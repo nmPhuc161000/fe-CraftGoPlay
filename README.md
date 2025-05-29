@@ -7,10 +7,12 @@
 Dưới đây là giải thích các thư mục chính trong `src/`:
 
 - **`constants/`**: Chứa các hằng số.
+
   - `api.jsx`: Định nghĩa `API_BASE_URL` và các nhóm điểm cuối API (`API_ENDPOINTS_AUTH`, `API_ENDPOINTS_HOME`, `API_ENDPOINTS_CART`).
   - `messages.jsx`: Thông báo lỗi/thành công.
 
 - **`services/`**: Quản lý API và cấu hình.
+
   - `apis/`:
     - `authApi.jsx`: API xác thực (đăng nhập, đăng ký, xác nhận email, v.v.).
     - `homeApi.jsx`: API trang chủ (lấy sản phẩm).
@@ -19,14 +21,17 @@ Dưới đây là giải thích các thư mục chính trong `src/`:
   - `index.jsx`: Xuất tất cả API.
 
 - **`context/`**: Quản lý trạng thái toàn cục.
+
   - `AuthContext.jsx`: Lưu thông tin người dùng và trạng thái xác thực.
 
 - **`pages/`**: Các trang giao diện.
+
   - `Login/Login.jsx`: Trang đăng nhập.
   - `Register/Register.jsx`: Trang đăng ký.
   - `Home/Home.jsx`: Trang chủ hiển thị sản phẩm.
 
 - **`router/`**: Định tuyến.
+
   - `index.js`: Cấu hình các route (`/login`, `/cart`, v.v.).
 
 - **`App.jsx`**: Component chính của ứng dụng.
@@ -36,6 +41,7 @@ Dưới đây là giải thích các thư mục chính trong `src/`:
 ## Bắt đầu
 
 1. **Cài đặt**:
+
    ```bash
    git clone <repository-url>
    cd my-react-app
