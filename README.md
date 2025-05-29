@@ -1,12 +1,58 @@
-# React + Vite
+# CraftGoPlay
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**CraftGoPlay** là một ứng dụng web thương mại điện tử xây dựng bằng React, hỗ trợ xác thực người dùng, duyệt sản phẩm và giỏ hàng. Dự án được tổ chức theo mô-đun, dễ mở rộng và bảo trì.
 
-Currently, two official plugins are available:
+## Cấu trúc dự án
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Dưới đây là giải thích các thư mục chính trong `src/`:
 
-## Expanding the ESLint configuration
+- **`constants/`**: Chứa các hằng số.
+  - `api.jsx`: Định nghĩa `API_BASE_URL` và các nhóm điểm cuối API (`API_ENDPOINTS_AUTH`, `API_ENDPOINTS_HOME`, `API_ENDPOINTS_CART`).
+  - `messages.jsx`: Thông báo lỗi/thành công.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **`services/`**: Quản lý API và cấu hình.
+  - `apis/`:
+    - `authApi.jsx`: API xác thực (đăng nhập, đăng ký, xác nhận email, v.v.).
+    - `homeApi.jsx`: API trang chủ (lấy sản phẩm).
+    - `cartApi.jsx`: API giỏ hàng (lấy giỏ, thêm sản phẩm).
+  - `axiosInstance.jsx`: Cấu hình Axios, thêm token vào header và xử lý lỗi 401.
+  - `index.jsx`: Xuất tất cả API.
+
+- **`context/`**: Quản lý trạng thái toàn cục.
+  - `AuthContext.jsx`: Lưu thông tin người dùng và trạng thái xác thực.
+
+- **`pages/`**: Các trang giao diện.
+  - `Login/Login.jsx`: Trang đăng nhập.
+  - `Register/Register.jsx`: Trang đăng ký.
+  - `Home/Home.jsx`: Trang chủ hiển thị sản phẩm.
+
+- **`router/`**: Định tuyến.
+  - `index.js`: Cấu hình các route (`/login`, `/cart`, v.v.).
+
+- **`App.jsx`**: Component chính của ứng dụng.
+- **`main.jsx`**: Điểm vào của ứng dụng.
+- **`index.css`**: CSS toàn cục.
+
+## Bắt đầu
+
+1. **Cài đặt**:
+   ```bash
+   git clone <repository-url>
+   cd my-react-app
+   npm install
+   ```
+
+2. **Chạy dự án**:
+   ```bash
+   npm run dev
+   ```
+   Truy cập `http://localhost:5173` để kiểm tra các trang:
+   - Đăng nhập: `/login`
+   - Trang chủ: `/`
+   - Giỏ hàng: `/cart`
+
+## Đóng góp
+
+- Fork repository, tạo branch mới (`feature/<tên-tính-năng>`).
+- Thêm code trong `services/api/`, `hooks/`, hoặc `pages/`.
+- Commit và tạo Pull Request trên GitHub.
