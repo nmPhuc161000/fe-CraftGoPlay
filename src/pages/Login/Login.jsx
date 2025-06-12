@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { FaUser, FaLock, FaClinicMedical } from "react-icons/fa";
+import { FaUser, FaLock } from "react-icons/fa";
+import loginImg from "../../assets/images/loginimg.jpg";
+import backgroundImg from "../../assets/images/background.jpg";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -18,35 +20,46 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-blue-100 via-blue-200 to-blue-300 px-4">
-      <div className="bg-white shadow-2xl rounded-2xl max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 overflow-hidden">
-        
-        {/* Bên trái - Banner */}
-        <div className="bg-blue-700 text-white flex flex-col justify-center items-center p-8 space-y-4">
-          <FaClinicMedical className="text-6xl" />
+    <div className="min-h-screen relative flex items-center justify-center px-4">
+      <img
+        src={backgroundImg}
+        alt="background"
+        className="absolute inset-0 w-full h-full object-cover blur-md brightness-75 z-[-1]"
+      />
+      <div className="bg-[#fffdf8] shadow-2xl rounded-2xl max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 overflow-hidden">
+        {/* Banner content left */}
+        <div className="bg-[#f2e8dc] text-[#5e3a1e] flex flex-col justify-center items-center p-8 space-y-4">
+          <img
+            src={loginImg}
+            alt="CraftGoPlay Logo"
+            className="w-40 h-40 object-contain rounded-full shadow-md"
+          />
           <h2 className="text-2xl font-bold text-center">
-            Phần mềm quản lý & theo dõi điều trị hiếm muộn
+            Tôn vinh bàn tay và khối óc của nghệ sỹ, nghệ nhân Việt Nam
           </h2>
           <p className="text-center text-sm opacity-90">
-            Đồng hành cùng bạn trên hành trình làm cha mẹ
+            Lựa chọn hướng đi thẩm mỹ, bền vững
           </p>
         </div>
 
         {/* Bên phải - Form */}
-        <div className="p-8 md:p-12">
-          <h2 className="text-2xl font-bold text-gray-800">Đăng nhập</h2>
-          <p className="text-sm text-gray-500 mb-6">Vui lòng đăng nhập để tiếp tục</p>
+        <div className="p-8 md:p-12 bg-[#faf5ef]">
+          <h2 className="text-2xl font-bold text-[#6b4c3b]">Đăng nhập</h2>
+          <p className="text-sm text-[#a0846f] mb-6">
+            Vui lòng đăng nhập để tiếp tục
+          </p>
 
           <form onSubmit={onFinish} className="space-y-4">
             <div>
-              <label className="block text-sm text-gray-700 mb-1">Email</label>
+              <label className="block text-sm text-[#7a5a3a] mb-1">Email</label>
               <div className="relative">
-                <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#a0846f]" />
                 <input
                   type="email"
                   required
                   placeholder="Email"
-                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  autoComplete="username"
+                  className="w-full pl-10 pr-4 py-2 border border-[#cbb892] rounded-lg focus:ring-2 focus:ring-[#cbb892] outline-none bg-white text-[#5a3e1b]"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                 />
@@ -54,21 +67,26 @@ const Login = () => {
             </div>
 
             <div>
-              <label className="block text-sm text-gray-700 mb-1">Mật khẩu</label>
+              <label className="block text-sm text-[#7a5a3a] mb-1">
+                Mật khẩu
+              </label>
               <div className="relative">
-                <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#a0846f]" />
                 <input
                   type="password"
                   required
                   placeholder="Mật khẩu"
-                  className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  autoComplete="current-password"
+                  className="w-full pl-10 pr-4 py-2 border border-[#cbb892] rounded-lg focus:ring-2 focus:ring-[#cbb892] outline-none bg-white text-[#5a3e1b]"
                   value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
                 />
               </div>
             </div>
 
-            <div className="flex justify-between text-sm text-blue-600">
+            <div className="flex justify-between text-sm text-[#7a5a3a] font-bold">
               <Link to="/ReqPass" className="hover:underline">
                 Quên mật khẩu?
               </Link>
@@ -78,29 +96,32 @@ const Login = () => {
               type="submit"
               disabled={loading}
               className={`w-full py-2 px-4 rounded-lg text-white font-semibold ${
-                loading ? "bg-blue-300" : "bg-blue-600 hover:bg-blue-700"
+                loading ? "bg-[#d4b06b]" : "bg-[#b28940] hover:bg-[#9e7635]"
               }`}
             >
               {loading ? "Đang xử lý..." : "Đăng nhập"}
             </button>
 
             <div className="relative text-center my-4">
-              <hr className="border-t border-gray-200" />
-              <span className="absolute top-[-12px] left-1/2 transform -translate-x-1/2 bg-white px-3 text-gray-400 text-sm">
+              <hr className="border-t border-[#d8c3a5]" />
+              <span className="absolute top-[-12px] left-1/2 transform -translate-x-1/2 bg-[#faf5ef] px-3 text-[#b59c7c] text-sm">
                 Hoặc
               </span>
             </div>
 
-            <p className="text-sm text-center text-gray-600">
+            <p className="text-sm text-center text-[#7a5a3a]">
               Bạn chưa có tài khoản?{" "}
-              <Link to="/register" className="text-blue-600 font-medium hover:underline">
+              <Link
+                to="/register"
+                className="text-[#b28940] font-medium hover:underline"
+              >
                 Đăng ký ngay
               </Link>
             </p>
           </form>
 
           <p className="mt-8 text-xs text-center text-gray-400">
-            © 2025 Phần mềm quản lý & theo dõi điều trị hiếm muộn
+            © 2025 Nền tảng kết nối nghệ nhân thủ công với người tiêu dùng
           </p>
         </div>
       </div>
