@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { homeApi } from "../../services";
+import { useNavigate } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
 import loginImg from "../../assets/images/background1.jpg";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
+  const navigate = useNavigate();
 
   // useEffect(() => {
   //   homeApi.getProducts().then((res) => setProducts(res.data));
@@ -14,6 +16,7 @@ const Home = () => {
     // Fake API tạm
     const fakeProducts = [
       {
+        id: 1,
         name: "Majestic Mahjong Set",
         image:
           "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
@@ -22,6 +25,7 @@ const Home = () => {
         tag: null,
       },
       {
+        id: 2,
         name: "Colorburst Wooden Domino Set",
         image:
           "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
@@ -30,6 +34,16 @@ const Home = () => {
         tag: "Pre-order",
       },
       {
+        id: 3,
+        name: "Nomad_The Portable Chess Set",
+        image:
+          "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
+        price: 3440000,
+        originalPrice: 4300000,
+        tag: "20% OFF",
+      },
+      {
+        id: 4,
         name: "Nomad_The Portable Chess Set",
         image:
           "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
@@ -104,12 +118,13 @@ const Home = () => {
         </div>
       </div>
 
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
-        <div className="max-w-screen-xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center justify-content-center">
+      <div className="w-full px-0 py-4">
+        <div className="w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 sm:px-6 lg:px-8">
             {products.map((product, index) => (
               <div
                 key={index}
+                onClick={() => navigate(`/product/${product.id}`)}
                 className="w-full max-w-sm bg-white shadow rounded-lg overflow-hidden relative text-center mx-auto transition-transform duration-300 hover:scale-105 hover:shadow-lg"
               >
                 {product.tag && (
@@ -166,7 +181,7 @@ const Home = () => {
             </a>
           </div>
         </div>
-        <div className="max-w-screen-xl mx-auto py-10">
+        <div className="w-full px-0 py-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {categories.map((category, index) => (
               <div
@@ -197,9 +212,11 @@ const Home = () => {
             Về Craftgoplay
           </h2>
           <p className="text-[#5e3a1e] text-lg max-w-2xl mx-auto mb-8">
-            CRAFTGOPLAY là nền tảng mua bán trực tuyến, kết nối các nghệ nhân thủ công với người dùng yêu thích board game. 
-            Mỗi sản phẩm là một tác phẩm thủ công tinh xảo, kết hợp nghệ thuật truyền thống và thiết kế hiện đại, 
-            mang đến trải nghiệm chơi độc đáo và ý nghĩa cho mọi gia đình.
+            CRAFTGOPLAY là nền tảng mua bán trực tuyến, kết nối các nghệ nhân
+            thủ công với người dùng yêu thích board game. Mỗi sản phẩm là một
+            tác phẩm thủ công tinh xảo, kết hợp nghệ thuật truyền thống và thiết
+            kế hiện đại, mang đến trải nghiệm chơi độc đáo và ý nghĩa cho mọi
+            gia đình.
           </p>
           <a
             href="/about"

@@ -7,7 +7,7 @@ const MainLayout = ({ children }) => {  // Nhận children prop
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-grow container mx-auto">
+      <main className="flex-grow">
         {children} {/* Render children thay vì Outlet */}
       </main>
       <Footer />
