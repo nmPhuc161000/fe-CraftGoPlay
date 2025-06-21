@@ -1,7 +1,7 @@
-export const API_BASE_URL = 'https://your-api-base-url.com/api';
+export const API_BASE_URL = 'https://localhost:7254';
 
 export const API_ENDPOINTS_AUTH = {
-  LOGIN: '/auth/login',
+  LOGIN: '/api/Auth/user/login',
   REGISTER: '/auth/register',
   VERIFY_EMAIL: '/auth/verify-email',
   LOGOUT: '/auth/logout',

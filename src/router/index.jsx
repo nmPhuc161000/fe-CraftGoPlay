@@ -6,7 +6,8 @@ import Home from "../pages/Home/Home";
 import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import Product from "../pages/Product/Product";
 import ProfileUser from "../pages/Profile/ProfileUser";
-
+import ProtectedRoute from "./ProtectedRoute"; // Import ProtectedRoute
+import ProfileRoutes from "./ProfileRoutes"; // Import ProfileRoutes
 
 const AppRouter = () => {
   return (
@@ -17,7 +18,14 @@ const AppRouter = () => {
         <Route path="/" element={<Home />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/products" element={<Product />} />
-        <Route path="/profile-user" element={<ProfileUser />} />
+        <Route
+          path="/profile-user/*"
+          element={
+            <ProtectedRoute>
+              <ProfileRoutes />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );

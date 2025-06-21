@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { homeApi } from "../../services";
+//import { homeApi } from "../../services";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
 import loginImg from "../../assets/images/background1.jpg";

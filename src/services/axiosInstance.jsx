@@ -1,11 +1,11 @@
 import axios from 'axios';
-import { API_BASE_URL } from '../constants/api';
-import { MESSAGES } from '../constants/messages';
+import { API_BASE_URL } from '../constants/apiEndPoint';
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
+    Accept: "*/*",
   },
 });
 

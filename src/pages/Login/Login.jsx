@@ -1,23 +1,84 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { FaUser, FaLock } from "react-icons/fa";
 import loginImg from "../../assets/images/loginimg.jpg";
 import backgroundImg from "../../assets/images/background.jpg";
+import authService from "../../services/apis/authApi";
+import { MESSAGES } from "../../constants/messages";
+import { decodeToken } from "../../utils/tokenUtils";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ email: "", passwordHash: "" });
+  const navigate = useNavigate();
 
-  const onFinish = (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      localStorage.setItem("user", JSON.stringify(form));
-      alert("Đăng nhập thành công!");
-      window.location.href = "/";
-    }, 1000);
-  };
+  // Sử dụng useCallback để tối ưu hóa handleLogin tránh re-render không cần thiết
+  const handleLogin = useCallback(
+    async (e) => {
+      e.preventDefault();
+      setLoading(true);
+
+      try {
+        const result = await authService.login(form);
+
+        if (!result.success) {
+          alert(result.error || "Đăng nhập thất bại. Vui lòng thử lại.");
+          return;
+        }
+
+        // Decode token và lấy thông tin
+        const tokenInfo = decodeToken(result.data.data.accessToken);
+        if (!tokenInfo) {
+          alert("Token không hợp lệ");
+          return;
+        }
+
+        const { role, exp } = tokenInfo;
+
+        // Lưu thông tin trực tiếp vào localStorage
+        // const userData = {
+        //   ...result.data.user,
+        //   email,
+        //   role,
+        //   userName,
+        //   userId,
+        //   exp,
+        // };
+        // localStorage.setItem("token", result.data.data.accessToken);
+        // localStorage.setItem("user", JSON.stringify(userData));
+
+        // Kiểm tra token hết hạn
+        const currentTime = Date.now() / 1000;
+        if (exp < currentTime) {
+          alert("Token đã hết hạn");
+          localStorage.removeItem("token"); // Xóa token nếu hết hạn
+          localStorage.removeItem("user");
+          return;
+        }
+
+        alert(MESSAGES.AUTH.LOGIN_SUCCESS);
+
+        // Điều hướng dựa trên role
+        if (role === "Admin" || role === "Staff") {
+          navigate("/admin/dashboard");
+        } else if (role === "Artisan") {
+          navigate("/profile-user/profile");
+        } else {
+          navigate("/");
+        }
+      } catch (error) {
+        console.error("Login error:", error);
+        alert(
+          error instanceof Error && error.message.includes("Invalid token")
+            ? "Token không hợp lệ"
+            : "Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau."
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [form, navigate] // Chỉ re-create handleLogin khi form hoặc navigate thay đổi
+  );
 
   return (
     <div className="min-h-screen relative flex items-center justify-center px-4">
@@ -30,11 +91,11 @@ const Login = () => {
         {/* Banner content left */}
         <div className="bg-[#f2e8dc] text-[#5e3a1e] flex flex-col justify-center items-center p-8 space-y-4">
           <Link to="/">
-          <img
-            src={loginImg}
-            alt="CraftGoPlay Logo"
-            className="w-40 h-40 object-contain rounded-full shadow-md"
-          />
+            <img
+              src={loginImg}
+              alt="CraftGoPlay Logo"
+              className="w-40 h-40 object-contain rounded-full shadow-md"
+            />
           </Link>
           <h2 className="text-2xl font-bold text-center">
             Tôn vinh bàn tay và khối óc của nghệ sỹ, nghệ nhân Việt Nam
@@ -51,7 +112,7 @@ const Login = () => {
             Vui lòng đăng nhập để tiếp tục
           </p>
 
-          <form onSubmit={onFinish} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-sm text-[#7a5a3a] mb-1">Email</label>
               <div className="relative">
@@ -63,15 +124,13 @@ const Login = () => {
                   autoComplete="username"
                   className="w-full pl-10 pr-4 py-2 border border-[#cbb892] rounded-lg focus:ring-2 focus:ring-[#cbb892] outline-none bg-white text-[#5a3e1b]"
                   value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm text-[#7a5a3a] mb-1">
-                Mật khẩu
-              </label>
+              <label className="block text-sm text-[#7a5a3a] mb-1">Mật khẩu</label>
               <div className="relative">
                 <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#a0846f]" />
                 <input
@@ -80,10 +139,8 @@ const Login = () => {
                   placeholder="Mật khẩu"
                   autoComplete="current-password"
                   className="w-full pl-10 pr-4 py-2 border border-[#cbb892] rounded-lg focus:ring-2 focus:ring-[#cbb892] outline-none bg-white text-[#5a3e1b]"
-                  value={form.password}
-                  onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
-                  }
+                  value={form.passwordHash}
+                  onChange={(e) => setForm((prev) => ({ ...prev, passwordHash: e.target.value }))}
                 />
               </div>
             </div>
@@ -113,10 +170,7 @@ const Login = () => {
 
             <p className="text-sm text-center text-[#7a5a3a]">
               Bạn chưa có tài khoản?{" "}
-              <Link
-                to="/register"
-                className="text-[#b28940] font-medium hover:underline"
-              >
+              <Link to="/register" className="text-[#b28940] font-medium hover:underline">
                 Đăng ký ngay
               </Link>
             </p>

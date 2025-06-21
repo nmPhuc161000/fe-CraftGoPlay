@@ -1,18 +1,17 @@
-import { useContext } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { AuthContext } from '../contexts/AuthContext'; // Import context AuthContext
+import { useContext } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, redirectTo = "/login" }) => {
   const { isAuthenticated, loading } = useContext(AuthContext);
   const location = useLocation();
 
   if (loading) {
-    return <div>Loading...</div>; // Hoặc component loading của bạn
+    return <div>Loading...</div>; // Hoặc dùng component loading tùy chỉnh
   }
 
   if (!isAuthenticated) {
-    // Chuyển hướng đến trang login, lưu lại location hiện tại để quay lại sau khi login
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
   return children;

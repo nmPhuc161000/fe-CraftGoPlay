@@ -1,122 +1,180 @@
 import React, { useState } from "react";
 import MainLayout from "../../components/layout/MainLayout";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import ProfileRoutes from "../../router/ProfileRoutes";
 
 export default function ProfileUser() {
-  // Giả sử user có thể là customer hoặc artisan
   const [user, setUser] = useState({
-    isArtisan: false, // Có thể thay đổi thành true để xem giao diện artisan
+    id: 1,
+    isArtisan: false,
     name: "Nguyễn Văn A",
     username: "@nguyenvana",
     bio: "Yêu thích đồ thủ công mỹ nghệ truyền thống",
     email: "nguyenvana@example.com",
+    phone: "0123456789",
     location: "Hà Nội, Việt Nam",
+    address: "Số 1, ngõ 12, phố ABC",
+    gender: "male",
+    birthday: "1990-01-01",
+    website: "",
+    socials: {
+      facebook: "nguyenvana",
+      instagram: "nguyen_van_a",
+      tiktok: "",
+    },
     joinDate: "Tham gia từ tháng 3/2023",
-    products: 12, // Số sản phẩm (nếu là artisan)
-    orders: 5, // Số đơn hàng (nếu là customer)
+    products: 12,
+    orders: 5,
+    avatar:
+      "https://th.bing.com/th/id/OIP.PwEh4SGekpMaWT2d5GWw0wHaHt?rs=1&pid=ImgDetMain",
   });
+
+  const navigate = useNavigate();
+  const handleSaveProfile = (updatedData) => {
+    setUser((prev) => ({ ...prev, ...updatedData }));
+  };
+
+  const handleRegisterArtisan = () => {
+    // Xử lý logic đăng ký nghệ nhân
+    setUser(prev => ({ ...prev, isArtisan: true }));
+    navigate('/profile-user/profile'); // Chuyển về tab profile sau khi đăng ký
+  };
+
+  const location = useLocation();
+  const currentTab = location.pathname.split("/").pop() || "profile";
+
+  const isActive = (tabName) => currentTab === tabName;
 
   return (
     <MainLayout>
       <div className="py-8 bg-gray-50 min-h-screen">
-        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
-          {/* Cover Photo */}
-          <div className="h-48 bg-gradient-to-r from-[#4a2d16] to-[#6e4b2a]"></div>
-
-          {/* Profile Content */}
-          <div className="relative px-6 pb-6">
-            {/* Avatar và Role Badge */}
-            <div className="absolute -top-16 left-6 flex items-end">
-              <img
-                className="w-32 h-32 rounded-full border-4 border-white object-cover"
-                src="https://th.bing.com/th/id/OIP.PwEh4SGekpMaWT2d5GWw0wHaHt?rs=1&pid=ImgDetMain"
-                alt="User avatar"
-              />
-              <div className="ml-4 mb-2">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6 px-4">
+          {/* Sidebar */}
+          <div className="w-full md:w-64 flex-shrink-0 bg-white rounded-lg shadow-lg h-fit md:sticky md:top-6">
+            {/* Profile Summary */}
+            <div className="p-4 border-b">
+              <div className="flex flex-col items-center text-center">
+                <img
+                  className="w-24 h-24 rounded-full border-2 border-[#5e3a1e] object-cover mb-3"
+                  src={user.avatar}
+                  alt="User avatar"
+                />
+                <h3 className="font-bold text-lg">{user.name}</h3>
+                <p className="text-gray-600 text-sm">{user.username}</p>
                 {user.isArtisan ? (
-                  <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-medium">
+                  <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full mt-1">
                     🎨 Nghệ nhân
                   </span>
                 ) : (
-                  <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full mt-1">
                     🛒 Khách hàng
                   </span>
                 )}
               </div>
             </div>
 
-            {/* User Info */}
-            <div className="pt-20">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-800">{user.name}</h1>
-                  <p className="text-gray-600">{user.username}</p>
-                  <p className="mt-2 text-gray-600">{user.bio}</p>
-                </div>
-                {!user.isArtisan && (
-                  <button className="px-4 py-2 bg-[#5e3a1e] text-white rounded-md hover:bg-[#7a4b28] transition text-sm">
-                    Đăng ký Nghệ nhân
-                  </button>
-                )}
-              </div>
-            </div>
+            {/* Sidebar Navigation */}
+            <nav className="p-2">
+              <Link
+                to="/profile-user/profile"
+                className={`flex items-center px-4 py-3 rounded-lg mb-1 ${
+                  isActive("profile")
+                    ? "bg-[#5e3a1e] text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <span className="w-6 text-center">📝</span>
+                <span className="ml-3">Hồ sơ cá nhân</span>
+              </Link>
 
-            {/* Contact Info */}
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h2 className="text-lg font-semibold text-gray-800">Thông tin liên hệ</h2>
-                <p className="text-gray-600">Email: {user.email}</p>
-                <p className="text-gray-600">Địa chỉ: {user.location}</p>
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-gray-800">Thông tin cơ bản</h2>
-                <p className="text-gray-600">{user.joinDate}</p>
-                {user.isArtisan ? (
-                  <p className="text-gray-600">Sản phẩm: {user.products}</p>
-                ) : (
-                  <p className="text-gray-600">Đơn hàng: {user.orders}</p>
-                )}
-              </div>
-            </div>
+              <Link
+                to={
+                  user.isArtisan
+                    ? "/profile-user/products"
+                    : "/profile-user/orders"
+                }
+                className={`flex items-center px-4 py-3 rounded-lg mb-1 ${
+                  isActive(user.isArtisan ? "products" : "orders")
+                    ? "bg-[#5e3a1e] text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <span className="w-6 text-center">
+                  {user.isArtisan ? "🎨" : "🛒"}
+                </span>
+                <span className="ml-3">
+                  {user.isArtisan ? "Sản phẩm" : "Đơn hàng"}
+                </span>
+              </Link>
 
-            {/* Action Buttons */}
-            <div className="mt-6 flex space-x-4">
-              <button className="px-4 py-2 bg-[#5e3a1e] text-white rounded-md hover:bg-[#7a4b28] transition">
-                Chỉnh sửa hồ sơ
-              </button>
-              <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition">
-                {user.isArtisan ? "Nhắn tin" : "Theo dõi"}
-              </button>
-            </div>
+              <Link
+                to="/profile-user/reviews"
+                className={`flex items-center px-4 py-3 rounded-lg mb-1 ${
+                  isActive("reviews")
+                    ? "bg-[#5e3a1e] text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <span className="w-6 text-center">⭐</span>
+                <span className="ml-3">Đánh giá</span>
+              </Link>
 
-            {/* Tabs for Additional Sections */}
-            <div className="mt-8">
-              <div className="border-b border-gray-200">
-                <nav className="-mb-px flex space-x-8">
-                  <button className="border-b-2 border-[#5e3a1e] px-1 pb-2 text-sm font-medium text-[#5e3a1e]">
-                    {user.isArtisan ? "Sản phẩm" : "Đơn hàng"}
-                  </button>
-                  <button className="border-b-2 border-transparent px-1 pb-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                    Đánh giá
-                  </button>
-                  <button className="border-b-2 border-transparent px-1 pb-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                    {user.isArtisan ? "Khách hàng" : "Yêu thích"}
-                  </button>
-                  {user.isArtisan && (
-                    <button className="border-b-2 border-transparent px-1 pb-2 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
-                      Doanh thu
-                    </button>
-                  )}
-                </nav>
-              </div>
+              <Link
+                to={
+                  user.isArtisan
+                    ? "/profile-user/customers"
+                    : "/profile-user/favorites"
+                }
+                className={`flex items-center px-4 py-3 rounded-lg mb-1 ${
+                  isActive(user.isArtisan ? "customers" : "favorites")
+                    ? "bg-[#5e3a1e] text-white"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <span className="w-6 text-center">
+                  {user.isArtisan ? "👥" : "❤️"}
+                </span>
+                <span className="ml-3">
+                  {user.isArtisan ? "Khách hàng" : "Yêu thích"}
+                </span>
+              </Link>
 
-              {/* Tab Content Placeholder */}
-              <div className="mt-4 p-4 border border-gray-200 rounded-lg">
-                {user.isArtisan ? (
-                  <p className="text-gray-600">Danh sách sản phẩm sẽ hiển thị ở đây</p>
-                ) : (
-                  <p className="text-gray-600">Lịch sử đơn hàng sẽ hiển thị ở đây</p>
-                )}
-              </div>
+              {user.isArtisan ? (
+                <Link
+                  to="/profile-user/revenue"
+                  className={`flex items-center px-4 py-3 rounded-lg mb-1 ${
+                    isActive("revenue")
+                      ? "bg-[#5e3a1e] text-white"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <span className="w-6 text-center">💰</span>
+                  <span className="ml-3">Doanh thu</span>
+                </Link>
+              ) : (
+                <button
+                  onClick={handleRegisterArtisan}
+                  className={`flex items-center w-full px-4 py-3 rounded-lg mb-1 ${
+                    isActive("register-artisan")
+                      ? "bg-[#5e3a1e] text-white"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  <span className="w-6 text-center">✨</span>
+                  <span className="ml-3">Đăng ký Nghệ nhân</span>
+                </button>
+              )}
+            </nav>
+          </div>
+
+          {/* Main Content */}
+          <div className="flex-1 bg-white rounded-lg shadow-lg overflow-hidden">
+            {/* Cover Photo - Đã bỏ nút đăng ký ở đây */}
+            <div className="h-48 bg-gradient-to-r from-[#4a2d16] to-[#6e4b2a]"></div>
+
+            {/* Tab Content */}
+            <div className="p-6">
+              <ProfileRoutes user={user} onSaveProfile={handleSaveProfile} />
             </div>
           </div>
         </div>
