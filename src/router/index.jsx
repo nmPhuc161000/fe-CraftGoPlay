@@ -8,6 +8,8 @@ import Product from "../pages/Product/Product";
 import ProfileUser from "../pages/Profile/ProfileUser";
 import ProtectedRoute from "./ProtectedRoute"; // Import ProtectedRoute
 import ProfileRoutes from "./ProfileRoutes"; // Import ProfileRoutes
+import Admin from "../pages/Admin/Admin";
+import AdminRoutes from "./AdminRoutes"; // Import AdminRoutes
 
 const AppRouter = () => {
   return (
@@ -24,6 +26,12 @@ const AppRouter = () => {
             <ProtectedRoute>
               <ProfileUser />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/*"
+          element={
+            <Admin />
           }
         />
       </Routes>
