@@ -33,19 +33,19 @@ const Login = () => {
           return;
         }
 
-        const { role, exp } = tokenInfo;
+        const { email, role, userName, userId, exp } = tokenInfo;
 
-        // Lưu thông tin trực tiếp vào localStorage
-        // const userData = {
-        //   ...result.data.user,
-        //   email,
-        //   role,
-        //   userName,
-        //   userId,
-        //   exp,
-        // };
-        // localStorage.setItem("token", result.data.data.accessToken);
-        // localStorage.setItem("user", JSON.stringify(userData));
+        //Lưu thông tin trực tiếp vào localStorage
+        const userData = {
+          ...result.data.user,
+          email,
+          role,
+          userName,
+          userId,
+          exp,
+        };
+        localStorage.setItem("token", result.data.data.accessToken);
+        localStorage.setItem("user", JSON.stringify(userData));
 
         // Kiểm tra token hết hạn
         const currentTime = Date.now() / 1000;
@@ -64,7 +64,8 @@ const Login = () => {
         } else if (role === "Artisan") {
           navigate("/profile-user/profile");
         } else {
-          navigate("/");
+          // navigate("/");
+          window.location.href = "/";
         }
       } catch (error) {
         console.error("Login error:", error);

@@ -1,55 +1,5 @@
-import axiosInstance from "../axiosInstance";
+import { performApiRequest, validateEmail } from "../../utils/apiUtils";
 import { API_ENDPOINTS_AUTH } from "../../constants/apiEndPoint";
-
-// Hàm chung để thực hiện request API
-const performApiRequest = async (endpoint, data = {}, method = "post") => {
-  try {
-    const response = await axiosInstance[method](endpoint, data);
-    return {
-      success: true,
-      data: response.data,
-      status: response.status,
-    };
-  } catch (error) {
-    return handleError(error);
-  }
-};
-
-// Hàm xử lý lỗi tập trung
-const handleError = (error) => {
-  if (error.response) {
-    console.error(`API Error [${error.response.status}]:`, error.response.data);
-    const errorMessage = error.response.data?.errors
-      ? Object.values(error.response.data.errors).join(", ")
-      : error.response.data?.message || "Lỗi server";
-    return {
-      success: false,
-      error: errorMessage,
-      status: error.response.status,
-      data: error.response.data,
-    };
-  } else if (error.request) {
-    console.error("Network Error:", error.message);
-    return {
-      success: false,
-      error: "Không thể kết nối tới server",
-      status: null,
-    };
-  } else {
-    console.error("Request Error:", error.message);
-    return {
-      success: false,
-      error: error.message || "Lỗi khi gửi yêu cầu",
-      status: null,
-    };
-  }
-};
-
-// Hàm kiểm tra định dạng email
-const validateEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
 
 // Service API cho authentication
 const authService = {
@@ -73,7 +23,12 @@ const authService = {
         status: 400,
       };
     }
-    return performApiRequest(API_ENDPOINTS_AUTH.LOGIN, credentials);
+    console.log("Data: ", credentials);
+
+    return performApiRequest(API_ENDPOINTS_AUTH.LOGIN, {
+      data: credentials,
+      method: "post",
+    });
   },
 
   /**

@@ -1,6 +1,6 @@
-// src/router/ProfileRoutes.jsx
+import { useContext } from "react";
 import { Routes, Route } from "react-router-dom";
-// src/router/ProfileRoutes.jsx
+import { AuthContext } from "../contexts/AuthContext";
 import ProductsTab from "../pages/Profile/components/ProductsTab";
 import OrdersTab from "../pages/Profile/components/OrdersTab";
 import ReviewsTab from "../pages/Profile/components/ReviewsTab";
@@ -9,13 +9,17 @@ import CustomersTab from "../pages/Profile/components/CustomersTab";
 import RevenueTab from "../pages/Profile/components/RevenueTab";
 import ProfileTab from "../pages/Profile/components/ProfileTab";
 
-const ProfileRoutes = ({ user, onSaveProfile }) => {
+const ProfileRoutes = () => {
+  const { user } = useContext(AuthContext);
+
+  if (!user) {
+    // Trường hợp hiếm khi user không tồn tại (do ProtectedRoute đã kiểm tra)
+    return <div>Error: User not found</div>;
+  }
+
   return (
     <Routes>
-      <Route
-        path="profile"
-        element={<ProfileTab user={user} onSave={onSaveProfile} />}
-      />
+      <Route path="profile" element={<ProfileTab user={user} />} />
       <Route path="products" element={<ProductsTab artisanId={user.id} />} />
       <Route path="orders" element={<OrdersTab userId={user.id} />} />
       <Route
