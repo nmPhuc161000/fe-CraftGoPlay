@@ -1,10 +1,27 @@
-import { Link } from "react-router-dom";
-import { FaSearch, FaShoppingBag, FaGlobe } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  FaSearch,
+  FaShoppingBag,
+  FaGlobe,
+  FaUser,
+  FaSignOutAlt,
+} from "react-icons/fa";
+import { useContext } from "react";
+import { AuthContext } from "../../contexts/AuthContext"; // Import AuthContext
 
-const Header = ({ isAuthenticated, user }) => {
+const Header = () => {
+  const { user, isAuthenticated, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  // Hàm xử lý đăng xuất
+  const handleLogout = () => {
+    logout();
+    navigate("/login"); // Chuyển hướng về trang login sau khi đăng xuất
+  };
+
   return (
     <header>
-      {/* banner day*/}
+      {/* Banner day */}
       <div className="bg-[#5e3a1e] text-[#f2e8dc] text-xs py-4 overflow-hidden whitespace-nowrap relative border-y border-[#cbb892]">
         <div className="flex animate-marquee min-w-max font-semibold">
           <div className="flex space-x-8">
@@ -32,7 +49,7 @@ const Header = ({ isAuthenticated, user }) => {
         </div>
       </div>
 
-      {/*main head */}
+      {/* Main head */}
       <div className="bg-white text-[#5e3a1e] shadow-md sticky top-0 z-50 w-full">
         <div className="px-12 py-5 flex justify-between items-center">
           <div className="flex space-x-10 text-base font-medium items-center">
@@ -123,11 +140,34 @@ const Header = ({ isAuthenticated, user }) => {
             />
 
             {isAuthenticated ? (
-              <div className="flex items-center space-x-2">
-                <span className="text-xs">Hi, {user?.name}</span>
-                <button className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600">
-                  Đăng xuất
-                </button>
+              <div className="relative group">
+                <Link to="/profile-user/profile" className="flex items-center space-x-2">
+                  <button className="flex items-center space-x-2 text-sm bg-[#f2e8dc] px-3 py-1 rounded-full hover:bg-gray-200 transition-colors duration-200">
+                    <FaUser />
+                    <span>Hi, {user?.userName || "User"}</span>
+                  </button>
+                </Link>
+                <div
+                  className="
+                    absolute right-0 mt-2 w-32
+                    bg-white bg-opacity-90 backdrop-blur-sm
+                    border border-gray-200 rounded-lg
+                    shadow-lg
+                    opacity-0 scale-95
+                    group-hover:opacity-100 group-hover:scale-100
+                    transform transition-all duration-200
+                    origin-top-right
+                    z-10
+                  "
+                >
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center w-full px-5 py-2 text-sm text-red-600 hover:bg-gray-100 hover:no-underline transition-colors duration-200 rounded-md"
+                  >
+                    <FaSignOutAlt className="mr-2" />
+                    Đăng xuất
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="flex space-x-8">

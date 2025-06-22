@@ -22,3 +22,8 @@ export const API_ENDPOINTS_CART = {
   ADD_TO_CART: '/cart/add',
   REMOVE_FROM_CART: '/cart/remove',
 };
+
+export const API_ENDPOINTS_USER = {
+  GET_USER: '/api/User/get-current-user',
+
+}

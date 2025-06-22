@@ -22,7 +22,7 @@ const AppRouter = () => {
           path="/profile-user/*"
           element={
             <ProtectedRoute>
-              <ProfileRoutes />
+              <ProfileUser />
             </ProtectedRoute>
           }
         />
