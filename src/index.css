@@ -1,11 +1,16 @@
 @import "tailwindcss";
-body, html, #root {
+
+body,
+html,
+#root {
   font-family: 'Nunito', sans-serif;
 }
+
 @keyframes marquee {
   0% {
     transform: translateX(0%);
   }
+
   100% {
     transform: translateX(-50%);
   }
@@ -13,4 +18,12 @@ body, html, #root {
 
 .animate-marquee {
   animation: marquee 70s linear infinite;
+}
+
+@layer base {
+  :root {
+    --primary: #1F2937;
+    --secondary: #22C55E;
+    --accent: #FBBF24;
+  }
 }
