@@ -1,12 +1,14 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext } from "react";
+import { AuthContext } from "../../../contexts/AuthContext";
 
-const ProfileTab = ({ user, onSave }) => {
+const ProfileTab = ({onSave }) => {
+  const { user } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     ...user,
-    phone: user.phone || "",
+    phone: user.phoneNumber || "",
     address: user.address || "",
     gender: user.gender || "other",
-    birthday: user.birthday || "",
+    birthday: user.dateOfBirth || "",
     website: user.website || "",
     socials: {
       facebook: user.socials?.facebook || "",
@@ -111,7 +113,7 @@ const ProfileTab = ({ user, onSave }) => {
             <input
               type="text"
               name="name"
-              value={formData.name}
+              value={formData.userName}
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#5e3a1e]"
               required

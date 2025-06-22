@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from "react";
-import { decodeToken } from "../utils/tokenUtils"; // Giả định bạn đã có file này
+import { decodeToken } from "../utils/tokenUtils";
+import userService from "../services/apis/userApi";
 
 export const AuthContext = createContext();
 
@@ -9,15 +10,28 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const initializeAuth = () => {
+    const initializeAuth = async () => {
       const token = localStorage.getItem("token");
       if (token) {
         const tokenInfo = decodeToken(token);
         if (tokenInfo && tokenInfo.exp > Date.now() / 1000) {
-          setUser(tokenInfo); // Sử dụng tokenInfo làm user nếu cần
+          // Lưu role vào localStorage
+          localStorage.setItem("role", tokenInfo.role);
           setIsAuthenticated(true);
+          // Gọi API để lấy thông tin user
+          try {
+            const response = await userService.getCurrentUser();
+            if (response.success) {
+              setUser(response.data.data); // Cập nhật user từ API
+            } else {
+              console.error("Failed to fetch user data:", response.error);
+            }
+          } catch (error) {
+            console.error("Error fetching user data:", error);
+          }
         } else {
-          localStorage.removeItem("token"); // Xóa token hết hạn
+          localStorage.removeItem("token");
+          localStorage.removeItem("role"); // Xóa role nếu token hết hạn
         }
       }
       setLoading(false);
@@ -26,7 +40,7 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []); // Chỉ chạy một lần khi component mount
 
-  const login = (userData, token) => {
+  const login = async (userData, token) => {
     if (!userData || !token) {
       console.error("Invalid userData or token");
       return;
@@ -38,14 +52,25 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    localStorage.setItem("token", token);
-    setUser(userData); // Sử dụng userData từ login response
+    localStorage.setItem("token", token); // Chỉ lưu token
+    localStorage.setItem("role", tokenInfo.role); // Lưu role từ token
     setIsAuthenticated(true);
+
+    // Gọi API để lấy thông tin user
+    try {
+      const response = await userService.getCurrentUser();
+      if (response.success) {
+        setUser(response.data); // Cập nhật user từ API
+      } else {
+        console.error("Failed to fetch user data:", response.error);
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
-  localStorage.removeItem("user");
+    localStorage.clear(); // Xóa toàn bộ localStorage (token và role)
     setUser(null);
     setIsAuthenticated(false);
   };

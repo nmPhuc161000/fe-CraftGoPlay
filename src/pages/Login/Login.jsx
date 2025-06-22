@@ -33,19 +33,11 @@ const Login = () => {
           return;
         }
 
-        const { email, role, userName, userId, exp } = tokenInfo;
+        const { role, exp } = tokenInfo;
 
-        //Lưu thông tin trực tiếp vào localStorage
-        const userData = {
-          ...result.data.user,
-          email,
-          role,
-          userName,
-          userId,
-          exp,
-        };
+        // Chỉ lưu token và role vào localStorage
         localStorage.setItem("token", result.data.data.accessToken);
-        localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem("role", role);
 
         // Kiểm tra token hết hạn
         const currentTime = Date.now() / 1000;
