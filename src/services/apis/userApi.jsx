@@ -16,7 +16,10 @@ const userService = {
    * @returns {Promise<{success: boolean, data?: any, error?: string, status?: number}>}
    */
   async updateUser(userData) {
-    return performApiRequest(API_ENDPOINTS_USER.UPDATE_USER, userData, "put");
+    return performApiRequest(API_ENDPOINTS_USER.UPDATE_USER, {
+      data: userData,
+      method: "put",
+    });
   },
 };
 

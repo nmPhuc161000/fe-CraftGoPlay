@@ -31,9 +31,5 @@
       }
     }
   ],
-  "regions": ["sin1"],
-  "cache": [
-    "node_modules",
-    "package-lock.json"
-  ]
+  "regions": ["sin1"]
 }

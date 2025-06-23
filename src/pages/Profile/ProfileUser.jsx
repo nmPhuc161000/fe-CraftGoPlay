@@ -1,50 +1,17 @@
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 import MainLayout from "../../components/layout/MainLayout";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProfileRoutes from "../../router/ProfileRoutes";
 import { AuthContext } from "../../contexts/AuthContext";
 
 export default function ProfileUser() {
-  const { user, saveProfile } = useContext(AuthContext); // Lấy từ AuthContext
+  const { user, saveProfile } = useContext(AuthContext);
   const navigate = useNavigate();
-
-  // Nếu user chưa được tải (trường hợp hiếm), sử dụng state tạm thời
-  const initialUser = user || {
-    id: 1,
-    isArtisan: false,
-    name: "Nguyễn Văn A",
-    username: "@nguyenvana",
-    bio: "Yêu thích đồ thủ công mỹ nghệ truyền thống",
-    email: "nguyenvana@example.com",
-    phone: "0123456789",
-    location: "Hà Nội, Việt Nam",
-    address: "Số 1, ngõ 12, phố ABC",
-    gender: "male",
-    birthday: "1990-01-01",
-    website: "",
-    socials: {
-      facebook: "nguyenvana",
-      instagram: "nguyen_van_a",
-      tiktok: "",
-    },
-    joinDate: "Tham gia từ tháng 3/2023",
-    products: 12,
-    orders: 5,
-    avatar:
-      "https://th.bing.com/th/id/OIP.PwEh4SGekpMaWT2d5GWw0wHaHt?rs=1&pid=ImgDetMain",
-  };
-
-  const [localUser, setLocalUser] = useState(initialUser);
-
-  // Cập nhật localUser khi user từ AuthContext thay đổi
-  React.useEffect(() => {
-    if (user) {
-      setLocalUser(user);
-    }
-  }, [user]);
+  const role = localStorage.getItem("role"); // Lấy role từ localStorage
 
   const handleRegisterArtisan = () => {
-    saveProfile({ isArtisan: true }); // Cập nhật isArtisan qua AuthContext
+    localStorage.setItem("role", "artisan"); // Cập nhật localStorage
+    saveProfile({ ...user, role: "artisan" }); // Cập nhật context
     navigate("/profile-user/profile");
   };
 
@@ -64,12 +31,19 @@ export default function ProfileUser() {
               <div className="flex flex-col items-center text-center">
                 <img
                   className="w-24 h-24 rounded-full border-2 border-[#5e3a1e] object-cover mb-3"
-                  src={localUser.avatar}
+                  src={
+                    user?.avatar ||
+                    "https://th.bing.com/th/id/OIP.PwEh4SGekpMaWT2d5GWw0wHaHt?rs=1&pid=ImgDetMain"
+                  }
                   alt="User avatar"
                 />
-                <h3 className="font-bold text-lg">{localUser.name}</h3>
-                <p className="text-gray-600 text-sm">{localUser.username}</p>
-                {localUser.isArtisan ? (
+                <h3 className="font-bold text-lg">
+                  {user?.userName || "Khách"}
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  {user?.email || "Email"}
+                </p>
+                {role === "Artisan" ? (
                   <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full mt-1">
                     🎨 Nghệ nhân
                   </span>
@@ -97,21 +71,21 @@ export default function ProfileUser() {
 
               <Link
                 to={
-                  localUser.isArtisan
+                  role === "Artisan"
                     ? "/profile-user/products"
                     : "/profile-user/orders"
                 }
                 className={`flex items-center px-4 py-3 rounded-lg mb-1 ${
-                  isActive(localUser.isArtisan ? "products" : "orders")
+                  isActive(role === "Artisan" ? "products" : "orders")
                     ? "bg-[#5e3a1e] text-white"
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 <span className="w-6 text-center">
-                  {localUser.isArtisan ? "🎨" : "🛒"}
+                  {role === "Artisan" ? "🎨" : "🛒"}
                 </span>
                 <span className="ml-3">
-                  {localUser.isArtisan ? "Sản phẩm" : "Đơn hàng"}
+                  {role === "Artisan" ? "Sản phẩm" : "Đơn hàng"}
                 </span>
               </Link>
 
@@ -129,25 +103,25 @@ export default function ProfileUser() {
 
               <Link
                 to={
-                  localUser.isArtisan
+                  role === "Artisan"
                     ? "/profile-user/customers"
                     : "/profile-user/favorites"
                 }
                 className={`flex items-center px-4 py-3 rounded-lg mb-1 ${
-                  isActive(localUser.isArtisan ? "customers" : "favorites")
+                  isActive(role === "Artisan" ? "customers" : "favorites")
                     ? "bg-[#5e3a1e] text-white"
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
                 <span className="w-6 text-center">
-                  {localUser.isArtisan ? "👥" : "❤️"}
+                  {role === "Artisan" ? "👥" : "❤️"}
                 </span>
                 <span className="ml-3">
-                  {localUser.isArtisan ? "Khách hàng" : "Yêu thích"}
+                  {role === "Artisan" ? "Khách hàng" : "Yêu thích"}
                 </span>
               </Link>
 
-              {localUser.isArtisan ? (
+              {role === "Artisan" ? (
                 <Link
                   to="/profile-user/revenue"
                   className={`flex items-center px-4 py-3 rounded-lg mb-1 ${
@@ -182,7 +156,7 @@ export default function ProfileUser() {
 
             {/* Tab Content */}
             <div className="p-6">
-              <ProfileRoutes />
+              <ProfileRoutes role={role} user={user} />
             </div>
           </div>
         </div>

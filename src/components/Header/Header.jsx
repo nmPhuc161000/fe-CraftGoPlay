@@ -141,7 +141,10 @@ const Header = () => {
 
             {isAuthenticated ? (
               <div className="relative group">
-                <Link to="/profile-user/profile" className="flex items-center space-x-2">
+                <Link
+                  to="/profile-user/profile"
+                  className="flex items-center space-x-2"
+                >
                   <button className="flex items-center space-x-2 text-sm bg-[#f2e8dc] px-3 py-1 rounded-full hover:bg-gray-200 transition-colors duration-200">
                     <FaUser />
                     <span>Hi, {user?.userName || "User"}</span>
