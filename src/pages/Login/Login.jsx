@@ -52,9 +52,9 @@ const Login = () => {
 
         // Điều hướng dựa trên role
         if (role === "Admin" || role === "Staff") {
-          navigate("/admin/dashboard");
+          window.location.href = "/admin/dashboard";
         } else if (role === "Artisan") {
-          navigate("/profile-user/profile");
+          window.location.href = "/profile-user/profile";
         } else {
           // navigate("/");
           window.location.href = "/";
@@ -111,19 +111,23 @@ const Login = () => {
               <div className="relative">
                 <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#a0846f]" />
                 <input
-                  type="email"
+                  type=""
                   required
                   placeholder="Email"
                   autoComplete="username"
                   className="w-full pl-10 pr-4 py-2 border border-[#cbb892] rounded-lg focus:ring-2 focus:ring-[#cbb892] outline-none bg-white text-[#5a3e1b]"
                   value={form.email}
-                  onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, email: e.target.value }))
+                  }
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm text-[#7a5a3a] mb-1">Mật khẩu</label>
+              <label className="block text-sm text-[#7a5a3a] mb-1">
+                Mật khẩu
+              </label>
               <div className="relative">
                 <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#a0846f]" />
                 <input
@@ -133,7 +137,12 @@ const Login = () => {
                   autoComplete="current-password"
                   className="w-full pl-10 pr-4 py-2 border border-[#cbb892] rounded-lg focus:ring-2 focus:ring-[#cbb892] outline-none bg-white text-[#5a3e1b]"
                   value={form.passwordHash}
-                  onChange={(e) => setForm((prev) => ({ ...prev, passwordHash: e.target.value }))}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      passwordHash: e.target.value,
+                    }))
+                  }
                 />
               </div>
             </div>
@@ -163,7 +172,10 @@ const Login = () => {
 
             <p className="text-sm text-center text-[#7a5a3a]">
               Bạn chưa có tài khoản?{" "}
-              <Link to="/register" className="text-[#b28940] font-medium hover:underline">
+              <Link
+                to="/register"
+                className="text-[#b28940] font-medium hover:underline"
+              >
                 Đăng ký ngay
               </Link>
             </p>

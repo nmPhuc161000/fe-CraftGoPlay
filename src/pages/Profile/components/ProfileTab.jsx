@@ -1,8 +1,7 @@
 import React, { useState, useRef, useContext } from "react";
 import { AuthContext } from "../../../contexts/AuthContext";
 
-const ProfileTab = ({onSave }) => {
-  const { user } = useContext(AuthContext);
+const ProfileTab = ({ role, user }) => {
   const [formData, setFormData] = useState({
     ...user,
     phone: user.phoneNumber || "",
@@ -13,36 +12,36 @@ const ProfileTab = ({onSave }) => {
     socials: {
       facebook: user.socials?.facebook || "",
       instagram: user.socials?.instagram || "",
-      tiktok: user.socials?.tiktok || ""
+      tiktok: user.socials?.tiktok || "",
     },
     // Thêm trường riêng cho Artisan
     workshopName: user.workshopName || "",
     craftSkills: user.craftSkills || [],
     yearsOfExperience: user.yearsOfExperience || 0,
     // Thêm trường riêng cho Customer
-    preferences: user.preferences || []
+    preferences: user.preferences || [],
   });
-  
+
   const [avatarPreview, setAvatarPreview] = useState(user.avatar || "");
   const fileInputRef = useRef(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     if (name.startsWith("socials.")) {
       const socialField = name.split(".")[1];
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        socials: { ...prev.socials, [socialField]: value }
+        socials: { ...prev.socials, [socialField]: value },
       }));
     } else if (name === "craftSkills") {
-      const skills = value.split(',').map(skill => skill.trim());
-      setFormData(prev => ({ ...prev, craftSkills: skills }));
+      const skills = value.split(",").map((skill) => skill.trim());
+      setFormData((prev) => ({ ...prev, craftSkills: skills }));
     } else if (name === "preferences") {
-      const prefs = value.split(',').map(pref => pref.trim());
-      setFormData(prev => ({ ...prev, preferences: prefs }));
+      const prefs = value.split(",").map((pref) => pref.trim());
+      setFormData((prev) => ({ ...prev, preferences: prefs }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -61,9 +60,9 @@ const ProfileTab = ({onSave }) => {
     e.preventDefault();
     const dataToSave = {
       ...formData,
-      avatar: avatarPreview // Thêm avatar vào dữ liệu sẽ lưu
+      avatar: avatarPreview, // Thêm avatar vào dữ liệu sẽ lưu
     };
-    onSave(dataToSave);
+    // onSave(dataToSave);
   };
 
   const triggerFileInput = () => {
@@ -73,26 +72,36 @@ const ProfileTab = ({onSave }) => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800">Chỉnh sửa thông tin cá nhân</h2>
-        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-          user.isArtisan 
-            ? "bg-amber-100 text-amber-800" 
-            : "bg-blue-100 text-blue-800"
-        }`}>
-          {user.isArtisan ? "🎨 Nghệ nhân" : "🛒 Khách hàng"}
+        <h2 className="text-2xl font-bold text-gray-800">
+          Chỉnh sửa thông tin cá nhân
+        </h2>
+        <span
+          className={`px-3 py-1 rounded-full text-sm font-medium ${
+            role === "Artisan"
+              ? "bg-amber-100 text-amber-800"
+              : "bg-blue-100 text-blue-800"
+          }`}
+        >
+          {role === "Artisan" ? "🎨 Nghệ nhân" : "🛒 Khách hàng"}
         </span>
       </div>
-      
+
       {/* Phần Avatar */}
       <div className="flex flex-col items-center">
         <div className="relative group">
-          <img 
-            src={avatarPreview || "/default-avatar.png"} 
-            alt="Avatar" 
+          <img
+            src={
+              avatarPreview ||
+              "https://th.bing.com/th/id/OIP.PwEh4SGekpMaWT2d5GWw0wHaHt?rs=1&pid=ImgDetMain"
+            }
+            alt="Avatar"
             className="w-32 h-32 rounded-full object-cover border-2 border-[#5e3a1e] cursor-pointer"
             onClick={triggerFileInput}
           />
-          <div className="absolute inset-0 bg-black bg-opacity-30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer" onClick={triggerFileInput}>
+          <div
+            className="absolute inset-0 bg-black bg-opacity-30 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer"
+            onClick={triggerFileInput}
+          >
             <span className="text-white text-sm font-medium">Đổi ảnh</span>
           </div>
         </div>
@@ -104,12 +113,17 @@ const ProfileTab = ({onSave }) => {
           className="hidden"
         />
       </div>
-      
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+      >
         {/* Cột 1 - Thông tin chung */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Họ và tên*</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Họ và tên*
+            </label>
             <input
               type="text"
               name="name"
@@ -121,7 +135,9 @@ const ProfileTab = ({onSave }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email*</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email*
+            </label>
             <input
               type="email"
               name="email"
@@ -132,9 +148,11 @@ const ProfileTab = ({onSave }) => {
             />
           </div>
 
-          {user.isArtisan && (
+          {role === "Artisan" && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Làng nghề</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Làng nghề
+              </label>
               <input
                 type="text"
                 name="workshopName"
@@ -149,7 +167,9 @@ const ProfileTab = ({onSave }) => {
         {/* Cột 2 - Thông tin liên hệ */}
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Số điện thoại
+            </label>
             <input
               type="tel"
               name="phone"
@@ -161,7 +181,9 @@ const ProfileTab = ({onSave }) => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Địa chỉ
+            </label>
             <input
               type="text"
               name="location"
@@ -175,27 +197,33 @@ const ProfileTab = ({onSave }) => {
         {/* Phần mở rộng - 2 cột */}
         <div className="md:col-span-2 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Giới thiệu</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Giới thiệu
+            </label>
             <textarea
               name="bio"
               value={formData.bio}
               onChange={handleChange}
               rows="3"
               className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#5e3a1e]"
-              placeholder={user.isArtisan 
-                ? "Giới thiệu về phong cách làm nghề, chất liệu yêu thích..." 
-                : "Mô tả sở thích về đồ thủ công..."}
+              placeholder={
+                role === "Artisan"
+                  ? "Giới thiệu về phong cách làm nghề, chất liệu yêu thích..."
+                  : "Mô tả sở thích về đồ thủ công..."
+              }
             ></textarea>
           </div>
 
-          {user.isArtisan && (
+          {role === "Artisan" && (
             <>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Kỹ năng chế tác (cách nhau bằng dấu phẩy)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Kỹ năng chế tác (cách nhau bằng dấu phẩy)
+                </label>
                 <input
                   type="text"
                   name="craftSkills"
-                  value={formData.craftSkills.join(', ')}
+                  value={formData.craftSkills.join(", ")}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#5e3a1e]"
                   placeholder="Gốm, mây tre, thêu, ..."
@@ -203,7 +231,9 @@ const ProfileTab = ({onSave }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Số năm kinh nghiệm</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Số năm kinh nghiệm
+                </label>
                 <input
                   type="number"
                   name="yearsOfExperience"
