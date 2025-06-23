@@ -93,7 +93,7 @@ const Home = () => {
       </div>
 
       {/* san pham noi bat */}
-      <div className="w-full px-12 py-20">
+      <div className="w-full px-12 pt-20 pb-6">
         {/* Header Section */}
         <div className="flex justify-between items-center mb-6 flex-col lg:flex-row">
           <div className="mb-4 lg:mb-0">
