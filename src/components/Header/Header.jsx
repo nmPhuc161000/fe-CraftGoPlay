@@ -55,63 +55,23 @@ const Header = () => {
           <div className="flex space-x-10 text-base font-medium items-center">
             <Link
               to="/products"
+              state={{ openCategory: true }}
               className="hover:no-underline hover:text-gray-500 transition-colors duration-200 font-extrabold tracking-wider"
             >
-              Sản Phẩm
+              Loại Sản Phẩm
             </Link>
-
-            <div className="relative group">
-              <button className="flex items-center space-x-1 hover:no-underline hover:text-gray-700 focus:outline-none transition-colors duration-200 font-extrabold tracking-wider">
-                <span>Bộ Sưu Tập</span>
-                <svg
-                  className="w-3 h-3 ml-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-
-              <div
-                className="
-                  absolute left-0 mt-2 w-48
-                  bg-white bg-opacity-90 backdrop-blur-sm
-                  border border-gray-200 rounded-lg
-                  shadow-lg
-                  opacity-0 scale-95
-                  group-hover:opacity-100 group-hover:scale-100
-                  transform transition-all duration-200
-                  origin-top-left
-                  z-10
-                "
-              >
-                <Link
-                  to="/collections/1"
-                  className="block px-5 py-3 hover:bg-gray-100 hover:no-underline hover:text-gray-700 transition-colors duration-200 rounded-md tracking-wider"
-                >
-                  Collection 1
-                </Link>
-                <Link
-                  to="/collections/2"
-                  className="block px-5 py-3 hover:bg-gray-100 hover:no-underline hover:text-gray-700 transition-colors duration-200 rounded-md tracking-wider"
-                >
-                  Collection 2
-                </Link>
-              </div>
-            </div>
 
             <Link
               to="/about"
               className="hover:no-underline hover:text-gray-500 transition-colors duration-200 font-extrabold tracking-wider"
             >
               Giới thiệu
+            </Link>
+            <Link
+              to="/contact"
+              className="hover:no-underline hover:text-gray-500 transition-colors duration-200 font-extrabold tracking-wider"
+            >
+              Liên hệ
             </Link>
           </div>
 
@@ -124,12 +84,6 @@ const Header = () => {
           </Link>
 
           <div className="flex space-x-8 items-center text-base font-medium">
-            <Link
-              to="/contact"
-              className="hover:no-underline hover:text-gray-500 transition-colors duration-200 font-extrabold tracking-wider"
-            >
-              Liên hệ
-            </Link>
             <FaSearch
               className="cursor-pointer hover:text-gray-500 tracking-wider"
               title="Tìm kiếm"
