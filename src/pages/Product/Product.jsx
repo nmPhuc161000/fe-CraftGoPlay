@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
 import DropdownSection from "./components/DropdownSection";
@@ -9,6 +10,14 @@ const Product = () => {
   const [isProductOpen, setIsProductOpen] = useState(true);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isArtistOpen, setIsArtistOpen] = useState(false);
+
+  const location = useLocation();
+  useEffect(() => {
+    if (location.state?.openCategory) {
+      setIsCategoryOpen(true);
+    }
+  }, [location.state]);
+
 
   useEffect(() => {
     // Giả lập dữ liệu sản phẩm
@@ -114,12 +123,6 @@ const Product = () => {
               <div className="border-t border-gray-300 my-3" />
 
               {/* danh muc loai sp */}
-              <DropdownSection
-                title="Sản phẩm"
-                isOpen={isProductOpen}
-                toggle={() => setIsProductOpen(!isProductOpen)}
-                items={["Tất cả", "Board Game", "Domino", "Cờ vua"]}
-              />
 
               <DropdownSection
                 title="Loại sản phẩm"
