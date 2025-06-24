@@ -1,0 +1,84 @@
+/* Admin Theme: CraftGoPlay - Terracotta Style */
+:root {
+  --primary: #D08C3A;
+  --accent: #A3B18A;
+  --background: #F9E4D0;
+  --card-bg: #FFF8F0;
+  --card-border: #E2C275;
+  --text-main: #3B2F1E;
+  --text-light: #6B4F2B;
+}
+
+body, .admin-bg, .bg-gray-100 {
+  background: var(--background) !important;
+  color: var(--text-main);
+  transition: background 0.3s, color 0.3s;
+}
+
+.admin-card, .bg-white {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  border-radius: 1rem;
+  box-shadow: 0 2px 12px 0 rgba(208,140,58,0.08);
+  transition: box-shadow 0.3s, background 0.3s;
+}
+
+.admin-card:hover {
+  box-shadow: 0 4px 24px 0 rgba(208,140,58,0.16);
+}
+
+.admin-btn, .bg-orange-500, .bg-primary, .btn-primary {
+  background: var(--primary) !important;
+  color: #fff !important;
+  border-radius: 0.5rem;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.admin-btn:hover, .btn-primary:hover {
+  background: var(--accent) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px 0 rgba(163,177,138,0.18);
+}
+
+.admin-input, input, .border-gray-200 {
+  border-color: var(--card-border) !important;
+  background: #fff !important;
+  color: var(--text-main);
+  transition: border 0.2s;
+}
+
+.admin-sidebar, .sidebar {
+  background: #D08C3A !important;
+  border-right: 2px solid var(--card-border);
+  color: #fff !important;
+}
+
+.admin-sidebar .active, .sidebar .active, .admin-sidebar .bg-indigo-100 {
+  background: #F5E3C3 !important;
+  color: var(--primary) !important;
+}
+
+.admin-sidebar button:hover, .sidebar button:hover {
+  background: #E2C275 !important;
+  color: var(--primary) !important;
+}
+
+.admin-header, .header {
+  background: #FFF8F0 !important;
+  border-bottom: 1px solid var(--card-border);
+  color: var(--text-main);
+}
+
+.admin-footer, .footer {
+  background: #FFF8F0 !important;
+  border-top: 1px solid var(--card-border);
+  color: var(--text-light);
+}
+
+.admin-badge, .badge {
+  background: var(--accent) !important;
+  color: #fff !important;
+}
+
+.admin-anim, .admin-card, .admin-btn, .admin-sidebar, .admin-header, .admin-footer {
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s, border 0.3s;
+} 
