@@ -4,7 +4,6 @@ import Dashboard from "./components/Dashboard";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ManagerAccount from "./components/ManagerAccount";
-import "./admin-theme.css";
 
 const Admin = () => {
   const [selected, setSelected] = useState("dashboard");
