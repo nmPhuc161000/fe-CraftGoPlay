@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
+import ProductReviews from "./components/ProductReviews";
 
 const sampleProduct = {
   name: "Sản phẩm thủ công bằng Tre",
@@ -69,9 +70,8 @@ const ProductDetail = () => {
                 src={img}
                 alt={`thumb-${index}`}
                 onClick={() => setSelectedImg(img)}
-                className={`w-16 h-16 object-cover cursor-pointer border ${
-                  img === selectedImg ? "border-black" : "border-gray-300"
-                }`}
+                className={`w-16 h-16 object-cover cursor-pointer border ${img === selectedImg ? "border-black" : "border-gray-300"
+                  }`}
               />
             ))}
           </div>
@@ -154,25 +154,7 @@ const ProductDetail = () => {
       {/* dang gia san pham */}
       <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent my-12"></div>
       <div className="container mx-auto px-6 pb-12 text-[#5e3a1e]">
-        <h3 className="text-2xl font-semibold mb-6">Đánh giá sản phẩm</h3>
-
-        {reviews.length === 0 ? (
-          <p className="text-sm">Chưa có đánh giá nào.</p>
-        ) : (
-          <div className="space-y-5">
-            {reviews.map((review) => (
-              <div key={review.id} className="border-b pb-4">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-medium">{review.name}</span>
-                  <div className="text-yellow-500 text-sm">
-                    {"★".repeat(review.rating) + "☆".repeat(5 - review.rating)}
-                  </div>
-                </div>
-                <p className="text-sm">{review.comment}</p>
-              </div>
-            ))}
-          </div>
-        )}
+        <ProductReviews reviews={reviews} />
       </div>
     </MainLayout>
   );

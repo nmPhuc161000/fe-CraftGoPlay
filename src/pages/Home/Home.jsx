@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 //import { homeApi } from "../../services";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
-import loginImg from "../../assets/images/background1.jpg";
+import loginImg from "../../assets/images/background2.png";
 
 const Home = () => {
   const [products, setProducts] = useState([]);
@@ -13,77 +13,95 @@ const Home = () => {
   // }, []);
 
   useEffect(() => {
-    // Fake API tạm
-    const fakeProducts = [
-      {
-        id: 1,
-        name: "Majestic Mahjong Set",
-        image:
-          "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
-        price: 13990000,
-        originalPrice: null,
-        tag: null,
-      },
-      {
-        id: 2,
-        name: "Colorburst Wooden Domino Set",
-        image:
-          "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
-        price: 1079000,
-        originalPrice: null,
-        tag: "Pre-order",
-      },
-      {
-        id: 3,
-        name: "Nomad_The Portable Chess Set",
-        image:
-          "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
-        price: 3440000,
-        originalPrice: 4300000,
-        tag: "20% OFF",
-      },
-      {
-        id: 4,
-        name: "Nomad_The Portable Chess Set",
-        image:
-          "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
-        price: 3440000,
-        originalPrice: 4300000,
-        tag: "20% OFF",
-      },
-    ];
+    const fakeProducts = Array.from({ length: 30 }, (_, i) => ({
+      id: i + 1,
+      name: `Sản phẩm thủ công ${i + 1}`,
+      image: "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
+      price: 1000000 + i * 100000,
+      originalPrice: i % 3 === 0 ? 1200000 + i * 100000 : null,
+      tag:
+        i % 5 === 0
+          ? "Pre-order"
+          : i % 4 === 0
+            ? "20% OFF"
+            : null,
+    }));
 
     setProducts(fakeProducts);
   }, []);
+
   const formatVND = (number) => {
     return number.toLocaleString("vi-VN") + "₫";
   };
 
   const categories = [
     {
-      name: "Tre",
+      name: "Mây tre đan",
       image:
         "https://i.vnbusiness.vn/2020/08/26/may-tre-2476-1598430768_860x0.jpg",
-      description: "Bộ cờ vua thủ công cao cấp, thiết kế tinh xảo.",
-    },
-    {
-      name: "Mây",
-      image:
-        "https://vungdecor.com/wp-content/uploads/2023/08/do-thu-cong-my-nghe3.png",
-      description: "Cờ tướng truyền thống với chất liệu gỗ bền vững.",
     },
     {
       name: "Gốm sứ",
       image:
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqj6shKMOGiRR5Y1noawJEa1CuE3PnXPwyPw&s",
-      description: "Bộ domino độc đáo với màu sắc bắt mắt.",
+        "https://media.vneconomy.vn/images/upload/2023/07/28/thu-cong-my-nghe.jpg",
+    },
+    {
+      name: "Điêu khắc gỗ",
+      image:
+        "https://gomphuctaman.com/wp-content/uploads/2022/07/san-pham-thu-cong-my-nghe.jpg",
+    },
+    {
+      name: "Tranh thêu tay",
+      image:
+        "https://cdn2.tuoitre.vn/zoom/700_390/471584752817336320/2025/6/7/8-6-san-pham-thu-cong-read-only-17493114206291591604366-228-0-1465-2362-crop-1749312138091765745310.jpg",
+    },
+    {
+      name: "Mây tre đan",
+      image:
+        "https://i.vnbusiness.vn/2020/08/26/may-tre-2476-1598430768_860x0.jpg",
+    },
+    {
+      name: "Gốm sứ",
+      image:
+        "https://media.vneconomy.vn/images/upload/2023/07/28/thu-cong-my-nghe.jpg",
+    },
+    {
+      name: "Điêu khắc gỗ",
+      image:
+        "https://gomphuctaman.com/wp-content/uploads/2022/07/san-pham-thu-cong-my-nghe.jpg",
+    },
+    {
+      name: "Tranh thêu tay",
+      image:
+        "https://cdn2.tuoitre.vn/zoom/700_390/471584752817336320/2025/6/7/8-6-san-pham-thu-cong-read-only-17493114206291591604366-228-0-1465-2362-crop-1749312138091765745310.jpg",
+    },
+    {
+      name: "Mây tre đan",
+      image:
+        "https://i.vnbusiness.vn/2020/08/26/may-tre-2476-1598430768_860x0.jpg",
+    },
+    {
+      name: "Gốm sứ",
+      image:
+        "https://media.vneconomy.vn/images/upload/2023/07/28/thu-cong-my-nghe.jpg",
+    },
+    {
+      name: "Điêu khắc gỗ",
+      image:
+        "https://gomphuctaman.com/wp-content/uploads/2022/07/san-pham-thu-cong-my-nghe.jpg",
+    },
+    {
+      name: "Tranh thêu tay",
+      image:
+        "https://cdn2.tuoitre.vn/zoom/700_390/471584752817336320/2025/6/7/8-6-san-pham-thu-cong-read-only-17493114206291591604366-228-0-1465-2362-crop-1749312138091765745310.jpg",
     },
   ];
+
 
   return (
     <MainLayout>
       <div className="w-full mt-0">
-        <div className="w-full h-180 relative">
+        <div className="w-full h-120 relative">
           <img
             src={loginImg}
             alt="Header Banner"
@@ -92,13 +110,91 @@ const Home = () => {
         </div>
       </div>
 
-      {/* san pham noi bat */}
-      <div className="w-full px-12 py-20">
+      <div className="w-full px-12 py-8 bg-white">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-[#5e3a1e]">
+          {/* ô 1 */}
+          <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition">
+            <div>
+              <h3 className="font-bold text-lg mb-1">CraftGoPlay</h3>
+              <p className="text-sm">100% Hàng Thủ Công</p>
+            </div>
+            <img
+              src="https://img.icons8.com/?size=100&id=36872&format=png&color=5e3a1e"
+              alt="Craftgoplay"
+              className="w-20 h-20 object-contain"
+            />
+          </div>
+
+          {/* ô 2 */}
+          <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition">
+            <div>
+              <h3 className="font-bold text-lg mb-1">Voucher</h3>
+              <p className="text-sm">Sử dụng ngay!</p>
+            </div>
+            <img
+              src="https://img.icons8.com/?size=100&id=8851&format=png&color=5e3a1e"
+              alt="Voucher"
+              className="w-16 h-16 object-contain"
+            />
+          </div>
+
+          {/* ô 3 */}
+          <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition">
+            <div>
+              <h3 className="font-bold text-lg mb-1">Trò chơi</h3>
+              <p className="text-sm">Thu thập & tích lũy voucher!</p>
+            </div>
+            <img
+              src="https://img.icons8.com/?size=100&id=GFDbOB2OqPWt&format=png&color=5e3a1e"
+              alt="Top Up"
+              className="w-16 h-16 object-contain"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* loai san pham*/}
+      <div className="w-full px-30 py-16">
+        <h2 className="text-4xl font-bold text-[#5e3a1e] mb-4 text-center">
+          Danh mục Loại sản phẩm
+        </h2>
+        <p className="text-center text-[#5e3a1e] max-w-3xl mx-auto mb-10 text-base md:text-lg">
+          Khám phá các dòng sản phẩm thủ công đa dạng từ các nghệ nhân trên khắp Việt Nam — từ tre, mây, gốm sứ đến các chất liệu truyền thống khác. Mỗi sản phẩm đều mang dấu ấn văn hóa và sự tinh xảo trong từng chi tiết.
+        </p>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+          {categories.map((category, index) => (
+            <div
+              key={index}
+              onClick={() =>
+                navigate(`/products?category=${encodeURIComponent(category.name)}`)
+              }
+              className="bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md hover:scale-105 transition-transform cursor-pointer overflow-hidden"
+            >
+              <div className="w-full h-32">
+                <img
+                  src={category.image}
+                  alt={category.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-2 text-center">
+                <span className="text-base font-medium text-[#5e3a1e] leading-tight block">
+                  {category.name}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* san pham danh cho ban */}
+      <div className="w-full px-30">
         {/* Header Section */}
         <div className="flex justify-between items-center mb-6 flex-col lg:flex-row">
           <div className="mb-4 lg:mb-0">
             <h2 className="text-5xl font-bold text-[#5e3a1e]">
-              Sản phẩm nổi bật
+              Sản phẩm dành cho bạn
             </h2>
             <p className="text-[#5e3a1e] mt-2 max-w-2xl">
               Khám phá những sản phẩm board games được yêu thích nhất, nổi tiếng
@@ -118,23 +214,22 @@ const Home = () => {
         </div>
       </div>
 
-      <div className="w-full px-0 py-4">
+      <div className="w-full px-20 py-4">
         <div className="w-full">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 px-4 sm:px-6 lg:px-8">
             {products.map((product, index) => (
               <div
                 key={index}
                 onClick={() => navigate(`/product/${product.id}`)}
-                className="w-full max-w-sm bg-white shadow rounded-lg overflow-hidden relative text-center mx-auto transition-transform duration-300 hover:scale-105 hover:shadow-lg"
+                className="w-full bg-white shadow rounded-lg overflow-hidden relative text-center transition-transform duration-300 hover:scale-105 hover:shadow-lg"
               >
                 {product.tag && (
                   <span
                     className={`absolute top-3 left-3 text-xs font-semibold px-2 py-1 rounded shadow 
-                ${
-                  product.tag === "Pre-order"
-                    ? "bg-yellow-400 text-black"
-                    : "bg-red-600 text-white"
-                }`}
+              ${product.tag === "Pre-order"
+                        ? "bg-yellow-400 text-black"
+                        : "bg-red-600 text-white"
+                      }`}
                   >
                     {product.tag}
                   </span>
@@ -165,48 +260,8 @@ const Home = () => {
         </div>
       </div>
 
-      {/* loai san pham*/}
-      <div className="w-full px-12 py-20">
-        <div className="flex justify-between items-center mb-6 flex-col lg:flex-row">
-          <div className="mb-4 lg:mb-0">
-            <h2 className="text-5xl font-bold text-[#5e3a1e]">Loại sản phẩm</h2>
-          </div>
-          <div>
-            <a
-              href="/products"
-              className="text-sm text-[#5e3a1e] hover:no-underline font-bold inline-flex items-center"
-            >
-              Xem tất cả
-              <span className="ml-1">➜</span>
-            </a>
-          </div>
-        </div>
-        <div className="w-full px-0 py-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {categories.map((category, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105"
-              >
-                <img
-                  src={category.image}
-                  alt={category.name}
-                  className="w-full h-64 object-cover"
-                />
-                <div className="p-4 text-center">
-                  <h3 className="text-xl font-semibold text-[#5e3a1e]">
-                    {category.name}
-                  </h3>
-                  <p className="text-gray-600 mt-2">{category.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
       {/*ve craftgoplay*/}
-      <div className="w-full px-12 py-5 mb-20">
+      <div className="w-full px-20 py-5 mb-20">
         <div className="max-w-screen-xl mx-auto text-center">
           <h2 className="text-5xl font-bold text-[#5e3a1e] mb-6">
             Về Craftgoplay
