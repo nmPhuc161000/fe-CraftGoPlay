@@ -1,81 +1,77 @@
-import React, { useContext } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../../contexts/AuthContext';
-import logo from '../../../assets/images/logo.jpg';
+import React from "react";
+import logo from "../../../assets/images/loginimg.jpg";
 
-function Sidebar() {
-    const { logout } = useContext(AuthContext);
-    const navigate = useNavigate();
+const menu = [
+  {
+    label: "Dashboard",
+    icon: (
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+        <rect x="3" y="3" width="7" height="7" rx="2" fill="none" stroke="currentColor" />
+        <rect x="14" y="3" width="7" height="7" rx="2" fill="none" stroke="currentColor" />
+        <rect x="14" y="14" width="7" height="7" rx="2" fill="none" stroke="currentColor" />
+        <rect x="3" y="14" width="7" height="7" rx="2" fill="none" stroke="currentColor" />
+      </svg>
+    ),
+  },
+  {
+    label: "Manager Account",
+    icon: (
+      <svg width="22" height="22" fill="none" viewBox="0 0 24 24" className="text-primary">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2c0-2.66-5.33-4-8-4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    ),
+  },
+];
 
-    const handleLogout = () => {
-        logout();
-        navigate('/login');
-    };
+const Sidebar = ({ selected, setSelected, isMobileOpen, onCloseMobile, isDesktopCollapsed, onToggleDesktop }) => {
+  const isOpen = !isDesktopCollapsed;
 
-    return (
-        <div className="w-64 bg-gray-800 text-white font-nunito flex flex-col">
-            <div className="p-4 flex items-center">
-                <img src={logo} alt="CraftGoPlay" className="h-10 mr-2" />
-                <h1 className="text-xl font-bold">CraftGoPlay</h1>
-            </div>
-            <nav className="flex-1">
-                <NavLink
-                    to="/admin/"
-                    className={({ isActive }) =>
-                        `block p-4 ${isActive ? 'bg-green-600' : 'hover:bg-green-700'}`
-                    }
-                >
-                    Dashboard
-                </NavLink>
-                <NavLink
-                    to="/admin/products"
-                    className={({ isActive }) =>
-                        `block p-4 ${isActive ? 'bg-green-600' : 'hover:bg-green-700'}`
-                    }
-                >
-                    Products
-                </NavLink>
-                <NavLink
-                    to="/admin/orders"
-                    className={({ isActive }) =>
-                        `block p-4 ${isActive ? 'bg-green-600' : 'hover:bg-green-700'}`
-                    }
-                >
-                    Orders
-                </NavLink>
-                <NavLink
-                    to="/admin/analytics"
-                    className={({ isActive }) =>
-                        `block p-4 ${isActive ? 'bg-green-600' : 'hover:bg-green-700'}`
-                    }
-                >
-                    Analytics
-                </NavLink>
-                <NavLink
-                    to="/admin/messages"
-                    className={({ isActive }) =>
-                        `block p-4 ${isActive ? 'bg-green-600' : 'hover:bg-green-700'}`
-                    }
-                >
-                    Messages
-                </NavLink>
-                <NavLink
-                    to="/admin/profile"
-                    className={({ isActive }) =>
-                        `block p-4 ${isActive ? 'bg-green-600' : 'hover:bg-green-700'}`
-                    }
-                >
-                    Profile
-                </NavLink>
-            </nav>
-            <button
-                onClick={handleLogout}
-                className="p-4 text-left hover:bg-red-600"
-            >
-                Logout
-            </button>
+  return (
+    <>
+      {/* Mobile Overlay */}
+      <div 
+        className={`md:hidden fixed inset-0 bg-black/50 z-30 transition-opacity ${isMobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        onClick={onCloseMobile}
+      ></div>
+
+      <aside
+        className={`fixed inset-y-0 left-0 bg-white shadow-xl z-40 flex flex-col transition-transform duration-300
+                  md:relative md:translate-x-0
+                  ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'}
+                  ${isDesktopCollapsed ? 'md:w-20' : 'md:w-64'}`}
+        style={{ minHeight: '100vh' }}
+      >
+        {/* Logo & Toggle */}
+        <div className="flex items-center gap-2 px-4 pt-6 pb-4">
+          <img src={logo} alt="CraftGoPlay Logo" className={`transition-all rounded-full object-cover ${isDesktopCollapsed ? 'h-8 w-8' : 'h-10 w-10'}`} />
+          {!isDesktopCollapsed && <span className="text-lg font-bold tracking-wide">CraftGoPlay</span>}
+          <button
+            className="ml-auto hidden md:flex items-center justify-center w-8 h-8 rounded-full hover:bg-indigo-50 transition"
+            onClick={onToggleDesktop}
+            aria-label="Toggle sidebar"
+          >
+            <span className="text-xl">{isOpen ? "«" : "»"}</span>
+          </button>
         </div>
-    );
-}
+        {/* Menu */}
+        <nav className="flex flex-col gap-1 px-2">
+          {menu.map((item) => (
+            <button
+              key={item.label}
+              className={`group w-full flex items-center gap-3 px-3 py-2 rounded-lg transition font-medium text-left hover:bg-indigo-50 ${selected === item.label.toLowerCase() ? "bg-indigo-100 text-indigo-700" : "text-gray-700"}`}
+              onClick={() => {
+                setSelected(item.label.toLowerCase());
+                onCloseMobile();
+              }}
+            >
+              <span className="flex items-center justify-center w-6 h-6">{item.icon}</span>
+              {!isDesktopCollapsed && <span className="flex-1">{item.label}</span>}
+            </button>
+          ))}
+        </nav>
+      </aside>
+    </>
+  );
+};
 
-export default Sidebar;
+export default Sidebar; 
