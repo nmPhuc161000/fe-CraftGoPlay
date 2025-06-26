@@ -1,13 +1,14 @@
 import { useContext } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
+import Loading from "../components/loading/Loading";
 
 const ProtectedRoute = ({ children, redirectTo = "/login" }) => {
   const { isAuthenticated, loading } = useContext(AuthContext);
   const location = useLocation();
 
   if (loading) {
-    return <div>Loading...</div>; // Hoặc dùng component loading tùy chỉnh
+    return <Loading />;
   }
 
   if (!isAuthenticated) {
