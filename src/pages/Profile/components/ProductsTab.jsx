@@ -99,12 +99,6 @@ export default function ProductsTab({ artisanId }) {
       <div className="flex justify-between items-center flex-wrap gap-4">
         <div className="flex items-center gap-2">
           <h3 className="text-xl font-bold text-[#5e3a1e]">Sản phẩm của tôi</h3>
-          <Link
-            to="/profile-user/products"
-            className="ml-2 px-3 py-1 bg-gray-200 text-[#5e3a1e] rounded hover:bg-gray-300 text-sm border border-[#cbb892] transition-colors duration-200"
-          >
-            ← Quay lại
-          </Link>
         </div>
 
         <div className="flex flex-wrap gap-2">

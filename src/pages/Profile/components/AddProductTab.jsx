@@ -4,6 +4,7 @@ import { FiArrowLeft, FiUpload, FiX } from "react-icons/fi";
 import { useContext } from "react";
 import { AuthContext } from "../../../contexts/AuthContext";
 import subCategoryService from "../../../services/apis/subCateApi";
+import productService from "../../../services/apis/productApi";
 
 export default function AddProductTab() {
   const { user } = useContext(AuthContext);
@@ -11,86 +12,176 @@ export default function AddProductTab() {
   const [formData, setFormData] = useState({
     Name: "",
     Description: "",
-    Price: "",
+    Price: 0,
     SubCategoryId: "",
     Status: "Active",
-    Artisan_id: user?.id, // Lấy từ localStorage hoặc context
+    Artisan_id: user?.id,
   });
   const [previewImage, setPreviewImage] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [subCate, setSubCate] = useState([]);
-  const subCateData = subCate.data?.data || [];
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // Lấy danh sách danh mục con
+  useEffect(() => {
+    const fetchSubCategories = async () => {
+      setIsLoading(true);
+      try {
+        const response = await subCategoryService.getAllSubCategories();
+        const subCategories = Array.isArray(response.data)
+          ? response.data
+          : response.data?.data || [];
+        setSubCate(subCategories);
+      } catch (error) {
+        console.error("Error fetching subcategories:", error);
+        setError("Không thể tải danh mục con. Vui lòng thử lại sau.");
+        setSubCate([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchSubCategories();
+  }, []);
+
+  // Xử lý thay đổi input
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageChange = (file) => {
-    if (file && file.type.match("image.*")) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPreviewImage(e.target.result);
-        // Lưu file vào formData để gửi lên API
-        setFormData((prev) => ({ ...prev, Image: file }));
-      };
-      reader.readAsDataURL(file);
+  // Xử lý chọn ảnh
+  const handleImageChange = useCallback((file) => {
+    if (!file) {
+      alert("Vui lòng chọn một file!");
+      return;
     }
-  };
+    if (!file.type.match("image.*")) {
+      alert("Vui lòng chọn file ảnh (JPG, PNG)!");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Kích thước file vượt quá 5MB!");
+      return;
+    }
 
-  useEffect(() => {
-    const fetchSubCategories = async () => {
-      const subcategories = await subCategoryService.getAllSubCategories();
-      setSubCate(subcategories.data);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPreviewImage(e.target.result);
+      setFormData((prev) => ({ ...prev, Image: file }));
     };
-    fetchSubCategories();
+    reader.readAsDataURL(file);
   }, []);
 
-  console.log("Subcategories:", subCate.data.data);
-
-  const handleDragOver = (e) => {
+  // Xử lý sự kiện kéo thả
+  const handleDragOver = useCallback((e) => {
     e.preventDefault();
     setIsDragging(true);
-  };
+  }, []);
 
-  const handleDragLeave = () => {
+  const handleDragLeave = useCallback(() => {
     setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback(
+    (e) => {
+      e.preventDefault();
+      setIsDragging(false);
+      const file = e.dataTransfer.files[0];
+      handleImageChange(file);
+    },
+    [handleImageChange]
+  );
+
+  // Hàm validate dữ liệu
+  const validateProductData = (productData) => {
+    if (!productData.Name) {
+      return {
+        success: false,
+        error: "Tên sản phẩm là bắt buộc",
+        status: 400,
+      };
+    }
+    if (!productData.Price) {
+      return {
+        success: false,
+        error: "Giá sản phẩm là bắt buộc",
+        status: 400,
+      };
+    }
+    if (!productData.Description) {
+      return {
+        success: false,
+        error: "Mô tả sản phẩm là bắt buộc",
+        status: 400,
+      };
+    }
+    if (!productData.SubCategoryId) {
+      return {
+        success: false,
+        error: "Danh mục con là bắt buộc",
+        status: 400,
+      };
+    }
+    if (parseFloat(productData.Price) <= 0) {
+      return {
+        success: false,
+        error: "Giá bán phải lớn hơn 0",
+        status: 400,
+      };
+    }
+    return {
+      success: true,
+    };
   };
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    handleImageChange(file);
-  };
-
+  // Xử lý gửi form
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
+      setIsSubmitting(true);
+
+      // Validate dữ liệu
+      const validationResult = validateProductData(formData);
+      if (!validationResult.success) {
+        alert(validationResult.error);
+        setIsSubmitting(false);
+        return;
+      }
+
+      if (!formData.Image) {
+        alert("Vui lòng chọn hình ảnh sản phẩm!");
+        setIsSubmitting(false);
+        return;
+      }
 
       const formPayload = new FormData();
       Object.keys(formData).forEach((key) => {
         formPayload.append(key, formData[key]);
-      });
+      });   
 
       try {
-        // Gọi API ở đây
-        // const response = await fetch('/api/products', {
-        //   method: 'POST',
-        //   body: formPayload
-        // });
-
-        // Giả lập thành công
-        console.log("Form data:", Object.fromEntries(formPayload));
+        const response = await productService.createProduct(formPayload);
+        if (!response.success) {
+          throw new Error(response.error || "Lỗi không xác định");
+        }
         alert("Thêm sản phẩm thành công!");
         navigate("/profile-user/products");
       } catch (error) {
-        console.error("Error:", error);
-        alert("Có lỗi xảy ra khi thêm sản phẩm");
+        console.error("Error creating product:", error);
+        alert(`Có lỗi xảy ra khi thêm sản phẩm: ${error.message}`);
+      } finally {
+        setIsSubmitting(false);
       }
     },
     [formData, navigate]
   );
+
+  // Kiểm tra user sau khi khai báo hooks
+  if (!user?.id) {
+    return <div>Vui lòng đăng nhập để thêm sản phẩm!</div>;
+  }
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -112,9 +203,7 @@ export default function AddProductTab() {
           onDrop={handleDrop}
           onClick={() => document.getElementById("fileInput").click()}
           className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-            isDragging
-              ? "border-[#5e3a1e] bg-[#f8f4ed]"
-              : "border-gray-300 hover:border-[#cbb892]"
+            isDragging ? "border-[#5e3a1e] bg-[#f8f4ed]" : "border-gray-300 hover:border-[#cbb892]"
           }`}
         >
           <input
@@ -228,13 +317,26 @@ export default function AddProductTab() {
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
               required
+              disabled={isLoading || error}
             >
-              {subCateData.map((sub) => (
-                <option key={sub.subId} value={sub.subId}>
-                  {sub.subName}
+              <option value="">Chọn danh mục con</option>
+              {isLoading ? (
+                <option value="" disabled>
+                  Đang tải...
                 </option>
-              ))}
+              ) : error ? (
+                <option value="" disabled>
+                  Lỗi tải danh mục
+                </option>
+              ) : (
+                subCate.map((sub) => (
+                  <option key={sub.subId} value={sub.subId}>
+                    {sub.subName}
+                  </option>
+                ))
+              )}
             </select>
+            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
           </div>
 
           <div>
@@ -252,6 +354,7 @@ export default function AddProductTab() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
             >
               <option value="Active">Đang bán</option>
+              <option value="Inactive">Ngừng bán</option>
             </select>
           </div>
         </div>
@@ -267,9 +370,9 @@ export default function AddProductTab() {
           <button
             type="submit"
             className="px-6 py-2 bg-[#5e3a1e] text-white rounded-md hover:bg-[#7a4b28] disabled:opacity-50"
-            disabled={!formData.Image}
+            disabled={!formData.Image || isSubmitting || isLoading}
           >
-            Lưu sản phẩm
+            {isSubmitting ? "Đang lưu..." : "Lưu sản phẩm"}
           </button>
         </div>
       </form>

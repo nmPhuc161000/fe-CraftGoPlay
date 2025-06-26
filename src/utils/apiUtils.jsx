@@ -2,24 +2,38 @@ import axiosInstance from "../services/axiosInstance";
 
 export const performApiRequest = async (
   endpoint,
-  { data = {}, method = "post", params } = {}
+  { data = {}, method = "post", params, headers = {} } = {}
 ) => {
   try {
     let response;
     method = method.toLowerCase(); // Chuẩn hóa method
 
+    // Cấu hình request
+    const config = {
+      params,
+      headers: {
+        ...headers, // Kết hợp headers từ tham số truyền vào
+      },
+      data,
+    };
+
+    // Nếu dữ liệu là FormData, xóa Content-Type để Axios tự đặt multipart/form-data
+    if (data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+
     if (method === "get" && params) {
-      response = await axiosInstance.get(endpoint, { params });
+      response = await axiosInstance.get(endpoint, config);
     } else if (method === "put") {
-      response = await axiosInstance.put(endpoint, data); // Sử dụng data cho PUT
+      response = await axiosInstance.put(endpoint, data, config);
     } else if (method === "delete") {
       // Cho phép cả data (nếu API yêu cầu) và params
       response = params
-        ? await axiosInstance.delete(endpoint, { params })
-        : await axiosInstance.delete(endpoint, data);
+        ? await axiosInstance.delete(endpoint, config)
+        : await axiosInstance.delete(endpoint, { ...config, data });
     } else {
       // Mặc định cho post và các phương thức khác
-      response = await axiosInstance[method](endpoint, data);
+      response = await axiosInstance[method](endpoint, data, config);
     }
 
     return {

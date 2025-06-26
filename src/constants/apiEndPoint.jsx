@@ -12,9 +12,9 @@ export const API_ENDPOINTS_AUTH = {
 };
 
 export const API_ENDPOINTS_PRODUCT = {
-  GET_PRODUCTS: "/products",
+  GET_PRODUCTS: "/api/Product/GetProducts",
   GET_PRODUCT_BY_ID: (id) => `/products/${id}`,
-  ADD_PRODUCT: "/products/add",
+  CREATE_PRODUCT: "/api/Product/CreateProduct",
 };
 
 export const API_ENDPOINTS_CART = {

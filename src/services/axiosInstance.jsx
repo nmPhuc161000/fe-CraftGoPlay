@@ -5,7 +5,7 @@ const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-    Accept: "*/*",
+    Accept: '*/*',
   },
 });
 
@@ -21,12 +21,49 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Interceptor để log lệnh curl và xử lý Content-Type
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const method = config.method.toUpperCase();
+    let curlCommand = `curl -X '${method}' '${config.url}'`;
+
+    // Thêm headers
+    for (const [key, value] of Object.entries(config.headers)) {
+      if (value && key !== 'Content-Type') {
+        curlCommand += ` -H '${key}: ${value}'`;
+      }
+    }
+
+    // Xử lý data
+    if (config.data) {
+      if (config.data instanceof FormData) {
+        // Xóa Content-Type nếu là FormData
+        delete config.headers['Content-Type'];
+        // Thêm các field từ FormData
+        for (let [key, value] of config.data.entries()) {
+          if (value instanceof File) {
+            curlCommand += ` -F '${key}=@${value.name}'`;
+          } else {
+            curlCommand += ` -F '${key}=${value}'`;
+          }
+        }
+      } else {
+        // Xử lý JSON hoặc dữ liệu khác
+        curlCommand += ` -d '${JSON.stringify(config.data)}'`;
+      }
+    }
+
+    console.log('Generated cURL command:', curlCommand);
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Xử lý lỗi 401 (Unauthorized)
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Xử lý khi token hết hạn hoặc không hợp lệ
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
