@@ -1,14 +1,7 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "vite.config.js",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "routes": [
     {
       "src": "/assets/(.*)",
@@ -18,17 +11,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/index.html",
-      "headers": {
-        "Cache-Control": "no-cache"
-      }
-    },
-    {
-      "src": "/.*",
-      "status": 200,
-      "headers": { 
-        "Content-Type": "text/html; charset=utf-8" 
-      }
+      "dest": "/index.html"
     }
   ],
   "regions": ["sin1"]

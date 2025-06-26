@@ -1,22 +1,37 @@
-import React from 'react';
-import { Outlet } from 'react-router-dom';
-import Sidebar from './components/Sidebar';
-import Header from '../../components/Header/Header';
-import Footer from '../../components/Footer/Footer';
+import React, { useState } from "react";
+import Sidebar from "./components/Sidebar";
+import Dashboard from "./components/Dashboard";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import ManagerAccount from "./components/ManagerAccount";
 
-function Admin() {
-    return (
-        <div className="flex flex-col min-h-screen bg-gray-50 text-nunito">
-            <Header />
-            <div className="flex flex-1">
-                <Sidebar />
-                <main className="flex-1 p-6">
-                    <Outlet />
-                </main>
-            </div>
-            <Footer />
-        </div>
-    );
-}
+const Admin = () => {
+  const [selected, setSelected] = useState("dashboard");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // For mobile
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false); // For desktop
 
-export default Admin;
+  return (
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar bên trái */}
+      <Sidebar
+        selected={selected}
+        setSelected={setSelected}
+        isMobileOpen={isSidebarOpen}
+        onCloseMobile={() => setIsSidebarOpen(false)}
+        isDesktopCollapsed={isDesktopSidebarCollapsed}
+        onToggleDesktop={() => setIsDesktopSidebarCollapsed(v => !v)}
+      />
+      {/* Phần phải: header, body, footer */}
+      <div className="flex flex-col flex-1 min-h-screen">
+        <Header onToggleMobileMenu={() => setIsSidebarOpen(true)} />
+        <main className="flex-1 p-4 md:p-8 overflow-auto bg-gray-100">
+          {selected === "dashboard" && <Dashboard />}
+          {selected === "manager account" && <ManagerAccount />}
+        </main>
+        <Footer />
+      </div>
+    </div>
+  );
+};
+
+export default Admin; 
