@@ -31,6 +31,20 @@ const authService = {
     });
   },
 
+  async loginGoogle(idToken) {
+    if (!idToken) {
+      return {
+        success: false,
+        error: "ID Token là bắt buộc",
+        status: 400,
+      };
+    }
+    return performApiRequest(API_ENDPOINTS_AUTH.GOOGLE_LOGIN, {
+      method: "post",
+      data: { idToken },
+    });
+  },
+
   /**
    * Đăng ký tài khoản
    * @param {Object} userData - Thông tin người dùng
@@ -52,6 +66,20 @@ const authService = {
       };
     }
     return performApiRequest(API_ENDPOINTS_AUTH.REGISTER, userData);
+  },
+
+  async registerGoogle(idToken) {
+    if (!idToken) {
+      return {
+        success: false,
+        error: "ID Token là bắt buộc",
+        status: 400,
+      };
+    }
+    return performApiRequest(API_ENDPOINTS_AUTH.REGISTER_GOOGLE, {
+      method: "post",
+      data: { idToken },
+    });
   },
 
   /**
