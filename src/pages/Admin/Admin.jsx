@@ -3,7 +3,10 @@ import Sidebar from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-import ManagerAccount from "./components/ManagerAccount";
+import StaffAccount from "./components/StaffAccount";
+import ArtisanAccount from "./components/ArtisanAccount";
+import CustomerAccount from "./components/CustomerAccount";
+import OrderHistory from "./components/OrderHistory";
 
 const Admin = () => {
   const [selected, setSelected] = useState("dashboard");
@@ -26,7 +29,10 @@ const Admin = () => {
         <Header onToggleMobileMenu={() => setIsSidebarOpen(true)} />
         <main className="flex-1 p-4 md:p-8 overflow-auto bg-gray-100">
           {selected === "dashboard" && <Dashboard />}
-          {selected === "manager account" && <ManagerAccount />}
+          {selected === "staff" && <StaffAccount />}
+          {selected === "artisan" && <ArtisanAccount />}
+          {selected === "customer" && <CustomerAccount />}
+          {selected === "order-history" && <OrderHistory />}
         </main>
         <Footer />
       </div>
