@@ -71,8 +71,8 @@ const OrderHistory = () => {
   });
 
   return (
-    <div className="w-full min-h-screen bg-white flex justify-center items-start py-8 px-2">
-      <div className="w-full bg-white rounded-3xl shadow-xl p-4 sm:p-6 md:p-10 mx-auto">
+    <div className="w-full min-h-screen bg-amber-25 flex justify-center items-start py-8 px-2">
+      <div className="w-full bg-amber-25 rounded-3xl shadow-xl p-4 sm:p-6 md:p-10 mx-auto">
         {/* Breadcrumb */}
         <div className="mb-2 text-sm text-gray-500">
           Home / Admin / <span className="text-blue-600 font-semibold">manage order</span>

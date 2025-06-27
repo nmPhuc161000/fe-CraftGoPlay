@@ -126,7 +126,7 @@ const Dashboard = () => {
 
   return (
     <div className="w-full">
-      <main className="bg-white min-h-screen w-full">
+      <main className="bg-amber-25 min-h-screen w-full">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4">
           {/* Breadcrumb */}
           <div className="mb-2 text-sm text-gray-500">
@@ -157,28 +157,28 @@ const Dashboard = () => {
           {/* Cards */}
           {data ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6">
-              <div className="bg-white rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
+              <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
                 <div className="bg-blue-100 text-blue-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl"><FaUserPlus /></div>
                 <div>
                   <div className="text-gray-500 text-xs sm:text-sm">Total Users</div>
                   <div className="text-xl sm:text-2xl font-bold">{data.cards.users}</div>
                 </div>
               </div>
-              <div className="bg-white rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
+              <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
                 <div className="bg-green-100 text-green-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl"><FaShoppingCart /></div>
                 <div>
                   <div className="text-gray-500 text-xs sm:text-sm">Total Orders</div>
                   <div className="text-xl sm:text-2xl font-bold">{data.cards.orders}</div>
                 </div>
               </div>
-              <div className="bg-white rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
+              <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
                 <div className="bg-purple-100 text-purple-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl"><FaCommentDots /></div>
                 <div>
                   <div className="text-gray-500 text-xs sm:text-sm">Total Feedbacks</div>
                   <div className="text-xl sm:text-2xl font-bold">{data.cards.feedbacks}</div>
                 </div>
               </div>
-              <div className="bg-white rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
+              <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
                 <div className="bg-yellow-100 text-yellow-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl"><FaCoins /></div>
                 <div>
                   <div className="text-gray-500 text-xs sm:text-sm">Total Revenues</div>
@@ -189,7 +189,7 @@ const Dashboard = () => {
           ) : null}
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-6">
-            <div className="col-span-1 lg:col-span-2 bg-white rounded-xl shadow p-3 sm:p-6 transition-all duration-300 hover:shadow-2xl">
+            <div className="col-span-1 lg:col-span-2 bg-amber-25 rounded-xl shadow p-3 sm:p-6 transition-all duration-300 hover:shadow-2xl">
               <div className="font-semibold mb-2">Product Statistics</div>
               {barData && barData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={260}>
@@ -206,7 +206,7 @@ const Dashboard = () => {
                 <div className="text-center text-red-500 font-semibold py-8 sm:py-12">Không có dữ liệu</div>
               )}
             </div>
-            <div className="bg-white rounded-xl shadow p-3 sm:p-6 flex flex-col items-center transition-all duration-300 hover:shadow-2xl">
+            <div className="bg-amber-25 rounded-xl shadow p-3 sm:p-6 flex flex-col items-center transition-all duration-300 hover:shadow-2xl">
               <div className="font-semibold mb-2">Order Distribution</div>
               {data && data.pie && data.pie.length > 0 ? (
                 <>
@@ -244,4 +244,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Dashboard; 
