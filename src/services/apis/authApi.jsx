@@ -51,6 +51,8 @@ const authService = {
    * @returns {Promise<{success: boolean, data?: any, error?: string, status?: number}>}
    */
   async register(userData) {
+    console.log("Registering with data: ", userData);
+
     if (!userData || !userData.email || !userData.passwordHash) {
       return {
         success: false,
@@ -89,6 +91,82 @@ const authService = {
   async logout() {
     return performApiRequest(API_ENDPOINTS_AUTH.LOGOUT, {}, "post");
   },
+
+  /**
+   * Xác thực email
+   * @param {string} token - Token xác thực
+   * @returns {Promise<{success: boolean, data?: any, error?: string, status?: number}>}
+   */
+  async verifyEmail(token) {
+    if (!token) {
+      return {
+        success: false,
+        error: "Token xác thực là bắt buộc",
+        status: 400,
+      };
+    }
+    return performApiRequest(API_ENDPOINTS_AUTH.VERIFY_EMAIL, {
+      method: "post",
+      data: { token },
+    });
+  }
+
+  /**
+   * Thay đổi mật khẩu
+   * @param {Object} data - { oldPassword, newPassword }
+   * @returns {Promise<{success: boolean, data?: any, error?: string, status?: number}>}
+   */
+  // async changePassword(data) {
+  //   if (!data || !data.oldPassword || !data.newPassword) {
+  //     return {
+  //       success: false,
+  //       error: "Mật khẩu cũ và mới là bắt buộc",
+  //       status: 400,
+  //     };
+  //   }
+  //   return performApiRequest(API_ENDPOINTS_AUTH.CHANGE_PASSWORD, {
+  //     method: "post",
+  //     data,
+  //   });
+  // },
+  /**
+   * Quên mật khẩu
+   * @param {string} email - Email người dùng
+   * @returns {Promise<{success: boolean, data?: any, error?: string, status?: number}>}
+   */
+  // async forgotPassword(email) {
+  //   if (!email) {
+  //     return {
+  //       success: false,
+  //       error: "Email là bắt buộc",
+  //       status: 400,
+  //     };
+  //   }
+  //   if (!validateEmail(email)) {
+  //     return {
+  //       success: false,
+  //       error: "Email không hợp lệ",
+  //       status: 400,
+  //     };
+  //   }
+  //   return performApiRequest(API_ENDPOINTS_AUTH.FORGOT_PASSWORD, {
+  //     method: "post",
+  //     data: { email },
+  //   });
+  // },
+  // async resetPassword(token, newPassword) {
+  //   if (!token || !newPassword) {
+  //     return {
+  //       success: false,
+  //       error: "Token và mật khẩu mới là bắt buộc",
+  //       status: 400,
+  //     };
+  //   }
+  //   return performApiRequest(API_ENDPOINTS_AUTH.RESET_PASSWORD, {
+  //     method: "post",
+  //     data: { token, newPassword },
+  //   });
+  // },
 };
 
 export default authService;
