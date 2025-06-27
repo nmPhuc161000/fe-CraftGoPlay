@@ -16,15 +16,11 @@ const Home = () => {
     const fakeProducts = Array.from({ length: 30 }, (_, i) => ({
       id: i + 1,
       name: `Sản phẩm thủ công ${i + 1}`,
-      image: "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
+      image:
+        "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
       price: 1000000 + i * 100000,
       originalPrice: i % 3 === 0 ? 1200000 + i * 100000 : null,
-      tag:
-        i % 5 === 0
-          ? "Pre-order"
-          : i % 4 === 0
-            ? "20% OFF"
-            : null,
+      tag: i % 5 === 0 ? "Pre-order" : i % 4 === 0 ? "20% OFF" : null,
     }));
 
     setProducts(fakeProducts);
@@ -97,7 +93,6 @@ const Home = () => {
     },
   ];
 
-
   return (
     <MainLayout>
       <div className="w-full mt-0">
@@ -159,7 +154,10 @@ const Home = () => {
           Danh mục Loại sản phẩm
         </h2>
         <p className="text-center text-[#5e3a1e] max-w-3xl mx-auto mb-10 text-base md:text-lg">
-          Khám phá các dòng sản phẩm thủ công đa dạng từ các nghệ nhân trên khắp Việt Nam — từ tre, mây, gốm sứ đến các chất liệu truyền thống khác. Mỗi sản phẩm đều mang dấu ấn văn hóa và sự tinh xảo trong từng chi tiết.
+          Khám phá các dòng sản phẩm thủ công đa dạng từ các nghệ nhân trên khắp
+          Việt Nam — từ tre, mây, gốm sứ đến các chất liệu truyền thống khác.
+          Mỗi sản phẩm đều mang dấu ấn văn hóa và sự tinh xảo trong từng chi
+          tiết.
         </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
@@ -167,7 +165,9 @@ const Home = () => {
             <div
               key={index}
               onClick={() =>
-                navigate(`/products?category=${encodeURIComponent(category.name)}`)
+                navigate(
+                  `/products?category=${encodeURIComponent(category.name)}`
+                )
               }
               className="bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md hover:scale-105 transition-transform cursor-pointer overflow-hidden"
             >
@@ -226,10 +226,11 @@ const Home = () => {
                 {product.tag && (
                   <span
                     className={`absolute top-3 left-3 text-xs font-semibold px-2 py-1 rounded shadow 
-              ${product.tag === "Pre-order"
-                        ? "bg-yellow-400 text-black"
-                        : "bg-red-600 text-white"
-                      }`}
+              ${
+                product.tag === "Pre-order"
+                  ? "bg-yellow-400 text-black"
+                  : "bg-red-600 text-white"
+              }`}
                   >
                     {product.tag}
                   </span>

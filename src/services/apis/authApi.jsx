@@ -67,7 +67,10 @@ const authService = {
         status: 400,
       };
     }
-    return performApiRequest(API_ENDPOINTS_AUTH.REGISTER, userData);
+    return performApiRequest(API_ENDPOINTS_AUTH.REGISTER, {
+      data: userData,
+      method: "post",
+    });
   },
 
   async registerGoogle(idToken) {
@@ -93,21 +96,21 @@ const authService = {
   },
 
   /**
-   * Xác thực email
-   * @param {string} token - Token xác thực
+   * Xác thực OTP
+   * @param {Object} data - { email, otp }
    * @returns {Promise<{success: boolean, data?: any, error?: string, status?: number}>}
    */
-  async verifyEmail(token) {
-    if (!token) {
+  async verifyOtp(data) {
+    if (!data || !data.email || !data.otp) {
       return {
         success: false,
-        error: "Token xác thực là bắt buộc",
+        error: "Email và OTP là bắt buộc",
         status: 400,
       };
     }
     return performApiRequest(API_ENDPOINTS_AUTH.VERIFY_EMAIL, {
       method: "post",
-      data: { token },
+      data: data,
     });
   },
 
