@@ -1,13 +1,17 @@
 export const MESSAGES = {
   AUTH: {
-    LOGIN_SUCCESS: 'Đăng nhập thành công',
-    LOGIN_FAILED: 'Đăng nhập thất bại. Vui lòng thử lại.',
-    REGISTER_SUCCESS: 'Đăng ký thành công',
-    REGISTER_FAILED: 'Đăng ký thất bại. Vui lòng thử lại.',
-    LOGOUT_SUCCESS: 'Đăng xuất thành công',
+    LOGIN_SUCCESS: "Đăng nhập thành công",
+    GOOGLE_LOGIN_SUCCESS: "Đăng nhập bằng Google thành công",
+    LOGIN_FAILED: "Đăng nhập thất bại. Vui lòng thử lại.",
+    GOOGLE_LOGIN_FAILED: "Đăng nhập bằng Google thất bại. Vui lòng thử lại.",
+    REGISTER_SUCCESS: "Đăng ký thành công",
+    REGISTER_FAILED: "Đăng ký thất bại. Vui lòng thử lại.",
+    GOOGLE_REGISTER_FAILED: "Đăng ký bằng Google thất bại. Vui lòng thử lại.",
+    VERIFY_EMAIL_SUCCESS: "Xác thực email thành công",
+    LOGOUT_SUCCESS: "Đăng xuất thành công",
     // Thêm các thông báo khác
   },
   COMMON: {
-    SERVER_ERROR: 'Lỗi server, vui lòng thử lại sau',
+    SERVER_ERROR: "Lỗi server, vui lòng thử lại sau",
   },
 };

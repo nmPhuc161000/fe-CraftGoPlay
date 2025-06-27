@@ -2,7 +2,9 @@ export const API_BASE_URL = "https://localhost:7254";
 
 export const API_ENDPOINTS_AUTH = {
   LOGIN: "/api/Auth/user/login",
+  GOOGLE_LOGIN: "/api/Auth/google-login",
   REGISTER: "/auth/register",
+  REGISTER_GOOGLE: "/api/Auth/register-google",
   VERIFY_EMAIL: "/auth/verify-email",
   LOGOUT: "/auth/logout",
   CHANGE_PASSWORD: "/auth/change-password",
