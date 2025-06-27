@@ -10,7 +10,7 @@ import ProfileUser from "../pages/Profile/ProfileUser";
 import ProtectedRoute from "./ProtectedRoute"; // Import ProtectedRoute
 import ProfileRoutes from "./ProfileRoutes"; // Import ProfileRoutes
 import Admin from "../pages/Admin/Admin";
-
+import VerifyOtp from "../pages/Register/VerifyOtp";
 
 const AppRouter = () => {
   return (
@@ -18,6 +18,7 @@ const AppRouter = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/verify-otp" element={<VerifyOtp />} />
         <Route path="/" element={<Home />} />
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />

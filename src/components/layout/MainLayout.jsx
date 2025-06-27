@@ -7,12 +7,12 @@ const MainLayout = ({ children }) => {
   const role = localStorage.getItem("role");
   return (
     <div className="min-h-screen flex flex-col">
-      {!role === "Artisan" && <Header />}{" "}
+      {role !== "Artisan" && <Header />}{" "}
       {/* Hiển thị Header nếu không phải là Artisan */}
       <main className="flex-grow">
         {children} {/* Render children thay vì Outlet */}
       </main>
-      {!role === "Artisan" && <Footer />}{" "}
+      {role !== "Artisan" && <Footer />}{" "}
       {/* Hiển thị Footer nếu không phải là Artisan */}
     </div>
   );
