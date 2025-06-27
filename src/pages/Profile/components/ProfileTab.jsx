@@ -1,7 +1,9 @@
-import React, { useState, useRef, useContext } from "react";
+import { useState, useRef, useContext } from "react";
 import { AuthContext } from "../../../contexts/AuthContext";
 
-const ProfileTab = ({ role, user }) => {
+const ProfileTab = () => {
+  const { user } = useContext(AuthContext);
+  const role = localStorage.getItem("role") || "Customer"; // Mặc định là Customer nếu không có role
   const [formData, setFormData] = useState({
     ...user,
     phone: user.phoneNumber || "",
