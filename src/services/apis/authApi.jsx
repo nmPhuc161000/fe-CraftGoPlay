@@ -109,7 +109,7 @@ const authService = {
       method: "post",
       data: { token },
     });
-  }
+  },
 
   /**
    * Thay đổi mật khẩu
@@ -134,39 +134,44 @@ const authService = {
    * @param {string} email - Email người dùng
    * @returns {Promise<{success: boolean, data?: any, error?: string, status?: number}>}
    */
-  // async forgotPassword(email) {
-  //   if (!email) {
-  //     return {
-  //       success: false,
-  //       error: "Email là bắt buộc",
-  //       status: 400,
-  //     };
-  //   }
-  //   if (!validateEmail(email)) {
-  //     return {
-  //       success: false,
-  //       error: "Email không hợp lệ",
-  //       status: 400,
-  //     };
-  //   }
-  //   return performApiRequest(API_ENDPOINTS_AUTH.FORGOT_PASSWORD, {
-  //     method: "post",
-  //     data: { email },
-  //   });
-  // },
-  // async resetPassword(token, newPassword) {
-  //   if (!token || !newPassword) {
-  //     return {
-  //       success: false,
-  //       error: "Token và mật khẩu mới là bắt buộc",
-  //       status: 400,
-  //     };
-  //   }
-  //   return performApiRequest(API_ENDPOINTS_AUTH.RESET_PASSWORD, {
-  //     method: "post",
-  //     data: { token, newPassword },
-  //   });
-  // },
+  async forgotPassword(email) {
+    console.log("email: ", email);
+
+    if (!email) {
+      return {
+        success: false,
+        error: "Email là bắt buộc",
+        status: 400,
+      };
+    }
+    if (!validateEmail(email)) {
+      return {
+        success: false,
+        error: "Email không hợp lệ",
+        status: 400,
+      };
+    }
+    const formData = new FormData();
+    formData.append("EmailOrPhoneNumber", email);
+
+    return performApiRequest(API_ENDPOINTS_AUTH.FORGOT_PASSWORD, {
+      method: "post",
+      data: formData,
+    });
+  },
+  async resetPassword(token, newPassword) {
+    if (!token || !newPassword) {
+      return {
+        success: false,
+        error: "Token và mật khẩu mới là bắt buộc",
+        status: 400,
+      };
+    }
+    return performApiRequest(API_ENDPOINTS_AUTH.RESET_PASSWORD, {
+      method: "post",
+      data: { token, newPassword },
+    });
+  },
 };
 
 export default authService;

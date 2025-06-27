@@ -1,4 +1,4 @@
-export const API_BASE_URL = "https://localhost:7254";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 export const API_ENDPOINTS_AUTH = {
   LOGIN: "/api/Auth/user/login",
@@ -8,8 +8,8 @@ export const API_ENDPOINTS_AUTH = {
   VERIFY_EMAIL: "/auth/verify-email",
   LOGOUT: "/auth/logout",
   CHANGE_PASSWORD: "/auth/change-password",
-  FORGOT_PASSWORD: "/auth/forgot-password",
-  RESET_PASSWORD: "/auth/reset-password",
+  FORGOT_PASSWORD: "/api/Auth/user/password/forgot",
+  RESET_PASSWORD: "/api/Auth/user/password/reset",
   // Thêm các endpoint khác
 };
 
