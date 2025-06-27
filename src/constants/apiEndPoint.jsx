@@ -8,8 +8,8 @@ export const API_ENDPOINTS_AUTH = {
   VERIFY_EMAIL: "/api/Auth/user/otp/verify",
   LOGOUT: "/auth/logout",
   CHANGE_PASSWORD: "/auth/change-password",
-  FORGOT_PASSWORD: "/auth/forgot-password",
-  RESET_PASSWORD: "/auth/reset-password",
+  FORGOT_PASSWORD: "/api/Auth/user/password/forgot",
+  RESET_PASSWORD: "/api/Auth/user/password/reset",
   // Thêm các endpoint khác
 };
 

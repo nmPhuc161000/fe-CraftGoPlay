@@ -137,7 +137,7 @@ const Login = () => {
             />
 
             <div className="flex justify-between text-sm text-[#7a5a3a] font-bold">
-              <Link to="/ReqPass" className="hover:underline">
+              <Link to="/forgetpassword" className="hover:underline">
                 Quên mật khẩu?
               </Link>
             </div>

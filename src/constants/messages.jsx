@@ -10,6 +10,7 @@ export const MESSAGES = {
     GOOGLE_REGISTER_FAILED: "Đăng ký bằng Google thất bại. Vui lòng thử lại.",
     VERIFY_EMAIL_SUCCESS: "Xác thực email thành công",
     LOGOUT_SUCCESS: "Đăng xuất thành công",
+    FORGET_FAILED: "Vui lòng nhập email trước khi gửi mã.",
     // Thêm các thông báo khác
   },
   COMMON: {
