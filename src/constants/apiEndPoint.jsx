@@ -17,6 +17,8 @@ export const API_ENDPOINTS_PRODUCT = {
   GET_PRODUCTS: "/api/Product/GetProducts",
   GET_PRODUCT_BY_ID: (id) => `/products/${id}`,
   CREATE_PRODUCT: "/api/Product/CreateProduct",
+  UPDATE_PRODUCT: (id) => `/api/Product/UpdateProduct/${id}`,
+  DELETE_PRODUCT: (id) => `/api/Product/DeleteProduct/${id}`,
 };
 
 export const API_ENDPOINTS_CART = {
