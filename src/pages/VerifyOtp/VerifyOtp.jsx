@@ -79,13 +79,19 @@ const VerifyOtp = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <img
-        src={backgroundImg}
-        alt="background"
-        className="absolute inset-0 w-full h-full object-cover blur-md brightness-75 z-[-1]"
-      />
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
+      {/* Background image với các lớp điều chỉnh */}
+      <div className="fixed inset-0 w-full h-full z-[-1]">
+        <img
+          src={backgroundImg}
+          alt="background"
+          className="w-full h-full object-cover"
+          style={{
+            filter: "blur(8px) brightness(0.75)",
+          }}
+        />
+      </div>
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md backdrop-blur-sm">
         <button
           onClick={() => navigate(-1)}
           className="flex items-center text-[#b28940] mb-4"

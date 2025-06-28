@@ -7,14 +7,15 @@ import Home from "../pages/Home/Home";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import ForgetPassword from "../pages/ForgetPassword/ForgetPassword";
-import VerifyOtp from "../pages/Register/VerifyOtp";
 import ProductDetail from "../pages/ProductDetail/ProductDetail";
-import Product from "../pages/Product/Product";
 import Cart from "../pages/Cart/Cart";
+import Product from "../pages/Product/Product";
+import VerifyOtp from "../pages/VerifyOtp/VerifyOtp";
 
 // Protected pages
 import ProfileUser from "../pages/Profile/ProfileUser";
 import Admin from "../pages/Admin/Admin";
+import Staff from "../pages/Staff/Staff";
 
 // ==================== Routes ====================
 import ProtectedRoute from "./ProtectedRoute";
@@ -48,6 +49,7 @@ const AppRouter = () => {
 
         {/* Admin routes */}
         <Route path="/admin" element={<Admin />} />
+        <Route path="/staff" element={<Staff />} />
 
         {/* ========== Special Home Route ========== */}
         {/* Giữ nguyên route Home đặc biệt của bạn */}
