@@ -19,8 +19,8 @@ const Login = () => {
     alert(MESSAGES.AUTH.LOGIN_SUCCESS);
 
     const redirectPaths = {
-      Admin: "/admin/dashboard",
-      Staff: "/admin/dashboard",
+      Admin: "/admin",
+      Staff: "/staff",
       Artisan: "/profile-user/profile",
       default: "/",
     };

@@ -1,32 +1,43 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+// ==================== Pages ====================
+// Public pages
+import Home from "../pages/Home/Home";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import ForgetPassword from "../pages/ForgetPassword/ForgetPassword";
-import Home from "../pages/Home/Home";
 import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import Cart from "../pages/Cart/Cart";
 import Product from "../pages/Product/Product";
+import VerifyOtp from "../pages/VerifyOtp/VerifyOtp";
+
+// Protected pages
 import ProfileUser from "../pages/Profile/ProfileUser";
-import ProtectedRoute from "./ProtectedRoute"; // Import ProtectedRoute
-import ProfileRoutes from "./ProfileRoutes"; // Import ProfileRoutes
 import Admin from "../pages/Admin/Admin";
 import Staff from "../pages/Staff/Staff";
-import VerifyOtp from "../pages/Register/VerifyOtp";
 
+// ==================== Routes ====================
+import ProtectedRoute from "./ProtectedRoute";
 
 const AppRouter = () => {
   return (
     <Router>
       <Routes>
+        {/* ========== Public Routes ========== */}
+        {/* Core pages */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgetpassword" element={<ForgetPassword />} />
         <Route path="/verify-otp" element={<VerifyOtp />} />
-        <Route path="/" element={<Home />} />
+
+        {/* Product pages */}
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/products" element={<Product />} />
+
+        {/* ========== Protected Routes ========== */}
+        {/* User profile routes */}
         <Route
           path="/profile-user/*"
           element={
@@ -35,8 +46,21 @@ const AppRouter = () => {
             </ProtectedRoute>
           }
         />
+
+        {/* Admin routes */}
         <Route path="/admin" element={<Admin />} />
         <Route path="/staff" element={<Staff />} />
+
+        {/* ========== Special Home Route ========== */}
+        {/* Giữ nguyên route Home đặc biệt của bạn */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute isPublic={true}>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );
