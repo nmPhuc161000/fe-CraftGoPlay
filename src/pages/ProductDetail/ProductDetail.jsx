@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
 import ProductReviews from "./components/ProductReviews";
+import { CartContext } from "../../contexts/CartContext";
+import { useNavigate } from "react-router-dom";
 
 const sampleProduct = {
   name: "Sản phẩm thủ công bằng Tre",
@@ -22,6 +24,8 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [reviews, setReviews] = useState([]);
 
+  const { addToCart } = useContext(CartContext);
+  const navigate = useNavigate();
   // Fake fetch API
   useEffect(() => {
     const fakeFetchReviews = async () => {
@@ -141,7 +145,18 @@ const ProductDetail = () => {
 
           {/* button */}
           <div className="mt-6 flex flex-wrap gap-4">
-            <button className="text-white px-6 py-2 rounded bg-[#b28940] hover:bg-[#9e7635]">
+            <button className="text-white px-6 py-2 rounded bg-[#5e3a1e] hover:bg-[#4a2f15]"
+              onClick={() => {
+                addToCart({
+                  id, // lấy từ useParams
+                  name: sampleProduct.name,
+                  price: sampleProduct.price,
+                  image: selectedImg,
+                  quantity,
+                });
+                navigate("/cart");
+              }}
+            >
               Thêm vào giỏ hàng
             </button>
             <button className="border border-yellow-700 text-yellow-700 px-6 py-2 rounded hover:bg-yellow-50">

@@ -97,7 +97,9 @@ export default function ProductsTab({ artisanId }) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center flex-wrap gap-4">
-        <h3 className="text-xl font-bold text-[#5e3a1e]">Sản phẩm của tôi</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="text-xl font-bold text-[#5e3a1e]">Sản phẩm của tôi</h3>
+        </div>
 
         <div className="flex flex-wrap gap-2">
           <button
@@ -132,7 +134,7 @@ export default function ProductsTab({ artisanId }) {
           </button>
 
           <Link
-            to="/products/new"
+            to="/profile-user/add-product"
             className="px-4 py-1 bg-[#5e3a1e] text-white rounded hover:bg-[#7a4b28] text-sm"
           >
             + Thêm sản phẩm

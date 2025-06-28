@@ -2,11 +2,14 @@ import React from "react";
 import "./index.css";
 import AppRouter from "./router";
 import { AuthProvider } from "./contexts/AuthContext";
+import { CartProvider } from "./contexts/CartContext";
 
 function App() {
   return (
     <AuthProvider>
-      <AppRouter />
+      <CartProvider>
+        <AppRouter />
+      </CartProvider>
     </AuthProvider>
   );
 }
