@@ -11,7 +11,9 @@ import ProfileUser from "../pages/Profile/ProfileUser";
 import ProtectedRoute from "./ProtectedRoute"; // Import ProtectedRoute
 import ProfileRoutes from "./ProfileRoutes"; // Import ProfileRoutes
 import Admin from "../pages/Admin/Admin";
+import Staff from "../pages/Staff/Staff";
 import VerifyOtp from "../pages/Register/VerifyOtp";
+
 
 const AppRouter = () => {
   return (
@@ -34,6 +36,7 @@ const AppRouter = () => {
           }
         />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/staff" element={<Staff />} />
       </Routes>
     </Router>
   );

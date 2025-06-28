@@ -1,185 +1,245 @@
-import React from "react";
+import React, { useState } from "react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from "recharts";
+import { FaUserPlus } from "react-icons/fa";
+import { FaShoppingCart } from "react-icons/fa";
+import { FaCommentDots } from "react-icons/fa";
+import { FaCoins } from "react-icons/fa";
+
+const YEARS = [2023, 2024, 2025];
+const MONTHS = [
+  { value: 0, label: "Tất cả các tháng" },
+  { value: 1, label: "Tháng 1" },
+  { value: 2, label: "Tháng 2" },
+  { value: 3, label: "Tháng 3" },
+  { value: 4, label: "Tháng 4" },
+  { value: 5, label: "Tháng 5" },
+  { value: 6, label: "Tháng 6" },
+  { value: 7, label: "Tháng 7" },
+  { value: 8, label: "Tháng 8" },
+  { value: 9, label: "Tháng 9" },
+  { value: 10, label: "Tháng 10" },
+  { value: 11, label: "Tháng 11" },
+  { value: 12, label: "Tháng 12" },
+];
+
+// Cập nhật FAKE_DATA: chỉ còn 1 loại duy nhất là 'Sản phẩm' (Products)
+const FAKE_DATA = {
+  2025: {
+    0: {
+      cards: { users: 58, orders: 159, feedbacks: 144, revenues: 9749900 },
+      monthlyData: [
+        { month: 'Tháng 5', Products: 68 + 18 + 16 },
+        { month: 'Tháng 6', Products: 3 + 2 + 1 },
+      ],
+      pie: [
+        { name: 'Success', value: 37, color: '#0084FF' },
+        { name: 'Cancelled', value: 6, color: '#00C49F' },
+        { name: 'Bad Feedback', value: 16, color: '#FFC233' },
+      ],
+    },
+    5: {
+      cards: { users: 28, orders: 89, feedbacks: 84, revenues: 5749900 },
+      dailyData: [
+        { date: '2025-05-01', Products: 10 + 2 + 1 },
+        { date: '2025-05-02', Products: 8 + 3 + 2 },
+        { date: '2025-05-03', Products: 12 + 4 + 3 },
+        { date: '2025-05-04', Products: 9 + 2 + 1 },
+        { date: '2025-05-05', Products: 11 + 3 + 2 },
+        { date: '2025-05-06', Products: 8 + 2 + 3 },
+        { date: '2025-05-07', Products: 10 + 2 + 4 },
+      ],
+      pie: [
+        { name: 'Success', value: 27, color: '#0084FF' },
+        { name: 'Cancelled', value: 4, color: '#00C49F' },
+        { name: 'Bad Feedback', value: 11, color: '#FFC233' },
+      ],
+    },
+    6: {
+      cards: { users: 30, orders: 70, feedbacks: 60, revenues: 4000000 },
+      dailyData: [
+        { date: '2025-06-01', Products: 1 + 0 + 0 },
+        { date: '2025-06-02', Products: 0 + 1 + 0 },
+        { date: '2025-06-03', Products: 1 + 0 + 1 },
+        { date: '2025-06-04', Products: 0 + 1 + 0 },
+        { date: '2025-06-05', Products: 1 + 0 + 0 },
+        { date: '2025-06-06', Products: 0 + 0 + 0 },
+        { date: '2025-06-07', Products: 0 + 0 + 0 },
+      ],
+      pie: [
+        { name: 'Success', value: 10, color: '#0084FF' },
+        { name: 'Cancelled', value: 2, color: '#00C49F' },
+        { name: 'Bad Feedback', value: 5, color: '#FFC233' },
+      ],
+    },
+  },
+  2024: {
+    0: {
+      cards: { users: 10, orders: 20, feedbacks: 5, revenues: 1000000 },
+      bar: [
+        { name: "Devices", value: 10 },
+        { name: "Combos", value: 5 },
+        { name: "Labs", value: 2 },
+      ],
+      pie: [
+        { name: "Success", value: 8, color: "#0084FF" },
+        { name: "Cancelled", value: 1, color: "#00C49F" },
+        { name: "Bad Feedback", value: 1, color: "#FFC233" },
+        { name: "Other", value: 10, color: "#FF8042" },
+      ],
+    },
+  },
+};
+
+function getData(year, month) {
+  if (FAKE_DATA[year] && FAKE_DATA[year][month]) return FAKE_DATA[year][month];
+  if (FAKE_DATA[year] && FAKE_DATA[year][0]) return FAKE_DATA[year][0];
+  return null;
+}
+
+const PieLegend = ({ data }) => (
+  <div className="flex flex-wrap justify-center gap-4 mt-4">
+    {data.map((entry) => (
+      <div key={entry.name} className="flex items-center gap-1 text-sm">
+        <span className="inline-block w-4 h-4 rounded" style={{ background: entry.color }}></span>
+        <span className="font-medium" style={{ color: entry.color }}>{entry.name}</span>
+        : <span className="font-semibold">{entry.value}</span>
+      </div>
+    ))}
+  </div>
+);
 
 const Dashboard = () => {
+  const [year, setYear] = useState(2025);
+  const [month, setMonth] = useState(0);
+  const data = getData(year, month);
+
+  // Xác định dữ liệu cho BarChart
+  let barData = [];
+  let xKey = '';
+  if (month === 0 && data && data.monthlyData) {
+    barData = data.monthlyData;
+    xKey = 'month';
+  } else if (month !== 0 && data && data.dailyData) {
+    barData = data.dailyData;
+    xKey = 'date';
+  }
+
   return (
-    <div className="space-y-6">
-      {/* Row 1: Sales Overview, Ratings, Sessions */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl shadow p-6 col-span-2 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-4">
-            <span className="font-semibold text-gray-600">Sales Overview</span>
-            <span className="text-green-500 text-sm font-bold">+18%</span>
+    <div className="w-full">
+      <main className="bg-amber-25 min-h-screen w-full">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4">
+          {/* Breadcrumb */}
+          <div className="mb-2 text-sm text-gray-500">
+            Home / <span className="text-blue-600 font-semibold">admin</span>
           </div>
-          <div className="flex items-center gap-8">
-            <div>
-              <div className="text-2xl font-bold">8,458</div>
-              <div className="text-xs text-gray-400">New Customers</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold">$28.5k</div>
-              <div className="text-xs text-gray-400">Total Profit</div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold">2,450k</div>
-              <div className="text-xs text-gray-400">New Transactions</div>
-            </div>
+          <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+          {/* Filter */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-6">
+            <select
+              className="border rounded px-3 py-2 bg-white w-full sm:w-auto"
+              value={year}
+              onChange={e => setYear(Number(e.target.value))}
+            >
+              {YEARS.map(y => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+            <select
+              className="border rounded px-3 py-2 bg-white w-full sm:w-auto"
+              value={month}
+              onChange={e => setMonth(Number(e.target.value))}
+            >
+              {MONTHS.map(m => (
+                <option key={m.value} value={m.value}>{m.label}</option>
+              ))}
+            </select>
           </div>
-        </div>
-        <div className="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-semibold text-gray-600">Ratings</span>
-            <span className="text-green-500 text-xs font-bold">+15.6%</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="text-2xl font-bold">8.14k</div>
-            <span className="text-xs text-gray-400">Year of 2021</span>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-semibold text-gray-600">Sessions</span>
-            <span className="text-red-500 text-xs font-bold">-25.5%</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="text-2xl font-bold">12.2k</div>
-            <span className="text-xs text-gray-400">Last Month</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Row 2: Weekly Sales, Total Visits, Sales This Month */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-blue-600 rounded-xl shadow p-6 col-span-1 text-white relative overflow-hidden">
-          <div className="font-semibold mb-2">Weekly Sales</div>
-          <div className="text-lg font-bold">Total $23.5k Earning <span className="text-green-200 text-sm">+62%</span></div>
-          <div className="mt-4 flex gap-6">
-            <div>
-              <div className="text-xs">TV's</div>
-              <div className="font-bold text-lg">16</div>
-            </div>
-            <div>
-              <div className="text-xs">Shoes</div>
-              <div className="font-bold text-lg">43</div>
-            </div>
-            <div>
-              <div className="text-xs">Speakers</div>
-              <div className="font-bold text-lg">40</div>
-            </div>
-            <div>
-              <div className="text-xs">Sun Glasses</div>
-              <div className="font-bold text-lg">7</div>
-            </div>
-          </div>
-          <img src="https://static.vecteezy.com/system/resources/previews/021/548/618/original/smartwatch-3d-illustration-png.png" alt="watch" className="absolute right-4 bottom-2 w-24 h-24 object-contain opacity-80" />
-        </div>
-        <div className="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-semibold text-gray-600">Total Visits</span>
-            <span className="text-green-500 text-xs font-bold">+18.4%</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-2xl font-bold">$42.5k</div>
-            <div className="flex flex-col text-xs text-gray-400">
-              <span>Mobile: 23.5%</span>
-              <span>Desktop: 76.5%</span>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl shadow p-6 flex flex-col justify-between">
-          <div className="font-semibold text-gray-600 mb-2">Sales This Month</div>
-          <div className="text-2xl font-bold">$28,450</div>
-          <div className="mt-2">
-            <svg height="40" width="100%" viewBox="0 0 100 40" className="w-full">
-              <polyline fill="none" stroke="#6366f1" strokeWidth="3" points="0,30 10,20 20,25 30,15 40,20 50,10 60,15 70,10 80,20 90,15 100,25" />
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      {/* Row 3: Activity Timeline & Top Referral Sources */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow p-6">
-          <div className="font-semibold mb-4">Activity Timeline</div>
-          <ul className="space-y-4">
-            <li className="flex items-start gap-3">
-              <span className="h-3 w-3 bg-blue-500 rounded-full mt-1"></span>
-              <div>
-                <div className="font-semibold">12 Invoices have been paid <span className="text-xs text-gray-400 ml-2">12 min ago</span></div>
-                <div className="text-xs text-gray-500">Invoices have been paid to the company</div>
-                <span className="inline-block bg-gray-100 text-xs px-2 py-1 rounded mt-1">invoices.pdf</span>
-              </div>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="h-3 w-3 bg-green-500 rounded-full mt-1"></span>
-              <div>
-                <div className="font-semibold">Client Meeting <span className="text-xs text-gray-400 ml-2">45 min ago</span></div>
-                <div className="text-xs text-gray-500">Project meeting with john @10:15am</div>
-                <div className="flex items-center gap-2 mt-1">
-                  <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="client" className="w-6 h-6 rounded-full" />
-                  <span className="text-xs text-gray-400">Lester McCarthy (Client)</span>
+          {/* Cards */}
+          {data ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6">
+              <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
+                <div className="bg-blue-100 text-blue-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl"><FaUserPlus /></div>
+                <div>
+                  <div className="text-gray-500 text-xs sm:text-sm">Total Users</div>
+                  <div className="text-xl sm:text-2xl font-bold">{data.cards.users}</div>
                 </div>
               </div>
-            </li>
-            <li className="flex items-start gap-3">
-              <span className="h-3 w-3 bg-yellow-500 rounded-full mt-1"></span>
-              <div>
-                <div className="font-semibold">Create a new project for client <span className="text-xs text-gray-400 ml-2">2 Day Ago</span></div>
-                <div className="text-xs text-gray-500">6 team members in a project</div>
-                <div className="flex -space-x-2 mt-1">
-                  <img src="https://randomuser.me/api/portraits/men/33.jpg" alt="member1" className="w-6 h-6 rounded-full border-2 border-white" />
-                  <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="member2" className="w-6 h-6 rounded-full border-2 border-white" />
-                  <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="member3" className="w-6 h-6 rounded-full border-2 border-white" />
-                  <span className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold border-2 border-white">+3</span>
+              <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
+                <div className="bg-green-100 text-green-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl"><FaShoppingCart /></div>
+                <div>
+                  <div className="text-gray-500 text-xs sm:text-sm">Total Orders</div>
+                  <div className="text-xl sm:text-2xl font-bold">{data.cards.orders}</div>
                 </div>
               </div>
-            </li>
-          </ul>
-        </div>
-        <div className="bg-white rounded-xl shadow p-6">
-          <div className="font-semibold mb-4">Top Referral Sources</div>
-          <div className="flex gap-4 mb-4">
-            <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-blue-400">
-              <img src="https://cdn.tgdd.vn/Products/Images/42/303226/samsung-galaxy-s22-ultra-thumb-xanh-600x600.jpg" alt="Samsung s22" className="w-10 h-10 object-contain" />
+              <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
+                <div className="bg-purple-100 text-purple-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl"><FaCommentDots /></div>
+                <div>
+                  <div className="text-gray-500 text-xs sm:text-sm">Total Feedbacks</div>
+                  <div className="text-xl sm:text-2xl font-bold">{data.cards.feedbacks}</div>
+                </div>
+              </div>
+              <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
+                <div className="bg-yellow-100 text-yellow-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl"><FaCoins /></div>
+                <div>
+                  <div className="text-gray-500 text-xs sm:text-sm">Total Revenues</div>
+                  <div className="text-xl sm:text-2xl font-bold">{data.cards.revenues.toLocaleString()} đ</div>
+                </div>
+              </div>
             </div>
-            <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-              <img src="https://cdn.tgdd.vn/Products/Images/42/303228/iphone-14-pro-thumb-den-600x600.jpg" alt="iPhone 14 Pro" className="w-10 h-10 object-contain" />
+          ) : null}
+          {/* Charts */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-6">
+            <div className="col-span-1 lg:col-span-2 bg-amber-25 rounded-xl shadow p-3 sm:p-6 transition-all duration-300 hover:shadow-2xl">
+              <div className="font-semibold mb-2">Product Statistics</div>
+              {barData && barData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={260}>
+                  <BarChart data={barData} barCategoryGap={24}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey={xKey} />
+                    <YAxis allowDecimals={false} />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="Products" fill="#8884d8" name="Sản phẩm" isAnimationActive animationDuration={700} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="text-center text-red-500 font-semibold py-8 sm:py-12">Không có dữ liệu</div>
+              )}
             </div>
-            <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
-              <img src="https://cdn.tgdd.vn/Products/Images/54/289663/tay-cam-choi-game-ps5-dualsense-thumb-600x600.jpg" alt="Gamepad" className="w-10 h-10 object-contain" />
-            </div>
-            <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300">
-              <span className="text-gray-400 text-2xl font-bold">+</span>
+            <div className="bg-amber-25 rounded-xl shadow p-3 sm:p-6 flex flex-col items-center transition-all duration-300 hover:shadow-2xl">
+              <div className="font-semibold mb-2">Order Distribution</div>
+              {data && data.pie && data.pie.length > 0 ? (
+                <>
+                  <ResponsiveContainer width="100%" height={220}>
+                    <PieChart>
+                      <Pie
+                        data={data.pie}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={80}
+                        label={false}
+                        isAnimationActive
+                        animationDuration={700}
+                      >
+                        {data.pie.map((entry, idx) => (
+                          <Cell key={entry.name} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value, name) => [`${value} đơn`, name]} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <PieLegend data={data.pie} />
+                </>
+              ) : (
+                <div className="text-center text-red-500 font-semibold py-8 sm:py-12">Không có dữ liệu</div>
+              )}
             </div>
           </div>
-          <table className="min-w-full text-xs">
-            <thead>
-              <tr className="text-gray-400">
-                <th className="py-2 px-2 text-left">IMAGE</th>
-                <th className="py-2 px-2 text-left">NAME</th>
-                <th className="py-2 px-2 text-left">STATUS</th>
-                <th className="py-2 px-2 text-left">REVENUE</th>
-                <th className="py-2 px-2 text-left">PROFIT</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="py-2 px-2"><img src="https://cdn.tgdd.vn/Products/Images/42/303226/samsung-galaxy-s22-ultra-thumb-xanh-600x600.jpg" alt="Samsung s22" className="w-8 h-8 rounded" /></td>
-                <td className="py-2 px-2">Samsung s22</td>
-                <td className="py-2 px-2"><span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">Out of Stock</span></td>
-                <td className="py-2 px-2">$12.5k</td>
-                <td className="py-2 px-2 text-green-500 font-bold">+24%</td>
-              </tr>
-              <tr>
-                <td className="py-2 px-2"><img src="https://cdn.tgdd.vn/Products/Images/42/303228/iphone-14-pro-thumb-den-600x600.jpg" alt="iPhone 14 Pro" className="w-8 h-8 rounded" /></td>
-                <td className="py-2 px-2">iPhone 14 Pro</td>
-                <td className="py-2 px-2"><span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">In Stock</span></td>
-                <td className="py-2 px-2">$45k</td>
-                <td className="py-2 px-2 text-red-500 font-bold">-18%</td>
-              </tr>
-            </tbody>
-          </table>
         </div>
-      </div>
+      </main>
     </div>
   );
 };
