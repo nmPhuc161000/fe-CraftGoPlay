@@ -7,16 +7,20 @@ import authService from "../../services/apis/authApi";
 import { MESSAGES } from "../../constants/messages";
 import { decodeToken } from "../../utils/tokenUtils";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import { useNotification } from "../../contexts/NotificationContext"; // dùng context mới
+import { motion } from "framer-motion";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [form, setForm] = useState({ email: "", passwordHash: "" });
+  const { showNotification } = useNotification();
 
   const handleAuthSuccess = (token, role) => {
     localStorage.setItem("token", token);
     localStorage.setItem("role", role);
-    alert(MESSAGES.AUTH.LOGIN_SUCCESS);
+    //showNotification(MESSAGES.AUTH.LOGIN_SUCCESS);
+    showNotification(MESSAGES.AUTH.LOGIN_SUCCESS, "success");
 
     const redirectPaths = {
       Admin: "/admin",
@@ -25,19 +29,21 @@ const Login = () => {
       default: "/",
     };
 
-    window.location.href = redirectPaths[role] || redirectPaths.default;
+    setTimeout(() => {
+      window.location.href = redirectPaths[role] || redirectPaths.default;
+    }, 1000);
   };
 
   const validateToken = (token) => {
     const tokenInfo = decodeToken(token);
     if (!tokenInfo) {
-      alert("Token không hợp lệ");
+      showNotification("Token không hợp lệ");
       return null;
     }
 
     const currentTime = Date.now() / 1000;
     if (tokenInfo.exp < currentTime) {
-      alert("Token đã hết hạn");
+      showNotification("Token đã hết hạn");
       localStorage.removeItem("token");
       localStorage.removeItem("role");
       return null;
@@ -63,7 +69,7 @@ const Login = () => {
         handleAuthSuccess(result.data.data.accessToken, tokenInfo.role);
       } catch (error) {
         console.error("Login error:", error);
-        alert(error.message);
+        showNotification(error.message);
       } finally {
         setLoading(false);
       }
@@ -87,7 +93,7 @@ const Login = () => {
       handleAuthSuccess(response.data.data.accessToken, tokenInfo.role);
     } catch (error) {
       console.error("Google login error:", error);
-      alert(error.message);
+      showNotification(error.message);
     } finally {
       setGoogleLoading(false);
     }
@@ -95,7 +101,7 @@ const Login = () => {
 
   const handleGoogleError = useCallback(() => {
     console.log("Google login failed");
-    alert(MESSAGES.AUTH.GOOGLE_LOGIN_FAILED);
+    showNotification(MESSAGES.AUTH.GOOGLE_LOGIN_FAILED);
   }, []);
 
   const handleInputChange = useCallback((e) => {
@@ -104,7 +110,13 @@ const Login = () => {
   }, []);
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center px-4">
+    <motion.main
+      className="min-h-screen relative flex items-center justify-center px-4"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+    >
       <BackgroundImage />
 
       <div className="bg-[#fffdf8] shadow-2xl rounded-2xl max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 overflow-hidden">
@@ -158,7 +170,7 @@ const Login = () => {
           <Footer />
         </div>
       </div>
-    </div>
+    </motion.main>
   );
 };
 
