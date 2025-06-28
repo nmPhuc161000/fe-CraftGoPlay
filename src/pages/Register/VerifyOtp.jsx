@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FaLock, FaArrowLeft } from "react-icons/fa";
 import authService from "../../services/apis/authApi";
 import { MESSAGES } from "../../constants/messages";
+import backgroundImg from "../../assets/images/background.jpg";
 
 const VerifyOtp = () => {
   const [otp, setOtp] = useState("");
@@ -42,7 +43,7 @@ const VerifyOtp = () => {
     try {
       const response = await authService.verifyOtp({
         email: email,
-        otp: otp
+        otp: otp,
       });
 
       if (response.success) {
@@ -79,6 +80,11 @@ const VerifyOtp = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <img
+        src={backgroundImg}
+        alt="background"
+        className="absolute inset-0 w-full h-full object-cover blur-md brightness-75 z-[-1]"
+      />
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <button
           onClick={() => navigate(-1)}
@@ -97,9 +103,7 @@ const VerifyOtp = () => {
 
         <form onSubmit={handleVerify} className="space-y-4">
           <div>
-            <label className="block text-sm text-[#7a5a3a] mb-1">
-              Mã OTP
-            </label>
+            <label className="block text-sm text-[#7a5a3a] mb-1">Mã OTP</label>
             <div className="relative">
               <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#a0846f]" />
               <input
@@ -107,7 +111,9 @@ const VerifyOtp = () => {
                 placeholder="Nhập mã OTP 6 chữ số"
                 className="w-full pl-10 pr-4 py-2 border border-[#cbb892] rounded-lg focus:ring-2 focus:ring-[#cbb892] outline-none bg-white text-[#5a3e1b]"
                 value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                onChange={(e) =>
+                  setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                }
                 required
               />
             </div>
