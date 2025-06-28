@@ -51,7 +51,7 @@ export const handleError = (error) => {
     console.error(`API Error [${error.response.status}]:`, error.response.data);
     const errorMessage = error.response.data?.errors
       ? Object.values(error.response.data.errors).join(", ")
-      : error.response.data?.message || "Lỗi server";
+      : error.response.data?.message || error.response.data || "Lỗi server";
     return {
       success: false,
       error: errorMessage,

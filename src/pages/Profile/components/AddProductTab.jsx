@@ -5,6 +5,7 @@ import { useContext } from "react";
 import { AuthContext } from "../../../contexts/AuthContext";
 import subCategoryService from "../../../services/apis/subCateApi";
 import productService from "../../../services/apis/productApi";
+import { useNotification } from "../../../contexts/NotificationContext";
 
 export default function AddProductTab() {
   const { user } = useContext(AuthContext);
@@ -23,6 +24,7 @@ export default function AddProductTab() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { showNotification } = useNotification(); // dùng context mới
 
   // Lấy danh sách danh mục con
   useEffect(() => {
@@ -54,15 +56,15 @@ export default function AddProductTab() {
   // Xử lý chọn ảnh
   const handleImageChange = useCallback((file) => {
     if (!file) {
-      alert("Vui lòng chọn một file!");
+      showNotification("Vui lòng chọn một file!");
       return;
     }
     if (!file.type.match("image.*")) {
-      alert("Vui lòng chọn file ảnh (JPG, PNG)!");
+      showNotification("Vui lòng chọn file ảnh (JPG, PNG)!");
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert("Kích thước file vượt quá 5MB!");
+      showNotification("Kích thước file vượt quá 5MB!");
       return;
     }
 
@@ -145,13 +147,13 @@ export default function AddProductTab() {
       // Validate dữ liệu
       const validationResult = validateProductData(formData);
       if (!validationResult.success) {
-        alert(validationResult.error);
+        showNotification(validationResult.error);
         setIsSubmitting(false);
         return;
       }
 
       if (!formData.Image) {
-        alert("Vui lòng chọn hình ảnh sản phẩm!");
+        showNotification("Vui lòng chọn hình ảnh sản phẩm!");
         setIsSubmitting(false);
         return;
       }
@@ -159,18 +161,18 @@ export default function AddProductTab() {
       const formPayload = new FormData();
       Object.keys(formData).forEach((key) => {
         formPayload.append(key, formData[key]);
-      });   
+      });
 
       try {
         const response = await productService.createProduct(formPayload);
         if (!response.success) {
           throw new Error(response.error || "Lỗi không xác định");
         }
-        alert("Thêm sản phẩm thành công!");
+        showNotification("Thêm sản phẩm thành công!");
         navigate("/profile-user/products");
       } catch (error) {
         console.error("Error creating product:", error);
-        alert(`Có lỗi xảy ra khi thêm sản phẩm: ${error.message}`);
+        showNotification(`Có lỗi xảy ra khi thêm sản phẩm: ${error.message}`);
       } finally {
         setIsSubmitting(false);
       }
@@ -203,7 +205,9 @@ export default function AddProductTab() {
           onDrop={handleDrop}
           onClick={() => document.getElementById("fileInput").click()}
           className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-            isDragging ? "border-[#5e3a1e] bg-[#f8f4ed]" : "border-gray-300 hover:border-[#cbb892]"
+            isDragging
+              ? "border-[#5e3a1e] bg-[#f8f4ed]"
+              : "border-gray-300 hover:border-[#cbb892]"
           }`}
         >
           <input

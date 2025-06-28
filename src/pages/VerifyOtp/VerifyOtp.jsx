@@ -5,6 +5,7 @@ import { FaLock, FaArrowLeft } from "react-icons/fa";
 import authService from "../../services/apis/authApi";
 import { MESSAGES } from "../../constants/messages";
 import backgroundImg from "../../assets/images/background.jpg";
+import { useNotification } from "../../contexts/NotificationContext"; // dùng context mới
 
 const VerifyOtp = () => {
   const [otp, setOtp] = useState("");
@@ -14,6 +15,7 @@ const VerifyOtp = () => {
   const [countdown, setCountdown] = useState(60);
   const navigate = useNavigate();
   const location = useLocation();
+  const { showNotification } = useNotification(); // dùng context mới
 
   useEffect(() => {
     // Lấy email từ state navigation hoặc localStorage
@@ -48,7 +50,7 @@ const VerifyOtp = () => {
 
       if (response.success) {
         localStorage.removeItem("registerEmail");
-        alert(MESSAGES.AUTH.VERIFY_EMAIL_SUCCESS);
+        showNotification(MESSAGES.AUTH.VERIFY_EMAIL_SUCCESS);
         navigate("/login");
       } else {
         setError(response.error || MESSAGES.AUTH.OTP_VERIFICATION_FAILED);
@@ -67,7 +69,7 @@ const VerifyOtp = () => {
       const response = await authService.resendOtp({ email });
       if (response.success) {
         setCountdown(60);
-        alert(MESSAGES.AUTH.OTP_RESENT);
+        showNotification(MESSAGES.AUTH.OTP_RESENT);
       } else {
         setError(response.error || MESSAGES.AUTH.OTP_RESEND_FAILED);
       }

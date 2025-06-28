@@ -24,7 +24,7 @@ export default function ProfileUser() {
   return (
     <MainLayout>
       <div className="py-8 bg-gray-50 min-h-screen">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6 px-4">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6 px-4">
           {/* Sidebar */}
           <div className="w-full md:w-64 flex-shrink-0 bg-white rounded-lg shadow-lg h-fit md:sticky md:top-6">
             {/* Profile Summary */}
