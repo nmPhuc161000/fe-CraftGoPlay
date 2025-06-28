@@ -6,6 +6,7 @@ import ForgetPassword from "../pages/ForgetPassword/ForgetPassword";
 import Home from "../pages/Home/Home";
 import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import Cart from "../pages/Cart/Cart";
+import Checkout from "../pages/Checkout/Checkout";
 import Product from "../pages/Product/Product";
 import ProfileUser from "../pages/Profile/ProfileUser";
 import ProtectedRoute from "./ProtectedRoute"; // Import ProtectedRoute
@@ -25,6 +26,7 @@ const AppRouter = () => {
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/products" element={<Product />} />
+        <Route path="/checkout" element={<Checkout />} />
         <Route
           path="/profile-user/*"
           element={
