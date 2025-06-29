@@ -10,6 +10,7 @@ import Register from "../pages/Register/Register";
 import ForgetPassword from "../pages/ForgetPassword/ForgetPassword";
 import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import Cart from "../pages/Cart/Cart";
+import Checkout from "../pages/Checkout/Checkout";
 import Product from "../pages/Product/Product";
 import VerifyOtp from "../pages/VerifyOtp/VerifyOtp";
 
@@ -37,6 +38,7 @@ const AppRouter = () => {
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/products" element={<Product />} />
+          <Route path="/checkout" element={<Checkout />} />
 
           {/* ========== Protected Routes ========== */}
           {/* User profile routes */}

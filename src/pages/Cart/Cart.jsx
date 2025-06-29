@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { CartContext } from "../../contexts/CartContext";
 import MainLayout from "../../components/layout/MainLayout";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaLock } from "react-icons/fa";
 import { FaTrashAlt } from "react-icons/fa";
 
@@ -25,6 +25,8 @@ const Cart = () => {
             setVoucherError("Mã không hợp lệ hoặc đã hết hạn");
         }
     };
+
+    const navigate = useNavigate();
 
     return (
         <MainLayout>
@@ -139,7 +141,8 @@ const Cart = () => {
                                     {voucherError && <p className="text-sm text-red-500 mt-1">{voucherError}</p>}
                                 </div>
 
-                                <button className="w-full py-3 bg-[#5e3a1e] hover:bg-[#4a2f15] text-white rounded flex justify-center items-center gap-2 transition">
+                                <button onClick={() => navigate("/checkout")}
+                                    className="w-full py-3 bg-[#5e3a1e] hover:bg-[#4a2f15] text-white rounded flex justify-center items-center gap-2 transition">
                                     <FaLock /> Thanh toán
                                 </button>
                             </div>
