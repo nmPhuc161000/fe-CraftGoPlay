@@ -4,6 +4,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FaLock, FaArrowLeft } from "react-icons/fa";
 import authService from "../../services/apis/authApi";
 import { MESSAGES } from "../../constants/messages";
+import backgroundImg from "../../assets/images/background.jpg";
+import { useNotification } from "../../contexts/NotificationContext"; // dùng context mới
 
 const VerifyOtp = () => {
   const [otp, setOtp] = useState("");
@@ -13,6 +15,7 @@ const VerifyOtp = () => {
   const [countdown, setCountdown] = useState(60);
   const navigate = useNavigate();
   const location = useLocation();
+  const { showNotification } = useNotification(); // dùng context mới
 
   useEffect(() => {
     // Lấy email từ state navigation hoặc localStorage
@@ -42,12 +45,12 @@ const VerifyOtp = () => {
     try {
       const response = await authService.verifyOtp({
         email: email,
-        otp: otp
+        otp: otp,
       });
 
       if (response.success) {
         localStorage.removeItem("registerEmail");
-        alert(MESSAGES.AUTH.VERIFY_EMAIL_SUCCESS);
+        showNotification(MESSAGES.AUTH.VERIFY_EMAIL_SUCCESS);
         navigate("/login");
       } else {
         setError(response.error || MESSAGES.AUTH.OTP_VERIFICATION_FAILED);
@@ -66,7 +69,7 @@ const VerifyOtp = () => {
       const response = await authService.resendOtp({ email });
       if (response.success) {
         setCountdown(60);
-        alert(MESSAGES.AUTH.OTP_RESENT);
+        showNotification(MESSAGES.AUTH.OTP_RESENT);
       } else {
         setError(response.error || MESSAGES.AUTH.OTP_RESEND_FAILED);
       }
@@ -78,8 +81,19 @@ const VerifyOtp = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
+      {/* Background image với các lớp điều chỉnh */}
+      <div className="fixed inset-0 w-full h-full z-[-1]">
+        <img
+          src={backgroundImg}
+          alt="background"
+          className="w-full h-full object-cover"
+          style={{
+            filter: "blur(8px) brightness(0.75)",
+          }}
+        />
+      </div>
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md backdrop-blur-sm">
         <button
           onClick={() => navigate(-1)}
           className="flex items-center text-[#b28940] mb-4"
@@ -97,9 +111,7 @@ const VerifyOtp = () => {
 
         <form onSubmit={handleVerify} className="space-y-4">
           <div>
-            <label className="block text-sm text-[#7a5a3a] mb-1">
-              Mã OTP
-            </label>
+            <label className="block text-sm text-[#7a5a3a] mb-1">Mã OTP</label>
             <div className="relative">
               <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#a0846f]" />
               <input
@@ -107,7 +119,9 @@ const VerifyOtp = () => {
                 placeholder="Nhập mã OTP 6 chữ số"
                 className="w-full pl-10 pr-4 py-2 border border-[#cbb892] rounded-lg focus:ring-2 focus:ring-[#cbb892] outline-none bg-white text-[#5a3e1b]"
                 value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                onChange={(e) =>
+                  setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                }
                 required
               />
             </div>

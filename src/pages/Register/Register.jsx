@@ -15,6 +15,8 @@ import authService from "../../services/apis/authApi";
 import { MESSAGES } from "../../constants/messages";
 import { decodeToken } from "../../utils/tokenUtils";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import { useNotification } from "../../contexts/NotificationContext"; // dùng context mới
+import { motion } from "framer-motion";
 
 // Tách các thành phần nhỏ thành component riêng
 const Tooltip = ({ content }) => (
@@ -91,6 +93,7 @@ const Register = () => {
     confirmPassword: "",
   });
   const navigate = useNavigate();
+  const { showNotification } = useNotification(); // dùng context mới
 
   const [form, setForm] = useState({
     userName: "",
@@ -103,7 +106,7 @@ const Register = () => {
   const handleAuthSuccess = useCallback((token, role) => {
     localStorage.setItem("token", token);
     localStorage.setItem("role", role);
-    alert(MESSAGES.AUTH.GOOGLE_REGISTER_AND_LOGIN_SUCCESS);
+    showNotification(MESSAGES.AUTH.GOOGLE_REGISTER_AND_LOGIN_SUCCESS);
 
     const redirectPaths = {
       Artisan: "/profile-user/profile",
@@ -116,13 +119,13 @@ const Register = () => {
   const validateToken = useCallback((token) => {
     const tokenInfo = decodeToken(token);
     if (!tokenInfo) {
-      alert("Token không hợp lệ");
+      showNotification("Token không hợp lệ");
       return null;
     }
 
     const currentTime = Date.now() / 1000;
     if (tokenInfo.exp < currentTime) {
-      alert("Token đã hết hạn");
+      showNotification("Token đã hết hạn");
       localStorage.removeItem("token");
       localStorage.removeItem("role");
       return null;
@@ -186,18 +189,18 @@ const Register = () => {
         const response = await authService.register(form);
 
         if (response.success) {
-          alert(MESSAGES.AUTH.REGISTER_SUCCESS);
+          showNotification(MESSAGES.AUTH.REGISTER_SUCCESS);
           // Lưu email vào localStorage để sử dụng ở trang OTP
-        localStorage.setItem("registerEmail", form.email);
-        
-        // Chuyển hướng đến trang OTP và gửi email qua state
-        navigate("/verify-otp", { state: { email: form.email } });
+          localStorage.setItem("registerEmail", form.email);
+
+          // Chuyển hướng đến trang OTP và gửi email qua state
+          navigate("/verify-otp", { state: { email: form.email } });
         } else {
-          alert(response.error || MESSAGES.AUTH.REGISTER_FAILED);
+          showNotification(response.error || MESSAGES.AUTH.REGISTER_FAILED);
         }
       } catch (error) {
         console.error("Registration error:", error);
-        alert(MESSAGES.AUTH.REGISTER_FAILED);
+        showNotification(MESSAGES.AUTH.REGISTER_FAILED);
       } finally {
         setLoading(false);
       }
@@ -234,7 +237,7 @@ const Register = () => {
         handleAuthSuccess(responseLogin.data.data.accessToken, tokenInfo.role);
       } catch (error) {
         console.error("Google login error:", error);
-        alert(error.message);
+        showNotification(error.message);
       } finally {
         setGoogleLoading(false);
       }
@@ -244,7 +247,7 @@ const Register = () => {
 
   const handleGoogleError = useCallback(() => {
     console.log("Google login failed");
-    alert(MESSAGES.AUTH.GOOGLE_LOGIN_FAILED);
+    showNotification(MESSAGES.AUTH.GOOGLE_LOGIN_FAILED);
   }, []);
 
   // Tooltip content
@@ -284,13 +287,19 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center px-4">
+    <motion.main
+      className="min-h-screen relative flex items-center justify-center px-4"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+    >
       <img
         src={backgroundImg}
         alt="background"
         className="absolute inset-0 w-full h-full object-cover blur-md brightness-75 z-[-1]"
       />
-      <div className="bg-[#fffdf8] shadow-2xl rounded-2xl max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 overflow-hidden">
+      <div className="bg-[#fffdf8] shadow-2xl rounded-2xl max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 overflow-hidden">
         <div className="bg-[#f2e8dc] text-[#5e3a1e] flex flex-col justify-center items-center p-8 space-y-4">
           <img
             src={registerImg}
@@ -407,7 +416,7 @@ const Register = () => {
           </p>
         </div>
       </div>
-    </div>
+    </motion.main>
   );
 };
 

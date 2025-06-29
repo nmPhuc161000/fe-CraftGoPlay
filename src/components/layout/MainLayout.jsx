@@ -1,5 +1,7 @@
-import Header from "../Header/Header"; // Component Header riêng
-import Footer from "../Footer/Footer"; // Component Footer riêng
+// src/components/layout/MainLayout.jsx
+import { motion } from "framer-motion";
+import Header from "../Header/Header";
+import Footer from "../Footer/Footer";
 
 // MainLayout.jsx
 const MainLayout = ({ children }) => {
@@ -9,9 +11,15 @@ const MainLayout = ({ children }) => {
     <div className="min-h-screen flex flex-col">
       {role !== "Artisan" && <Header />}{" "}
       {/* Hiển thị Header nếu không phải là Artisan */}
-      <main className="flex-grow">
+      <motion.main
+        className="flex-grow"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.3 }}
+      >
         {children} {/* Render children thay vì Outlet */}
-      </main>
+      </motion.main>
       {role !== "Artisan" && <Footer />}{" "}
       {/* Hiển thị Footer nếu không phải là Artisan */}
     </div>

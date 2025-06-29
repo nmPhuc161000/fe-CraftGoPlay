@@ -76,6 +76,59 @@ const productService = {
       method: "post",
     });
   },
+
+  async updateProduct(id, productData) {
+    // Kiểm tra xem FormData có chứa các trường cần thiết không
+    const formDataObject = Object.fromEntries(productData.entries());
+    console.log("Updating product with data:", formDataObject);
+
+    if (!formDataObject.Name) {
+      return {
+        success: false,
+        error: "Tên sản phẩm là bắt buộc",
+        status: 400,
+      };
+    }
+
+    if (
+      !formDataObject.Price ||
+      isNaN(formDataObject.Price) ||
+      parseFloat(formDataObject.Price) <= 0
+    ) {
+      return {
+        success: false,
+        error: "Giá sản phẩm không hợp lệ",
+        status: 400,
+      };
+    }
+
+    if (!formDataObject.Description) {
+      return {
+        success: false,
+        error: "Mô tả sản phẩm là bắt buộc",
+        status: 400,
+      };
+    }
+
+    if (!formDataObject.SubCategoryId) {
+      return {
+        success: false,
+        error: "Danh mục con là bắt buộc",
+        status: 400,
+      };
+    }
+
+    return performApiRequest(`${API_ENDPOINTS_PRODUCT.UPDATE_PRODUCT(id)}`, {
+      data: productData,
+      method: "put",
+    });
+  },
+
+  async deleteProduct(id) {
+    return performApiRequest(`${API_ENDPOINTS_PRODUCT.DELETE_PRODUCT(id)}`, {
+      method: "delete",
+    });
+  },
 };
 
 export default productService;
