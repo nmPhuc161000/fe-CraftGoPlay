@@ -4,6 +4,7 @@ import { FiArrowLeft, FiUpload, FiX } from "react-icons/fi";
 import { useContext } from "react";
 import { AuthContext } from "../../../contexts/AuthContext";
 import subCategoryService from "../../../services/apis/subCateApi";
+import meterialService from "../../../services/apis/meterialApi"; // Thêm service cho material
 import productService from "../../../services/apis/productApi";
 import { useNotification } from "../../../contexts/NotificationContext";
 
@@ -14,37 +15,49 @@ export default function AddProductTab() {
     Name: "",
     Description: "",
     Price: 0,
+    Quantity: 1, // Thêm field Quantity
     SubCategoryId: "",
     Status: "Active",
     Artisan_id: user?.id,
+    MaterialIds: [], // Thay đổi từ string sang array
   });
-  const [previewImage, setPreviewImage] = useState(null);
+  const [previewImages, setPreviewImages] = useState([]); // Thay đổi từ single image sang array
   const [isDragging, setIsDragging] = useState(false);
   const [subCate, setSubCate] = useState([]);
+  const [materials, setMaterials] = useState([]); // Thêm state cho materials
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { showNotification } = useNotification(); // dùng context mới
+  const { showNotification } = useNotification();
 
-  // Lấy danh sách danh mục con
+  // Lấy danh sách danh mục con và materials
   useEffect(() => {
-    const fetchSubCategories = async () => {
+    const fetchInitialData = async () => {
       setIsLoading(true);
       try {
-        const response = await subCategoryService.getAllSubCategories();
-        const subCategories = Array.isArray(response.data)
-          ? response.data
-          : response.data?.data || [];
+        // Lấy danh sách subcategories
+        const subCateResponse = await subCategoryService.getAllSubCategories();
+        const subCategories = Array.isArray(subCateResponse.data)
+          ? subCateResponse.data
+          : subCateResponse.data?.data || [];
         setSubCate(subCategories);
+
+        // Lấy danh sách materials
+        const materialResponse = await meterialService.getMeterials();
+        console.log("Material Response:", materialResponse.data.data);
+
+        const materialsData = Array.isArray(materialResponse.data)
+          ? materialResponse.data
+          : materialResponse.data?.data || [];
+        setMaterials(materialsData);
       } catch (error) {
-        console.error("Error fetching subcategories:", error);
-        setError("Không thể tải danh mục con. Vui lòng thử lại sau.");
-        setSubCate([]);
+        console.error("Error fetching data:", error);
+        setError("Không thể tải dữ liệu. Vui lòng thử lại sau.");
       } finally {
         setIsLoading(false);
       }
     };
-    fetchSubCategories();
+    fetchInitialData();
   }, []);
 
   // Xử lý thay đổi input
@@ -53,28 +66,68 @@ export default function AddProductTab() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Xử lý chọn ảnh
-  const handleImageChange = useCallback((file) => {
-    if (!file) {
-      showNotification("Vui lòng chọn một file!");
-      return;
-    }
-    if (!file.type.match("image.*")) {
-      showNotification("Vui lòng chọn file ảnh (JPG, PNG)!");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      showNotification("Kích thước file vượt quá 5MB!");
+  // Xử lý chọn material
+  const handleMaterialChange = (materialId) => {
+    setFormData((prev) => {
+      const newMaterialIds = prev.MaterialIds.includes(materialId)
+        ? prev.MaterialIds.filter((id) => id !== materialId)
+        : [...prev.MaterialIds, materialId];
+      return { ...prev, MaterialIds: newMaterialIds };
+    });
+  };
+
+  // Xử lý chọn ảnh (nhiều ảnh)
+  const handleImageChange = useCallback((files) => {
+    if (!files || files.length === 0) {
+      showNotification("Vui lòng chọn ít nhất một file!");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setPreviewImage(e.target.result);
-      setFormData((prev) => ({ ...prev, Image: file }));
-    };
-    reader.readAsDataURL(file);
+    const validFiles = Array.from(files).filter((file) => {
+      if (!file.type.match("image.*")) {
+        showNotification(`File ${file.name} không phải là ảnh!`);
+        return false;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        showNotification(`File ${file.name} vượt quá 5MB!`);
+        return false;
+      }
+      return true;
+    });
+
+    if (validFiles.length === 0) return;
+
+    // Giới hạn số lượng ảnh tối đa (ví dụ 5 ảnh)
+    const filesToProcess = validFiles.slice(0, 5);
+
+    const readers = filesToProcess.map((file) => {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          resolve({ file, preview: e.target.result });
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    Promise.all(readers).then((results) => {
+      setPreviewImages((prev) => [...prev, ...results.map((r) => r.preview)]);
+      setFormData((prev) => ({
+        ...prev,
+        Images: [...(prev.Images || []), ...results.map((r) => r.file)],
+      }));
+    });
   }, []);
+
+  // Xóa ảnh đã chọn
+  const removeImage = (index) => {
+    setPreviewImages((prev) => prev.filter((_, i) => i !== index));
+    setFormData((prev) => {
+      const newImages = [...prev.Images];
+      newImages.splice(index, 1);
+      return { ...prev, Images: newImages };
+    });
+  };
 
   // Xử lý sự kiện kéo thả
   const handleDragOver = useCallback((e) => {
@@ -90,8 +143,8 @@ export default function AddProductTab() {
     (e) => {
       e.preventDefault();
       setIsDragging(false);
-      const file = e.dataTransfer.files[0];
-      handleImageChange(file);
+      const files = e.dataTransfer.files;
+      handleImageChange(files);
     },
     [handleImageChange]
   );
@@ -109,6 +162,13 @@ export default function AddProductTab() {
       return {
         success: false,
         error: "Giá sản phẩm là bắt buộc",
+        status: 400,
+      };
+    }
+    if (!productData.Quantity || productData.Quantity <= 0) {
+      return {
+        success: false,
+        error: "Số lượng phải lớn hơn 0",
         status: 400,
       };
     }
@@ -133,6 +193,20 @@ export default function AddProductTab() {
         status: 400,
       };
     }
+    if (!productData.MaterialIds || productData.MaterialIds.length === 0) {
+      return {
+        success: false,
+        error: "Vui lòng chọn ít nhất một chất liệu",
+        status: 400,
+      };
+    }
+    if (!productData.Images || productData.Images.length === 0) {
+      return {
+        success: false,
+        error: "Vui lòng chọn ít nhất một hình ảnh",
+        status: 400,
+      };
+    }
     return {
       success: true,
     };
@@ -152,15 +226,21 @@ export default function AddProductTab() {
         return;
       }
 
-      if (!formData.Image) {
-        showNotification("Vui lòng chọn hình ảnh sản phẩm!");
-        setIsSubmitting(false);
-        return;
-      }
-
       const formPayload = new FormData();
       Object.keys(formData).forEach((key) => {
-        formPayload.append(key, formData[key]);
+        if (key === "MaterialIds") {
+          // Xử lý mảng MaterialIds
+          formData.MaterialIds.forEach((id) => {
+            formPayload.append("MaterialIds", id);
+          });
+        } else if (key === "Images") {
+          // Xử lý mảng Images
+          formData.Images.forEach((image) => {
+            formPayload.append("Images", image);
+          });
+        } else {
+          formPayload.append(key, formData[key]);
+        }
       });
 
       try {
@@ -177,10 +257,9 @@ export default function AddProductTab() {
         setIsSubmitting(false);
       }
     },
-    [formData, navigate]
+    [formData, navigate, showNotification]
   );
 
-  // Kiểm tra user sau khi khai báo hooks
   if (!user?.id) {
     return <div>Vui lòng đăng nhập để thêm sản phẩm!</div>;
   }
@@ -198,7 +277,7 @@ export default function AddProductTab() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Vùng upload ảnh */}
+        {/* Vùng upload ảnh (nhiều ảnh) */}
         <div
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -215,27 +294,31 @@ export default function AddProductTab() {
             id="fileInput"
             accept="image/*"
             className="hidden"
-            onChange={(e) => handleImageChange(e.target.files[0])}
+            onChange={(e) => handleImageChange(e.target.files)}
+            multiple // Cho phép chọn nhiều file
           />
 
-          {previewImage ? (
-            <div className="relative">
-              <img
-                src={previewImage}
-                alt="Preview"
-                className="mx-auto max-h-64 rounded-md object-cover"
-              />
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setPreviewImage(null);
-                  setFormData((prev) => ({ ...prev, Image: null }));
-                }}
-                className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md hover:bg-gray-100"
-              >
-                <FiX className="w-5 h-5 text-red-500" />
-              </button>
+          {previewImages.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {previewImages.map((img, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={img}
+                    alt={`Preview ${index + 1}`}
+                    className="w-full h-32 object-cover rounded-md"
+                  />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeImage(index);
+                    }}
+                    className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md hover:bg-gray-100"
+                  >
+                    <FiX className="w-4 h-4 text-red-500" />
+                  </button>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="space-y-2">
@@ -244,7 +327,7 @@ export default function AddProductTab() {
                 Kéo thả ảnh vào đây hoặc click để chọn
               </p>
               <p className="text-xs text-gray-500">
-                Định dạng hỗ trợ: JPG, PNG (tối đa 5MB)
+                Định dạng hỗ trợ: JPG, PNG (tối đa 5MB mỗi ảnh, tối đa 5 ảnh)
               </p>
             </div>
           )}
@@ -287,6 +370,50 @@ export default function AddProductTab() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
               required
             />
+          </div>
+
+          <div>
+            <label
+              htmlFor="Quantity"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Số lượng*
+            </label>
+            <input
+              type="number"
+              id="Quantity"
+              name="Quantity"
+              value={formData.Quantity}
+              onChange={handleChange}
+              min="1"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
+              required
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Chất liệu*
+            </label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {materials.map((material) => (
+                <div key={material.id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={`material-${material.id}`}
+                    checked={formData.MaterialIds.includes(material.id)}
+                    onChange={() => handleMaterialChange(material.id)}
+                    className="h-4 w-4 text-[#5e3a1e] focus:ring-[#5e3a1e] border-gray-300 rounded"
+                  />
+                  <label
+                    htmlFor={`material-${material.id}`}
+                    className="ml-2 text-sm text-gray-700"
+                  >
+                    {material.name}
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="md:col-span-2">
@@ -374,7 +501,12 @@ export default function AddProductTab() {
           <button
             type="submit"
             className="px-6 py-2 bg-[#5e3a1e] text-white rounded-md hover:bg-[#7a4b28] disabled:opacity-50"
-            disabled={!formData.Image || isSubmitting || isLoading}
+            disabled={
+              !formData.Images ||
+              formData.Images.length === 0 ||
+              isSubmitting ||
+              isLoading
+            }
           >
             {isSubmitting ? "Đang lưu..." : "Lưu sản phẩm"}
           </button>
