@@ -7,6 +7,7 @@ import CustomersTab from "../pages/Profile/components/CustomersTab";
 import RevenueTab from "../pages/Profile/components/RevenueTab";
 import ProfileTab from "../pages/Profile/components/ProfileTab";
 import AddProductTab from "../pages/Profile/components/AddProductTab";
+import ProductDetailTab from "../pages/Profile/components/ProductDetailtabb";
 
 const ProfileRoutes = ({ role, user }) => {
   if (!user) return <div>Error: User not found</div>;
@@ -29,6 +30,7 @@ const ProfileRoutes = ({ role, user }) => {
           />
           <Route path="revenue" element={<RevenueTab artisanId={user.id} />} />
           <Route path="add-product" element={<AddProductTab />} />
+          <Route path="/products/:productId" element={<ProductDetailTab />} />
         </>
       )}
 

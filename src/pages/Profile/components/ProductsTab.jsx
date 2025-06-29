@@ -1,10 +1,17 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import productService from "../../../services/apis/productApi";
 
 export default function ProductsTab({ artisanId }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [filter, setFilter] = useState("all");
+  const [pageIndex, setPageIndex] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [productStatus, setProductStatus] = useState("Active");
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
 
   // Lấy danh sách sản phẩm
@@ -13,56 +20,30 @@ export default function ProductsTab({ artisanId }) {
 
     const fetchProducts = async () => {
       try {
-        // Giả lập API call
-        setTimeout(() => {
-          if (isMounted) {
-            setProducts([
-              {
-                id: 1,
-                name: "Tranh thêu tay Hạ Long",
-                price: 1200000,
-                image:
-                  "https://i.pinimg.com/originals/a8/ed/06/a8ed06111498d09daa5d3931a3c1db8d.jpg",
-                stock: 5,
-                sold: 12,
-                status: "active",
-              },
-              {
-                id: 2,
-                name: "Gốm Bát Tràng",
-                price: 850000,
-                image:
-                  "https://static-images.vnncdn.net/files/publish/2023/5/18/w-z4355000189193-d7e2441483d443e8f8575221260c40a1-3-830.jpg",
-                stock: 5,
-                sold: 8,
-                status: "active",
-              },
-              {
-                id: 3,
-                name: "Tranh đông hồ",
-                price: 120000,
-                image:
-                  "https://th.bing.com/th/id/OIP.tgpteL8lE6GN66AH4hdLJAHaFW?rs=1&pid=ImgDetMain&cb=idpwebp2&o=7&rm=3",
-                stock: 0,
-                sold: 5,
-                status: "out_of_stock",
-              },
-              {
-                id: 4,
-                name: "Tranh đông hồ",
-                price: 120000,
-                image:
-                  "https://th.bing.com/th/id/OIP.tgpteL8lE6GN66AH4hdLJAHaFW?rs=1&pid=ImgDetMain&cb=idpwebp2&o=7&rm=3",
-                stock: 0,
-                sold: 5,
-                status: "out_of_stock",
-              },
-            ]);
-            setLoading(false);
-          }
-        }, 800);
+        setLoading(true);
+        setError(null);
+
+        const response = await productService.getProductsByArtisanId(
+          artisanId,
+          pageIndex,
+          pageSize,
+          productStatus
+        );
+        console.log("Fetched products:", response.data.data);
+
+        if (!response.success) {
+          throw new Error(response.error || "Không thể tải sản phẩm");
+        }
+
+        if (isMounted) {
+          setProducts(response.data.data || []);
+          setTotalItems(response.data.totalItems || 0);
+          setTotalPages(response.data.totalPages || 1);
+          setLoading(false);
+        }
       } catch (error) {
         if (isMounted) {
+          setError(error.message);
           setLoading(false);
           console.error("Lỗi khi tải sản phẩm:", error);
         }
@@ -74,31 +55,73 @@ export default function ProductsTab({ artisanId }) {
     return () => {
       isMounted = false;
     };
-  }, [artisanId]);
+  }, [artisanId, pageIndex, pageSize, productStatus]);
 
   // Xử lý xóa sản phẩm
-  const handleDelete = (productId) => {
+  const handleDelete = async (productId) => {
     if (window.confirm("Bạn chắc chắn muốn xóa sản phẩm này?")) {
-      setProducts((prev) => prev.filter((p) => p.id !== productId));
-      // Gọi API xóa thực tế ở đây
+      try {
+        const response = await productService.deleteProduct(productId);
+        if (response.success) {
+          setProducts((prev) => prev.filter((p) => p.id !== productId));
+          setTotalItems((prev) => prev - 1);
+        } else {
+          alert(response.error || "Xóa sản phẩm thất bại");
+        }
+      } catch (error) {
+        console.error("Lỗi khi xóa sản phẩm:", error);
+        alert("Có lỗi xảy ra khi xóa sản phẩm");
+      }
     }
   };
 
   // Lọc sản phẩm theo trạng thái
   const filteredProducts = products.filter((product) => {
-    if (filter === "out_of_stock") return product.stock <= 0;
-    if (filter === "active") return product.stock > 0;
+    if (filter === "out_of_stock") return product.quantity <= 0;
+    if (filter === "active") return product.quantity > 0;
     return true;
   });
 
-  if (loading)
-    return <div className="text-center py-8">Đang tải sản phẩm...</div>;
+  // Xử lý chuyển trang
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPageIndex(newPage);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-8">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#5e3a1e]"></div>
+        <p className="mt-2">Đang tải sản phẩm...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8 text-red-500">
+        <p>{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-2 px-4 py-1 bg-gray-100 rounded hover:bg-gray-200"
+        >
+          Thử lại
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center flex-wrap gap-4">
         <div className="flex items-center gap-2">
           <h3 className="text-xl font-bold text-[#5e3a1e]">Sản phẩm của tôi</h3>
+          {totalItems > 0 && (
+            <span className="text-sm text-gray-500">
+              ({totalItems} sản phẩm)
+            </span>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -120,7 +143,7 @@ export default function ProductsTab({ artisanId }) {
                 : "bg-gray-100 text-gray-800"
             }`}
           >
-            Đang bán ({products.filter((p) => p.stock > 0).length})
+            Đang bán ({products.filter((p) => p.quantity > 0).length})
           </button>
           <button
             onClick={() => setFilter("out_of_stock")}
@@ -130,7 +153,7 @@ export default function ProductsTab({ artisanId }) {
                 : "bg-gray-100 text-gray-800"
             }`}
           >
-            Hết hàng ({products.filter((p) => p.stock <= 0).length})
+            Hết hàng ({products.filter((p) => p.quantity <= 0).length})
           </button>
 
           <Link
@@ -139,6 +162,48 @@ export default function ProductsTab({ artisanId }) {
           >
             + Thêm sản phẩm
           </Link>
+        </div>
+      </div>
+
+      {/* Dropdown chọn trạng thái và số lượng mỗi trang */}
+      <div className="flex flex-wrap gap-4 items-center">
+        <div className="flex items-center gap-2">
+          <label htmlFor="status" className="text-sm text-gray-600">
+            Trạng thái:
+          </label>
+          <select
+            id="status"
+            value={productStatus}
+            onChange={(e) => {
+              setProductStatus(e.target.value);
+              setPageIndex(1); // Reset về trang đầu khi thay đổi trạng thái
+            }}
+            className="border rounded px-2 py-1 text-sm"
+          >
+            <option value="Active">Đang bán</option>
+            <option value="Inactive">Ngừng bán</option>
+            <option value="All">Tất cả</option>
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <label htmlFor="pageSize" className="text-sm text-gray-600">
+            Số lượng/trang:
+          </label>
+          <select
+            id="pageSize"
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setPageIndex(1); // Reset về trang đầu khi thay đổi số lượng
+            }}
+            className="border rounded px-2 py-1 text-sm"
+          >
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
         </div>
       </div>
 
@@ -151,26 +216,115 @@ export default function ProductsTab({ artisanId }) {
               ? "Không có sản phẩm đang bán"
               : "Không có sản phẩm hết hàng"}
           </p>
-          {filter === "active" && (
+          {filter !== "out_of_stock" && (
             <Link
-              to="/products/new"
+              to="/profile-user/add-product"
               className="mt-4 inline-block px-4 py-2 bg-[#5e3a1e] text-white rounded hover:bg-[#7a4b28] text-sm"
             >
-              Đăng sản phẩm mới
+              Thêm sản phẩm mới
             </Link>
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onDelete={handleDelete}
-              onEdit={() => navigate(`/products/edit/${product.id}`)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProducts.map((product) => (
+              <Link
+                to={`/profile-user/products/${product.id}`}
+                className="block"
+                key={product.id}
+              >
+                <ProductCard
+                  product={product}
+                  onDelete={handleDelete}
+                  onEdit={() =>
+                    navigate(`/profile-user/products/edit/${product.id}`)
+                  }
+                />
+              </Link>
+            ))}
+          </div>
+
+          {/* Phân trang */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-6">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handlePageChange(1)}
+                  disabled={pageIndex === 1}
+                  className={`px-3 py-1 rounded ${
+                    pageIndex === 1
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-[#5e3a1e] hover:bg-gray-100"
+                  }`}
+                >
+                  «
+                </button>
+                <button
+                  onClick={() => handlePageChange(pageIndex - 1)}
+                  disabled={pageIndex === 1}
+                  className={`px-3 py-1 rounded ${
+                    pageIndex === 1
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-[#5e3a1e] hover:bg-gray-100"
+                  }`}
+                >
+                  ‹
+                </button>
+
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (pageIndex <= 3) {
+                    pageNum = i + 1;
+                  } else if (pageIndex >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = pageIndex - 2 + i;
+                  }
+
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      className={`px-3 py-1 rounded ${
+                        pageIndex === pageNum
+                          ? "bg-[#5e3a1e] text-white"
+                          : "text-[#5e3a1e] hover:bg-gray-100"
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+
+                <button
+                  onClick={() => handlePageChange(pageIndex + 1)}
+                  disabled={pageIndex === totalPages}
+                  className={`px-3 py-1 rounded ${
+                    pageIndex === totalPages
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-[#5e3a1e] hover:bg-gray-100"
+                  }`}
+                >
+                  ›
+                </button>
+                <button
+                  onClick={() => handlePageChange(totalPages)}
+                  disabled={pageIndex === totalPages}
+                  className={`px-3 py-1 rounded ${
+                    pageIndex === totalPages
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-[#5e3a1e] hover:bg-gray-100"
+                  }`}
+                >
+                  »
+                </button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -181,12 +335,15 @@ function ProductCard({ product, onDelete, onEdit }) {
     <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
       <div className="relative">
         <img
-          src={product.image}
-          alt={product.name}
+          src={product.productImages?.[0]?.imageUrl}
+          alt={product.name || "Ảnh sản phẩm"}
           className="w-full h-48 object-cover"
           loading="lazy"
+          onError={(e) => {
+            e.target.src = "/default-product-image.jpg";
+          }}
         />
-        {product.status === "out_of_stock" && (
+        {product.stock <= 0 && (
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-transparent flex items-center justify-center">
             <span className="bg-white/90 px-3 py-1 rounded-full text-sm font-medium border border-gray-200 shadow-sm">
               HẾT HÀNG
@@ -198,11 +355,14 @@ function ProductCard({ product, onDelete, onEdit }) {
       <div className="p-4 flex-grow">
         <h4 className="font-semibold text-lg line-clamp-2">{product.name}</h4>
         <p className="text-[#5e3a1e] font-medium mt-1">
-          {product.price.toLocaleString()} VND
+          {product.price?.toLocaleString() || "0"} VND
         </p>
         <div className="mt-2 text-sm space-y-1">
-          <p className="text-gray-600">Tồn kho: {product.stock}</p>
-          <p className="text-gray-600">Đã bán: {product.sold}</p>
+          <p className="text-gray-600">Tồn kho: {product.quantity || 0}</p>
+          <p className="text-gray-600">Đã bán: {product.soldQuantity || 0}</p>
+          <p className="text-gray-600">
+            Trạng thái: {product.status === "Active" ? "Đang bán" : "Ngừng bán"}
+          </p>
         </div>
       </div>
 
