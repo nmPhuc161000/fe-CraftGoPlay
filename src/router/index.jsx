@@ -38,6 +38,7 @@ const AppRouter = () => {
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/products" element={<Product />} />
+          <Route path="/checkout" element={<Checkout />} />
 
           {/* ========== Protected Routes ========== */}
           {/* User profile routes */}
