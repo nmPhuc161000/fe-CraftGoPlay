@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import productService from "../../../services/apis/productApi";
 
 export default function ProductsTab({ artisanId }) {
@@ -12,7 +12,6 @@ export default function ProductsTab({ artisanId }) {
   const [productStatus, setProductStatus] = useState("Active");
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const navigate = useNavigate();
 
   // Lấy danh sách sản phẩm
   useEffect(() => {
@@ -56,24 +55,6 @@ export default function ProductsTab({ artisanId }) {
       isMounted = false;
     };
   }, [artisanId, pageIndex, pageSize, productStatus]);
-
-  // Xử lý xóa sản phẩm
-  const handleDelete = async (productId) => {
-    if (window.confirm("Bạn chắc chắn muốn xóa sản phẩm này?")) {
-      try {
-        const response = await productService.deleteProduct(productId);
-        if (response.success) {
-          setProducts((prev) => prev.filter((p) => p.id !== productId));
-          setTotalItems((prev) => prev - 1);
-        } else {
-          alert(response.error || "Xóa sản phẩm thất bại");
-        }
-      } catch (error) {
-        console.error("Lỗi khi xóa sản phẩm:", error);
-        alert("Có lỗi xảy ra khi xóa sản phẩm");
-      }
-    }
-  };
 
   // Lọc sản phẩm theo trạng thái
   const filteredProducts = products.filter((product) => {
@@ -234,13 +215,7 @@ export default function ProductsTab({ artisanId }) {
                 className="block"
                 key={product.id}
               >
-                <ProductCard
-                  product={product}
-                  onDelete={handleDelete}
-                  onEdit={() =>
-                    navigate(`/profile-user/products/edit/${product.id}`)
-                  }
-                />
+                <ProductCard product={product} />
               </Link>
             ))}
           </div>
@@ -330,7 +305,7 @@ export default function ProductsTab({ artisanId }) {
   );
 }
 
-function ProductCard({ product, onDelete, onEdit }) {
+function ProductCard({ product }) {
   return (
     <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
       <div className="relative">
@@ -364,21 +339,6 @@ function ProductCard({ product, onDelete, onEdit }) {
             Trạng thái: {product.status === "Active" ? "Đang bán" : "Ngừng bán"}
           </p>
         </div>
-      </div>
-
-      <div className="p-4 border-t flex space-x-2">
-        <button
-          onClick={onEdit}
-          className="flex-1 py-1 bg-amber-100 text-amber-800 rounded hover:bg-amber-200 text-sm"
-        >
-          Chỉnh sửa
-        </button>
-        <button
-          onClick={() => onDelete(product.id)}
-          className="flex-1 py-1 bg-red-100 text-red-800 rounded hover:bg-red-200 text-sm"
-        >
-          Xóa
-        </button>
       </div>
     </div>
   );
