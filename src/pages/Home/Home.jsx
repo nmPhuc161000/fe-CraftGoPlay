@@ -3,95 +3,56 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
 import loginImg from "../../assets/images/background2.png";
+import categoryService from "../../services/apis/cateApi";
+import productService from "../../services/apis/productApi";
 
 const Home = () => {
+  const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
 
   // useEffect(() => {
-  //   homeApi.getProducts().then((res) => setProducts(res.data));
+  //   const fakeProducts = Array.from({ length: 30 }, (_, i) => ({
+  //     id: i + 1,
+  //     name: `Sản phẩm thủ công ${i + 1}`,
+  //     image:
+  //       "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
+  //     price: 1000000 + i * 100000,
+  //     originalPrice: i % 3 === 0 ? 1200000 + i * 100000 : null,
+  //     tag: i % 5 === 0 ? "Pre-order" : i % 4 === 0 ? "20% OFF" : null,
+  //   }));
+
+  //   setProducts(fakeProducts);
   // }, []);
 
-  useEffect(() => {
-    const fakeProducts = Array.from({ length: 30 }, (_, i) => ({
-      id: i + 1,
-      name: `Sản phẩm thủ công ${i + 1}`,
-      image:
-        "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
-      price: 1000000 + i * 100000,
-      originalPrice: i % 3 === 0 ? 1200000 + i * 100000 : null,
-      tag: i % 5 === 0 ? "Pre-order" : i % 4 === 0 ? "20% OFF" : null,
-    }));
-
-    setProducts(fakeProducts);
-  }, []);
-
   const formatVND = (number) => {
-    return number.toLocaleString("vi-VN") + "₫";
+    return number?.toLocaleString("vi-VN", { style: "currency", currency: "VND" }) || "";
   };
 
-  const categories = [
-    {
-      name: "Mây tre đan",
-      image:
-        "https://i.vnbusiness.vn/2020/08/26/may-tre-2476-1598430768_860x0.jpg",
-    },
-    {
-      name: "Gốm sứ",
-      image:
-        "https://media.vneconomy.vn/images/upload/2023/07/28/thu-cong-my-nghe.jpg",
-    },
-    {
-      name: "Điêu khắc gỗ",
-      image:
-        "https://gomphuctaman.com/wp-content/uploads/2022/07/san-pham-thu-cong-my-nghe.jpg",
-    },
-    {
-      name: "Tranh thêu tay",
-      image:
-        "https://cdn2.tuoitre.vn/zoom/700_390/471584752817336320/2025/6/7/8-6-san-pham-thu-cong-read-only-17493114206291591604366-228-0-1465-2362-crop-1749312138091765745310.jpg",
-    },
-    {
-      name: "Mây tre đan",
-      image:
-        "https://i.vnbusiness.vn/2020/08/26/may-tre-2476-1598430768_860x0.jpg",
-    },
-    {
-      name: "Gốm sứ",
-      image:
-        "https://media.vneconomy.vn/images/upload/2023/07/28/thu-cong-my-nghe.jpg",
-    },
-    {
-      name: "Điêu khắc gỗ",
-      image:
-        "https://gomphuctaman.com/wp-content/uploads/2022/07/san-pham-thu-cong-my-nghe.jpg",
-    },
-    {
-      name: "Tranh thêu tay",
-      image:
-        "https://cdn2.tuoitre.vn/zoom/700_390/471584752817336320/2025/6/7/8-6-san-pham-thu-cong-read-only-17493114206291591604366-228-0-1465-2362-crop-1749312138091765745310.jpg",
-    },
-    {
-      name: "Mây tre đan",
-      image:
-        "https://i.vnbusiness.vn/2020/08/26/may-tre-2476-1598430768_860x0.jpg",
-    },
-    {
-      name: "Gốm sứ",
-      image:
-        "https://media.vneconomy.vn/images/upload/2023/07/28/thu-cong-my-nghe.jpg",
-    },
-    {
-      name: "Điêu khắc gỗ",
-      image:
-        "https://gomphuctaman.com/wp-content/uploads/2022/07/san-pham-thu-cong-my-nghe.jpg",
-    },
-    {
-      name: "Tranh thêu tay",
-      image:
-        "https://cdn2.tuoitre.vn/zoom/700_390/471584752817336320/2025/6/7/8-6-san-pham-thu-cong-read-only-17493114206291591604366-228-0-1465-2362-crop-1749312138091765745310.jpg",
-    },
-  ];
+  const fetchCategories = async () => {
+    try {
+      const res = await categoryService.getAllCategories();
+      setCategories(res.data?.data || []);
+    } catch (error) {
+      console.error("Lỗi kết nối:", error);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      const res = await productService.getProducts();
+      const data = res?.data?.data || [];
+      console.log("Dữ liệu sản phẩm từ API:", data);
+      setProducts(data);
+    } catch (error) {
+      console.error("Lỗi khi lấy sản phẩm:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+    fetchProducts();
+  }, []);
 
   return (
     <MainLayout>
@@ -166,7 +127,7 @@ const Home = () => {
               key={index}
               onClick={() =>
                 navigate(
-                  `/products?category=${encodeURIComponent(category.name)}`
+                  `/products?category=${encodeURIComponent(category.categoryName)}`
                 )
               }
               className="bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md hover:scale-105 transition-transform cursor-pointer overflow-hidden"
@@ -174,13 +135,13 @@ const Home = () => {
               <div className="w-full h-32">
                 <img
                   src={category.image}
-                  alt={category.name}
+                  alt={category.categoryName}
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="p-2 text-center">
                 <span className="text-base font-medium text-[#5e3a1e] leading-tight block">
-                  {category.name}
+                  {category.categoryName}
                 </span>
               </div>
             </div>
@@ -190,7 +151,6 @@ const Home = () => {
 
       {/* san pham danh cho ban */}
       <div className="w-full px-30">
-        {/* Header Section */}
         <div className="flex justify-between items-center mb-6 flex-col lg:flex-row">
           <div className="mb-4 lg:mb-0">
             <h2 className="text-5xl font-bold text-[#5e3a1e]">
@@ -226,18 +186,17 @@ const Home = () => {
                 {product.tag && (
                   <span
                     className={`absolute top-3 left-3 text-xs font-semibold px-2 py-1 rounded shadow 
-              ${
-                product.tag === "Pre-order"
-                  ? "bg-yellow-400 text-black"
-                  : "bg-red-600 text-white"
-              }`}
+              ${product.tag === "Pre-order"
+                        ? "bg-yellow-400 text-black"
+                        : "bg-red-600 text-white"
+                      }`}
                   >
                     {product.tag}
                   </span>
                 )}
 
                 <img
-                  src={product.image}
+                  src={product.productImages?.[0]?.imageUrl}
                   alt={product.name}
                   className="w-full h-64 object-cover"
                 />
