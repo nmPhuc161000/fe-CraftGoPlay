@@ -13,20 +13,37 @@ const productService = {
     });
   },
 
-  async getProductById(id) {
+  async getProductsByArtisanId(
+    artisanId,
+    pageIndex = 1,
+    pageSize = 10,
+    productStatus = "Active"
+  ) {
     return performApiRequest(
-      `${API_ENDPOINTS_PRODUCT.GET_PRODUCT_BY_ID}/${id}`,
+      API_ENDPOINTS_PRODUCT.GET_PRODUCTS_BY_ARTISANID(
+        artisanId,
+        pageIndex,
+        pageSize,
+        productStatus
+      ),
       {
         method: "get",
       }
     );
   },
 
+  async getProductById(id) {
+    return performApiRequest(API_ENDPOINTS_PRODUCT.GET_PRODUCT_BY_ID(id), {
+      method: "get",
+    });
+  },
+
   async createProduct(productData) {
-    // Kiểm tra xem FormData có chứa các trường cần thiết không
+    // Chuyển FormData thành object để kiểm tra
     const formDataObject = Object.fromEntries(productData.entries());
     console.log("Creating product with data:", formDataObject);
 
+    // Kiểm tra các trường bắt buộc
     if (!formDataObject.Name) {
       return {
         success: false,
@@ -47,6 +64,14 @@ const productService = {
       };
     }
 
+    if (!formDataObject.Quantity || parseInt(formDataObject.Quantity) <= 0) {
+      return {
+        success: false,
+        error: "Số lượng sản phẩm không hợp lệ",
+        status: 400,
+      };
+    }
+
     if (!formDataObject.Description) {
       return {
         success: false,
@@ -63,17 +88,53 @@ const productService = {
       };
     }
 
-    if (!productData.get("Image")) {
+    // Kiểm tra ít nhất một ảnh được chọn
+    const images = productData.getAll("Images");
+    if (!images || images.length === 0) {
       return {
         success: false,
-        error: "Hình ảnh sản phẩm là bắt buộc",
+        error: "Vui lòng chọn ít nhất một hình ảnh sản phẩm",
         status: 400,
       };
     }
 
+    // Kiểm tra ít nhất một chất liệu được chọn
+    const materialIds = productData.getAll("MaterialIds");
+    if (!materialIds || materialIds.length === 0) {
+      return {
+        success: false,
+        error: "Vui lòng chọn ít nhất một chất liệu",
+        status: 400,
+      };
+    }
+
+    // Kiểm tra định dạng ảnh
+    for (const image of images) {
+      if (image instanceof File) {
+        if (!image.type.match("image.*")) {
+          return {
+            success: false,
+            error: `File ${image.name} không phải là hình ảnh hợp lệ`,
+            status: 400,
+          };
+        }
+        if (image.size > 5 * 1024 * 1024) {
+          return {
+            success: false,
+            error: `File ${image.name} vượt quá kích thước cho phép (5MB)`,
+            status: 400,
+          };
+        }
+      }
+    }
+
+    // Gửi request tới API
     return performApiRequest(API_ENDPOINTS_PRODUCT.CREATE_PRODUCT, {
       data: productData,
       method: "post",
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
     });
   },
 

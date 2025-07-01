@@ -15,7 +15,14 @@ export const API_ENDPOINTS_AUTH = {
 
 export const API_ENDPOINTS_PRODUCT = {
   GET_PRODUCTS: "/api/Product/GetProducts",
-  GET_PRODUCT_BY_ID: (id) => `/products/${id}`,
+  GET_PRODUCTS_BY_ARTISANID: (
+    artisanId,
+    pageIndex = 1,
+    pageSize = 10,
+    productStatus = "Active"
+  ) =>
+    `/api/Product/GetProductsByArtisanId/${artisanId}?pageIndex=${pageIndex}&pageSize=${pageSize}&productStatus=${productStatus}`,
+  GET_PRODUCT_BY_ID: (id) => `/api/Product/GetProductByProductId/${id}`,
   CREATE_PRODUCT: "/api/Product/CreateProduct",
   UPDATE_PRODUCT: (id) => `/api/Product/UpdateProduct/${id}`,
   DELETE_PRODUCT: (id) => `/api/Product/DeleteProduct/${id}`,
@@ -25,6 +32,13 @@ export const API_ENDPOINTS_CART = {
   GET_CART: "/cart",
   ADD_TO_CART: "/cart/add",
   REMOVE_FROM_CART: "/cart/remove",
+};
+
+export const API_ENDPOINTS_METERIAL = {
+  GET_METERIALS: "/api/Meterial/GetMeterials",
+  CREATE_METERIAL: "/api/Meterial/CreateMeterial",
+  UPDATE_METERIAL: (id) => `/api/Meterial/UpdateMeterial/${id}`,
+  DELETE_METERIAL: (id) => `/api/Meterial/DeleteMeterial/${id}`,
 };
 
 export const API_ENDPOINTS_CATEGORY = {

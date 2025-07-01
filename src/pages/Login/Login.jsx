@@ -31,7 +31,7 @@ const Login = () => {
 
     setTimeout(() => {
       window.location.href = redirectPaths[role] || redirectPaths.default;
-    }, 1000);
+    }, 500);
   };
 
   const validateToken = (token) => {
