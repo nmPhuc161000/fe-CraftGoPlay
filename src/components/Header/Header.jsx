@@ -6,12 +6,14 @@ import {
   FaUser,
   FaSignOutAlt,
 } from "react-icons/fa";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext"; // Import AuthContext
 
 const Header = () => {
   const { user, isAuthenticated, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [showSearchInput, setShowSearchInput] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Hàm xử lý đăng xuất
   const handleLogout = () => {
@@ -54,11 +56,10 @@ const Header = () => {
         <div className="px-12 py-5 flex justify-between items-center">
           <div className="flex space-x-10 text-base font-medium items-center">
             <Link
-              to="/products"
-              state={{ openCategory: true }}
+              to="/#products"
               className="hover:no-underline hover:text-gray-500 transition-colors duration-200 font-extrabold tracking-wider"
             >
-              Loại Sản Phẩm
+              Sản Phẩm
             </Link>
 
             <Link
@@ -84,10 +85,34 @@ const Header = () => {
           </Link>
 
           <div className="flex space-x-8 items-center text-base font-medium">
-            <FaSearch
-              className="cursor-pointer hover:text-gray-500 tracking-wider"
-              title="Tìm kiếm"
-            />
+            <div className="relative">
+              <FaSearch
+                onClick={() => setShowSearchInput((prev) => !prev)}
+                className="cursor-pointer hover:text-gray-500 tracking-wider"
+                title="Tìm kiếm"
+              />
+
+              {showSearchInput && (
+                <div className="absolute top-1/2 -translate-y-1/2 right-[20px] flex items-center z-50 bg-white border border-gray-300 rounded-full px-3 py-1 shadow w-64 transition-transform">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Tìm sản phẩm..."
+                    autoFocus
+                    className="w-full text-sm text-black outline-none bg-transparent"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        navigate(`/products?search=${encodeURIComponent(searchTerm)}`);
+                        setShowSearchInput(false);
+                      }
+                    }}
+                  />
+                </div>
+              )}
+
+            </div>
+
             <FaShoppingBag
               className="cursor-pointer hover:text-gray-500 tracking-wider"
               title="Giỏ hàng"
