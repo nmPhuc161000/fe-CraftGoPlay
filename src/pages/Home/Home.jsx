@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 //import { homeApi } from "../../services";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
 import loginImg from "../../assets/images/background2.png";
 import categoryService from "../../services/apis/cateApi";
@@ -10,6 +10,8 @@ const Home = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
+  const scrollToProductsRef = useRef(null);
+  const location = useLocation();
 
   // useEffect(() => {
   //   const fakeProducts = Array.from({ length: 30 }, (_, i) => ({
@@ -53,6 +55,19 @@ const Home = () => {
     fetchCategories();
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    if (window.location.pathname === "/" && window.location.hash) {
+      navigate("/", { replace: true });
+    }
+  }, []);
+  useEffect(() => {
+    if (location.hash === "#products" && scrollToProductsRef.current) {
+      setTimeout(() => {
+        scrollToProductsRef.current.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  }, [location.hash]);
 
   return (
     <MainLayout>
@@ -150,7 +165,7 @@ const Home = () => {
       </div>
 
       {/* san pham danh cho ban */}
-      <div className="w-full px-30">
+      <div ref={scrollToProductsRef} id="products" className="w-full px-30">
         <div className="flex justify-between items-center mb-6 flex-col lg:flex-row">
           <div className="mb-4 lg:mb-0">
             <h2 className="text-5xl font-bold text-[#5e3a1e]">
@@ -183,18 +198,6 @@ const Home = () => {
                 onClick={() => navigate(`/product/${product.id}`)}
                 className="w-full bg-white shadow rounded-lg overflow-hidden relative text-center transition-transform duration-300 hover:scale-105 hover:shadow-lg"
               >
-                {product.tag && (
-                  <span
-                    className={`absolute top-3 left-3 text-xs font-semibold px-2 py-1 rounded shadow 
-              ${product.tag === "Pre-order"
-                        ? "bg-yellow-400 text-black"
-                        : "bg-red-600 text-white"
-                      }`}
-                  >
-                    {product.tag}
-                  </span>
-                )}
-
                 <img
                   src={product.productImages?.[0]?.imageUrl}
                   alt={product.name}

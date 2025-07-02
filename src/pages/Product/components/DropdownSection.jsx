@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 
-const DropdownSection = ({ title, isOpen, toggle, items = [], expandable = false }) => {
+const DropdownSection = ({
+  title,
+  isOpen,
+  toggle,
+  items = [],
+  expandable = false,
+  onSelect,
+  onParentSelect,
+}) => {
   const [expandedItems, setExpandedItems] = useState({});
 
   const toggleItem = (label) => {
@@ -33,12 +41,24 @@ const DropdownSection = ({ title, isOpen, toggle, items = [], expandable = false
         <ul className="pl-3 space-y-2 text-sm">
           {items.map((item, idx) =>
             typeof item === "string" ? (
-              <li key={idx} className="cursor-pointer hover:text-[#5e3a1e]">{item}</li>
+              <li
+                key={idx}
+                className="cursor-pointer hover:text-[#5e3a1e]"
+                onClick={() => onSelect?.(item)}
+              >
+                {item}
+              </li>
             ) : (
               <li key={idx}>
                 <div
                   className="flex justify-between items-center cursor-pointer hover:text-[#5e3a1e]"
-                  onClick={() => toggleItem(item.label)}
+                  onClick={() => {
+                    toggleItem(item.label);
+                    if (onParentSelect && item.children) {
+                      const subNames = item.children.map((child) => child.value);
+                      onParentSelect(subNames);
+                    }
+                  }}
                 >
                   <span>{item.label}</span>
                   <svg
@@ -52,9 +72,16 @@ const DropdownSection = ({ title, isOpen, toggle, items = [], expandable = false
                 </div>
                 {expandedItems[item.label] && (
                   <ul className="pl-4 mt-1 space-y-1 text-sm text-[#5e3a1e]">
-                    {item.children.map((child, i) => (
-                      <li key={i} className="cursor-pointer hover:text-[#5e3a1e]">
-                        {child}
+                    {item.children?.map((child, i) => (
+                      <li
+                        key={i}
+                        className="cursor-pointer hover:text-[#5e3a1e]"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelect?.(child.value);
+                        }}
+                      >
+                        {child.label}
                       </li>
                     ))}
                   </ul>
