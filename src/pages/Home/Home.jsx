@@ -148,11 +148,17 @@ const Home = () => {
               className="bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md hover:scale-105 transition-transform cursor-pointer overflow-hidden"
             >
               <div className="w-full h-32">
-                <img
-                  src={category.image}
-                  alt={category.categoryName}
-                  className="w-full h-full object-cover"
-                />
+                {category.image ? (
+                  <img
+                    src={category.image}
+                    alt={category.categoryName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
+                    Không có ảnh
+                  </div>
+                )}
               </div>
               <div className="p-2 text-center">
                 <span className="text-base font-medium text-[#5e3a1e] leading-tight block">
