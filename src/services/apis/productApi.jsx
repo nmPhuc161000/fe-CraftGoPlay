@@ -38,6 +38,34 @@ const productService = {
     });
   },
 
+  async searchProducts({
+    search = "",
+    pageIndex = 1,
+    pageSize = 10,
+    from = 0,
+    to = 1000000,
+    sortOrder = "",
+    subCategoryName = "",
+    artisanName = "",
+  } = {}) {
+    const params = {
+      search,
+      pageIndex,
+      pageSize,
+      from,
+      to,
+    };
+
+    if (sortOrder) params.sortOrder = sortOrder;
+    if (subCategoryName) params.subCategoryName = subCategoryName;
+    if (artisanName) params.artisanName = artisanName;
+    return performApiRequest(API_ENDPOINTS_PRODUCT.GET_SEARCH_PRODUCTS, {
+      method: "get",
+      params,
+    });
+  },
+
+
   async createProduct(productData) {
     // Chuyển FormData thành object để kiểm tra
     const formDataObject = Object.fromEntries(productData.entries());

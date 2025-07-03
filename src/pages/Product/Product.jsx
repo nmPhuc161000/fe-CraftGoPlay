@@ -1,103 +1,87 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
 import DropdownSection from "./components/DropdownSection";
+import categoryService from "../../services/apis/cateApi";
+import productService from "../../services/apis/productApi"
 
 const Product = () => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
-  const [isProductOpen, setIsProductOpen] = useState(true);
-  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-  const [isArtistOpen, setIsArtistOpen] = useState(false);
-
+  const [isCategoryOpen, setIsCategoryOpen] = useState(true);
+  const [isArtistOpen, setIsArtistOpen] = useState(true);
+  const [categories, setCategories] = useState([]);
+  const [sortOrder, setSortOrder] = useState("");
   const location = useLocation();
+  const [selectedSubCategory, setSelectedSubCategory] = useState("");
+  const [selectedSubCategories, setSelectedSubCategories] = useState([]);
+  const [selectedArtisan, setSelectedArtisan] = useState("");
+  const [searchParams] = useSearchParams();
+  const searchTerm = searchParams.get("search") || "";
+
   useEffect(() => {
     if (location.state?.openCategory) {
       setIsCategoryOpen(true);
     }
   }, [location.state]);
 
-
   useEffect(() => {
-    // Giả lập dữ liệu sản phẩm
-    const fakeProducts = [
-      {
-        id: 1,
-        name: "Majestic Mahjong Set",
-        image:
-          "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
-        price: 13990000,
-        originalPrice: null,
-        tag: null,
-      },
-      {
-        id: 2,
-        name: "Colorburst Wooden Domino Set",
-        image:
-          "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
-        price: 1079000,
-        originalPrice: null,
-        tag: "Pre-order",
-      },
-      {
-        id: 3,
-        name: "Nomad_The Portable Chess Set",
-        image:
-          "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
-        price: 3440000,
-        originalPrice: 4300000,
-        tag: "20% OFF",
-      },
-      {
-        id: 4,
-        name: "Nomad_The Portable Chess Set",
-        image:
-          "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
-        price: 3440000,
-        originalPrice: 4300000,
-        tag: "20% OFF",
-      },
-      {
-        id: 5,
-        name: "Nomad_The Portable Chess Set",
-        image:
-          "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
-        price: 3440000,
-        originalPrice: 4300000,
-        tag: "20% OFF",
-      },
-    ];
-    setProducts(fakeProducts);
+    const fetchCategories = async () => {
+      try {
+        const res = await categoryService.getAllCategories();
+        setCategories(res?.data?.data || []);
+      } catch (err) {
+        console.error("Lỗi khi fetch categories:", err);
+      }
+    };
+    fetchCategories();
   }, []);
 
-  const formatVND = (number) => {
-    return number.toLocaleString("vi-VN") + "₫";
+  // load products
+  const fetchProducts = async () => {
+    try {
+      const res = await productService.searchProducts({
+        search: searchTerm,
+        pageIndex: 1,
+        pageSize: 20,
+        from: 0,
+        to: 1000000,
+        sortOrder,
+        subCategoryName: selectedSubCategories.join(","),
+        artisanName: selectedArtisan,
+      });
+      setProducts(res?.data?.data || []);
+    } catch (error) {
+      console.error("Lỗi khi lấy sản phẩm:", error);
+    }
   };
+
+  useEffect(() => {
+    fetchProducts();
+    console.log("subCategories đã chọn:", selectedSubCategories);
+  }, [searchTerm, sortOrder, selectedSubCategories, selectedArtisan]);
+
+
+  const formatVND = (number) => {
+    return number?.toLocaleString("vi-VN", { style: "currency", currency: "VND" }) || "";
+  };
+
+  const filteredProducts = products.filter((product) => {
+    const matchesSubCategory =
+      selectedSubCategories.length === 0 ||
+      selectedSubCategories.includes(product.subCategoryName);
+
+    const matchesArtisan =
+      !selectedArtisan || product.artisanName === selectedArtisan;
+
+    return matchesSubCategory && matchesArtisan;
+  });
 
   return (
     <MainLayout>
       {/* Danh sách sản phẩm */}
       <div className="w-full px-12 py-15 text-[#5e3a1e]">
-
-        <div className="flex justify-end mb-4">
-          {/* sap xep ben phai */}
-          <div className="flex items-center space-x-2">
-            <label htmlFor="sort" className="text-sm font-medium">
-              Sắp xếp:
-            </label>
-            <select
-              id="sort"
-              className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5e3a1e]"
-            >
-              <option value="default">Mặc định</option>
-              <option value="name-asc">Theo tên</option>
-              <option value="price-asc">Giá tăng dần</option>
-              <option value="price-desc">Giá giảm dần</option>
-            </select>
-          </div>
-        </div>
-
 
         <div className="flex gap-6 px-4 sm:px-6 lg:px-0">
           {/* Sidebar */}
@@ -128,48 +112,67 @@ const Product = () => {
                 title="Loại sản phẩm"
                 isOpen={isCategoryOpen}
                 toggle={() => setIsCategoryOpen(!isCategoryOpen)}
-                items={[
-                  {
-                    label: "Đồ chơi",
-                    children: ["Bộ cờ", "Xếp hình"],
-                  },
-                  {
-                    label: "Trang trí",
-                    children: ["Đèn", "Tượng"],
-                  },
-                ]}
+                items={categories.map((cate) => ({
+                  label: cate.categoryName,
+                  children: (cate.subCategories || []).map((sub) => ({
+                    label: sub.subName,
+                    value: sub.subName,
+                  })),
+                }))}
                 expandable={true}
+                onSelect={(subName) => {
+                  setSelectedSubCategories([subName]);
+                  setSelectedArtisan("");
+                }}
+                onParentSelect={(subNames) => {
+                  setSelectedSubCategories(subNames);
+                  setSelectedArtisan("");
+                }}
               />
 
               <DropdownSection
                 title="Nghệ nhân"
                 isOpen={isArtistOpen}
                 toggle={() => setIsArtistOpen(!isArtistOpen)}
-                items={["Nguyễn Văn A", "Trần Thị B", "Phạm Văn C"]}
+                items={[
+                  { label: "Nguyễn Văn A", value: "Nguyễn Văn A" },
+                  { label: "Trần Thị B", value: "Trần Thị B" },
+                  { label: "Phạm Văn C", value: "Phạm Văn C" },
+                ]}
+                onSelect={(name) => {
+                  setSelectedArtisan(name);
+                  setSelectedSubCategory("");
+                }}
               />
+
+              <div className="mt-6">
+                <label htmlFor="sort" className="block text-sm font-medium mb-2">
+                  Sắp xếp theo
+                </label>
+                <select
+                  id="sort"
+                  className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-[#5e3a1e]"
+                  onChange={(e) => setSortOrder(e.target.value)}
+                >
+                  <option value="">Mặc định</option>
+                  <option value="asc">Giá tăng dần</option>
+                  <option value="desc">Giá giảm dần</option>
+                </select>
+              </div>
             </div>
           </div>
-
 
           {/* Danh sách sản phẩm */}
           <div className="w-[82%]">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {products.map((product, index) => (
+              {filteredProducts.map((product, index) => (
                 <div
                   key={index}
                   onClick={() => navigate(`/product/${product.id}`)}
                   className="w-full max-w-sm bg-white shadow rounded-lg overflow-hidden relative text-center mx-auto transition-transform duration-300 hover:scale-105 hover:shadow-lg"
                 >
-                  {product.tag && (
-                    <span
-                      className={`absolute top-3 left-3 text-xs font-semibold px-2 py-1 rounded shadow 
-              ${product.tag === "Pre-order" ? "bg-yellow-400 text-black" : "bg-red-600 text-white"}`}
-                    >
-                      {product.tag}
-                    </span>
-                  )}
                   <img
-                    src={product.image}
+                    src={product.productImages?.[0]?.imageUrl}
                     alt={product.name}
                     className="w-full h-64 object-cover"
                   />

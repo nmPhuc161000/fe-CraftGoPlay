@@ -23,6 +23,7 @@ export const API_ENDPOINTS_PRODUCT = {
   ) =>
     `/api/Product/GetProductsByArtisanId/${artisanId}?pageIndex=${pageIndex}&pageSize=${pageSize}&productStatus=${productStatus}`,
   GET_PRODUCT_BY_ID: (id) => `/api/Product/GetProductByProductId/${id}`,
+  GET_SEARCH_PRODUCTS: "/api/Product/SearchProducts",
   CREATE_PRODUCT: "/api/Product/CreateProduct",
   UPDATE_PRODUCT: `/api/Product/UpdateProduct`,
   DELETE_PRODUCT: (id) => `/api/Product/DeleteProduct/${id}`,
