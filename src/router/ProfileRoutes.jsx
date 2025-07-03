@@ -7,7 +7,9 @@ import CustomersTab from "../pages/Profile/components/CustomersTab";
 import RevenueTab from "../pages/Profile/components/RevenueTab";
 import ProfileTab from "../pages/Profile/components/ProfileTab";
 import AddProductTab from "../pages/Profile/components/AddProductTab";
-import ProductDetailTab from "../pages/Profile/components/ProductDetailtabb";
+import ProductDetailTab from "../pages/Profile/components/ProductDetailtab";
+import AddressTab from "../pages/Profile/components/AddressTab";
+import UpgradeArtisanTab from "../pages/Profile/components/UpgradeArtisanTab";
 
 const ProfileRoutes = ({ role, user }) => {
   if (!user) return <div>Error: User not found</div>;
@@ -39,6 +41,11 @@ const ProfileRoutes = ({ role, user }) => {
         <>
           <Route path="orders" element={<OrdersTab userId={user.id} />} />
           <Route path="favorites" element={<FavoritesTab userId={user.id} />} />
+          <Route path="addresses" element={<AddressTab userId={user.id} />} />
+          <Route
+            path="upgradeArtisan"
+            element={<UpgradeArtisanTab userId={user.id} />}
+          />
         </>
       )}
 

@@ -25,7 +25,7 @@ export const API_ENDPOINTS_PRODUCT = {
   GET_PRODUCT_BY_ID: (id) => `/api/Product/GetProductByProductId/${id}`,
   GET_SEARCH_PRODUCTS: "/api/Product/SearchProducts",
   CREATE_PRODUCT: "/api/Product/CreateProduct",
-  UPDATE_PRODUCT: (id) => `/api/Product/UpdateProduct/${id}`,
+  UPDATE_PRODUCT: `/api/Product/UpdateProduct`,
   DELETE_PRODUCT: (id) => `/api/Product/DeleteProduct/${id}`,
 };
 
@@ -34,6 +34,14 @@ export const API_ENDPOINTS_CART = {
   ADD_TO_CART: (userId) => `/api/Cart/${userId}`,
   UPDATE_ITEM: "/api/Cart/item",
   REMOVE_FROM_CART: (cartItemId) => `/api/Cart/item/${cartItemId}`,
+};
+
+export const API_ENDPOINTS_CRAFTVILLAGE = {
+  GET_CRAFTVILLAGES: "/api/CraftVillage/GetAllCraftVillages",
+  GET_CRAFTVILLAGE_BY_ID: (id) => `/api/CraftVillage/GetCraftVillageById/${id}`,
+  CREATE_NEW_CRAFTVILLAGE: "/api/CraftVillage/CreateNewCraftVillage",
+  UPDATE_CRAFTVILLAGE: (id) => `/api/CraftVillage/UpdateCraftVillage/${id}`,
+  DELETE_CRAFTVILLAGE: (id) => `/api/CraftVillage/DeleteCraftVillage/${id}`,
 };
 
 export const API_ENDPOINTS_METERIAL = {
@@ -55,4 +63,20 @@ export const API_ENDPOINTS_SUBCATEGORY = {
 
 export const API_ENDPOINTS_USER = {
   GET_USER: "/api/User/get-current-user",
+  SEND_REQUEST_UPGRADE_ARTISAN: "/api/User/SendRequestUpgradeToArtisan",
+};
+
+export const API_ENDPOINTS_FAVORITE = {
+  GET_FAVORITE: (id) => `/api/Favourite/GetFavourites/${id}`,
+  GET_CHECKFAVORITE: (userId, productId) =>
+    `/api/Favourite/CheckFavourite?userId=${userId}&productId=${productId}`,
+  ADD_FAVORITE: "/api/Favourite/AddFavourite",
+  DELETE_FAVORITE: (userId, productId) => `/api/Favourite/DeleteFavourite?userId=${userId}&productId=${productId}`,
+};
+
+export const API_ENDPOINTS_ADDRESS = {
+  GET_ADDRESS: (userId) => `/api/UserAddress/GetAddress/${userId}`,
+  ADD_ADDRESS: "/api/UserAddress/AddNewAddress",
+  UPDATE_ADDRESS: (addressId) => `/api/UserAddress/UpdateAddress/${addressId}`,
+  DELTE_ADDRESS: (addressId) => `/api/UserAddress/DeleteAddress/${addressId}`,
 };

@@ -10,6 +10,13 @@ const userService = {
     return performApiRequest(API_ENDPOINTS_USER.GET_USER, { method: "get" });
   },
 
+  async upgradeToArtisan(formData) {
+    return performApiRequest(API_ENDPOINTS_USER.SEND_REQUEST_UPGRADE_ARTISAN, {
+      method: "post",
+      data: formData
+    })
+  },
+
   /**
    * Cập nhật thông tin người dùng
    * @param {Object} userData - Dữ liệu người dùng cần cập nhật

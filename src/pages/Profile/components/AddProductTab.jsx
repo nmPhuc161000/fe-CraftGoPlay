@@ -7,6 +7,7 @@ import subCategoryService from "../../../services/apis/subCateApi";
 import meterialService from "../../../services/apis/meterialApi"; // Thêm service cho material
 import productService from "../../../services/apis/productApi";
 import { useNotification } from "../../../contexts/NotificationContext";
+import { validateProductData } from "../../../utils/validateProductData";
 
 export default function AddProductTab() {
   const { user } = useContext(AuthContext);
@@ -19,7 +20,7 @@ export default function AddProductTab() {
     SubCategoryId: "",
     Status: "Active",
     Artisan_id: user?.id,
-    MaterialIds: [], // Thay đổi từ string sang array
+    MeterialIds: [], // Thay đổi từ string sang array
   });
   const [previewImages, setPreviewImages] = useState([]); // Thay đổi từ single image sang array
   const [isDragging, setIsDragging] = useState(false);
@@ -69,10 +70,10 @@ export default function AddProductTab() {
   // Xử lý chọn material
   const handleMaterialChange = (materialId) => {
     setFormData((prev) => {
-      const newMaterialIds = prev.MaterialIds.includes(materialId)
-        ? prev.MaterialIds.filter((id) => id !== materialId)
-        : [...prev.MaterialIds, materialId];
-      return { ...prev, MaterialIds: newMaterialIds };
+      const newMeterialIds = prev.MeterialIds.includes(materialId)
+        ? prev.MeterialIds.filter((id) => id !== materialId)
+        : [...prev.MeterialIds, materialId];
+      return { ...prev, MeterialIds: newMeterialIds };
     });
   };
 
@@ -149,69 +150,6 @@ export default function AddProductTab() {
     [handleImageChange]
   );
 
-  // Hàm validate dữ liệu
-  const validateProductData = (productData) => {
-    if (!productData.Name) {
-      return {
-        success: false,
-        error: "Tên sản phẩm là bắt buộc",
-        status: 400,
-      };
-    }
-    if (!productData.Price) {
-      return {
-        success: false,
-        error: "Giá sản phẩm là bắt buộc",
-        status: 400,
-      };
-    }
-    if (!productData.Quantity || productData.Quantity <= 0) {
-      return {
-        success: false,
-        error: "Số lượng phải lớn hơn 0",
-        status: 400,
-      };
-    }
-    if (!productData.Description) {
-      return {
-        success: false,
-        error: "Mô tả sản phẩm là bắt buộc",
-        status: 400,
-      };
-    }
-    if (!productData.SubCategoryId) {
-      return {
-        success: false,
-        error: "Danh mục con là bắt buộc",
-        status: 400,
-      };
-    }
-    if (parseFloat(productData.Price) <= 0) {
-      return {
-        success: false,
-        error: "Giá bán phải lớn hơn 0",
-        status: 400,
-      };
-    }
-    if (!productData.MaterialIds || productData.MaterialIds.length === 0) {
-      return {
-        success: false,
-        error: "Vui lòng chọn ít nhất một chất liệu",
-        status: 400,
-      };
-    }
-    if (!productData.Images || productData.Images.length === 0) {
-      return {
-        success: false,
-        error: "Vui lòng chọn ít nhất một hình ảnh",
-        status: 400,
-      };
-    }
-    return {
-      success: true,
-    };
-  };
-
   // Xử lý gửi form
   const handleSubmit = useCallback(
     async (e) => {
@@ -228,10 +166,10 @@ export default function AddProductTab() {
 
       const formPayload = new FormData();
       Object.keys(formData).forEach((key) => {
-        if (key === "MaterialIds") {
-          // Xử lý mảng MaterialIds
-          formData.MaterialIds.forEach((id) => {
-            formPayload.append("MaterialIds", id);
+        if (key === "MeterialIds") {
+          // Xử lý mảng MeterialIds
+          formData.MeterialIds.forEach((id) => {
+            formPayload.append("MeterialIds", id);
           });
         } else if (key === "Images") {
           // Xử lý mảng Images
@@ -248,7 +186,7 @@ export default function AddProductTab() {
         if (!response.success) {
           throw new Error(response.error || "Lỗi không xác định");
         }
-        showNotification("Thêm sản phẩm thành công!");
+        showNotification("Thêm sản phẩm thành công!", "success");
         navigate("/profile-user/products");
       } catch (error) {
         console.error("Error creating product:", error);
@@ -401,7 +339,7 @@ export default function AddProductTab() {
                   <input
                     type="checkbox"
                     id={`material-${material.id}`}
-                    checked={formData.MaterialIds.includes(material.id)}
+                    checked={formData.MeterialIds.includes(material.id)}
                     onChange={() => handleMaterialChange(material.id)}
                     className="h-4 w-4 text-[#5e3a1e] focus:ring-[#5e3a1e] border-gray-300 rounded"
                   />
