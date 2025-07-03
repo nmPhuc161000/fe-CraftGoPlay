@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
 import ProductReviews from "./components/ProductReviews";
@@ -7,19 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
 import productService from "../../services/apis/productApi";
 import Notification from "../../components/Notification/Notification";
-
-// const sampleProduct = {
-//   name: "Sản phẩm thủ công bằng Tre",
-//   price: 13990000,
-//   description: `Lấy cảm hứng từ vẻ đẹp huyền bí của những đền tháp cổ Á Đông, Majestic Mahjong Set tái hiện tinh hoa văn hoá qua từng nét chạm khắc tinh xảo. Một tác phẩm nghệ thuật giao thoa giữa lịch sử và nghệ thuật, bộ cờ vừa toát lên vẻ cổ kính uy nghi, vừa tạo dấu ấn độc bản cho trải nghiệm chơi và trưng bày.`,
-//   images: [
-//     "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg",
-//     "https://mynghesenviet.vn/wp-content/uploads/2020/01/20190504_115952_petu.jpg",
-//     "https://wikiluat.com/wp-content/uploads/2017/11/12maytredanXKquangnam5_0792_640x426.jpg",
-//   ],
-//   warranty: "12 tháng",
-//   shipping: "Miễn phí vận chuyển",
-// };
+import favoriteService from "../../services/apis/favoriteApi";
+import { useNotification } from "../../contexts/NotificationContext";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -32,8 +21,9 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [showMessage, setShowMessage] = useState(false);
   const [showFavoriteMessage, setShowFavoriteMessage] = useState(false);
-
-  const { isAuthenticated } = useContext(AuthContext);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const { showNotification } = useNotification();
+  const { isAuthenticated, user } = useContext(AuthContext);
   const { addToCart } = useContext(CartContext);
 
   useEffect(() => {
@@ -108,16 +98,78 @@ const ProductDetail = () => {
     setTimeout(() => setShowMessage(false), 3500);
   };
 
-  const handleFavorite = () => {
-    if (!isAuthenticated) {
-      navigate("/login", { state: { from: location.pathname } });
-      return;
-    }
-    setShowFavoriteMessage(true);
-    setTimeout(() => setShowFavoriteMessage(false), 3500);
-  };
+  const handleFavorite = useCallback(
+    async (e) => {
+      e.preventDefault();
 
-  if (!product) return <div className="text-center py-12">Đang tải sản phẩm...</div>;
+      if (!isAuthenticated) {
+        navigate("/login", { state: { from: location.pathname } });
+        return;
+      }
+
+      try {
+        if (isFavorite) {
+          // Nếu đã thích thì gọi API xóa yêu thích
+          const response = await favoriteService.deleteFavorite(
+            user.id,
+            product.id
+          );
+          if (!response.success) {
+            throw new Error(response.error || "Lỗi khi xóa yêu thích");
+          }
+          setIsFavorite(false);
+          showNotification("Bỏ yêu thích thành công", "success");
+          setTimeout(() => setShowFavoriteMessage(false), 3500);
+        } else {
+          // Nếu chưa thích thì gọi API thêm yêu thích
+          const formData = {
+            userId: user.id,
+            productId: product.id,
+          };
+          const response = await favoriteService.addFavorite(formData);
+          if (!response.success) {
+            throw new Error(response.error || "Lỗi khi thêm yêu thích");
+          }
+          setIsFavorite(true);
+          showNotification("Thêm yêu thích thành công", "success");
+          setTimeout(() => setShowFavoriteMessage(false), 3500);
+        }
+      } catch (error) {
+        console.error("Error handling favorite:", error);
+      }
+    },
+    [
+      isFavorite,
+      isAuthenticated,
+      navigate,
+      location.pathname,
+      user,
+      product,
+    ]
+  );
+
+  // Thêm dependency vào useEffect kiểm tra yêu thích
+  useEffect(() => {
+    const checkFavorite = async () => {
+      if (user && product) {
+        // Thêm điều kiện kiểm tra user và product tồn tại
+        try {
+          const response = await favoriteService.getCheckFavorite(
+            user.id,
+            product.id
+          );
+          setIsFavorite(response.data?.isFavorited);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    };
+
+    checkFavorite();
+  }, [user, product]); // Thêm dependencies
+
+  if (!product)
+    return <div className="text-center py-12">Đang tải sản phẩm...</div>;
 
   return (
     <MainLayout>
@@ -140,7 +192,11 @@ const ProductDetail = () => {
         {/* img san pham */}
         <div className="flex flex-col md:w-1/2">
           {selectedImg && (
-            <img src={selectedImg} alt="product" className="w-full h-[420px] object-cover rounded-md" />
+            <img
+              src={selectedImg}
+              alt="product"
+              className="w-full h-[420px] object-cover rounded-md"
+            />
           )}
           <div className="flex mt-4 gap-2 overflow-x-auto">
             {product.productImages?.map((imgObj, index) => (
@@ -149,8 +205,11 @@ const ProductDetail = () => {
                 src={imgObj.imageUrl}
                 alt={`thumb-${index}`}
                 onClick={() => setSelectedImg(imgObj.imageUrl)}
-                className={`w-17 h-17 object-cover cursor-pointer border ${imgObj.imageUrl === selectedImg ? "border-black" : "border-gray-300"
-                  }`}
+                className={`w-17 h-17 object-cover cursor-pointer border ${
+                  imgObj.imageUrl === selectedImg
+                    ? "border-black"
+                    : "border-gray-300"
+                }`}
               />
             ))}
           </div>
@@ -196,7 +255,8 @@ const ProductDetail = () => {
                       className="text-[#5e3a1e] underline:none hover:text-[#3f2812] font-bold"
                     >
                       {product.artisanName}
-                    </Link>.
+                    </Link>
+                    .
                   </>
                 ) : (
                   "Không có thông tin nghệ nhân."
@@ -242,14 +302,19 @@ const ProductDetail = () => {
             >
               Mua ngay
             </button>
-            <button className="text-white px-6 py-2 rounded bg-[#5e3a1e] hover:bg-[#4a2f15]"
+            <button
+              className="text-white px-6 py-2 rounded bg-[#5e3a1e] hover:bg-[#4a2f15]"
               onClick={handleAddToCart}
             >
               🛒 Thêm vào giỏ hàng
             </button>
-            <button className="border border-yellow-700 text-yellow-700 px-6 py-2 rounded hover:bg-yellow-50"
-              onClick={handleFavorite}>
-              🤎 Yêu Thích
+            <button
+              className={`border ${
+                isFavorite ? "bg-yellow-50 text-yellow-700" : "text-yellow-700"
+              } border-yellow-700 px-6 py-2 rounded hover:bg-yellow-100 transition-colors`}
+              onClick={handleFavorite}
+            >
+              {isFavorite ? "🤎 Đã Thích" : "🤎 Yêu Thích"}
             </button>
           </div>
         </div>

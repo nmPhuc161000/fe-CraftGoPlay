@@ -37,8 +37,12 @@ export const API_ENDPOINTS_CART = {
 };
 
 export const API_ENDPOINTS_CRAFTVILLAGE = {
-  GET_CRAFTVILLAGE: "/"
-}
+  GET_CRAFTVILLAGES: "/api/CraftVillage/GetAllCraftVillages",
+  GET_CRAFTVILLAGE_BY_ID: (id) => `/api/CraftVillage/GetCraftVillageById/${id}`,
+  CREATE_NEW_CRAFTVILLAGE: "/api/CraftVillage/CreateNewCraftVillage",
+  UPDATE_CRAFTVILLAGE: (id) => `/api/CraftVillage/UpdateCraftVillage/${id}`,
+  DELETE_CRAFTVILLAGE: (id) => `/api/CraftVillage/DeleteCraftVillage/${id}`,
+};
 
 export const API_ENDPOINTS_METERIAL = {
   GET_METERIALS: "/api/Meterial/GetMeterials",
@@ -59,7 +63,7 @@ export const API_ENDPOINTS_SUBCATEGORY = {
 
 export const API_ENDPOINTS_USER = {
   GET_USER: "/api/User/get-current-user",
-  SEND_REQUEST_UPGRADE_ARTISAN: "/api/User/SendRequestUpgradeToArtisan"
+  SEND_REQUEST_UPGRADE_ARTISAN: "/api/User/SendRequestUpgradeToArtisan",
 };
 
 export const API_ENDPOINTS_FAVORITE = {
@@ -67,7 +71,7 @@ export const API_ENDPOINTS_FAVORITE = {
   GET_CHECKFAVORITE: (userId, productId) =>
     `/api/Favourite/CheckFavourite?userId=${userId}&productId=${productId}`,
   ADD_FAVORITE: "/api/Favourite/AddFavourite",
-  DELETE_FAVORITE: (id) => `/api/Favourite/DeleteFavourite/${id}`,
+  DELETE_FAVORITE: (userId, productId) => `/api/Favourite/DeleteFavourite?userId=${userId}&productId=${productId}`,
 };
 
 export const API_ENDPOINTS_ADDRESS = {
@@ -75,4 +79,4 @@ export const API_ENDPOINTS_ADDRESS = {
   ADD_ADDRESS: "/api/UserAddress/AddNewAddress",
   UPDATE_ADDRESS: (addressId) => `/api/UserAddress/UpdateAddress/${addressId}`,
   DELTE_ADDRESS: (addressId) => `/api/UserAddress/DeleteAddress/${addressId}`,
-}
+};

@@ -28,9 +28,9 @@ export default function FavoritesTab() {
     }
   };
 
-  const handleDeleteFavorite = async (id) => {
+  const handleDeleteFavorite = async (userId, productId, id) => {
     try {
-      const response = await favoriteService.deleteFavorite(id);
+      const response = await favoriteService.deleteFavorite(userId, productId);
       showNotification(
         response.message || MESSAGES.FAVORITE.DELETE_SUCCESS,
         "success"
@@ -89,7 +89,7 @@ export default function FavoritesTab() {
                 onClick={(e) => {
                   e.preventDefault(); // Ngăn Link chuyển trang
                   e.stopPropagation(); // Ngăn sự kiện nổi bọt
-                  handleDeleteFavorite(favorite.id);
+                  handleDeleteFavorite(user.id, favorite.product.id, favorite.id);
                 }}
                 className="absolute top-2 right-2 z-20 text-red-500 hover:scale-110 transition-transform bg-white/80 rounded-full p-1"
                 title="Bỏ yêu thích"

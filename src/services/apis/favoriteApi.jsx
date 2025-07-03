@@ -29,8 +29,8 @@ const favoriteService = {
     });
   },
 
-  async deleteFavorite(id) {
-    return performApiRequest(API_ENDPOINTS_FAVORITE.DELETE_FAVORITE(id), {
+  async deleteFavorite(userId, productId) {
+    return performApiRequest(API_ENDPOINTS_FAVORITE.DELETE_FAVORITE(userId, productId), {
       method: "delete",
     });
   },

@@ -1,8 +1,9 @@
 // src/components/UpgradeArtisanTab.jsx
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import userService from "../../../services/apis/userApi";
 import { useNotification } from "../../../contexts/NotificationContext";
 import { FiUpload, FiX } from "react-icons/fi";
+import CraftVillageService from "../../../services/apis/craftvillageApi";
 
 export default function UpgradeArtisanTab({ userId }) {
   const [formData, setFormData] = useState({
@@ -11,11 +12,13 @@ export default function UpgradeArtisanTab({ userId }) {
     YearsOfExperience: 0,
     Description: "",
   });
+  const [craftVillages, setCraftVillages] = useState([]);
+  const [selectedVillage, setSelectedVillage] = useState(null);
   const { showNotification } = useNotification();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [previewImage, setPreviewImage] = useState(null); // chỉ 1 ảnh
+  const [previewImage, setPreviewImage] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const handleInputChange = (e) => {
@@ -24,7 +27,30 @@ export default function UpgradeArtisanTab({ userId }) {
       ...formData,
       [name]: value,
     });
+
+    // Khi chọn làng nghề, cập nhật thông tin làng nghề được chọn
+    if (name === "CraftVillageId") {
+      const village = craftVillages.find((v) => v.id === value);
+      setSelectedVillage(village);
+    }
   };
+
+  useEffect(() => {
+    const fetchCraftVillage = async () => {
+      setIsLoading(true);
+      try {
+        const response = await CraftVillageService.getCraftVillages();
+        setCraftVillages(response.data.data);
+      } catch (error) {
+        console.error(error);
+        showNotification("Không tải được danh sách làng nghề", "error");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCraftVillage();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,13 +72,17 @@ export default function UpgradeArtisanTab({ userId }) {
       formDataToSend.append("UserId", userId);
 
       const response = await userService.upgradeToArtisan(formDataToSend);
+      console.log("data: ", response);
+      
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to submit request");
+        throw new Error(errorData.message || "Gửi yêu cầu thất bại");
       }
 
       setSuccess(true);
+      showNotification("Yêu cầu của bạn đã được gửi thành công!", "success");
+      
       // Reset form sau khi gửi thành công
       setFormData({
         Image: null,
@@ -60,29 +90,32 @@ export default function UpgradeArtisanTab({ userId }) {
         YearsOfExperience: 0,
         Description: "",
       });
+      setPreviewImage(null);
+      setSelectedVillage(null);
     } catch (err) {
-      setError(err.message || "An unknown error occurred");
+      setError(err.message || "Đã xảy ra lỗi không xác định");
+      showNotification(err.message || "Đã xảy ra lỗi không xác định", "error");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Xử lý chọn ảnh (nhiều ảnh)
+  // Các hàm xử lý ảnh giữ nguyên như cũ
   const handleImageChange = useCallback((files) => {
     if (!files || files.length === 0) {
-      showNotification("Vui lòng chọn một file!");
+      showNotification("Vui lòng chọn một file!", "error");
       return;
     }
 
     const file = files[0];
 
     if (!file.type.match("image.*")) {
-      showNotification(`File ${file.name} không phải là ảnh!`);
+      showNotification(`File ${file.name} không phải là ảnh!`, "error");
       return;
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      showNotification(`File ${file.name} vượt quá 5MB!`);
+      showNotification(`File ${file.name} vượt quá 5MB!`, "error");
       return;
     }
 
@@ -97,7 +130,6 @@ export default function UpgradeArtisanTab({ userId }) {
     reader.readAsDataURL(file);
   }, []);
 
-  // Xử lý sự kiện kéo thả
   const handleDragOver = useCallback((e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -117,25 +149,20 @@ export default function UpgradeArtisanTab({ userId }) {
     [handleImageChange]
   );
 
+  // Hàm format ngày tháng
+  const formatDate = (dateString) => {
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    return new Date(dateString).toLocaleDateString("vi-VN", options);
+  };
+
   return (
     <div className="w-full mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">
-        Upgrade to Artisan
+        Đăng ký nghệ nhân
       </h2>
 
-      {error && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
-          Your request has been submitted successfully!
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Phần upload ảnh giữ nguyên như cũ */}
         <div
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -187,9 +214,10 @@ export default function UpgradeArtisanTab({ userId }) {
           )}
         </div>
 
+        {/* Phần chọn làng nghề */}
         <div>
           <label className="block text-gray-700 mb-2" htmlFor="CraftVillageId">
-            Craft Village
+            Làng nghề thủ công
           </label>
           <select
             id="CraftVillageId"
@@ -198,20 +226,50 @@ export default function UpgradeArtisanTab({ userId }) {
             onChange={handleInputChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
+            disabled={isLoading || craftVillages.length === 0}
           >
-            <option value="">Select a craft village</option>
-            <option value="1">Village 1</option>
-            <option value="2">Village 2</option>
-            {/* Thêm các tùy chọn khác nếu cần */}
+            <option value="">Chọn làng nghề thủ công</option>
+            {craftVillages.map((village) => (
+              <option key={village.id} value={village.id}>
+                {village.village_Name}
+              </option>
+            ))}
           </select>
         </div>
+
+        {/* Hiển thị thông tin chi tiết làng nghề khi được chọn */}
+        {selectedVillage && (
+          <div className="p-4 border border-gray-200 rounded-lg bg-gray-50">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">
+              Thông tin làng nghề
+            </h3>
+            <div className="space-y-2">
+              <p>
+                <span className="font-medium">Tên làng nghề:</span>{" "}
+                {selectedVillage.village_Name}
+              </p>
+              <p>
+                <span className="font-medium">Mô tả:</span>{" "}
+                {selectedVillage.description}
+              </p>
+              <p>
+                <span className="font-medium">Địa điểm:</span>{" "}
+                {selectedVillage.location}
+              </p>
+              <p>
+                <span className="font-medium">Ngày thành lập:</span>{" "}
+                {formatDate(selectedVillage.establishedDate)}
+              </p>
+            </div>
+          </div>
+        )}
 
         <div>
           <label
             className="block text-gray-700 mb-2"
             htmlFor="YearsOfExperience"
           >
-            Years of Experience
+            Kinh nghiệm (năm)
           </label>
           <input
             type="number"
@@ -227,7 +285,7 @@ export default function UpgradeArtisanTab({ userId }) {
 
         <div>
           <label className="block text-gray-700 mb-2" htmlFor="Description">
-            Description
+            Mô tả
           </label>
           <textarea
             id="Description"
@@ -237,6 +295,7 @@ export default function UpgradeArtisanTab({ userId }) {
             rows={4}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
+            placeholder="Mô tả về kỹ năng và kinh nghiệm của bạn"
           />
         </div>
 
@@ -247,7 +306,7 @@ export default function UpgradeArtisanTab({ userId }) {
             isLoading ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"
           } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
         >
-          {isLoading ? "Submitting..." : "Submit Request"}
+          {isLoading ? "Đang gửi..." : "Gửi yêu cầu"}
         </button>
       </form>
     </div>
