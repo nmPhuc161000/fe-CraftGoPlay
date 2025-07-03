@@ -31,6 +31,7 @@ export default function ProductDetailTab() {
     Quantity: 1,
     Status: "Active",
     SubCategoryId: "",
+    Artisan_id: "",
     ImagesToAdd: [],
     ImagesToRemove: [],
     MeterialIdsToAdd: [],
@@ -82,6 +83,7 @@ export default function ProductDetailTab() {
           Quantity: productData.quantity,
           Status: productData.status,
           SubCategoryId: productData.subCategoryId,
+          Artisan_id: productData.artisan_id,
           ImagesToAdd: [],
           ImagesToRemove: [],
           MeterialIdsToAdd: [],
@@ -241,6 +243,7 @@ export default function ProductDetailTab() {
       formPayload.append("Quantity", formData.Quantity);
       formPayload.append("Status", formData.Status);
       formPayload.append("SubCategoryId", formData.SubCategoryId);
+      formPayload.append("Artisan_id", formData.Artisan_id);
 
       // Xử lý MeterialIdsToAdd - thêm từng cái một
       formData.MeterialIdsToAdd.forEach((id) => {

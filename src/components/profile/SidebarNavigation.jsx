@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
 import { useContext } from "react";
 
-const SidebarNavigation = ({ role, isActive, handleRegisterArtisan }) => {
+const SidebarNavigation = ({ role, isActive }) => {
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -76,6 +76,20 @@ const SidebarNavigation = ({ role, isActive, handleRegisterArtisan }) => {
         </span>
       </Link>
 
+      {role === "User" && (
+        <Link
+          to="/profile-user/addresses"
+          className={`flex items-center px-4 py-3 rounded-lg mb-1 ${
+            isActive("addresses")
+              ? "bg-[#5e3a1e] text-white"
+              : "text-gray-700 hover:bg-gray-100"
+          }`}
+        >
+          <span className="w-6 text-center">🏠</span>
+          <span className="ml-3">Địa chỉ</span>
+        </Link>
+      )}
+
       {role === "Artisan" ? (
         <>
           <Link
@@ -99,17 +113,17 @@ const SidebarNavigation = ({ role, isActive, handleRegisterArtisan }) => {
           </button>
         </>
       ) : (
-        <button
-          onClick={handleRegisterArtisan}
-          className={`flex items-center w-full px-4 py-3 rounded-lg mb-1 ${
-            isActive("register-artisan")
+        <Link
+          to="/profile-user/upgradeArtisan"
+          className={`flex items-center px-4 py-3 rounded-lg mb-1 ${
+            isActive("upgradeArtisan")
               ? "bg-[#5e3a1e] text-white"
               : "text-gray-700 hover:bg-gray-100"
           }`}
         >
           <span className="w-6 text-center">✨</span>
           <span className="ml-3">Đăng ký Nghệ nhân</span>
-        </button>
+        </Link>
       )}
     </nav>
   );

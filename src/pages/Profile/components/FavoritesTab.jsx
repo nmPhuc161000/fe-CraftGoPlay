@@ -1,34 +1,101 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from "react";
+import ProductCard from "../../../components/profile/ProductCard";
+import { AuthContext } from "../../../contexts/AuthContext";
+import favoriteService from "../../../services/apis/favoriteApi";
+import { Link } from "react-router-dom";
+import { FaHeart } from "react-icons/fa";
+import { useNotification } from "../../../contexts/NotificationContext";
+import { MESSAGES } from "../../../constants/messages";
 
-export default function FavoritesTab({ userId }) {
-  const favorites = [
-    { id: 1, name: 'Tranh thêu tay Hạ Long', price: 1200000, artisan: 'Nghệ nhân A' },
-    { id: 2, name: 'Gốm Bát Tràng', price: 850000, artisan: 'Nghệ nhân B' },
-  ];
+export default function FavoritesTab() {
+  const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { user } = useContext(AuthContext);
+  const { showNotification } = useNotification();
+
+  const fetchFavorites = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await favoriteService.getFavorite(user.id);
+      setFavorites(response.data.data || []);
+    } catch (error) {
+      setError(error.message);
+      console.error("Lỗi khi tải sản phẩm:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteFavorite = async (id) => {
+    try {
+      const response = await favoriteService.deleteFavorite(id);
+      showNotification(
+        response.message || MESSAGES.FAVORITE.DELETE_SUCCESS,
+        "success"
+      );
+      // Cập nhật UI mà không cần gọi lại API
+      setFavorites((prev) => prev.filter((fav) => fav.id !== id));
+    } catch (error) {
+      console.error("Lỗi khi xóa yêu thích:", error);
+      showNotification("Xóa yêu thích thất bại", "error");
+    }
+  };
+
+  useEffect(() => {
+    fetchFavorites();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="text-center py-8">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#5e3a1e]"></div>
+        <p className="mt-2">Đang tải sản phẩm...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8 text-red-500">
+        <p>{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-2 px-4 py-1 bg-gray-100 rounded hover:bg-gray-200"
+        >
+          Thử lại
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <h3 className="text-xl font-bold text-[#5e3a1e]">Sản phẩm yêu thích</h3>
-      
+
       {favorites.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <p className="text-gray-500">Bạn chưa có sản phẩm yêu thích nào</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {favorites.map(item => (
-            <div key={item.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-              <h4 className="font-semibold">{item.name}</h4>
-              <p className="text-[#5e3a1e] font-medium mt-1">{item.price.toLocaleString()} VND</p>
-              <p className="text-gray-500 text-sm mt-1">Nghệ nhân: {item.artisan}</p>
-              <div className="mt-3 flex space-x-2">
-                <button className="px-3 py-1 bg-[#5e3a1e] text-white rounded text-sm hover:bg-[#7a4b28]">
-                  Mua ngay
-                </button>
-                <button className="px-3 py-1 bg-gray-100 text-gray-800 rounded text-sm">
-                  Xóa
-                </button>
-              </div>
+          {favorites.map((favorite) => (
+            <div key={favorite.product.id} className="relative">
+              <Link to={`/product/${favorite.product.id}`} className="block">
+                <ProductCard product={favorite.product} isFavorite={true} />
+              </Link>
+              <button
+                onClick={(e) => {
+                  e.preventDefault(); // Ngăn Link chuyển trang
+                  e.stopPropagation(); // Ngăn sự kiện nổi bọt
+                  handleDeleteFavorite(favorite.id);
+                }}
+                className="absolute top-2 right-2 z-20 text-red-500 hover:scale-110 transition-transform bg-white/80 rounded-full p-1"
+                title="Bỏ yêu thích"
+              >
+                <FaHeart className="w-5 h-5" />
+              </button>
             </div>
           ))}
         </div>

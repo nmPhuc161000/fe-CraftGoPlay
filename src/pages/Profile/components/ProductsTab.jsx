@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import productService from "../../../services/apis/productApi";
+import ProductCard from "../../../components/profile/ProductCard";
 
 export default function ProductsTab({ artisanId }) {
   const [products, setProducts] = useState([]);
@@ -9,7 +10,7 @@ export default function ProductsTab({ artisanId }) {
   const [filter, setFilter] = useState("all");
   const [pageIndex, setPageIndex] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [productStatus, setProductStatus] = useState("Active");
+  const [productStatus, setProductStatus] = useState("");
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -163,7 +164,7 @@ export default function ProductsTab({ artisanId }) {
           >
             <option value="Active">Đang bán</option>
             <option value="Inactive">Ngừng bán</option>
-            <option value="All">Tất cả</option>
+            <option value="">Tất cả</option>
           </select>
         </div>
 
@@ -301,45 +302,6 @@ export default function ProductsTab({ artisanId }) {
           )}
         </>
       )}
-    </div>
-  );
-}
-
-function ProductCard({ product }) {
-  return (
-    <div className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow flex flex-col h-full">
-      <div className="relative">
-        <img
-          src={product.productImages?.[0]?.imageUrl}
-          alt={product.name || "Ảnh sản phẩm"}
-          className="w-full h-48 object-cover"
-          loading="lazy"
-          onError={(e) => {
-            e.target.src = "/default-product-image.jpg";
-          }}
-        />
-        {product.stock <= 0 && (
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-transparent flex items-center justify-center">
-            <span className="bg-white/90 px-3 py-1 rounded-full text-sm font-medium border border-gray-200 shadow-sm">
-              HẾT HÀNG
-            </span>
-          </div>
-        )}
-      </div>
-
-      <div className="p-4 flex-grow">
-        <h4 className="font-semibold text-lg line-clamp-2">{product.name}</h4>
-        <p className="text-[#5e3a1e] font-medium mt-1">
-          {product.price?.toLocaleString() || "0"} VND
-        </p>
-        <div className="mt-2 text-sm space-y-1">
-          <p className="text-gray-600">Tồn kho: {product.quantity || 0}</p>
-          <p className="text-gray-600">Đã bán: {product.soldQuantity || 0}</p>
-          <p className="text-gray-600">
-            Trạng thái: {product.status === "Active" ? "Đang bán" : "Ngừng bán"}
-          </p>
-        </div>
-      </div>
     </div>
   );
 }

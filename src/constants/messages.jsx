@@ -16,4 +16,7 @@ export const MESSAGES = {
   COMMON: {
     SERVER_ERROR: "Lỗi server, vui lòng thử lại sau",
   },
+  FAVORITE: {
+    DELETE_SUCCESS: "Đã xóa khỏi danh sách yêu thích"
+  }
 };
