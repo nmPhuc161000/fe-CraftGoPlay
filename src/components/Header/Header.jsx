@@ -8,12 +8,17 @@ import {
 } from "react-icons/fa";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext"; // Import AuthContext
+import { CartContext } from "../../contexts/CartContext"; // Import CartContext
 
 const Header = () => {
   const { user, isAuthenticated, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const { cartItems } = useContext(CartContext);
+
+  const totalCartQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
+
 
   // Hàm xử lý đăng xuất
   const handleLogout = () => {
@@ -113,10 +118,17 @@ const Header = () => {
 
             </div>
 
-            <FaShoppingBag
-              className="cursor-pointer hover:text-gray-500 tracking-wider"
-              title="Giỏ hàng"
-            />
+            <div className="relative cursor-pointer" onClick={() => navigate("/cart")}>
+              <FaShoppingBag
+                className="text-xl hover:text-gray-500 tracking-wider"
+                title="Giỏ hàng"
+              />
+              {totalCartQuantity > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
+                  {totalCartQuantity}
+                </span>
+              )}
+            </div>
 
             {isAuthenticated ? (
               <div className="relative group">

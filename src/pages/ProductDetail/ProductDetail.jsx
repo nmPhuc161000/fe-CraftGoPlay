@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useContext } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams, useLocation } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
 import ProductReviews from "./components/ProductReviews";
 import { CartContext } from "../../contexts/CartContext";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../contexts/AuthContext";
 import productService from "../../services/apis/productApi";
+import Notification from "../../components/Notification/Notification";
 
 // const sampleProduct = {
 //   name: "Sản phẩm thủ công bằng Tre",
@@ -21,12 +23,18 @@ import productService from "../../services/apis/productApi";
 
 const ProductDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [selectedImg, setSelectedImg] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [reviews, setReviews] = useState([]);
   const [product, setProduct] = useState(null);
+  const [showMessage, setShowMessage] = useState(false);
+  const [showFavoriteMessage, setShowFavoriteMessage] = useState(false);
+
+  const { isAuthenticated } = useContext(AuthContext);
   const { addToCart } = useContext(CartContext);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -79,14 +87,61 @@ const ProductDetail = () => {
     fakeFetchReviews();
   }, []);
 
+  const handleBuyNow = () => {
+    handleAddToCart();
+    navigate("/checkout");
+  };
+
+  const handleAddToCart = () => {
+    if (!isAuthenticated) {
+      navigate("/login", { state: { from: location.pathname } });
+      return;
+    }
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: selectedImg,
+      quantity: quantity,
+    });
+    setShowMessage(true);
+    setTimeout(() => setShowMessage(false), 3500);
+  };
+
+  const handleFavorite = () => {
+    if (!isAuthenticated) {
+      navigate("/login", { state: { from: location.pathname } });
+      return;
+    }
+    setShowFavoriteMessage(true);
+    setTimeout(() => setShowFavoriteMessage(false), 3500);
+  };
+
   if (!product) return <div className="text-center py-12">Đang tải sản phẩm...</div>;
 
   return (
     <MainLayout>
+      {showMessage && (
+        <Notification
+          message="Đã thêm sản phẩm vào giỏ hàng!"
+          type="success"
+          onClose={() => setShowMessage(false)}
+        />
+      )}
+      {showFavoriteMessage && (
+        <Notification
+          message="Đã thêm vào danh sách yêu thích!"
+          type="success"
+          onClose={() => setShowFavoriteMessage(false)}
+        />
+      )}
+
       <div className="container mx-auto px-6 py-12 flex flex-col md:flex-row gap-8 text-[#5e3a1e]">
         {/* img san pham */}
         <div className="flex flex-col md:w-1/2">
-          <img src={selectedImg} alt="product" className="w-full rounded-md" />
+          {selectedImg && (
+            <img src={selectedImg} alt="product" className="w-full h-[420px] object-cover rounded-md" />
+          )}
           <div className="flex mt-4 gap-2 overflow-x-auto">
             {product.productImages?.map((imgObj, index) => (
               <img
@@ -94,7 +149,7 @@ const ProductDetail = () => {
                 src={imgObj.imageUrl}
                 alt={`thumb-${index}`}
                 onClick={() => setSelectedImg(imgObj.imageUrl)}
-                className={`w-16 h-16 object-cover cursor-pointer border ${imgObj.imageUrl === selectedImg ? "border-black" : "border-gray-300"
+                className={`w-17 h-17 object-cover cursor-pointer border ${imgObj.imageUrl === selectedImg ? "border-black" : "border-gray-300"
                   }`}
               />
             ))}
@@ -118,18 +173,34 @@ const ProductDetail = () => {
               <summary className="cursor-pointer font-bold">
                 Chất Liệu Tạo Nên Sự Khác Biệt
               </summary>
-              <p className="mt-2">
-                Sản phẩm thủ công từ tre được ưa chuộng trong và ngoài nước có
-                thể kể đến là: đèn mây tre, gương tre, mẹt tre, khay tre, giỏ
-                tre, bàn tre, ghế tre, mành tre che nắng, ống hút tre
-              </p>
+              <div className="mt-2 space-y-1">
+                {product.meterials?.length > 0 ? (
+                  product.meterials.map((material, index) => (
+                    <p key={index}>• {material.name || material}</p>
+                  ))
+                ) : (
+                  <p>Không có thông tin chất liệu.</p>
+                )}
+              </div>
             </details>
             <details className="mb-4 border-b pb-2">
               <summary className="cursor-pointer font-bold">
                 Nghệ Nhân Chế Tác Thủ Công
               </summary>
               <p className="mt-2">
-                Mỗi chi tiết được làm thủ công bởi nghệ nhân lành nghề.
+                {product.artisanName ? (
+                  <>
+                    Sản phẩm được chế tác bởi{" "}
+                    <Link
+                      to={`/artisan/${product.artisan_id}`}
+                      className="text-[#5e3a1e] underline:none hover:text-[#3f2812] font-bold"
+                    >
+                      {product.artisanName}
+                    </Link>.
+                  </>
+                ) : (
+                  "Không có thông tin nghệ nhân."
+                )}
               </p>
             </details>
           </div>
@@ -156,30 +227,28 @@ const ProductDetail = () => {
 
           <div className="mt-6 flex gap-6 text-sm text-gray-600">
             <div className="flex items-center gap-1">
-              👍 <span>Bảo hành {product.warranty}</span>
+              👍 <span>Bảo hành</span>
             </div>
             <div className="flex items-center gap-1">
-              📦 <span>{product.shipping}</span>
+              📦 <span> Còn {product.quantity} sản phẩm</span>
             </div>
           </div>
 
           {/* button */}
           <div className="mt-6 flex flex-wrap gap-4">
-            <button className="text-white px-6 py-2 rounded bg-[#5e3a1e] hover:bg-[#4a2f15]"
-              onClick={() => {
-                addToCart({
-                  id, // lấy từ useParams
-                  name: product.name,
-                  price: product.price,
-                  image: selectedImg,
-                  quantity,
-                });
-                navigate("/cart");
-              }}
+            <button
+              className="text-white px-6 py-2 rounded bg-[#5e3a1e] hover:bg-[#4a2f15]"
+              onClick={handleBuyNow}
             >
-              Thêm vào giỏ hàng
+              Mua ngay
             </button>
-            <button className="border border-yellow-700 text-yellow-700 px-6 py-2 rounded hover:bg-yellow-50">
+            <button className="text-white px-6 py-2 rounded bg-[#5e3a1e] hover:bg-[#4a2f15]"
+              onClick={handleAddToCart}
+            >
+              🛒 Thêm vào giỏ hàng
+            </button>
+            <button className="border border-yellow-700 text-yellow-700 px-6 py-2 rounded hover:bg-yellow-50"
+              onClick={handleFavorite}>
               🤎 Yêu Thích
             </button>
           </div>
