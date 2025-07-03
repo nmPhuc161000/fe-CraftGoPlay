@@ -1,6 +1,7 @@
 import axios from "axios";
 import { createContext, useState, useEffect, useContext } from "react";
 import { AuthContext } from "./AuthContext";
+import { API_BASE_URL, API_ENDPOINTS_CART } from "../constants/apiEndPoint";
 
 export const CartContext = createContext();
 
@@ -8,20 +9,16 @@ export const CartProvider = ({ children }) => {
     const [cartItems, setCartItems] = useState([]);
     const { isAuthenticated, user, token } = useContext(AuthContext);
 
-    const API = {
-        GET_CART: (userId) => `http://localhost:5000/api/Cart/${userId}`,
-        ADD_TO_CART: (userId) => `http://localhost:5000/api/Cart/${userId}`,
-        UPDATE_ITEM: "http://localhost:5000/api/Cart/item",
-        DELETE_ITEM: (cartItemId) => `http://localhost:5000/api/Cart/item/${cartItemId}`,
-    };
-
     // 1. Lấy giỏ hàng từ API
     const fetchCart = async () => {
         if (isAuthenticated && user?.id) {
             try {
-                const res = await axios.get(API.GET_CART(user.id), {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                const res = await axios.get(
+                    `${API_BASE_URL}${API_ENDPOINTS_CART.GET_CART(user.id)}`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                );
                 const items = res.data?.data?.items || [];
                 setCartItems(items);
             } catch (err) {
@@ -41,7 +38,7 @@ export const CartProvider = ({ children }) => {
         if (isAuthenticated && user?.id) {
             try {
                 await axios.post(
-                    API.ADD_TO_CART(user.id),
+                    `${API_BASE_URL}${API_ENDPOINTS_CART.ADD_TO_CART(user.id)}`,
                     {
                         productId: product.id,
                         quantity: product.quantity,
@@ -77,9 +74,12 @@ export const CartProvider = ({ children }) => {
 
         if (isAuthenticated && cartItemId) {
             try {
-                await axios.delete(API.DELETE_ITEM(cartItemId), {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                await axios.delete(
+                    `${API_BASE_URL}${API_ENDPOINTS_CART.REMOVE_FROM_CART(cartItemId)}`,
+                    {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }
+                );
             } catch (err) {
                 console.error("Lỗi khi xoá sản phẩm:", err);
             }
@@ -99,7 +99,7 @@ export const CartProvider = ({ children }) => {
         if (isAuthenticated && cartItemId) {
             try {
                 await axios.put(
-                    API.UPDATE_ITEM,
+                    `${API_BASE_URL}${API_ENDPOINTS_CART.UPDATE_ITEM}`,
                     { cartItemId, quantity },
                     {
                         headers: { Authorization: `Bearer ${token}` },
