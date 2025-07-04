@@ -47,10 +47,10 @@ export const CartProvider = ({ children }) => {
     const removeFromCart = async (cartItemId) => {
         if (!isAuthenticated || !cartItemId) return;
 
-        setCartItems((prev) => prev.filter((item) => item.id !== cartItemId));
-
         const res = await removeFromCartApi(cartItemId);
-        if (!res.success) {
+        if (res.success) {
+            await fetchCart(); 
+        } else {
             console.error("Lỗi khi xoá sản phẩm:", res.error);
         }
     };
@@ -59,17 +59,18 @@ export const CartProvider = ({ children }) => {
     const updateQuantity = async (cartItemId, quantity) => {
         if (!isAuthenticated || !cartItemId || quantity < 1) return;
 
-        setCartItems((prev) =>
-            prev.map((item) =>
-                item.id === cartItemId ? { ...item, quantity } : item
-            )
-        );
-
         const res = await updateCartItemApi(cartItemId, quantity);
-        if (!res.success) {
+        if (res.success) {
+            await fetchCart();
+        } else {
             console.error("Lỗi khi cập nhật số lượng:", res.error);
         }
     };
+
+    const clearCart = () => {
+    setCartItems([]);
+};
+
 
     const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -81,6 +82,7 @@ export const CartProvider = ({ children }) => {
                 removeFromCart,
                 updateQuantity,
                 cartCount,
+                clearCart,
             }}
         >
             {children}

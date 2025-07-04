@@ -3,7 +3,7 @@ import { API_ENDPOINTS_CATEGORY } from "../../constants/apiEndPoint";
 
 const categoryService = {
   async getAllCategories() {
-    performApiRequest(API_ENDPOINTS_CATEGORY.GET_CATEGORIES, {
+    return performApiRequest(API_ENDPOINTS_CATEGORY.GET_CATEGORIES, {
       method: "get",
     });
   },
