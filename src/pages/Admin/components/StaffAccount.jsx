@@ -32,7 +32,10 @@ const StaffAccount = () => {
   const [showModal, setShowModal] = useState(false);
   const [openActionIdx, setOpenActionIdx] = useState(null);
   const actionMenuRef = useRef(null);
-  const [data, setData] = useState(FAKE_DATA);
+  const [data, setData] = useState(() => {
+    const savedData = localStorage.getItem('adminStaffData');
+    return savedData ? JSON.parse(savedData) : FAKE_DATA;
+  });
   const [search, setSearch] = useState("");
   const [confirmModal, setConfirmModal] = useState({ open: false, idx: null, action: null });
   const [form, setForm] = useState({ name: "", email: "", phone: "", address: "" });
@@ -41,6 +44,11 @@ const StaffAccount = () => {
   const [actionMenuPos, setActionMenuPos] = useState({ top: 0, left: 0 });
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+
+  // Lưu dữ liệu vào localStorage khi data thay đổi
+  useEffect(() => {
+    localStorage.setItem('adminStaffData', JSON.stringify(data));
+  }, [data]);
 
   // Lọc dữ liệu theo search
   const filteredData = data.filter(row =>
