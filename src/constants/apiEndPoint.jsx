@@ -64,6 +64,7 @@ export const API_ENDPOINTS_SUBCATEGORY = {
 export const API_ENDPOINTS_USER = {
   GET_USER: "/api/User/get-current-user",
   SEND_REQUEST_UPGRADE_ARTISAN: "/api/User/SendRequestUpgradeToArtisan",
+  CHECK_SEND_REQUEST_UPGRADE_ARTISAN: (userId) => `/api/User/CheckRequestSent/${userId}`
 };
 
 export const API_ENDPOINTS_FAVORITE = {

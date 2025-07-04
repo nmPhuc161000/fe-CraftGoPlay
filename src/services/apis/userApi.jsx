@@ -13,8 +13,17 @@ const userService = {
   async upgradeToArtisan(formData) {
     return performApiRequest(API_ENDPOINTS_USER.SEND_REQUEST_UPGRADE_ARTISAN, {
       method: "post",
-      data: formData
-    })
+      data: formData,
+    });
+  },
+
+  async checkSendRequestArtisan(userId) {
+    return performApiRequest(
+      API_ENDPOINTS_USER.CHECK_SEND_REQUEST_UPGRADE_ARTISAN(userId),
+      {
+        method: "get",
+      }
+    );
   },
 
   /**
