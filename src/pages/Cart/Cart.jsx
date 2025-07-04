@@ -9,7 +9,7 @@ const Cart = () => {
     const { cartItems, removeFromCart, updateQuantity } = useContext(CartContext);
 
     const getTotal = () =>
-        cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+        cartItems.reduce((total, item) => total + (item?.totalPrice ?? 0), 0);
     // voucher
     const [voucherCode, setVoucherCode] = useState("");
     const [discount, setDiscount] = useState(0);
@@ -45,13 +45,13 @@ const Cart = () => {
                         {/* danh sach */}
                         <div className="lg:col-span-2 max-h-[calc(100vh-150px)] overflow-y-auto pr-2">
                             {cartItems.map((item, index) => (
-                                <div key={index} className="flex items-center justify-between border-t border-gray-200 pt-6">
+                                <div key={index} className="flex items-center justify-between border-t border-gray-200 pt-4 mt-4">
                                     {/* sp*/}
                                     <div className="flex items-center gap-6">
-                                        <img src={item.image} alt={item.name} className="w-24 h-24 object-cover rounded-md border" />
+                                        <img src={item.productImages?.[0]?.imageUrl} alt={item.productName} className="w-24 h-24 object-cover rounded-md border" />
                                         <div>
-                                            <h2 className="font-semibold text-lg">{item.name}</h2>
-                                            <p className="text-[#5e3a1e] text-base">{item.price.toLocaleString("vi-VN")}₫</p>
+                                            <h2 className="font-semibold text-lg">{item.productName}</h2>
+                                            <p className="text-[#5e3a1e] text-base">{(item?.unitPrice ?? 0).toLocaleString("vi-VN")}₫</p>
                                         </div>
                                     </div>
 
@@ -79,7 +79,7 @@ const Cart = () => {
 
                                     <div className="flex items-center justify-end gap-4 pr-2">
                                         <div className="text-base text-right">
-                                            {(item.price * item.quantity).toLocaleString("vi-VN")}₫
+                                            {(item?.totalPrice ?? 0).toLocaleString("vi-VN")}₫
                                         </div>
                                         <button
                                             onClick={() => removeFromCart(item.id)}
