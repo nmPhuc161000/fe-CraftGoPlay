@@ -202,13 +202,22 @@ const Home = () => {
               <div
                 key={index}
                 onClick={() => navigate(`/product/${product.id}`)}
-                className="w-full bg-white shadow rounded-lg overflow-hidden relative text-center transition-transform duration-300 hover:scale-105 hover:shadow-lg"
+                className="group w-full bg-white shadow rounded-lg overflow-hidden relative text-center transition-transform duration-300 hover:scale-105 hover:shadow-lg cursor-pointer"
               >
-                <img
-                  src={product.productImages?.[0]?.imageUrl}
-                  alt={product.name}
-                  className="w-full h-64 object-cover"
-                />
+                <div className="relative w-full h-64">
+                  {/* img default */}
+                  <img
+                    src={product.productImages?.[0]?.imageUrl}
+                    alt={product.name}
+                    className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-100 group-hover:opacity-0"
+                  />
+                  {/* img2 */}
+                  <img
+                    src={product.productImages?.[1]?.imageUrl || product.productImages?.[0]?.imageUrl}
+                    alt={product.name}
+                    className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+                  />
+                </div>
 
                 <div className="p-4">
                   <h3 className="text-lg font-semibold">{product.name}</h3>

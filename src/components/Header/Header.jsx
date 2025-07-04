@@ -15,6 +15,7 @@ const Header = () => {
   const navigate = useNavigate();
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
   const { cartItems, clearCart } = useContext(CartContext);
 
   const totalCartQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
@@ -24,11 +25,11 @@ const Header = () => {
   const handleLogout = () => {
     logout();
     clearCart();
-    navigate("/login"); 
+    navigate("/login");
   };
 
   return (
-    <header>
+    <>
       {/* Banner day */}
       <div className="bg-[#5e3a1e] text-[#f2e8dc] text-xs py-4 overflow-hidden whitespace-nowrap relative border-y border-[#cbb892]">
         <div className="flex animate-marquee min-w-max font-semibold">
@@ -58,7 +59,7 @@ const Header = () => {
       </div>
 
       {/* Main head */}
-      <div className="bg-white text-[#5e3a1e] shadow-md sticky top-0 z-50 w-full">
+      <header className="bg-white text-[#5e3a1e] shadow-md sticky top-0 z-50 w-full relative">
         <div className="px-12 py-5 flex justify-between items-center">
           <div className="flex space-x-10 text-base font-medium items-center">
             <Link
@@ -85,12 +86,12 @@ const Header = () => {
           {/* Logo trung tâm */}
           <Link
             to="/"
-            className="text-3xl font-extrabold text-[#5e3a1e] font-nunito tracking-wider"
+            className="absolute left-1/2 transform -translate-x-1/2 text-3xl font-extrabold text-[#5e3a1e] font-nunito tracking-wider"
           >
             CraftGoPlay
           </Link>
 
-          <div className="flex space-x-8 items-center text-base font-medium">
+          <div className="flex space-x-10 items-center text-base font-medium">
             <div className="relative">
               <FaSearch
                 onClick={() => setShowSearchInput((prev) => !prev)}
@@ -132,37 +133,39 @@ const Header = () => {
             </div>
 
             {isAuthenticated ? (
-              <div className="relative group">
-                <Link
-                  to="/profile-user/profile"
-                  className="flex items-center space-x-2"
+              <div className="relative">
+                <button
+                  onClick={() => setShowDropdown((prev) => !prev)}
+                  className="flex items-center space-x-2 text-sm bg-[#f2e8dc] px-3 py-1 rounded-full hover:bg-gray-200 transition-colors duration-200"
                 >
-                  <button className="flex items-center space-x-2 text-sm bg-[#f2e8dc] px-3 py-1 rounded-full hover:bg-gray-200 transition-colors duration-200">
-                    <FaUser />
-                    <span>Hi, {user?.userName || "User"}</span>
-                  </button>
-                </Link>
-                <div
-                  className="
-                    absolute right-0 mt-2 w-32
-                    bg-white bg-opacity-90 backdrop-blur-sm
-                    border border-gray-200 rounded-lg
-                    shadow-lg
-                    opacity-0 scale-95
-                    group-hover:opacity-100 group-hover:scale-100
-                    transform transition-all duration-200
-                    origin-top-right
-                    z-10
-                  "
-                >
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center w-full px-5 py-2 text-sm text-red-600 hover:bg-gray-100 hover:no-underline transition-colors duration-200 rounded-md"
-                  >
-                    <FaSignOutAlt className="mr-2" />
-                    Đăng xuất
-                  </button>
-                </div>
+                  <FaUser />
+                  <span>Hi, {user?.userName || "User"}</span>
+                </button>
+
+                {showDropdown && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white bg-opacity-90 backdrop-blur-sm border border-gray-200 rounded-lg shadow-lg z-10">
+                    <button
+                      onClick={() => {
+                        navigate("/profile-user/profile");
+                        setShowDropdown(false);
+                      }}
+                      className="flex items-center w-full px-5 py-2 text-sm text-gray-800 hover:bg-gray-100 transition-colors duration-200 rounded-md"
+                    >
+                      <FaUser className="mr-2" />
+                      Xem thông tin
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setShowDropdown(false);
+                      }}
+                      className="flex items-center w-full px-5 py-2 text-sm text-red-600 hover:bg-gray-100 transition-colors duration-200 rounded-md"
+                    >
+                      <FaSignOutAlt className="mr-2" />
+                      Đăng xuất
+                    </button>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex space-x-8">
@@ -182,8 +185,8 @@ const Header = () => {
             )}
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 };
 
