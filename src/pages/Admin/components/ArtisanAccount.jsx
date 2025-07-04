@@ -14,13 +14,21 @@ const ArtisanAccount = () => {
   const [showModal, setShowModal] = useState(false);
   const [openActionIdx, setOpenActionIdx] = useState(null);
   const actionMenuRef = useRef(null);
-  const [data, setData] = useState(FAKE_DATA);
+  const [data, setData] = useState(() => {
+    const savedData = localStorage.getItem('adminArtisanData');
+    return savedData ? JSON.parse(savedData) : FAKE_DATA;
+  });
   const [search, setSearch] = useState("");
   const [confirmModal, setConfirmModal] = useState({ open: false, idx: null, action: null });
   const [form, setForm] = useState({ name: "", email: "", phone: "", address: "" });
   const [formError, setFormError] = useState("");
   const actionBtnRefs = useRef([]);
   const [actionMenuPos, setActionMenuPos] = useState({ top: 0, left: 0 });
+
+  // Lưu dữ liệu vào localStorage khi data thay đổi
+  useEffect(() => {
+    localStorage.setItem('adminArtisanData', JSON.stringify(data));
+  }, [data]);
 
   useEffect(() => {
     function handleClickOutside(event) {

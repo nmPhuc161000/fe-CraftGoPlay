@@ -1,20 +1,8 @@
 import React, { useState, useEffect } from "react";
-
-const FAKE_CATEGORIES = [
-  { id: 1, name: "Đồ gia dụng", desc: "Các sản phẩm gia dụng thủ công" },
-  { id: 2, name: "Đồ trang trí", desc: "Sản phẩm trang trí nhà cửa" },
-  { id: 3, name: "Đèn lồng", desc: "Các loại đèn lồng thủ công" },
-  // ... thêm danh mục giả nếu muốn
-];
+import categoryService from "../../../services/apis/cateApi";
 
 const ManageCategory = () => {
-  // Khôi phục dữ liệu từ localStorage hoặc sử dụng fake data ban đầu
-  const getInitialData = () => {
-    const savedData = localStorage.getItem('staff_categories');
-    return savedData ? JSON.parse(savedData) : FAKE_CATEGORIES;
-  };
-
-  const [data, setData] = useState(getInitialData);
+  const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editIdx, setEditIdx] = useState(null);
@@ -27,12 +15,20 @@ const ManageCategory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
-  // Lưu dữ liệu vào localStorage mỗi khi data thay đổi
+  // Fetch categories from API
   useEffect(() => {
-    localStorage.setItem('staff_categories', JSON.stringify(data));
-  }, [data]);
+    const fetchCategories = async () => {
+      const res = await categoryService.getAllCategories();
+      if (res.success && res.data && res.data.data) {
+        setData(res.data.data);
+      } else {
+        setData([]);
+      }
+    };
+    fetchCategories();
+  }, []);
 
-  const filtered = data.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
+  const filtered = data.filter(c => c.categoryName.toLowerCase().includes(search.toLowerCase()));
   const totalPage = Math.ceil(filtered.length / pageSize);
   const paged = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
@@ -65,8 +61,8 @@ const ManageCategory = () => {
     if (editIdx === null) {
       // Tạo ID mới bằng cách tìm ID lớn nhất + 1
       setData(prev => {
-        const maxId = prev.length > 0 ? Math.max(...prev.map(item => item.id)) : 0;
-        const newItem = { id: maxId + 1, ...form };
+        const maxId = prev.length > 0 ? Math.max(...prev.map(item => item.categoryId)) : 0;
+        const newItem = { categoryId: maxId + 1, ...form };
         return [newItem, ...prev];
       });
     } else {
@@ -81,10 +77,23 @@ const ManageCategory = () => {
     setDeleteId(id);
     setShowDeleteModal(true);
   };
-  const handleDelete = () => {
-    setData(prev => prev.filter(c => c.id !== deleteId));
-    setShowDeleteModal(false);
-    setDeleteId(null);
+  const handleDelete = async () => {
+    try {
+      const res = await categoryService.deleteCategory(deleteId);
+      if (res.success) {
+        // Fetch lại danh sách
+        const fetchRes = await categoryService.getAllCategories();
+        if (fetchRes.success && fetchRes.data && fetchRes.data.data) {
+          setData(fetchRes.data.data);
+        }
+        setShowDeleteModal(false);
+        setDeleteId(null);
+      } else {
+        alert(res.error || "Xóa thất bại!");
+      }
+    } catch (err) {
+      alert("Lỗi khi xóa!");
+    }
   };
 
   return (
@@ -105,22 +114,28 @@ const ManageCategory = () => {
         <table className="min-w-full text-sm border-separate border-spacing-0">
           <thead>
             <tr>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tl-lg">ID</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Name</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Description</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tr-lg">Actions</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tl-lg">STT</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Hình ảnh</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Tên sản phẩm</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Trạng thái</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Ngày tạo</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tr-lg">Hành động</th>
             </tr>
           </thead>
           <tbody>
             {paged.map((row, idx) => (
-              <tr key={row.id} className="border-b last:border-0">
-                <td className="px-3 py-2">{row.id}</td>
-                <td className="px-3 py-2 font-semibold">{row.name}</td>
-                <td className="px-3 py-2">{row.desc}</td>
+              <tr key={row.categoryId} className="border-b last:border-0">
+                <td className="px-3 py-2">{(currentPage - 1) * pageSize + idx + 1}</td>
+                <td className="px-3 py-2">
+                  <img src={row.image} alt={row.categoryName} className="w-12 h-12 object-cover rounded" />
+                </td>
+                <td className="px-3 py-2 font-semibold">{row.categoryName}</td>
+                <td className="px-3 py-2">{row.categoryStatus}</td>
+                <td className="px-3 py-2">{row.creationDate ? new Date(row.creationDate).toLocaleDateString() : ""}</td>
                 <td className="px-3 py-2 flex gap-2">
                   <button className="text-green-500 hover:underline" onClick={() => openView((currentPage-1)*pageSize+idx)}>View</button>
                   <button className="text-blue-500 hover:underline" onClick={() => openEdit((currentPage-1)*pageSize+idx)}>Edit</button>
-                  <button className="text-red-500 hover:underline" onClick={() => openDelete(row.id)}>Delete</button>
+                  <button className="text-red-500 hover:underline" onClick={() => openDelete(row.categoryId)}>Delete</button>
                 </td>
               </tr>
             ))}
@@ -144,18 +159,73 @@ const ManageCategory = () => {
           <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative animate-fadeIn">
             <button className="absolute top-3 right-3 text-2xl text-gray-400 hover:text-gray-600" onClick={() => { setShowModal(false); setEditIdx(null); }} aria-label="Close">×</button>
             <div className="text-xl font-bold mb-4">{editIdx === null ? 'Create Category' : 'Edit Category'}</div>
-            <form className="space-y-4" onSubmit={handleAddEdit}>
+            
+            
+            <form className="space-y-4" onSubmit={async e => {
+              e.preventDefault();
+              if (!form.categoryName || !form.categoryName.trim()) {
+                setFormError("Tên loại không được để trống!");
+                return;
+              }
+              if (!form.imageFile) {
+                setFormError("Vui lòng chọn ảnh!");
+                return;
+              }
+              if (editIdx === null) {
+                // Gọi API tạo mới category
+                try {
+                  const res = await categoryService.createCategory({
+                    categoryName: form.categoryName,
+                    imageFile: form.imageFile,
+                    categoryStatus: "Actived"
+                  });
+                  if (res.success) {
+                    // Fetch lại danh sách
+                    const fetchRes = await categoryService.getAllCategories();
+                    if (fetchRes.success && fetchRes.data && fetchRes.data.data) {
+                      setData(fetchRes.data.data);
+                    }
+                    setShowModal(false);
+                    setForm({ categoryName: "", image: "", imageFile: null });
+                    setEditIdx(null);
+                    setFormError("");
+                  } else {
+                    setFormError(res.error || "Thêm mới thất bại!");
+                  }
+                } catch (err) {
+                  setFormError("Lỗi khi thêm mới!");
+                }
+              } else {
+                // Edit local (nếu cần gọi API update thì bổ sung sau)
+                setData(prev => prev.map((item, i) => i === editIdx ? { ...item, categoryName: form.categoryName, image: form.image } : item));
+                setShowModal(false);
+                setForm({ categoryName: "", image: "", imageFile: null });
+                setEditIdx(null);
+                setFormError("");
+              }
+            }}>
               <div>
-                <label className="block font-medium mb-1">Name</label>
-                <input type="text" className="w-full border rounded px-3 py-2" placeholder="Enter name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+                <label className="block font-medium mb-1">Tên loại</label>
+                <input type="text" className="w-full border rounded px-3 py-2" placeholder="Nhập tên loại" value={form.categoryName || ''} onChange={e => setForm({ ...form, categoryName: e.target.value })} />
               </div>
               <div>
-                <label className="block font-medium mb-1">Description</label>
-                <textarea className="w-full border rounded px-3 py-2 resize-none" rows={2} placeholder="Enter description" value={form.desc} onChange={e => setForm({ ...form, desc: e.target.value })} />
+                <label className="block font-medium mb-1">Ảnh loại</label>
+                <input type="file" accept="image/*" onChange={e => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    setForm(f => ({ ...f, imageFile: file }));
+                    const reader = new FileReader();
+                    reader.onload = ev => setForm(f => ({ ...f, image: ev.target.result }));
+                    reader.readAsDataURL(file);
+                  }
+                }} />
+                {form.image && (
+                  <img src={form.image} alt="preview" className="w-24 h-24 object-cover rounded mt-2" />
+                )}
               </div>
               {formError && <div className="text-red-500 text-sm font-medium mt-1">{formError}</div>}
               <div className="flex justify-end gap-2 mt-4">
-                <button type="button" className="px-4 py-2 rounded border bg-gray-50 hover:bg-gray-100" onClick={() => { setShowModal(false); setForm({ name: "", desc: "" }); setEditIdx(null); }}>
+                <button type="button" className="px-4 py-2 rounded border bg-gray-50 hover:bg-gray-100" onClick={() => { setShowModal(false); setForm({ categoryName: "", image: "", imageFile: null }); setEditIdx(null); }}>
                   Cancel
                 </button>
                 <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700">
@@ -163,6 +233,8 @@ const ManageCategory = () => {
                 </button>
               </div>
             </form>
+
+            
           </div>
         </div>
       )}
@@ -187,8 +259,8 @@ const ManageCategory = () => {
             <div className="text-xl font-bold mb-4">Category Detail</div>
             {viewIdx !== null && (
               <div className="space-y-3">
-                <div><span className="font-semibold">Name:</span> {data[viewIdx].name}</div>
-                <div><span className="font-semibold">Description:</span> {data[viewIdx].desc}</div>
+                <div><span className="font-semibold">Tên loại:</span> {data[viewIdx].categoryName}</div>
+                <div><span className="font-semibold">Ảnh:</span><br/>{data[viewIdx].image && <img src={data[viewIdx].image} alt={data[viewIdx].categoryName} className="w-24 h-24 object-cover rounded mt-2" />}</div>
               </div>
             )}
           </div>
