@@ -10,7 +10,6 @@ export default function ProductsTab({ artisanId }) {
   const [filter, setFilter] = useState("all");
   const [pageIndex, setPageIndex] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [productStatus, setProductStatus] = useState("");
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -26,8 +25,7 @@ export default function ProductsTab({ artisanId }) {
         const response = await productService.getProductsByArtisanId(
           artisanId,
           pageIndex,
-          pageSize,
-          productStatus
+          pageSize
         );
         console.log("Fetched products:", response.data.data);
 
@@ -55,7 +53,7 @@ export default function ProductsTab({ artisanId }) {
     return () => {
       isMounted = false;
     };
-  }, [artisanId, pageIndex, pageSize, productStatus]);
+  }, [artisanId, pageIndex, pageSize]);
 
   // Lọc sản phẩm theo trạng thái
   const filteredProducts = products.filter((product) => {
@@ -147,27 +145,8 @@ export default function ProductsTab({ artisanId }) {
         </div>
       </div>
 
-      {/* Dropdown chọn trạng thái và số lượng mỗi trang */}
+      {/* Dropdown chọn số lượng mỗi trang */}
       <div className="flex flex-wrap gap-4 items-center">
-        <div className="flex items-center gap-2">
-          <label htmlFor="status" className="text-sm text-gray-600">
-            Trạng thái:
-          </label>
-          <select
-            id="status"
-            value={productStatus}
-            onChange={(e) => {
-              setProductStatus(e.target.value);
-              setPageIndex(1); // Reset về trang đầu khi thay đổi trạng thái
-            }}
-            className="border rounded px-2 py-1 text-sm"
-          >
-            <option value="Active">Đang bán</option>
-            <option value="Inactive">Ngừng bán</option>
-            <option value="">Tất cả</option>
-          </select>
-        </div>
-
         <div className="flex items-center gap-2">
           <label htmlFor="pageSize" className="text-sm text-gray-600">
             Số lượng/trang:
@@ -186,6 +165,23 @@ export default function ProductsTab({ artisanId }) {
             <option value="20">20</option>
             <option value="50">50</option>
           </select>
+        </div>
+
+        {/* Phân trang nhanh */}
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-600">Trang:</label>
+          <select
+            value={pageIndex}
+            onChange={(e) => handlePageChange(Number(e.target.value))}
+            className="border rounded px-2 py-1 text-sm"
+          >
+            {Array.from({ length: totalPages }, (_, i) => (
+              <option key={i + 1} value={i + 1}>
+                {i + 1}
+              </option>
+            ))}
+          </select>
+          <span className="text-sm text-gray-600">/ {totalPages}</span>
         </div>
       </div>
 
@@ -221,7 +217,7 @@ export default function ProductsTab({ artisanId }) {
             ))}
           </div>
 
-          {/* Phân trang */}
+          {/* Phân trang chi tiết */}
           {totalPages > 1 && (
             <div className="flex justify-center mt-6">
               <div className="flex items-center gap-2">

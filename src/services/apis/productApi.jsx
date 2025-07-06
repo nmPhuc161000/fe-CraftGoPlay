@@ -17,7 +17,7 @@ const productService = {
     artisanId,
     pageIndex = 1,
     pageSize = 10,
-    productStatus = "Active"
+    productStatus = ""
   ) {
     return performApiRequest(
       API_ENDPOINTS_PRODUCT.GET_PRODUCTS_BY_ARTISANID(
