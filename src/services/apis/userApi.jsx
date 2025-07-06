@@ -10,6 +10,24 @@ const userService = {
     return performApiRequest(API_ENDPOINTS_USER.GET_USER, { method: "get" });
   },
 
+  async checkSendRequestArtisan(userId) {
+    return performApiRequest(
+      API_ENDPOINTS_USER.CHECK_SEND_REQUEST_UPGRADE_ARTISAN(userId),
+      {
+        method: "get",
+      }
+    );
+  },
+
+  async getSentRequestByUserId(userId) {
+    return performApiRequest(
+      API_ENDPOINTS_USER.GET_SEND_REQUEST_UPGRADE_ARTISAN(userId),
+      {
+        method: "get",
+      }
+    );
+  },
+
   async upgradeToArtisan(formData) {
     return performApiRequest(API_ENDPOINTS_USER.SEND_REQUEST_UPGRADE_ARTISAN, {
       method: "post",
@@ -17,11 +35,20 @@ const userService = {
     });
   },
 
-  async checkSendRequestArtisan(userId) {
+  async cancelArtisanRequest(userId) {
     return performApiRequest(
-      API_ENDPOINTS_USER.CHECK_SEND_REQUEST_UPGRADE_ARTISAN(userId),
+      API_ENDPOINTS_USER.CANCEL_REQUEST_UPGRADE_ARTISAN(userId),
       {
-        method: "get",
+        method: "put",
+      }
+    );
+  },
+  
+  async resendRequest(userId, requestId) {
+    return performApiRequest(
+      API_ENDPOINTS_USER.RESEND_SEND_REQUEST_UPGRADE_ARTISAN(userId, requestId),
+      {
+        method: "put",
       }
     );
   },
