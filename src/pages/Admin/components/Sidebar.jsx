@@ -4,7 +4,7 @@ import StaffAccount from "./StaffAccount";
 
 const menu = [
   {
-    label: "Dashboard",
+    label: "Bảng điều khiển",
     icon: (
       <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
         <rect x="3" y="3" width="7" height="7" rx="2" fill="none" stroke="currentColor" />
@@ -18,9 +18,9 @@ const menu = [
 ];
 
 const managerAccountSubMenu = [
-  { label: "Staff Account", value: "staff" },
-  { label: "Artisan Account", value: "artisan" },
-  { label: "Customer Account", value: "customer" },
+  { label: "Nhân viên", value: "staff" },
+  { label: "Thợ thủ công", value: "artisan" },
+  { label: "Khách hàng", value: "customer" },
 ];
 
 const managerIcon = (
@@ -88,7 +88,7 @@ const Sidebar = ({ selected, setSelected, isMobileOpen, onCloseMobile, isDesktop
             style={{ minHeight: 40 }}
           >
             {menu[0].icon}
-            {isOpen && <span>Dashboard</span>}
+            {isOpen && <span>Bảng điều khiển</span>}
           </button>
           {/* Order History */}
           <button
@@ -97,7 +97,7 @@ const Sidebar = ({ selected, setSelected, isMobileOpen, onCloseMobile, isDesktop
             style={{ minHeight: 40 }}
           >
             {orderIcon}
-            {isOpen && <span>Order History</span>}
+            {isOpen && <span>Lịch sử đơn hàng</span>}
           </button>
           {/* Manager Account group */}
           <div className="relative"
@@ -111,8 +111,8 @@ const Sidebar = ({ selected, setSelected, isMobileOpen, onCloseMobile, isDesktop
               onClick={() => setOpenManager((v) => !v)}
             >
               {React.cloneElement(managerIcon, { className: ['staff','artisan','customer','manager'].includes(selected) ? 'text-blue-600' : 'text-primary' })}
-              {isOpen && <span>Manager Account</span>}
-              <span className="ml-auto">{openManager ? '▾' : '▸'}</span>
+              {isOpen && <span>Quản lý tài khoản</span>}
+              <span className="ml-auto">{openManager ? '\u25be' : '\u25b8'}</span>
             </button>
             {/* Popover submenu khi thu gọn */}
             {isDesktopCollapsed && hoverManager && (

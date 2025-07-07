@@ -1,16 +1,13 @@
 import React from "react";
 import logo from "../../../assets/images/loginimg.jpg";
+import { MdCategory, MdViewList, MdInventory2 } from "react-icons/md";
+import { MdAssignment } from "react-icons/md";
 
 const menu = [
-  { label: "Manage Product", value: "product", icon: (
-    <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2" stroke="currentColor" strokeWidth="2" fill="none"/></svg>
-  ) },
-  { label: "Manage Category", value: "category", icon: (
-    <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" fill="none"/></svg>
-  ) },
-  { label: "Manage SubCategory", value: "subcategory", icon: (
-    <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" stroke="currentColor" strokeWidth="2" fill="none"/></svg>
-  ) },
+  { label: "Quản lý sản phẩm", value: "product", icon: <MdInventory2 size={22} /> },
+  { label: "Quản lý danh mục", value: "category", icon: <MdCategory size={22} /> },
+  { label: "Quản lý danh mục con", value: "subcategory", icon: <MdViewList size={22} /> },
+  { label: "Quản lý yêu cầu", value: "request", icon: <MdAssignment size={22} /> },
 ];
 
 const Sidebar = ({ selected, setSelected, isMobileOpen, onCloseMobile, isDesktopCollapsed, onToggleDesktop }) => {

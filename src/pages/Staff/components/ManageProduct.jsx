@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { MdVisibility, MdShoppingBag } from 'react-icons/md';
 
 // Fake data cho sản phẩm của Artisan
 const FAKE_ARTISAN_PRODUCTS = [
@@ -116,12 +117,12 @@ const ManageProduct = () => {
     <div className="bg-amber-25 rounded-2xl shadow p-4 w-full">
       <div className="flex justify-between items-center mb-4">
         <div>
-          <div className="font-bold text-xl">Artisan Products Management</div>
-          <div className="text-sm font-medium text-gray-700 mt-1">Search by product name, artisan, or category</div>
+          <div className="font-bold text-xl">Quản lý sản phẩm thợ thủ công</div>
+          <div className="text-sm font-medium text-gray-700 mt-1">Tìm kiếm theo tên sản phẩm, thợ thủ công hoặc danh mục</div>
           <div className="mt-1 flex w-full max-w-xs border rounded overflow-hidden bg-white">
             <input 
               className="flex-1 px-2 py-1.5 text-sm outline-none bg-transparent" 
-              placeholder="input search text" 
+              placeholder="Nhập từ khóa tìm kiếm" 
               value={search} 
               onChange={e => setSearch(e.target.value)} 
             />
@@ -134,14 +135,14 @@ const ManageProduct = () => {
           <thead>
             <tr>
               <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tl-lg">ID</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Image</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Product Name</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Artisan</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Category</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Price</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Status</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Views/Orders</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tr-lg">Actions</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Hình ảnh</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Tên sản phẩm</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Thợ thủ công</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Danh mục</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Giá</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Trạng thái</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Lượt xem/Đơn hàng</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tr-lg">Thao tác</th>
             </tr>
           </thead>
           <tbody>
@@ -166,19 +167,19 @@ const ManageProduct = () => {
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-red-100 text-red-800'
                   }`}>
-                    {row.status === 'active' ? 'Active' : 'Inactive'}
+                    {row.status === 'active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}
                   </span>
                 </td>
                 <td className="px-3 py-2 text-xs">
-                  <div>👁 {row.views}</div>
-                  <div>📦 {row.orders}</div>
+                  <div className="flex items-center gap-1"><MdVisibility className="inline text-lg" style={{ color: '#f59e42' }} /> {row.views}</div>
+                  <div className="flex items-center gap-1 mt-1"><MdShoppingBag className="inline text-lg" style={{ color: '#3B82F6' }} /> {row.orders}</div>
                 </td>
                 <td className="px-3 py-2 flex gap-2">
                   <button 
                     className="text-green-500 hover:underline" 
                     onClick={() => openView(row)}
                   >
-                    View
+                    Xem
                   </button>
                   <button 
                     className={`hover:underline ${
@@ -186,7 +187,7 @@ const ManageProduct = () => {
                     }`}
                     onClick={() => openStatusChange(row)}
                   >
-                    {row.status === 'active' ? 'Inactive' : 'Active'}
+                    {row.status === 'active' ? 'Ngừng hoạt động' : 'Kích hoạt'}
                   </button>
                 </td>
               </tr>
@@ -197,7 +198,7 @@ const ManageProduct = () => {
       
       <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
         <span>
-          {(filtered.length === 0 ? 0 : (currentPage - 1) * pageSize + 1)} to {Math.min(currentPage * pageSize, filtered.length)} of {filtered.length}
+          {(filtered.length === 0 ? 0 : (currentPage - 1) * pageSize + 1)} đến {Math.min(currentPage * pageSize, filtered.length)} trên tổng số {filtered.length}
         </span>
         <div className="flex items-center gap-2">
           <button 
