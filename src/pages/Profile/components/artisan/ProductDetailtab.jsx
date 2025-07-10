@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState, useCallback } from "react";
-import productService from "../../../services/apis/productApi";
-import meterialService from "../../../services/apis/meterialApi";
+import productService from "../../../../services/apis/productApi";
+import meterialService from "../../../../services/apis/meterialApi";
 import {
   FiArrowLeft,
   FiEdit,
@@ -10,9 +10,9 @@ import {
   FiUpload,
   FiTrash2,
 } from "react-icons/fi";
-import { useNotification } from "../../../contexts/NotificationContext";
-import Loading from "../../../components/loading/Loading";
-import subCategoryService from "../../../services/apis/subCateApi";
+import { useNotification } from "../../../../contexts/NotificationContext";
+import Loading from "../../../../components/loading/Loading";
+import subCategoryService from "../../../../services/apis/subCateApi";
 
 export default function ProductDetailTab() {
   const { productId } = useParams();

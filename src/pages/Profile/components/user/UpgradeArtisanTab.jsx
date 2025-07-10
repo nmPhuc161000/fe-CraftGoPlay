@@ -1,9 +1,9 @@
 // src/components/UpgradeArtisanTab.jsx
 import { useCallback, useEffect, useState } from "react";
-import userService from "../../../services/apis/userApi";
-import { useNotification } from "../../../contexts/NotificationContext";
+import userService from "../../../../services/apis/userApi";
+import { useNotification } from "../../../../contexts/NotificationContext";
 import { FiUpload, FiX } from "react-icons/fi";
-import CraftVillageService from "../../../services/apis/craftvillageApi";
+import CraftVillageService from "../../../../services/apis/craftvillageApi";
 
 export default function UpgradeArtisanTab({ userId }) {
   const [formData, setFormData] = useState({
