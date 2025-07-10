@@ -15,7 +15,7 @@ export const CartProvider = ({ children }) => {
 
     // 1. Lấy giỏ hàng từ API
     const fetchCart = async () => {
-        if (isAuthenticated && user?.id) {
+        if (isAuthenticated && user?.id && user?.roleId === 4) {
             const res = await getCart(user.id);
             if (res.success) {
                 const items = res.data?.data?.items || [];
@@ -49,7 +49,7 @@ export const CartProvider = ({ children }) => {
 
         const res = await removeFromCartApi(cartItemId);
         if (res.success) {
-            await fetchCart(); 
+            await fetchCart();
         } else {
             console.error("Lỗi khi xoá sản phẩm:", res.error);
         }
@@ -67,10 +67,14 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    const clearCart = () => {
-    setCartItems([]);
-};
+    const clearCart = async () => {
+        if (!isAuthenticated || !cartItems.length) return;
+        for (const item of cartItems) {
+            await removeFromCartApi(item.id); 
+        }
 
+        await fetchCart();
+    };
 
     const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 

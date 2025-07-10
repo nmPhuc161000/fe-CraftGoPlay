@@ -1,19 +1,26 @@
 import React, { useContext, useState } from "react";
 import { CartContext } from "../../contexts/CartContext";
 import { FaLock } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaShoppingBag } from "react-icons/fa";
+import { AuthContext } from "../../contexts/AuthContext";
 
 
 const Checkout = () => {
-    const { cartItems } = useContext(CartContext);
+    const { cartItems, clearCart } = useContext(CartContext);
+    // const { user } = useContext(AuthContext);
+    const { user: realUser } = useContext(AuthContext);
+    const user = { ...realUser, coins: 5000 };
+
+    const navigate = useNavigate();
 
     const getTotal = () =>
-        cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+        cartItems.reduce((total, item) => total + (item?.totalPrice ?? 0), 0);
 
     const [voucherCode, setVoucherCode] = useState("");
     const [discount, setDiscount] = useState(0);
     const [voucherError, setVoucherError] = useState("");
+    const [useCoins, setUseCoins] = useState(false);
 
     const handleApplyVoucher = () => {
         if (voucherCode === "GIAM10") {
@@ -25,6 +32,9 @@ const Checkout = () => {
             setVoucherError("Mã không hợp lệ hoặc đã hết hạn");
         }
     };
+    const coinDiscount = useCoins
+        ? Math.min(user?.coins ?? 0, Math.floor(getTotal() / 100)) * 100
+        : 0;
 
     return (
         <>
@@ -86,19 +96,19 @@ const Checkout = () => {
                                 <div key={index} className="flex items-center justify-between">
                                     <div className="flex items-center gap-4">
                                         <img
-                                            src={item.image}
-                                            alt={item.name}
+                                            src={item.productImages?.[0]?.imageUrl}
+                                            alt={item.productName}
                                             className="w-14 h-14 object-cover rounded-md border"
                                         />
                                         <div>
-                                            <p className="text-base font-medium">{item.name}</p>
+                                            <p className="text-base font-medium">{item.productName}</p>
                                             <p className="text-sm text-gray-500">
-                                                {item.quantity} × {item.price.toLocaleString("vi-VN")}₫
+                                                {item.quantity} × {(item?.unitPrice ?? 0).toLocaleString("vi-VN")}₫
                                             </p>
                                         </div>
                                     </div>
                                     <p className="text-right font-medium">
-                                        {(item.price * item.quantity).toLocaleString("vi-VN")}₫
+                                        {((item?.unitPrice ?? 0) * item.quantity).toLocaleString("vi-VN")}₫
                                     </p>
                                 </div>
                             ))}
@@ -121,6 +131,27 @@ const Checkout = () => {
                         </div>
                         {voucherError && <p className="text-sm text-red-500 mb-2">{voucherError}</p>}
 
+                        <div className="flex items-center justify-between mb-4">
+                            <label htmlFor="use-coins" className="text-sm text-[#5e3a1e] font-medium">
+                                Dùng {user?.coins ?? 0} xu <br />
+                                <span className="text-xs text-gray-500">
+                                    Giảm tối đa {(coinDiscount || 0).toLocaleString("vi-VN")}₫
+                                </span>
+                            </label>
+
+                            <label className="relative inline-flex items-center cursor-pointer w-11 h-6">
+                                <input
+                                    type="checkbox"
+                                    id="use-coins"
+                                    checked={useCoins}
+                                    onChange={(e) => setUseCoins(e.target.checked)}
+                                    className="sr-only peer"
+                                />
+                                <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-[#5e3a1e] transition-colors duration-300"></div>
+                                <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
+                            </label>
+                        </div>
+
                         <div className="space-y-1 text-base mb-6">
                             <div className="flex justify-between text-sm text-gray-600">
                                 <span>Tạm tính</span>
@@ -130,13 +161,22 @@ const Checkout = () => {
                                 <span>Giảm giá</span>
                                 <span>− {(discount || 0).toLocaleString("vi-VN")}₫</span>
                             </div>
+                            <div className="flex justify-between text-sm text-orange-600">
+                                <span>Giảm từ xu</span>
+                                <span>− {coinDiscount.toLocaleString("vi-VN")}₫</span>
+                            </div>
                             <div className="flex justify-between font-bold text-xl border-t pt-3">
                                 <span>Tổng</span>
-                                <span>{(getTotal() - discount).toLocaleString("vi-VN")}₫</span>
+                                <span>{(getTotal() - discount - coinDiscount).toLocaleString("vi-VN")}₫</span>
                             </div>
                         </div>
 
-                        <button className="w-full py-3 bg-[#5e3a1e] hover:bg-[#4a2f15] text-white rounded flex justify-center items-center gap-2 transition">
+                        <button
+                            onClick={async () => {
+                                await clearCart();
+                                navigate("/payment-success");
+                            }}
+                            className="w-full py-3 bg-[#5e3a1e] hover:bg-[#4a2f15] text-white rounded flex justify-center items-center gap-2 transition">
                             <FaLock /> Thanh toán ngay
                         </button>
                     </div>
