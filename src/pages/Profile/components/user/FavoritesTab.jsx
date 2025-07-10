@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from "react";
-import ProductCard from "../../../components/profile/ProductCard";
-import { AuthContext } from "../../../contexts/AuthContext";
-import favoriteService from "../../../services/apis/favoriteApi";
+import ProductCard from "../../../../components/profile/ProductCard";
+import { AuthContext } from "../../../../contexts/AuthContext";
+import favoriteService from "../../../../services/apis/favoriteApi";
 import { Link } from "react-router-dom";
 import { FaHeart } from "react-icons/fa";
-import { useNotification } from "../../../contexts/NotificationContext";
-import { MESSAGES } from "../../../constants/messages";
+import { useNotification } from "../../../../contexts/NotificationContext";
+import { MESSAGES } from "../../../../constants/messages";
 
 export default function FavoritesTab() {
   const [favorites, setFavorites] = useState([]);

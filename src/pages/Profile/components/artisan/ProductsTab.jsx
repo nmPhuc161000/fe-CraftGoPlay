@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import productService from "../../../services/apis/productApi";
-import ProductCard from "../../../components/profile/ProductCard";
+import productService from "../../../../services/apis/productApi";
+import ProductCard from "../../../../components/profile/ProductCard";
 
 export default function ProductsTab({ artisanId }) {
   const [products, setProducts] = useState([]);

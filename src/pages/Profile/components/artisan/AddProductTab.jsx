@@ -2,12 +2,12 @@ import React, { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiArrowLeft, FiUpload, FiX } from "react-icons/fi";
 import { useContext } from "react";
-import { AuthContext } from "../../../contexts/AuthContext";
-import subCategoryService from "../../../services/apis/subCateApi";
-import meterialService from "../../../services/apis/meterialApi"; // Thêm service cho material
-import productService from "../../../services/apis/productApi";
-import { useNotification } from "../../../contexts/NotificationContext";
-import { validateProductData } from "../../../utils/validateProductData";
+import { AuthContext } from "../../../../contexts/AuthContext";
+import subCategoryService from "../../../../services/apis/subCateApi";
+import meterialService from "../../../../services/apis/meterialApi"; // Thêm service cho material
+import productService from "../../../../services/apis/productApi";
+import { useNotification } from "../../../../contexts/NotificationContext";
+import { validateProductData } from "../../../../utils/validateProductData";
 
 export default function AddProductTab() {
   const { user } = useContext(AuthContext);

@@ -43,7 +43,7 @@ const userService = {
       }
     );
   },
-  
+
   async resendRequest(userId, requestId) {
     return performApiRequest(
       API_ENDPOINTS_USER.RESEND_SEND_REQUEST_UPGRADE_ARTISAN(userId, requestId),
@@ -59,7 +59,7 @@ const userService = {
    * @returns {Promise<{success: boolean, data?: any, error?: string, status?: number}>}
    */
   async updateUser(userData) {
-    return performApiRequest(API_ENDPOINTS_USER.UPDATE_USER, {
+    return performApiRequest(API_ENDPOINTS_USER.UPDATE_INFORMATION_USER, {
       data: userData,
       method: "put",
     });

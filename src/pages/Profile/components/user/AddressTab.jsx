@@ -1,9 +1,9 @@
 // pages/profile/AddressTab.jsx
 import React, { useState, useEffect } from "react";
-import addressService from "../../../services/apis/addressApi";
-import { useNotification } from "../../../contexts/NotificationContext";
-import AddressManager from "../../../components/common/AddressManager";
-import AddressFormPopup from "../../../components/common/AddressFormPopup";
+import addressService from "../../../../services/apis/addressApi";
+import { useNotification } from "../../../../contexts/NotificationContext";
+import AddressManager from "../../../../components/common/AddressManager";
+import AddressFormPopup from "../../../../components/common/AddressFormPopup";
 // import locationService from "../../../services/apis/locationApi"; // Đã comment
 
 export default function AddressTab({ userId }) {

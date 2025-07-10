@@ -156,6 +156,16 @@ const Header = () => {
                     </button>
                     <button
                       onClick={() => {
+                        navigate("/profile-user/orders");
+                        setShowDropdown(false);
+                      }}
+                      className="flex items-center w-full px-5 py-2 text-sm text-gray-800 hover:bg-gray-100 transition-colors duration-200 rounded-md"
+                    >
+                      <FaUser className="mr-2" />
+                      Đơn hàng
+                    </button>
+                    <button
+                      onClick={() => {
                         handleLogout();
                         setShowDropdown(false);
                       }}
