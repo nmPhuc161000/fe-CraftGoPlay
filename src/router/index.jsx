@@ -13,6 +13,8 @@ import Cart from "../pages/Cart/Cart";
 import Checkout from "../pages/Checkout/Checkout";
 import Product from "../pages/Product/Product";
 import VerifyOtp from "../pages/VerifyOtp/VerifyOtp";
+import About from "../pages/About/About";
+import PaymentSuccess from "../pages/PaymentSuccess/PaymentSuccess";
 
 // Protected pages
 import ProfileUser from "../pages/Profile/ProfileUser";
@@ -33,6 +35,7 @@ const AppRouter = () => {
           <Route path="/register" element={<Register />} />
           <Route path="/forgetpassword" element={<ForgetPassword />} />
           <Route path="/verify-otp" element={<VerifyOtp />} />
+          <Route path="/about" element={<About />} />
 
           {/* Product pages */}
           <Route path="/product/:id" element={<ProductDetail />} />
@@ -61,6 +64,14 @@ const AppRouter = () => {
             element={
               <ProtectedRoute>
                 <Checkout />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payment-success"
+            element={
+              <ProtectedRoute>
+                <PaymentSuccess />
               </ProtectedRoute>
             }
           />
