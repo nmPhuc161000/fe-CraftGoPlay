@@ -67,7 +67,8 @@ export const API_ENDPOINTS_USER = {
   GET_SEND_REQUEST_UPGRADE_ARTISAN: (userId) => `/api/User/GetSentRequestByUserId/${userId}`,
   CHECK_SEND_REQUEST_UPGRADE_ARTISAN: (userId) => `/api/User/CheckRequestSent/${userId}`,
   CANCEL_REQUEST_UPGRADE_ARTISAN: (userId) => `/api/User/CancelRequest/${userId}`,
-  RESEND_SEND_REQUEST_UPGRADE_ARTISAN: (userId, requestId) => `/api/User/ResendRequest?userId=${userId}&requestId=${requestId}`
+  RESEND_SEND_REQUEST_UPGRADE_ARTISAN: (userId, requestId) => `/api/User/ResendRequest?userId=${userId}&requestId=${requestId}`,
+  UPDATE_INFORMATION_USER: "/api/User/UpdateInfoUser",
 };
 
 export const API_ENDPOINTS_FAVORITE = {
