@@ -18,6 +18,7 @@ export default function ProductDetailTab() {
   const { productId } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [mainImage, setMainImage] = useState("");
   const [isEditing, setIsEditing] = useState(false);
@@ -233,6 +234,7 @@ export default function ProductDetailTab() {
     }
 
     try {
+      setIsLoading(true);
       const formPayload = new FormData();
 
       // Thêm các field cơ bản
@@ -278,6 +280,8 @@ export default function ProductDetailTab() {
     } catch (error) {
       console.error("Update error:", error);
       showNotification(error.message, "error");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -335,8 +339,31 @@ export default function ProductDetailTab() {
                 onClick={handleSubmit}
                 className="flex items-center gap-2 px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
               >
-                <FiSave className="w-4 h-4" />
-                <span>Lưu</span>
+                {isLoading ? (
+                  <svg
+                    className="w-4 h-4 animate-spin"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4l5-5-5-5v4a10 10 0 100 20v-4l-5 5 5 5v-4a8 8 0 01-8-8z"
+                    ></path>
+                  </svg>
+                ) : (
+                  <FiSave className="w-4 h-4" />
+                )}
+                <span>{isLoading ? "Đang lưu..." : "Lưu"}</span>
               </button>
               <button
                 onClick={() => setIsEditing(false)}
@@ -605,7 +632,7 @@ export default function ProductDetailTab() {
                   >
                     <option value="Active">Đang bán</option>
                     <option value="OutOfStock">Hết hàng</option>
-                    <option value="Inactive">Ngừng bán</option>
+                    <option value="InActive">Ngừng bán</option>
                   </select>
                 ) : (
                   <span
