@@ -27,13 +27,15 @@ export const API_ENDPOINTS_PRODUCT = {
   CREATE_PRODUCT: "/api/Product/CreateProduct",
   UPDATE_PRODUCT: `/api/Product/UpdateProduct`,
   DELETE_PRODUCT: (id) => `/api/Product/DeleteProduct/${id}`,
+  GET_PRODUCTS_BY_STATUS: (status, pageIndex, pageSize) =>
+    `/api/Product/GetProductsByStatus?pageIndex=${pageIndex}&pageSize=${pageSize}&productStatus=${status}`,
 };
 
 export const API_ENDPOINTS_CART = {
-  GET_CART: (userId) => `/api/Cart/${userId}`,
-  ADD_TO_CART: (userId) => `/api/Cart/${userId}`,
-  UPDATE_ITEM: "/api/Cart/item",
-  REMOVE_FROM_CART: (cartItemId) => `/api/Cart/item/${cartItemId}`,
+  GET_CART: (userId) => `/api/Cart/GetAllItemCart/${userId}`,
+  ADD_TO_CART: (userId) => `/api/Cart/AddToCart/${userId}`,
+  UPDATE_ITEM: "/api/Cart/UpdateCart",
+  REMOVE_FROM_CART: (cartItemId) => `/api/Cart/Delete/${cartItemId}`,
 };
 
 export const API_ENDPOINTS_CRAFTVILLAGE = {

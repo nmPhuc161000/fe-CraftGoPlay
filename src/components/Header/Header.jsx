@@ -16,7 +16,7 @@ const Header = () => {
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
-  const { cartItems, clearCart } = useContext(CartContext);
+  const { cartItems } = useContext(CartContext);
 
   const totalCartQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
 
@@ -24,7 +24,6 @@ const Header = () => {
   // Hàm xử lý đăng xuất
   const handleLogout = () => {
     logout();
-    clearCart();
     navigate("/login");
   };
 
