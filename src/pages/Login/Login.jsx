@@ -9,7 +9,7 @@ import { decodeToken } from "../../utils/tokenUtils";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { useNotification } from "../../contexts/NotificationContext"; // dùng context mới
 import { motion } from "framer-motion";
-import { validateRegisterForm } from "../../utils/validationUtils";
+import { validateLoginForm } from "../../utils/validationUtils";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -59,7 +59,7 @@ const Login = () => {
 
   // Hàm xác thực form
   const validateForm = useCallback(() => {
-    const { errors, isValid } = validateRegisterForm(form);
+    const { errors, isValid } = validateLoginForm(form);
     setErrors(errors);
     return isValid;
   }, [form]);
