@@ -9,12 +9,17 @@ import { decodeToken } from "../../utils/tokenUtils";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { useNotification } from "../../contexts/NotificationContext"; // dùng context mới
 import { motion } from "framer-motion";
+import { validateRegisterForm } from "../../utils/validationUtils";
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [form, setForm] = useState({ email: "", passwordHash: "" });
+  const [form, setForm] = useState({ Email: "", PasswordHash: "" });
   const { showNotification } = useNotification();
+  const [errors, setErrors] = useState({
+    email: "",
+    passwordHash: "",
+  });
 
   const handleAuthSuccess = (token, role) => {
     localStorage.setItem("token", token);
@@ -52,10 +57,18 @@ const Login = () => {
     return tokenInfo;
   };
 
+  // Hàm xác thực form
+  const validateForm = useCallback(() => {
+    const { errors, isValid } = validateRegisterForm(form);
+    setErrors(errors);
+    return isValid;
+  }, [form]);
+
   const handleLogin = useCallback(
     async (e) => {
       e.preventDefault();
       setLoading(true);
+      if (!validateForm()) return;
 
       try {
         const result = await authService.login(form);
@@ -129,23 +142,25 @@ const Login = () => {
             <FormInput
               label="Email"
               type="email"
-              name="email"
-              value={form.email}
+              name="Email"
+              value={form.Email}
               onChange={handleInputChange}
               icon={<FaUser />}
               placeholder="Email"
               autoComplete="username"
+              error={errors.email}
             />
 
             <FormInput
               label="Mật khẩu"
               type="password"
-              name="passwordHash"
-              value={form.passwordHash}
+              name="PasswordHash"
+              value={form.PasswordHash}
               onChange={handleInputChange}
               icon={<FaLock />}
               placeholder="Mật khẩu"
               autoComplete="current-password"
+              error={errors.passwordHash}
             />
 
             <div className="flex justify-between text-sm text-[#7a5a3a] font-bold">
