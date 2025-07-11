@@ -5,6 +5,7 @@ import Footer from "./components/Footer";
 import ManageProduct from "./components/ManageProduct";
 import ManageCategory from "./components/ManageCategory";
 import ManageSubCategory from "./components/ManageSubCategory";
+import ArtisanRequestList from './components/ArtisanRequestList';
 import categoryService from "../../services/apis/cateApi";
 
 const Staff = () => {
@@ -28,6 +29,7 @@ const Staff = () => {
           {selected === "product" && <ManageProduct />}
           {selected === "category" && <ManageCategory />}
           {selected === "subcategory" && <ManageSubCategory />}
+          {selected === 'request' && <ArtisanRequestList />}
         </main>
         <Footer />
       </div>

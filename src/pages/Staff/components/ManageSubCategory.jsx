@@ -133,14 +133,14 @@ const ManageSubCategory = () => {
     <div className="bg-amber-25 rounded-2xl shadow p-4 w-full">
       <div className="flex justify-between items-center mb-4">
         <div>
-          <div className="font-bold text-xl">SubCategory List</div>
-          <div className="text-sm font-medium text-gray-700 mt-1">Search by name</div>
+          <div className="font-bold text-xl">Danh sách danh mục con</div>
+          <div className="text-sm font-medium text-gray-700 mt-1">Tìm kiếm theo tên</div>
           <div className="mt-1 flex w-full max-w-xs border rounded overflow-hidden bg-white">
-            <input className="flex-1 px-2 py-1.5 text-sm outline-none bg-transparent" placeholder="input search text" value={search} onChange={e => setSearch(e.target.value)} />
+            <input className="flex-1 px-2 py-1.5 text-sm outline-none bg-transparent" placeholder="Nhập từ khóa tìm kiếm" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
         </div>
         <button className="bg-white border border-gray-300 px-4 py-2 rounded shadow-sm font-semibold hover:bg-gray-50 flex items-center gap-2" onClick={openAdd}>
-          + New SubCategory
+          + Thêm danh mục con
         </button>
       </div>
       <div className="overflow-x-auto">
@@ -148,10 +148,10 @@ const ManageSubCategory = () => {
           <thead>
             <tr>
               <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tl-lg">ID</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Name</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Parent Category</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Description</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tr-lg">Actions</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Tên danh mục con</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Danh mục cha</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Mô tả</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tr-lg">Hành động</th>
             </tr>
           </thead>
           <tbody>
@@ -162,9 +162,9 @@ const ManageSubCategory = () => {
                 <td className="px-3 py-2">{row.parent}</td>
                 <td className="px-3 py-2">{row.desc}</td>
                 <td className="px-3 py-2 flex gap-2">
-                  <button className="text-green-500 hover:underline" onClick={() => openView((currentPage-1)*pageSize+idx)}>View</button>
-                  <button className="text-blue-500 hover:underline" onClick={() => openEdit((currentPage-1)*pageSize+idx)}>Edit</button>
-                  <button className="text-red-500 hover:underline" onClick={() => openDelete(row.id)}>Delete</button>
+                  <button className="text-green-500 hover:underline" onClick={() => openView((currentPage-1)*pageSize+idx)}>Xem</button>
+                  <button className="text-blue-500 hover:underline" onClick={() => openEdit((currentPage-1)*pageSize+idx)}>Sửa</button>
+                  <button className="text-red-500 hover:underline" onClick={() => openDelete(row.id)}>Xóa</button>
                 </td>
               </tr>
             ))}
@@ -172,7 +172,7 @@ const ManageSubCategory = () => {
         </table>
       </div>
       <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
-        <span>{(filtered.length === 0 ? 0 : (currentPage - 1) * pageSize + 1)} to {Math.min(currentPage * pageSize, filtered.length)} of {filtered.length}</span>
+        <span>{(filtered.length === 0 ? 0 : (currentPage - 1) * pageSize + 1)} đến {Math.min(currentPage * pageSize, filtered.length)} trên tổng số {filtered.length}</span>
         <div className="flex items-center gap-2">
           <button className="border rounded px-2 py-1" disabled={currentPage === 1} onClick={() => setCurrentPage(p => Math.max(1, p - 1))}>&lt;</button>
           <span className="border rounded px-2 py-1 bg-white">{currentPage}</span>
@@ -187,29 +187,29 @@ const ManageSubCategory = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative animate-fadeIn">
             <button className="absolute top-3 right-3 text-2xl text-gray-400 hover:text-gray-600" onClick={() => { setShowModal(false); setEditIdx(null); }} aria-label="Close">×</button>
-            <div className="text-xl font-bold mb-4">{editIdx === null ? 'Create SubCategory' : 'Edit SubCategory'}</div>
+            <div className="text-xl font-bold mb-4">{editIdx === null ? 'Thêm danh mục con' : 'Sửa danh mục con'}</div>
             <form className="space-y-4" onSubmit={handleAddEdit}>
               <div>
-                <label className="block font-medium mb-1">Name</label>
-                <input type="text" className="w-full border rounded px-3 py-2" placeholder="Enter name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+                <label className="block font-medium mb-1">Tên danh mục con</label>
+                <input type="text" className="w-full border rounded px-3 py-2" placeholder="Nhập tên danh mục con" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
               </div>
               <div>
-                <label className="block font-medium mb-1">Parent Category</label>
+                <label className="block font-medium mb-1">Danh mục cha</label>
                 <select className="w-full border rounded px-3 py-2" value={form.parent} onChange={e => setForm({ ...form, parent: e.target.value })}>
                   {categories.map(cat => <option key={cat}>{cat}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block font-medium mb-1">Description</label>
-                <textarea className="w-full border rounded px-3 py-2 resize-none" rows={2} placeholder="Enter description" value={form.desc} onChange={e => setForm({ ...form, desc: e.target.value })} />
+                <label className="block font-medium mb-1">Mô tả</label>
+                <input type="text" className="w-full border rounded px-3 py-2" placeholder="Nhập mô tả" value={form.desc} onChange={e => setForm({ ...form, desc: e.target.value })} />
               </div>
               {formError && <div className="text-red-500 text-sm font-medium mt-1">{formError}</div>}
               <div className="flex justify-end gap-2 mt-4">
                 <button type="button" className="px-4 py-2 rounded border bg-gray-50 hover:bg-gray-100" onClick={() => { setShowModal(false); const currentCategories = getCategoriesFromStorage(); setForm({ name: "", desc: "", parent: currentCategories[0] || "" }); setEditIdx(null); }}>
-                  Cancel
+                  Hủy
                 </button>
                 <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700">
-                  Submit
+                  Gửi
                 </button>
               </div>
             </form>

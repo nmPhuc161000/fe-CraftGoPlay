@@ -22,13 +22,19 @@ export const CartProvider = ({ children }) => {
                 setCartItems(items);
             } else {
                 console.error("Lỗi khi tải giỏ hàng:", res.error);
+                setCartItems([]);
             }
+        } else {
+            setCartItems([]);
         }
     };
 
     useEffect(() => {
-        fetchCart();
-    }, [isAuthenticated, user?.id]);
+        if (isAuthenticated && user?.id && user?.roleId === 4) {
+            fetchCart();
+        }
+    }, [isAuthenticated, user?.id, user?.roleId]);
+
 
     // 2. Thêm sản phẩm vào giỏ hàng
     const addToCart = async (product) => {
@@ -70,13 +76,15 @@ export const CartProvider = ({ children }) => {
     const clearCart = async () => {
         if (!isAuthenticated || !cartItems.length) return;
         for (const item of cartItems) {
-            await removeFromCartApi(item.id); 
+            await removeFromCartApi(item.id);
         }
 
         await fetchCart();
     };
 
-    const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    const cartCount = Array.isArray(cartItems)
+        ? cartItems.reduce((sum, item) => sum + item.quantity, 0)
+        : 0;
 
     return (
         <CartContext.Provider

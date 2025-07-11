@@ -1,26 +1,26 @@
 import React, { useState, useRef, useEffect } from "react";
 
 const FAKE_DATA = [
-  { id: 246, name: "Nguyen Hoang Le Minh", username: "staff001@gmail.com", email: "staff001@gmail.com", role: "Staff", status: "Active" },
-  { id: 247, name: "Nguyen Ngoc Bao", username: "staff002@gmail.com", email: "staff002@gmail.com", role: "Staff", status: "Active" },
-  { id: 248, name: "Nguyen Minh Phuc", username: "staff003@gmail.com", email: "staff003@gmail.com", role: "Staff", status: "Active" },
-  { id: 249, name: "Ung Tuan Kiet", username: "staff004@gmail.com", email: "staff004@gmail.com", role: "Staff", status: "Active" },
-  { id: 250, name: "Nguyen Thanh Tien", username: "staff005@gmail.com", email: "staff005@gmail.com", role: "Staff", status: "Active" },
-  { id: 246, name: "Nguyen Hoang Le Minh", username: "staff001@gmail.com", email: "staff001@gmail.com", role: "Staff", status: "Active" },
-  { id: 247, name: "Nguyen Ngoc Bao", username: "staff002@gmail.com", email: "staff002@gmail.com", role: "Staff", status: "Active" },
-  { id: 248, name: "Nguyen Minh Phuc", username: "staff003@gmail.com", email: "staff003@gmail.com", role: "Staff", status: "Active" },
-  { id: 249, name: "Ung Tuan Kiet", username: "staff004@gmail.com", email: "staff004@gmail.com", role: "Staff", status: "Active" },
-  { id: 250, name: "Nguyen Thanh Tien", username: "staff005@gmail.com", email: "staff005@gmail.com", role: "Staff", status: "Active" },
-  { id: 246, name: "Nguyen Hoang Le Minh", username: "staff001@gmail.com", email: "staff001@gmail.com", role: "Staff", status: "Active" },
-  { id: 247, name: "Nguyen Ngoc Bao", username: "staff002@gmail.com", email: "staff002@gmail.com", role: "Staff", status: "Active" },
-  { id: 248, name: "Nguyen Minh Phuc", username: "staff003@gmail.com", email: "staff003@gmail.com", role: "Staff", status: "Active" },
-  { id: 249, name: "Ung Tuan Kiet", username: "staff004@gmail.com", email: "staff004@gmail.com", role: "Staff", status: "Active" },
-  { id: 250, name: "Nguyen Thanh Tien", username: "staff005@gmail.com", email: "staff005@gmail.com", role: "Staff", status: "Active" },
-  { id: 246, name: "Nguyen Hoang Le Minh", username: "staff001@gmail.com", email: "staff001@gmail.com", role: "Staff", status: "Active" },
-  { id: 247, name: "Nguyen Ngoc Bao", username: "staff002@gmail.com", email: "staff002@gmail.com", role: "Staff", status: "Active" },
-  { id: 248, name: "Nguyen Minh Phuc", username: "staff003@gmail.com", email: "staff003@gmail.com", role: "Staff", status: "Active" },
-  { id: 249, name: "Ung Tuan Kiet", username: "staff004@gmail.com", email: "staff004@gmail.com", role: "Staff", status: "Active" },
-  { id: 250, name: "Nguyen Thanh Tien", username: "staff005@gmail.com", email: "staff005@gmail.com", role: "Staff", status: "Active" },
+  { id: 246, name: "Nguyen Hoang Le Minh", username: "staff001@gmail.com", email: "staff001@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 247, name: "Nguyen Ngoc Bao", username: "staff002@gmail.com", email: "staff002@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 248, name: "Nguyen Minh Phuc", username: "staff003@gmail.com", email: "staff003@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 249, name: "Ung Tuan Kiet", username: "staff004@gmail.com", email: "staff004@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 250, name: "Nguyen Thanh Tien", username: "staff005@gmail.com", email: "staff005@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 246, name: "Nguyen Hoang Le Minh", username: "staff001@gmail.com", email: "staff001@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 247, name: "Nguyen Ngoc Bao", username: "staff002@gmail.com", email: "staff002@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 248, name: "Nguyen Minh Phuc", username: "staff003@gmail.com", email: "staff003@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 249, name: "Ung Tuan Kiet", username: "staff004@gmail.com", email: "staff004@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 250, name: "Nguyen Thanh Tien", username: "staff005@gmail.com", email: "staff005@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 246, name: "Nguyen Hoang Le Minh", username: "staff001@gmail.com", email: "staff001@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 247, name: "Nguyen Ngoc Bao", username: "staff002@gmail.com", email: "staff002@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 248, name: "Nguyen Minh Phuc", username: "staff003@gmail.com", email: "staff003@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 249, name: "Ung Tuan Kiet", username: "staff004@gmail.com", email: "staff004@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 250, name: "Nguyen Thanh Tien", username: "staff005@gmail.com", email: "staff005@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 246, name: "Nguyen Hoang Le Minh", username: "staff001@gmail.com", email: "staff001@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 247, name: "Nguyen Ngoc Bao", username: "staff002@gmail.com", email: "staff002@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 248, name: "Nguyen Minh Phuc", username: "staff003@gmail.com", email: "staff003@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 249, name: "Ung Tuan Kiet", username: "staff004@gmail.com", email: "staff004@gmail.com", role: "Nhân viên", status: "Active" },
+  { id: 250, name: "Nguyen Thanh Tien", username: "staff005@gmail.com", email: "staff005@gmail.com", role: "Nhân viên", status: "Active" },
 ];
 
 const STATUS_COLOR = {
@@ -113,12 +113,12 @@ const StaffAccount = () => {
           <div className="bg-amber-25 rounded-xl shadow p-4 overflow-x-auto">
             <div className="flex justify-between items-center mb-2">
               <div>
-                <div className="font-bold text-xl">Staff List</div>
-                <div className="text-sm font-medium text-gray-700 mt-1">Search by related</div>
+                <div className="font-bold text-xl">Danh sách nhân viên</div>
+                <div className="text-sm font-medium text-gray-700 mt-1">Tìm kiếm liên quan</div>
                 <div className="mt-1 flex w-full max-w-xs border rounded overflow-hidden bg-white">
                   <input
                     className="flex-1 px-2 py-1.5 text-sm outline-none bg-transparent"
-                    placeholder="input search text"
+                    placeholder="Nhập từ khóa tìm kiếm"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                   />
@@ -138,7 +138,7 @@ const StaffAccount = () => {
                 className="bg-white border border-gray-300 px-4 py-2 rounded shadow-sm font-semibold hover:bg-gray-50 flex items-center gap-2"
                 onClick={() => setShowModal(true)}
               >
-                + New Staff
+                + Thêm nhân viên
               </button>
             </div>
             <div className="overflow-x-auto">
@@ -146,12 +146,12 @@ const StaffAccount = () => {
                 <thead>
                   <tr>
                     <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tl-lg">ID</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Full Name</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Username</th>
+                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Họ và tên</th>
+                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Tên đăng nhập</th>
                     <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Email</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Role</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Status</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tr-lg">Actions</th>
+                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Chức vụ</th>
+                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Trạng thái</th>
+                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tr-lg">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -165,7 +165,7 @@ const StaffAccount = () => {
                         <span className="border border-blue-200 bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs font-semibold">{row.role}</span>
                       </td>
                       <td className="px-3 py-2">
-                        <span className={`px-2 py-1 rounded text-xs font-semibold ${STATUS_COLOR[row.status]}`}>{row.status}</span>
+                        <span className={`px-2 py-1 rounded text-xs font-semibold ${STATUS_COLOR[row.status]}`}>{row.status === 'Active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}</span>
                       </td>
                       <td className="px-3 py-2 relative">
                         <button
@@ -182,8 +182,8 @@ const StaffAccount = () => {
                         {openActionIdx === idx && (
                           <div
                             ref={actionMenuRef}
-                            style={{ position: 'fixed', top: actionMenuPos.top, left: actionMenuPos.left, zIndex: 1000 }}
-                            className="w-24 bg-white rounded-md shadow-lg animate-fadeIn p-0.5"
+                            style={{ position: 'fixed', top: actionMenuPos.top, left: actionMenuPos.left, zIndex: 1000, minWidth: 100 }}
+                            className="bg-white rounded-md shadow-lg animate-fadeIn p-0.5"
                           >
                             {row.status === 'Active' ? (
                               <button
@@ -198,7 +198,7 @@ const StaffAccount = () => {
                                     <line x1="16" y1="8" x2="8" y2="16" stroke="currentColor" strokeWidth="2"/>
                                   </svg>
                                 </span>
-                                <span className="text-red-600 font-medium">Deactivate</span>
+                                <span className="text-red-600 font-medium">Ngừng hoạt động</span>
                               </button>
                             ) : (
                               <button
@@ -212,7 +212,7 @@ const StaffAccount = () => {
                                     <polyline points="8 12 11 15 16 10" stroke="currentColor" strokeWidth="2" fill="none"/>
                                   </svg>
                                 </span>
-                                <span className="text-green-600 font-medium">Active</span>
+                                <span className="text-green-600 font-medium">Kích hoạt</span>
                               </button>
                             )}
                           </div>
@@ -242,7 +242,7 @@ const StaffAccount = () => {
                   value={pageSize}
                   disabled
                 >
-                  <option>10 / page</option>
+                  <option>10 / trang</option>
                 </select>
               </div>
             </div>
@@ -258,7 +258,7 @@ const StaffAccount = () => {
                 >
                   ×
                 </button>
-                <div className="text-xl font-bold mb-4">Create Staff</div>
+                <div className="text-xl font-bold mb-4">Thêm nhân viên</div>
                 <form className="space-y-4" onSubmit={e => {
                   e.preventDefault();
                   setFormError("");
@@ -276,7 +276,7 @@ const StaffAccount = () => {
                       name: form.name,
                       username: form.email,
                       email: form.email,
-                      role: "Staff",
+                      role: "Nhân viên",
                       status: "Active",
                     },
                     ...prev,
@@ -285,36 +285,36 @@ const StaffAccount = () => {
                   setForm({ name: "", email: "", phone: "", address: "" });
                 }}>
                   <div>
-                    <label className="block font-medium mb-1">Full Name</label>
-                    <input type="text" className="w-full border rounded px-3 py-2" placeholder="Enter full name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+                    <label className="block font-medium mb-1">Họ và tên</label>
+                    <input type="text" className="w-full border rounded px-3 py-2" placeholder="Nhập họ và tên" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
                   </div>
                   <div className="flex gap-4">
                     <div className="flex-1">
                       <label className="block font-medium mb-1">Email</label>
-                      <input type="email" className="w-full border rounded px-3 py-2" placeholder="Enter email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+                      <input type="email" className="w-full border rounded px-3 py-2" placeholder="Nhập email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
                     </div>
                     <div className="flex-1">
-                      <label className="block font-medium mb-1">Phone</label>
-                      <input type="text" className="w-full border rounded px-3 py-2" placeholder="Enter phone number" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value.replace(/[^\d]/g, "") })} maxLength={10} />
+                      <label className="block font-medium mb-1">Số điện thoại</label>
+                      <input type="text" className="w-full border rounded px-3 py-2" placeholder="Nhập số điện thoại" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value.replace(/[^\d]/g, "") })} maxLength={10} />
                     </div>
                   </div>
                   <div>
-                    <label className="block font-medium mb-1">Address</label>
-                    <textarea className="w-full border rounded px-3 py-2 resize-none" rows={2} placeholder="Enter address" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} />
+                    <label className="block font-medium mb-1">Địa chỉ</label>
+                    <textarea className="w-full border rounded px-3 py-2 resize-none" rows={2} placeholder="Nhập địa chỉ" value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} />
                   </div>
                   <div>
-                    <label className="block font-medium mb-1">Role</label>
+                    <label className="block font-medium mb-1">Chức vụ</label>
                     <select className="w-full border rounded px-3 py-2 bg-gray-100 text-gray-400" disabled>
-                      <option>Staff</option>
+                      <option>Nhân viên</option>
                     </select>
                   </div>
                   {formError && <div className="text-red-500 text-sm font-medium mt-1">{formError}</div>}
                   <div className="flex justify-end gap-2 mt-4">
                     <button type="button" className="px-4 py-2 rounded border bg-gray-50 hover:bg-gray-100" onClick={() => { setShowModal(false); setForm({ name: "", email: "", phone: "", address: "" }); }}>
-                      Cancel
+                      Hủy
                     </button>
                     <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700">
-                      Submit
+                      Thêm
                     </button>
                   </div>
                 </form>
@@ -324,7 +324,7 @@ const StaffAccount = () => {
           {/* Modal xác nhận Deactive/Active */}
           {confirmModal.open && (
             <div className="fixed inset-0 z-50 flex items-center justify-center">
-              <div className="bg-amber-25 rounded-xl shadow-lg w-full max-w-xs p-6 relative animate-fadeIn">
+              <div className="bg-white rounded-xl shadow-2xl border border-gray-200 w-full max-w-xs p-6 relative animate-fadeIn">
                 <div className="text-lg font-bold mb-2 text-center">
                   {confirmModal.action === 'deactive' ? 'Xác nhận vô hiệu hóa?' : 'Xác nhận kích hoạt?'}
                 </div>
@@ -335,16 +335,16 @@ const StaffAccount = () => {
                 </div>
                 <div className="flex justify-center gap-3">
                   <button
-                    className="px-4 py-2 rounded border bg-gray-50 hover:bg-gray-100"
-                    onClick={() => setConfirmModal({ open: false, idx: null, action: null })}
-                  >
-                    Hủy
-                  </button>
-                  <button
                     className={`px-4 py-2 rounded text-white font-semibold ${confirmModal.action === 'deactive' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
                     onClick={handleConfirm}
                   >
                     Xác nhận
+                  </button>
+                  <button
+                    className="px-4 py-2 rounded border bg-gray-50 hover:bg-gray-100"
+                    onClick={() => setConfirmModal({ open: false, idx: null, action: null })}
+                  >
+                    Hủy
                   </button>
                 </div>
               </div>

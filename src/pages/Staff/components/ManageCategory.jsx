@@ -100,14 +100,14 @@ const ManageCategory = () => {
     <div className="bg-amber-25 rounded-2xl shadow p-4 w-full">
       <div className="flex justify-between items-center mb-4">
         <div>
-          <div className="font-bold text-xl">Category List</div>
-          <div className="text-sm font-medium text-gray-700 mt-1">Search by name</div>
+          <div className="font-bold text-xl">Danh sách danh mục</div>
+          <div className="text-sm font-medium text-gray-700 mt-1">Tìm kiếm theo tên</div>
           <div className="mt-1 flex w-full max-w-xs border rounded overflow-hidden bg-white">
-            <input className="flex-1 px-2 py-1.5 text-sm outline-none bg-transparent" placeholder="input search text" value={search} onChange={e => setSearch(e.target.value)} />
+            <input className="flex-1 px-2 py-1.5 text-sm outline-none bg-transparent" placeholder="Nhập từ khóa tìm kiếm" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
         </div>
         <button className="bg-white border border-gray-300 px-4 py-2 rounded shadow-sm font-semibold hover:bg-gray-50 flex items-center gap-2" onClick={openAdd}>
-          + New Category
+          + Thêm danh mục
         </button>
       </div>
       <div className="overflow-x-auto">
@@ -116,7 +116,7 @@ const ManageCategory = () => {
             <tr>
               <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tl-lg">STT</th>
               <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Hình ảnh</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Tên sản phẩm</th>
+              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Tên danh mục</th>
               <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Trạng thái</th>
               <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Ngày tạo</th>
               <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tr-lg">Hành động</th>
@@ -133,9 +133,9 @@ const ManageCategory = () => {
                 <td className="px-3 py-2">{row.categoryStatus}</td>
                 <td className="px-3 py-2">{row.creationDate ? new Date(row.creationDate).toLocaleDateString() : ""}</td>
                 <td className="px-3 py-2 flex gap-2">
-                  <button className="text-green-500 hover:underline" onClick={() => openView((currentPage-1)*pageSize+idx)}>View</button>
-                  <button className="text-blue-500 hover:underline" onClick={() => openEdit((currentPage-1)*pageSize+idx)}>Edit</button>
-                  <button className="text-red-500 hover:underline" onClick={() => openDelete(row.categoryId)}>Delete</button>
+                  <button className="text-green-500 hover:underline" onClick={() => openView((currentPage-1)*pageSize+idx)}>Xem</button>
+                  <button className="text-blue-500 hover:underline" onClick={() => openEdit((currentPage-1)*pageSize+idx)}>Sửa</button>
+                  <button className="text-red-500 hover:underline" onClick={() => openDelete(row.categoryId)}>Xóa</button>
                 </td>
               </tr>
             ))}
@@ -143,7 +143,7 @@ const ManageCategory = () => {
         </table>
       </div>
       <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
-        <span>{(filtered.length === 0 ? 0 : (currentPage - 1) * pageSize + 1)} to {Math.min(currentPage * pageSize, filtered.length)} of {filtered.length}</span>
+        <span>{(filtered.length === 0 ? 0 : (currentPage - 1) * pageSize + 1)} đến {Math.min(currentPage * pageSize, filtered.length)} trên tổng số {filtered.length}</span>
         <div className="flex items-center gap-2">
           <button className="border rounded px-2 py-1" disabled={currentPage === 1} onClick={() => setCurrentPage(p => Math.max(1, p - 1))}>&lt;</button>
           <span className="border rounded px-2 py-1 bg-white">{currentPage}</span>
@@ -158,7 +158,7 @@ const ManageCategory = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative animate-fadeIn">
             <button className="absolute top-3 right-3 text-2xl text-gray-400 hover:text-gray-600" onClick={() => { setShowModal(false); setEditIdx(null); }} aria-label="Close">×</button>
-            <div className="text-xl font-bold mb-4">{editIdx === null ? 'Create Category' : 'Edit Category'}</div>
+            <div className="text-xl font-bold mb-4">{editIdx === null ? 'Thêm danh mục' : 'Sửa danh mục'}</div>
             
             
             <form className="space-y-4" onSubmit={async e => {
@@ -206,30 +206,37 @@ const ManageCategory = () => {
             }}>
               <div>
                 <label className="block font-medium mb-1">Tên loại</label>
-                <input type="text" className="w-full border rounded px-3 py-2" placeholder="Nhập tên loại" value={form.categoryName || ''} onChange={e => setForm({ ...form, categoryName: e.target.value })} />
+                <input type="text" className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400" placeholder="Nhập tên loại" value={form.categoryName || ''} onChange={e => setForm({ ...form, categoryName: e.target.value })} />
               </div>
               <div>
-                <label className="block font-medium mb-1">Ảnh loại</label>
-                <input type="file" accept="image/*" onChange={e => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    setForm(f => ({ ...f, imageFile: file }));
-                    const reader = new FileReader();
-                    reader.onload = ev => setForm(f => ({ ...f, image: ev.target.result }));
-                    reader.readAsDataURL(file);
-                  }
-                }} />
-                {form.image && (
-                  <img src={form.image} alt="preview" className="w-24 h-24 object-cover rounded mt-2" />
-                )}
+                <label className="block font-medium mb-1">Hình ảnh</label>
+                <div className="flex items-center gap-4">
+                  <label className="cursor-pointer inline-block px-4 py-2 border border-gray-400 text-gray-800 rounded hover:bg-gray-100 transition font-medium shadow-sm">
+                    Chọn ảnh
+                    <input type="file" accept="image/*" className="hidden" onChange={e => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        setForm(f => ({ ...f, imageFile: file }));
+                        const reader = new FileReader();
+                        reader.onload = ev => setForm(f => ({ ...f, image: ev.target.result }));
+                        reader.readAsDataURL(file);
+                      }
+                    }} />
+                  </label>
+                  {(form.image || form.imageFile) && (
+                    <img src={form.image || (form.imageFile && URL.createObjectURL(form.imageFile))} alt="preview" className="w-12 h-12 object-cover rounded border" />
+                  )}
+                </div>
+                <div className="text-xs text-gray-500 mt-1">Chỉ chấp nhận ảnh PNG, JPG, JPEG. Dung lượng &lt; 2MB.</div>
+                {form.imageFile && <div className="text-xs text-green-600 mt-1">{form.imageFile.name}</div>}
               </div>
               {formError && <div className="text-red-500 text-sm font-medium mt-1">{formError}</div>}
               <div className="flex justify-end gap-2 mt-4">
-                <button type="button" className="px-4 py-2 rounded border bg-gray-50 hover:bg-gray-100" onClick={() => { setShowModal(false); setForm({ categoryName: "", image: "", imageFile: null }); setEditIdx(null); }}>
-                  Cancel
+                <button type="button" className="px-4 py-2 rounded border bg-gray-50 hover:bg-gray-100" onClick={() => { setShowModal(false); setForm({ categoryName: '', image: '', imageFile: null }); setEditIdx(null); }}>
+                  Hủy
                 </button>
-                <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700">
-                  Submit
+                <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 shadow">
+                  Lưu
                 </button>
               </div>
             </form>
