@@ -32,9 +32,9 @@ const FAKE_DATA = {
         { month: 'Tháng 6', Products: 3 + 2 + 1 },
       ],
       pie: [
-        { name: 'Success', value: 37, color: '#0084FF' },
-        { name: 'Cancelled', value: 6, color: '#00C49F' },
-        { name: 'Bad Feedback', value: 16, color: '#FFC233' },
+        { name: 'Thành công', value: 37, color: '#0084FF' },
+        { name: 'Đã hủy', value: 6, color: '#00C49F' },
+        { name: 'Phản hồi xấu', value: 16, color: '#FFC233' },
       ],
     },
     5: {
@@ -49,9 +49,9 @@ const FAKE_DATA = {
         { date: '2025-05-07', Products: 10 + 2 + 4 },
       ],
       pie: [
-        { name: 'Success', value: 27, color: '#0084FF' },
-        { name: 'Cancelled', value: 4, color: '#00C49F' },
-        { name: 'Bad Feedback', value: 11, color: '#FFC233' },
+        { name: 'Thành công', value: 27, color: '#0084FF' },
+        { name: 'Đã hủy', value: 4, color: '#00C49F' },
+        { name: 'Phản hồi xấu', value: 11, color: '#FFC233' },
       ],
     },
     6: {
@@ -66,9 +66,9 @@ const FAKE_DATA = {
         { date: '2025-06-07', Products: 0 + 0 + 0 },
       ],
       pie: [
-        { name: 'Success', value: 10, color: '#0084FF' },
-        { name: 'Cancelled', value: 2, color: '#00C49F' },
-        { name: 'Bad Feedback', value: 5, color: '#FFC233' },
+        { name: 'Thành công', value: 10, color: '#0084FF' },
+        { name: 'Đã hủy', value: 2, color: '#00C49F' },
+        { name: 'Phản hồi xấu', value: 5, color: '#FFC233' },
       ],
     },
   },
@@ -76,15 +76,15 @@ const FAKE_DATA = {
     0: {
       cards: { users: 10, orders: 20, feedbacks: 5, revenues: 1000000 },
       bar: [
-        { name: "Devices", value: 10 },
-        { name: "Combos", value: 5 },
-        { name: "Labs", value: 2 },
+        { name: "Thiết bị", value: 10 },
+        { name: "Bộ sản phẩm", value: 5 },
+        { name: "Phòng thí nghiệm", value: 2 },
       ],
       pie: [
-        { name: "Success", value: 8, color: "#0084FF" },
-        { name: "Cancelled", value: 1, color: "#00C49F" },
-        { name: "Bad Feedback", value: 1, color: "#FFC233" },
-        { name: "Other", value: 10, color: "#FF8042" },
+        { name: "Thành công", value: 8, color: "#0084FF" },
+        { name: "Đã hủy", value: 1, color: "#00C49F" },
+        { name: "Phản hồi xấu", value: 1, color: "#FFC233" },
+        { name: "Khác", value: 10, color: "#FF8042" },
       ],
     },
   },
@@ -130,9 +130,9 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4">
           {/* Breadcrumb */}
           <div className="mb-2 text-sm text-gray-500">
-            Home / <span className="text-blue-600 font-semibold">admin</span>
+            Trang chủ / <span className="text-blue-600 font-semibold">quản trị</span>
           </div>
-          <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+          <h1 className="text-2xl font-bold mb-4">Bảng điều khiển</h1>
           {/* Filter */}
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-6">
             <select
@@ -160,28 +160,28 @@ const Dashboard = () => {
               <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
                 <div className="bg-blue-100 text-blue-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl"><FaUserPlus /></div>
                 <div>
-                  <div className="text-gray-500 text-xs sm:text-sm">Total Users</div>
+                  <div className="text-gray-500 text-xs sm:text-sm">Tổng người dùng</div>
                   <div className="text-xl sm:text-2xl font-bold">{data.cards.users}</div>
                 </div>
               </div>
               <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
                 <div className="bg-green-100 text-green-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl"><FaShoppingCart /></div>
                 <div>
-                  <div className="text-gray-500 text-xs sm:text-sm">Total Orders</div>
+                  <div className="text-gray-500 text-xs sm:text-sm">Tổng đơn hàng</div>
                   <div className="text-xl sm:text-2xl font-bold">{data.cards.orders}</div>
                 </div>
               </div>
               <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
                 <div className="bg-purple-100 text-purple-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl"><FaCommentDots /></div>
                 <div>
-                  <div className="text-gray-500 text-xs sm:text-sm">Total Feedbacks</div>
+                  <div className="text-gray-500 text-xs sm:text-sm">Tổng phản hồi</div>
                   <div className="text-xl sm:text-2xl font-bold">{data.cards.feedbacks}</div>
                 </div>
               </div>
               <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
                 <div className="bg-yellow-100 text-yellow-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl"><FaCoins /></div>
                 <div>
-                  <div className="text-gray-500 text-xs sm:text-sm">Total Revenues</div>
+                  <div className="text-gray-500 text-xs sm:text-sm">Tổng doanh thu</div>
                   <div className="text-xl sm:text-2xl font-bold">{data.cards.revenues.toLocaleString()} đ</div>
                 </div>
               </div>
@@ -190,7 +190,7 @@ const Dashboard = () => {
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-6">
             <div className="col-span-1 lg:col-span-2 bg-amber-25 rounded-xl shadow p-3 sm:p-6 transition-all duration-300 hover:shadow-2xl">
-              <div className="font-semibold mb-2">Product Statistics</div>
+              <div className="font-semibold mb-2">Thống kê sản phẩm</div>
               {barData && barData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={260}>
                   <BarChart data={barData} barCategoryGap={24}>
@@ -207,7 +207,7 @@ const Dashboard = () => {
               )}
             </div>
             <div className="bg-amber-25 rounded-xl shadow p-3 sm:p-6 flex flex-col items-center transition-all duration-300 hover:shadow-2xl">
-              <div className="font-semibold mb-2">Order Distribution</div>
+              <div className="font-semibold mb-2">Phân bố đơn hàng</div>
               {data && data.pie && data.pie.length > 0 ? (
                 <>
                   <ResponsiveContainer width="100%" height={220}>

@@ -2,14 +2,14 @@ import React, { useState } from "react";
 import { FaHourglassHalf, FaBoxOpen, FaTruck, FaStar, FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaSearch } from "react-icons/fa";
 
 const STATUS_TABS = [
-  { key: "all", label: "All orders", icon: null },
-  { key: "pending", label: "Pending", icon: <FaHourglassHalf className="text-yellow-500" /> },
-  { key: "packing", label: "Packing", icon: <FaBoxOpen className="text-blue-400" /> },
-  { key: "delivering", label: "Delivering", icon: <FaTruck className="text-blue-600" /> },
-  { key: "pending_feedback", label: "Pending to feedback", icon: <FaStar className="text-yellow-400" /> },
-  { key: "success", label: "Success order", icon: <FaCheckCircle className="text-green-500" /> },
-  { key: "cancel", label: "Cancel", icon: <FaTimesCircle className="text-gray-400" /> },
-  { key: "bad_feedback", label: "Bad feedback", icon: <FaExclamationTriangle className="text-orange-400" /> },
+  { key: "all", label: "Tất cả đơn hàng", icon: null },
+  { key: "pending", label: "Chờ xác nhận", icon: <FaHourglassHalf className="text-yellow-500" /> },
+  { key: "packing", label: "Đang đóng gói", icon: <FaBoxOpen className="text-blue-400" /> },
+  { key: "delivering", label: "Đang giao hàng", icon: <FaTruck className="text-blue-600" /> },
+  { key: "pending_feedback", label: "Chờ phản hồi", icon: <FaStar className="text-yellow-400" /> },
+  { key: "success", label: "Thành công", icon: <FaCheckCircle className="text-green-500" /> },
+  { key: "cancel", label: "Đã hủy", icon: <FaTimesCircle className="text-gray-400" /> },
+  { key: "bad_feedback", label: "Phản hồi xấu", icon: <FaExclamationTriangle className="text-orange-400" /> },
 ];
 
 const FAKE_ORDERS = [
@@ -51,13 +51,13 @@ const FAKE_ORDERS = [
 ];
 
 const STATUS_BADGE = {
-  pending: { text: "Pending", color: "bg-yellow-100 text-yellow-700 border border-yellow-300" },
-  packing: { text: "Packing", color: "bg-blue-100 text-blue-700 border border-blue-300" },
-  delivering: { text: "Delivering", color: "bg-blue-100 text-blue-700 border border-blue-300" },
-  pending_feedback: { text: "Pending to feedback", color: "bg-yellow-100 text-yellow-700 border border-yellow-300" },
-  success: { text: "Success order", color: "bg-green-100 text-green-700 border border-green-300" },
-  cancel: { text: "Cancel", color: "bg-gray-100 text-gray-500 border border-gray-300" },
-  bad_feedback: { text: "Bad feedback", color: "bg-orange-100 text-orange-700 border border-orange-300" },
+  pending: { text: "Chờ xác nhận", color: "bg-yellow-100 text-yellow-700 border border-yellow-300" },
+  packing: { text: "Đang đóng gói", color: "bg-blue-100 text-blue-700 border border-blue-300" },
+  delivering: { text: "Đang giao hàng", color: "bg-blue-100 text-blue-700 border border-blue-300" },
+  pending_feedback: { text: "Chờ phản hồi", color: "bg-yellow-100 text-yellow-700 border border-yellow-300" },
+  success: { text: "Thành công", color: "bg-green-100 text-green-700 border border-green-300" },
+  cancel: { text: "Đã hủy", color: "bg-gray-100 text-gray-500 border border-gray-300" },
+  bad_feedback: { text: "Phản hồi xấu", color: "bg-orange-100 text-orange-700 border border-orange-300" },
 };
 
 const OrderHistory = () => {
@@ -75,9 +75,9 @@ const OrderHistory = () => {
       <div className="w-full bg-amber-25 rounded-3xl shadow-xl p-4 sm:p-6 md:p-10 mx-auto">
         {/* Breadcrumb */}
         <div className="mb-2 text-sm text-gray-500">
-          Home / Admin / <span className="text-blue-600 font-semibold">manage order</span>
+          Trang chủ / Quản trị / <span className="text-blue-600 font-semibold">quản lý đơn hàng</span>
         </div>
-        <h1 className="text-2xl font-bold mb-6">Order History</h1>
+        <h1 className="text-2xl font-bold mb-6">Lịch sử đơn hàng</h1>
         {/* Tabs */}
         <div className="flex flex-wrap gap-3 mb-6 items-center">
           {STATUS_TABS.map(t => (
@@ -98,7 +98,7 @@ const OrderHistory = () => {
         <div className="mb-8 relative">
           <input
             className="w-full border border-gray-300 rounded-full px-5 py-3 pr-12 text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
-            placeholder="Search by order code"
+            placeholder="Tìm kiếm theo mã đơn hàng"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -107,17 +107,17 @@ const OrderHistory = () => {
         {/* Order List */}
         <div className="space-y-8">
           {filtered.length === 0 && (
-            <div className="text-center text-gray-400 py-12">No orders found.</div>
+            <div className="text-center text-gray-400 py-12">Không tìm thấy đơn hàng nào.</div>
           )}
           {filtered.map((order, idx) => (
             <div key={order.code} className="bg-white rounded-2xl shadow-lg border border-blue-100 p-6 md:p-8 flex flex-col gap-4">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                 <div className="flex flex-col gap-1">
-                  <div className="text-xs text-gray-500 font-medium">Order code: <span className="font-bold text-gray-700">{order.code}</span></div>
-                  <div className="text-xs text-gray-500">Create date: <span className="font-semibold">{order.created}</span></div>
+                  <div className="text-xs text-gray-500 font-medium">Mã đơn hàng: <span className="font-bold text-gray-700">{order.code}</span></div>
+                  <div className="text-xs text-gray-500">Ngày tạo: <span className="font-semibold">{order.created}</span></div>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  {order.paid && <span className="text-xs font-bold text-green-500">PAID</span>}
+                  {order.paid && <span className="text-xs font-bold text-green-500">ĐÃ THANH TOÁN</span>}
                   <span className={`text-xs font-semibold px-2 py-1 rounded border ${STATUS_BADGE[order.status]?.color || "bg-gray-100 text-gray-500 border-gray-200"}`}>{STATUS_BADGE[order.status]?.text || order.status}</span>
                 </div>
               </div>
@@ -131,15 +131,15 @@ const OrderHistory = () => {
                     <img src={item.img} alt={item.name} className="w-16 h-16 object-cover rounded border" />
                     <div className="flex-1">
                       <div className="font-semibold text-gray-700 text-base">{item.name}</div>
-                      <div className="text-xs text-gray-500">Quantity: {item.quantity}</div>
-                      {item.serial && <div className="text-xs text-gray-400">Warranty serial number: <span className="font-semibold">{item.serial}</span></div>}
-                      {item.warranty && <div className="text-xs text-green-500">Warranty until: {item.warranty}</div>}
+                      <div className="text-xs text-gray-500">Số lượng: {item.quantity}</div>
+                      {item.serial && <div className="text-xs text-gray-400">Mã bảo hành: <span className="font-semibold">{item.serial}</span></div>}
+                      {item.warranty && <div className="text-xs text-green-500">Bảo hành đến: {item.warranty}</div>}
                     </div>
                     <div className="text-xl font-bold text-red-500 whitespace-nowrap">{order.total.toLocaleString()}đ</div>
                   </div>
                 ))}
                 <div className="flex justify-end mt-2">
-                  <span className="font-bold text-lg text-black">Total: <span className="text-red-500">{order.total.toLocaleString()}đ</span></span>
+                  <span className="font-bold text-lg text-black">Tổng: <span className="text-red-500">{order.total.toLocaleString()}đ</span></span>
                 </div>
               </div>
             </div>
