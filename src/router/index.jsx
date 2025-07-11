@@ -23,6 +23,7 @@ import Staff from "../pages/Staff/Staff";
 
 // ==================== Routes ====================
 import ProtectedRoute from "./ProtectedRoute";
+import Game from "../pages/Game/Game";
 
 const AppRouter = () => {
   return (
@@ -72,6 +73,14 @@ const AppRouter = () => {
             element={
               <ProtectedRoute>
                 <PaymentSuccess />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/game"
+            element={
+              <ProtectedRoute>
+                <Game />
               </ProtectedRoute>
             }
           />

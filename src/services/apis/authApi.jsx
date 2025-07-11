@@ -1,4 +1,8 @@
-import { performApiRequest, validateEmail } from "../../utils/apiUtils";
+import { performApiRequest } from "../../utils/apiUtils";
+import {
+  validateBeforeApiCall,
+  validateEmail,
+} from "../../utils/validationUtils";
 import { API_ENDPOINTS_AUTH } from "../../constants/apiEndPoint";
 
 // Service API cho authentication
@@ -9,19 +13,9 @@ const authService = {
    * @returns {Promise<{success: boolean, data?: any, error?: string, status?: number}>}
    */
   async login(credentials) {
-    if (!credentials || !credentials.email || !credentials.passwordHash) {
-      return {
-        success: false,
-        error: "Email và mật khẩu là bắt buộc",
-        status: 400,
-      };
-    }
-    if (!validateEmail(credentials.email)) {
-      return {
-        success: false,
-        error: "Email không hợp lệ",
-        status: 400,
-      };
+    const { isValid, error, status } = validateBeforeApiCall(userData);
+    if (!isValid) {
+      return { success: false, error, status };
     }
     console.log("Data: ", credentials);
 
@@ -53,20 +47,11 @@ const authService = {
   async register(userData) {
     console.log("Registering with data: ", userData);
 
-    if (!userData || !userData.email || !userData.passwordHash) {
-      return {
-        success: false,
-        error: "Email và mật khẩu là bắt buộc",
-        status: 400,
-      };
+    const { isValid, error, status } = validateBeforeApiCall(userData);
+    if (!isValid) {
+      return { success: false, error, status };
     }
-    if (!validateEmail(userData.email)) {
-      return {
-        success: false,
-        error: "Email không hợp lệ",
-        status: 400,
-      };
-    }
+
     return performApiRequest(API_ENDPOINTS_AUTH.REGISTER, {
       data: userData,
       method: "post",
