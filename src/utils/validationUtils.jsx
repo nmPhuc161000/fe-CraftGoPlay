@@ -45,6 +45,9 @@ export const validateRequiredFields = (userData) => {
 };
 
 export const validateUserEmail = (email) => {
+  if (!email) {
+    return "Email là bắt buôc!";
+  }
   if (!validateEmail(email)) {
     return "Email không hợp lệ";
   }
@@ -67,6 +70,15 @@ export const validateRegisterForm = (form, confirmPassword) => {
 
   const isValid = !Object.values(errors).some((error) => error !== "");
   return { errors, isValid };
+};
+
+// Validate riêng cho Login
+export const validateLoginForm = (form) => {
+  const errors = {
+    email: validateUserEmail(form.Email),
+    passwordHash: validatePassword(form.passwordHash),
+  };
+  return { errors, isValid: !Object.values(errors).some((error) => error) };
 };
 
 // Hàm validate trước khi gọi API
