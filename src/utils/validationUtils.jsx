@@ -57,7 +57,7 @@ export const validateRegisterForm = (form, confirmPassword) => {
     userName: validateUserName(form.UserName),
     email: validateUserEmail(form.Email),
     phoneNo: validatePhoneNumber(form.PhoneNo),
-    password: validatePassword(form.PasswordHash),
+    passwordHash: validatePassword(form.PasswordHash),
     confirmPassword: validateConfirmPassword(
       form.PasswordHash,
       confirmPassword

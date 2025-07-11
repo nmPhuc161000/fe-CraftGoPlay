@@ -13,7 +13,7 @@ const authService = {
    * @returns {Promise<{success: boolean, data?: any, error?: string, status?: number}>}
    */
   async login(credentials) {
-    const { isValid, error, status } = validateBeforeApiCall(userData);
+    const { isValid, error, status } = validateBeforeApiCall(credentials);
     if (!isValid) {
       return { success: false, error, status };
     }

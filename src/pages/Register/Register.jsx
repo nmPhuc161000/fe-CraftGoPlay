@@ -92,8 +92,10 @@ const Register = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({
-    PhoneNo: "",
-    PasswordHash: "",
+    email: "",
+    userName: "",
+    phoneNo: "",
+    passwordHash: "",
     confirmPassword: "",
   });
   const navigate = useNavigate();
@@ -158,10 +160,8 @@ const Register = () => {
   const handleRegister = useCallback(
     async (e) => {
       e.preventDefault();
-
-      if (!validateForm()) return;
-
       setLoading(true);
+      if (!validateForm()) return;
 
       try {
         const response = await authService.register(form);
@@ -305,7 +305,7 @@ const Register = () => {
               placeholder="Tên người dùng"
               value={form.UserName}
               onChange={(e) => setForm({ ...form, UserName: e.target.value })}
-              error={errors.UserName}
+              error={errors.userName}
               tooltipContent={tooltips.userName}
             />
 
@@ -327,7 +327,7 @@ const Register = () => {
               placeholder="Số điện thoại ít nhất 10 số"
               value={form.PhoneNo}
               onChange={handlePhoneChange}
-              error={errors.PhoneNo}
+              error={errors.phoneNo}
               maxLength={10}
               tooltipContent={tooltips.phone}
             />
@@ -342,7 +342,7 @@ const Register = () => {
               onChange={(e) =>
                 setForm({ ...form, PasswordHash: e.target.value })
               }
-              error={errors.PasswordHash}
+              error={errors.passwordHash}
               tooltipContent={tooltips.password}
             />
 
