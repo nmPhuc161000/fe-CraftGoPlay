@@ -4,6 +4,7 @@ import addressService from "../../../../services/apis/addressApi";
 import { useNotification } from "../../../../contexts/NotificationContext";
 import AddressManager from "../../../../components/common/AddressManager";
 import AddressFormPopup from "../../../../components/common/AddressFormPopup";
+import locationService from "../../../../services/apis/locationApi";
 // import locationService from "../../../services/apis/locationApi"; // Đã comment
 
 export default function AddressTab({ userId }) {
@@ -34,23 +35,23 @@ export default function AddressTab({ userId }) {
     }
   };
 
-  /* Đã comment toàn bộ phần location service
   const fetchProvinces = async () => {
     try {
-      const response = await locationService.getProvinces();
-      setProvinces(response.data?.data || []);
+      const response = await locationService.getProvince();
+      setProvinces(response.data || []);
     } catch (error) {
       console.error("Failed to fetch provinces", error);
     }
   };
 
+  // Thay đổi các hàm fetchDistricts và fetchWards
   const fetchDistricts = async (provinceName) => {
     try {
-      const province = provinces.find(p => p.name === provinceName);
+      const province = provinces.find((p) => p.ProvinceName === provinceName);
       if (!province) return;
-      
-      const response = await locationService.getDistricts(province.id);
-      setDistricts(response.data?.data || []);
+
+      const response = await locationService.getDistrict(province.ProvinceID);
+      setDistricts(response.data || []);
       setWards([]);
     } catch (error) {
       console.error("Failed to fetch districts", error);
@@ -59,16 +60,21 @@ export default function AddressTab({ userId }) {
 
   const fetchWards = async (districtName) => {
     try {
-      const district = districts.find(d => d.name === districtName);
+      const district = districts.find((d) => d.DistrictName === districtName);
       if (!district) return;
-      
-      const response = await locationService.getWards(district.id);
-      setWards(response.data?.data || []);
+
+      const response = await locationService.getWard(district.DistrictID);
+      setWards(response.data || []);
     } catch (error) {
       console.error("Failed to fetch wards", error);
     }
   };
-  */
+
+  useEffect(() => {
+    fetchProvinces();
+    fetchDistricts();
+    fetchWards();
+  }, []);
 
   const handleDelete = async (addressId) => {
     if (window.confirm("Bạn chắc chắn muốn xóa địa chỉ này?")) {
@@ -105,7 +111,7 @@ export default function AddressTab({ userId }) {
   };
 
   const handleEdit = (addressId) => {
-    const address = addresses.find(addr => addr.id === addressId);
+    const address = addresses.find((addr) => addr.id === addressId);
     if (address) {
       setCurrentAddress(address);
       /* Đã comment phần fetch districts và wards
@@ -130,9 +136,9 @@ export default function AddressTab({ userId }) {
       fetchAddresses();
     } catch (error) {
       showNotification(
-        currentAddress 
-          ? "Cập nhật địa chỉ thất bại" 
-          : "Thêm địa chỉ mới thất bại", 
+        currentAddress
+          ? "Cập nhật địa chỉ thất bại"
+          : "Thêm địa chỉ mới thất bại",
         "error"
       );
       console.error(error);
@@ -141,11 +147,11 @@ export default function AddressTab({ userId }) {
 
   // Đã comment các hàm xử lý location
   const handleProvinceChange = (provinceName) => {
-    // fetchDistricts(provinceName); // Đã comment
+    fetchDistricts(provinceName); // Đã comment
   };
 
   const handleDistrictChange = (districtName) => {
-    // fetchWards(districtName); // Đã comment
+    fetchWards(districtName); // Đã comment
   };
 
   if (loading) {
