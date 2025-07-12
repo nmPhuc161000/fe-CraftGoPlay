@@ -7,7 +7,12 @@ const ManageCategory = () => {
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editIdx, setEditIdx] = useState(null);
-  const [form, setForm] = useState({ categoryName: "", imageFile: null, image: "" });
+  const [form, setForm] = useState({ 
+    categoryName: "", 
+    imageFile: null, 
+    image: "",
+    categoryStatus: "Actived" 
+  });
   const [formError, setFormError] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
@@ -18,7 +23,7 @@ const ManageCategory = () => {
   const pageSize = 10;
 
   // Fetch categories from API
-    const fetchCategories = async () => {
+  const fetchCategories = async () => {
     try {
       setLoading(true);
       const res = await categoryService.getAllCategories();
@@ -31,8 +36,8 @@ const ManageCategory = () => {
       console.error("Lỗi khi tải danh sách danh mục:", error);
     } finally {
       setLoading(false);
-      }
-    };
+    }
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -46,28 +51,37 @@ const ManageCategory = () => {
 
   const openAdd = () => {
     setEditIdx(null);
-    setForm({ categoryName: "", imageFile: null, image: "" });
+    setForm({ 
+      categoryName: "", 
+      imageFile: null, 
+      image: "",
+      categoryStatus: "Actived" 
+    });
     setShowModal(true);
     setFormError("");
   };
 
   const openEdit = idx => {
-    setEditIdx(idx);
-    const category = data[idx];
-    setForm({
-      categoryName: category.categoryName || "",
-      image: category.image || "",
-      imageFile: null
-    });
-    setShowModal(true);
-    setFormError("");
+    const actualIndex = (currentPage - 1) * pageSize + idx;
+    if (actualIndex >= 0 && actualIndex < filtered.length) {
+      setEditIdx(actualIndex);
+      const category = filtered[actualIndex];
+      setForm({
+        categoryName: category.categoryName || "",
+        image: category.image || "",
+        imageFile: null,
+        categoryStatus: category.categoryStatus || "Actived"
+      });
+      setShowModal(true);
+      setFormError("");
+    }
   };
 
   const openView = idx => {
     const actualIndex = (currentPage - 1) * pageSize + idx;
     if (actualIndex >= 0 && actualIndex < filtered.length) {
       setViewIdx(actualIndex);
-    setShowViewModal(true);
+      setShowViewModal(true);
     }
   };
 
@@ -85,69 +99,142 @@ const ManageCategory = () => {
 
     try {
       setLoading(true);
-    if (editIdx === null) {
+      // Log form data trước khi gửi
+      console.log("Form Data:", form);
+
+      if (editIdx === null) {
         // Tạo mới
         const res = await categoryService.createCategory({
-          categoryName: form.categoryName,
+          categoryName: form.categoryName.trim(),
           imageFile: form.imageFile,
-          categoryStatus: "Active"
+          categoryStatus: "Actived" // Luôn set Actived khi tạo mới
         });
 
         if (res.success) {
           await fetchCategories();
           setShowModal(false);
-          setForm({ categoryName: "", imageFile: null, image: "" });
-    } else {
-          setFormError(res.error || "Thêm mới thất bại!");
+          setForm({ 
+            categoryName: "", 
+            imageFile: null, 
+            image: "",
+            categoryStatus: "Actived" 
+          });
+        } else {
+          // Xử lý hiển thị lỗi
+          let errorMessage = "Thêm mới thất bại!";
+          if (res.error) {
+            if (typeof res.error === 'string') {
+              errorMessage = res.error;
+            } else if (typeof res.error === 'object') {
+              errorMessage = Object.values(res.error).flat().join(", ");
+            }
+          }
+          console.error("Create Error:", res.error);
+          setFormError(errorMessage);
         }
       } else {
         // Cập nhật
-        const category = data[editIdx];
+        const category = filtered[editIdx];
+        if (!category || !category.categoryId) {
+          setFormError("Không tìm thấy thông tin danh mục!");
+          return;
+        }
+
         const res = await categoryService.updateCategory(category.categoryId, {
-          categoryName: form.categoryName,
+          categoryName: form.categoryName.trim(),
           imageFile: form.imageFile,
-          categoryStatus: category.categoryStatus
+          image: form.image,
+          categoryStatus: form.categoryStatus
         });
 
         if (res.success) {
           await fetchCategories();
-    setShowModal(false);
-          setForm({ categoryName: "", imageFile: null, image: "" });
-    setEditIdx(null);
+          setShowModal(false);
+          setForm({ 
+            categoryName: "", 
+            imageFile: null, 
+            image: "",
+            categoryStatus: "Actived" 
+          });
+          setEditIdx(null);
         } else {
-          setFormError(res.error || "Cập nhật thất bại!");
+          let errorMessage = "Cập nhật thất bại!";
+          if (res.error) {
+            if (typeof res.error === 'string') {
+              errorMessage = res.error;
+            } else if (typeof res.error === 'object') {
+              errorMessage = Object.values(res.error).flat().join(", ");
+            }
+          }
+          console.error("Update Error:", res.error);
+          setFormError(errorMessage);
         }
       }
     } catch (err) {
-      setFormError("Có lỗi xảy ra, vui lòng thử lại!");
-      console.error("Lỗi khi thêm/sửa danh mục:", err);
+      console.error("Error in handleAddEdit:", err);
+      setFormError(err?.message || "Có lỗi xảy ra, vui lòng thử lại!");
     } finally {
       setLoading(false);
     }
   };
 
-  const openDelete = id => {
-    setDeleteId(id);
-    setShowDeleteModal(true);
+  // Hàm xử lý hiển thị trạng thái
+  const getStatusDisplay = (status) => {
+    return status === "Actived" ? "Đang hoạt động" : "Ngừng hoạt động";
+  };
+
+  // Hàm xử lý style cho status badge
+  const getStatusStyle = (status) => {
+    return status === "Actived" 
+      ? 'bg-green-50 text-green-600'
+      : 'bg-red-50 text-red-600';
   };
 
   const handleDelete = async () => {
+    if (!deleteId) {
+      alert("Không tìm thấy thông tin danh mục cần xóa!");
+      setShowDeleteModal(false);
+      return;
+    }
+
     try {
       setLoading(true);
+      console.log("Deleting category:", deleteId);
+      
       const res = await categoryService.deleteCategory(deleteId);
+      
       if (res.success) {
         await fetchCategories();
         setShowDeleteModal(false);
         setDeleteId(null);
       } else {
-        alert(res.error || "Xóa thất bại!");
+        let errorMessage = "Xóa thất bại!";
+        if (res.error) {
+          if (typeof res.error === 'string') {
+            errorMessage = res.error;
+          } else if (typeof res.error === 'object') {
+            errorMessage = Object.values(res.error).flat().join(", ");
+          }
+        }
+        console.error("Delete Error:", res.error);
+        alert(errorMessage);
       }
     } catch (err) {
-      alert("Lỗi khi xóa!");
-      console.error("Lỗi khi xóa danh mục:", err);
+      console.error("Error in handleDelete:", err);
+      alert(err?.message || "Có lỗi xảy ra khi xóa danh mục!");
     } finally {
       setLoading(false);
     }
+  };
+
+  const openDelete = (categoryId) => {
+    if (!categoryId) {
+      alert("Không tìm thấy thông tin danh mục!");
+      return;
+    }
+    console.log("Opening delete modal for category:", categoryId);
+    setDeleteId(categoryId);
+    setShowDeleteModal(true);
   };
 
   if (loading) {
@@ -234,12 +321,12 @@ const ManageCategory = () => {
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">{row.categoryName}</td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    row.categoryStatus?.toLowerCase() === 'active' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    row.categoryStatus === "Actived"
+                      ? 'bg-green-50 text-green-600' 
+                      : 'bg-red-50 text-red-600'
                   }`}>
-                    {row.categoryStatus?.toLowerCase() === 'active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}
+                    {getStatusDisplay(row.categoryStatus)}
                   </span>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap text-gray-500">
@@ -349,7 +436,12 @@ const ManageCategory = () => {
                   onClick={() => {
                     setShowModal(false);
                     setEditIdx(null);
-                    setForm({ categoryName: "", imageFile: null, image: "" });
+                    setForm({ 
+                      categoryName: "", 
+                      imageFile: null, 
+                      image: "",
+                      categoryStatus: "Actived" 
+                    });
                     setFormError("");
                   }}
                 >
@@ -471,7 +563,12 @@ const ManageCategory = () => {
                     onClick={() => {
                       setShowModal(false);
                       setEditIdx(null);
-                      setForm({ categoryName: "", imageFile: null, image: "" });
+                      setForm({ 
+                        categoryName: "", 
+                        imageFile: null, 
+                        image: "",
+                        categoryStatus: "Actived" 
+                      });
                       setFormError("");
                     }}
                   >
@@ -557,15 +654,15 @@ const ManageCategory = () => {
 
                   {/* Status Badge */}
                   <div className="text-center">
-                    <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${
-                      filtered[viewIdx].categoryStatus?.toLowerCase() === 'active'
-                        ? 'bg-green-100 text-green-800 border border-green-200' 
-                        : 'bg-red-100 text-red-800 border border-red-200'
+                    <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
+                      filtered[viewIdx].categoryStatus === "Actived"
+                        ? 'bg-green-50 text-green-600' 
+                        : 'bg-red-50 text-red-600'
                     }`}>
                       <span className={`w-2 h-2 rounded-full mr-2 ${
-                        filtered[viewIdx].categoryStatus?.toLowerCase() === 'active' ? 'bg-green-500' : 'bg-red-500'
+                        filtered[viewIdx].categoryStatus === "Actived" ? 'bg-green-500' : 'bg-red-500'
                       }`}></span>
-                      {filtered[viewIdx].categoryStatus?.toLowerCase() === 'active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}
+                      {getStatusDisplay(filtered[viewIdx].categoryStatus)}
                     </span>
                   </div>
                 </div>

@@ -56,13 +56,15 @@ export const API_ENDPOINTS_METERIAL = {
 export const API_ENDPOINTS_CATEGORY = {
   GET_CATEGORIES: "/api/Category/GetAllCategories",
   CREATE_CATEGORY: "/api/Category/CreateCategory",
-  UPDATE_CATEGORY: (id) => `/api/Category/UpdateCategory/${categoryId}`,
-  DELETE_CATEGORY: (id) => `/api/Category/CategoryId/Delete`,
+  UPDATE_CATEGORY: (categoryId) => `/api/Category/UpdateCategory/${categoryId}`,
+  DELETE_CATEGORY: (categoryId) => `/api/Category/CategoryId/Delete?CategoryId=${categoryId}`,
 };
 
 export const API_ENDPOINTS_SUBCATEGORY = {
   GET_SUBCATEGORIES: "/api/SubCategory/GetAllSubCategories",
   CREATE_SUBCATEGORY: "/api/SubCategory/CreateSubCategory",
+  UPDATE_SUBCATEGORY: (id) => `/api/SubCategory/UpdateSubCategory/${id}`,
+  DELETE_SUBCATEGORY: (id) => `/api/SubCategory/DeleteSubCategory/${id}`
 };
 
 export const API_ENDPOINTS_USER = {

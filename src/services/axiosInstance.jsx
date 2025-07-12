@@ -7,6 +7,8 @@ const axiosInstance = axios.create({
     'Content-Type': 'application/json',
     Accept: '*/*',
   },
+  // Thêm cấu hình để xử lý HTTP/HTTPS
+  httpsAgent: false,
 });
 
 // Thêm interceptor để tự động thêm token vào header
@@ -59,10 +61,11 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Xử lý lỗi 401 (Unauthorized)
+// Xử lý lỗi 401 (Unauthorized) và các lỗi khác
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.error('Axios Error:', error); // Thêm log để debug
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       window.location.href = '/login';
