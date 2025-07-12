@@ -76,7 +76,7 @@ export const validateRegisterForm = (form, confirmPassword) => {
 export const validateLoginForm = (form) => {
   const errors = {
     email: validateUserEmail(form.Email),
-    passwordHash: validatePassword(form.passwordHash),
+    passwordHash: validatePassword(form.PasswordHash),
   };
   return { errors, isValid: !Object.values(errors).some((error) => error) };
 };
