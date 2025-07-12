@@ -1,82 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MdVisibility, MdShoppingBag } from 'react-icons/md';
-
-// Fake data cho sản phẩm của Artisan
-const FAKE_ARTISAN_PRODUCTS = [
-  {
-    id: 1,
-    name: "Bình gốm sứ Bát Tràng",
-    artisan: "Nguyễn Văn A",
-    artisanId: "ART001",
-    price: 1500000,
-    category: "Gốm sứ",
-    status: "active",
-    image: "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg",
-    description: "Bình gốm sứ truyền thống Bát Tràng, được làm thủ công với kỹ thuật nung truyền thống",
-    createdAt: "2024-01-15",
-    views: 245,
-    orders: 12
-  },
-  {
-    id: 2,
-    name: "Tranh Đông Hồ - Gà trống",
-    artisan: "Trần Thị B",
-    artisanId: "ART002", 
-    price: 850000,
-    category: "Tranh dân gian",
-    status: "inactive",
-    image: "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg",
-    description: "Tranh Đông Hồ truyền thống với hình ảnh gà trống, được in bằng kỹ thuật mộc bản",
-    createdAt: "2024-01-10",
-    views: 189,
-    orders: 8
-  },
-  {
-    id: 3,
-    name: "Túi thổ cẩm Tây Nguyên",
-    artisan: "Lê Văn C",
-    artisanId: "ART003",
-    price: 650000,
-    category: "Thổ cẩm",
-    status: "active",
-    image: "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg",
-    description: "Túi thổ cẩm được dệt thủ công với hoa văn truyền thống của người Tây Nguyên",
-    createdAt: "2024-01-20",
-    views: 312,
-    orders: 15
-  },
-  {
-    id: 4,
-    name: "Đồng hồ tre nứa",
-    artisan: "Phạm Thị D",
-    artisanId: "ART004",
-    price: 450000,
-    category: "Tre nứa",
-    status: "active",
-    image: "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg",
-    description: "Đồng hồ được đan bằng tre nứa với thiết kế độc đáo, thân thiện môi trường",
-    createdAt: "2024-01-12",
-    views: 178,
-    orders: 6
-  },
-  {
-    id: 5,
-    name: "Bộ ấm chén gốm Chu Đậu",
-    artisan: "Hoàng Văn E",
-    artisanId: "ART005",
-    price: 1200000,
-    category: "Gốm sứ",
-    status: "inactive",
-    image: "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg",
-    description: "Bộ ấm chén gốm Chu Đậu với hoa văn tinh xảo, được làm theo kỹ thuật truyền thống",
-    createdAt: "2024-01-08",
-    views: 156,
-    orders: 4
-  }
-];
+import productService from "../../../services/apis/productApi";
+import { motion } from "framer-motion";
 
 const ManageProduct = () => {
-  const [data, setData] = useState(FAKE_ARTISAN_PRODUCTS);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewProduct, setViewProduct] = useState(null);
@@ -85,25 +15,85 @@ const ManageProduct = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
-  const filtered = data.filter(p => 
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.artisan.toLowerCase().includes(search.toLowerCase()) ||
-    p.category.toLowerCase().includes(search.toLowerCase())
-  );
-  const totalPage = Math.ceil(filtered.length / pageSize);
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await productService.getProducts();
+        
+        // Kiểm tra response từ apiUtils
+        if (!response?.success) {
+          console.error('API Error:', response?.error);
+          setError(response?.error || 'Lỗi kết nối API. Vui lòng kiểm tra cấu hình server.');
+          setData([]);
+          return;
+        }
+        
+        // Kiểm tra và xử lý dữ liệu an toàn
+        const responseData = response?.data?.data || [];
+        if (Array.isArray(responseData)) {
+          const transformedData = responseData.map(product => ({
+            id: product?.id || 'N/A',
+            name: product?.name || 'N/A',
+            artisan: product?.artisanName || 'N/A',
+            artisanId: product?.artisan_id || 'N/A',
+            price: product?.price || 0,
+            category: product?.subCategoryName || 'N/A',
+            status: (product?.status || '').toLowerCase() === 'active' ? 'active' : 'inactive',
+            image: product?.productImages?.[0]?.imageUrl || "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg",
+            description: product?.description || "N/A",
+            createdAt: product?.createdAt ? new Date(product.createdAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+            views: 0,
+            orders: product?.quantitySold || 0
+          }));
+          setData(transformedData);
+        } else {
+          console.error('Invalid response data format:', responseData);
+          setError('Dữ liệu API không đúng định dạng.');
+          setData([]);
+        }
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        setError('Không thể tải dữ liệu sản phẩm. Vui lòng thử lại sau.');
+        setData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Xử lý tìm kiếm an toàn
+  const filtered = data.filter(p => {
+    const searchLower = (search || '').toLowerCase();
+    const nameMatch = p?.name?.toLowerCase()?.includes(searchLower) || false;
+    const artisanMatch = p?.artisan?.toLowerCase()?.includes(searchLower) || false;
+    const categoryMatch = p?.category?.toLowerCase()?.includes(searchLower) || false;
+    return nameMatch || artisanMatch || categoryMatch;
+  });
+
+  const totalPage = Math.max(1, Math.ceil(filtered.length / pageSize));
   const paged = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const openView = (product) => {
+    if (product) {
     setViewProduct(product);
     setShowViewModal(true);
+    }
   };
 
   const openStatusChange = (product) => {
+    if (product) {
     setStatusProduct(product);
     setShowStatusModal(true);
+    }
   };
 
   const handleStatusChange = () => {
+    if (statusProduct?.id) {
     setData(prev => prev.map(item => 
       item.id === statusProduct.id 
         ? { ...item, status: item.status === 'active' ? 'inactive' : 'active' }
@@ -111,180 +101,400 @@ const ManageProduct = () => {
     ));
     setShowStatusModal(false);
     setStatusProduct(null);
+    }
   };
 
+  if (loading) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="bg-white rounded-2xl shadow-lg p-6 w-full"
+      >
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </motion.div>
+    );
+  }
+
+  if (error) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="bg-white rounded-2xl shadow-lg p-6 w-full"
+      >
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <svg className="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="text-xl font-bold text-gray-900 mb-2">Lỗi tải dữ liệu</div>
+            <div className="text-gray-600 mb-4">{error}</div>
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:shadow-lg"
+              onClick={() => window.location.reload()}
+            >
+              Thử lại
+            </motion.button>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
-    <div className="bg-amber-25 rounded-2xl shadow p-4 w-full">
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <div className="font-bold text-xl">Quản lý sản phẩm thợ thủ công</div>
-          <div className="text-sm font-medium text-gray-700 mt-1">Tìm kiếm theo tên sản phẩm, thợ thủ công hoặc danh mục</div>
-          <div className="mt-1 flex w-full max-w-xs border rounded overflow-hidden bg-white">
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white rounded-2xl shadow-lg p-6 w-full"
+    >
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Quản lý sản phẩm thợ thủ công</h1>
+          <div className="relative">
             <input 
-              className="flex-1 px-2 py-1.5 text-sm outline-none bg-transparent" 
-              placeholder="Nhập từ khóa tìm kiếm" 
+              className="w-full md:max-w-xs pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+              placeholder="Tìm kiếm theo tên, thợ thủ công hoặc danh mục..." 
               value={search} 
               onChange={e => setSearch(e.target.value)} 
             />
+            <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
         </div>
       </div>
       
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-sm border-separate border-spacing-0">
-          <thead>
+      <div className="overflow-x-auto rounded-xl shadow">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gradient-to-r from-blue-600 to-blue-700">
             <tr>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tl-lg">ID</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Hình ảnh</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Tên sản phẩm</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Thợ thủ công</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Danh mục</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Giá</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Trạng thái</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Lượt xem/Đơn hàng</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tr-lg">Thao tác</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">STT</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Hình ảnh</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Tên sản phẩm</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Thợ thủ công</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Danh mục</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Giá</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Trạng thái</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Lượt xem/Đơn hàng</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Thao tác</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="bg-white divide-y divide-gray-200">
             {paged.map((row, idx) => (
-              <tr key={row.id} className="border-b last:border-0">
-                <td className="px-3 py-2">{row.id}</td>
-                <td className="px-3 py-2">
-                  <img src={row.image} alt={row.name} className="w-14 h-14 object-cover rounded border" />
+              <motion.tr 
+                key={row?.id || idx}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className="hover:bg-gray-50 transition-colors"
+              >
+                <td className="px-4 py-3 whitespace-nowrap">{(currentPage - 1) * pageSize + idx + 1}</td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <motion.img 
+                    whileHover={{ scale: 1.1 }}
+                    src={row?.image || "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg"} 
+                    alt={row?.name || 'Product'} 
+                    className="w-14 h-14 object-cover rounded-lg shadow"
+                    onError={(e) => {
+                      e.target.src = "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg";
+                    }}
+                  />
                 </td>
-                <td className="px-3 py-2 font-semibold">{row.name}</td>
-                <td className="px-3 py-2">
-                  <div>
-                    <div className="font-medium">{row.artisan}</div>
-                    <div className="text-xs text-gray-500">ID: {row.artisanId}</div>
-                  </div>
+                <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">{row?.name || 'N/A'}</td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="font-medium">{row?.artisan || 'N/A'}</div>
                 </td>
-                <td className="px-3 py-2">{row.category}</td>
-                <td className="px-3 py-2 text-blue-700 font-bold">{row.price.toLocaleString()}đ</td>
-                <td className="px-3 py-2">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    row.status === 'active' 
+                <td className="px-4 py-3 whitespace-nowrap text-gray-500">{row?.category || 'N/A'}</td>
+                <td className="px-4 py-3 whitespace-nowrap text-blue-700 font-bold">
+                  {typeof row?.price === 'number' ? row.price.toLocaleString() : '0'}đ
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    row?.status === 'active' 
                       ? 'bg-green-100 text-green-800' 
                       : 'bg-red-100 text-red-800'
                   }`}>
-                    {row.status === 'active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}
+                    {row?.status === 'active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}
                   </span>
                 </td>
-                <td className="px-3 py-2 text-xs">
-                  <div className="flex items-center gap-1"><MdVisibility className="inline text-lg" style={{ color: '#f59e42' }} /> {row.views}</div>
-                  <div className="flex items-center gap-1 mt-1"><MdShoppingBag className="inline text-lg" style={{ color: '#3B82F6' }} /> {row.orders}</div>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-2 text-amber-600">
+                      <MdVisibility className="text-lg" /> 
+                      <span>{row?.views || 0}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-blue-600">
+                      <MdShoppingBag className="text-lg" /> 
+                      <span>{row?.orders || 0}</span>
+                    </div>
+                  </div>
                 </td>
-                <td className="px-3 py-2 flex gap-2">
-                  <button 
-                    className="text-green-500 hover:underline" 
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="flex gap-2">
+                    <motion.button 
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="text-green-600 hover:text-green-800" 
                     onClick={() => openView(row)}
                   >
-                    Xem
-                  </button>
-                  <button 
-                    className={`hover:underline ${
-                      row.status === 'active' ? 'text-red-500' : 'text-green-500'
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </motion.button>
+                    <motion.button 
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className={`${
+                        row?.status === 'active' ? 'text-red-600 hover:text-red-800' : 'text-green-600 hover:text-green-800'
                     }`}
                     onClick={() => openStatusChange(row)}
                   >
-                    {row.status === 'active' ? 'Ngừng hoạt động' : 'Kích hoạt'}
-                  </button>
+                      {row?.status === 'active' ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      )}
+                    </motion.button>
+                  </div>
                 </td>
-              </tr>
+              </motion.tr>
             ))}
           </tbody>
         </table>
       </div>
       
-      <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+      <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
         <span>
           {(filtered.length === 0 ? 0 : (currentPage - 1) * pageSize + 1)} đến {Math.min(currentPage * pageSize, filtered.length)} trên tổng số {filtered.length}
         </span>
         <div className="flex items-center gap-2">
-          <button 
-            className="border rounded px-2 py-1" 
+          <motion.button 
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="p-2 rounded-lg border hover:bg-gray-50 disabled:opacity-50"
             disabled={currentPage === 1} 
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
           >
-            &lt;
-          </button>
-          <span className="border rounded px-2 py-1 bg-white">{currentPage}</span>
-          <button 
-            className="border rounded px-2 py-1" 
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </motion.button>
+          <span className="px-4 py-2 rounded-lg bg-blue-50 font-medium text-blue-600">{currentPage}</span>
+          <motion.button 
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="p-2 rounded-lg border hover:bg-gray-50 disabled:opacity-50"
             disabled={currentPage === totalPage || totalPage === 0} 
             onClick={() => setCurrentPage(p => Math.min(totalPage, p + 1))}
           >
-            &gt;
-          </button>
-          <select className="border rounded px-2 py-1 ml-2" value={pageSize} disabled>
-            <option>10 / page</option>
-          </select>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </motion.button>
         </div>
       </div>
 
-      {/* Modal xem chi tiết sản phẩm */}
+      {/* Modal View Product */}
       {showViewModal && viewProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl p-6 relative animate-fadeIn">
-            <button 
-              className="absolute top-3 right-3 text-2xl text-gray-400 hover:text-gray-600" 
-              onClick={() => setShowViewModal(false)} 
-              aria-label="Close"
-            >
-              ×
-            </button>
-            <div className="text-xl font-bold mb-4">Product Detail</div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-opacity-30"
+        >
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden relative"
+          >
+            {/* Header with sticky position */}
+            <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-8 py-6">
+              <div className="flex justify-between items-start">
               <div>
-                <img 
-                  src={viewProduct.image} 
-                  alt={viewProduct.name} 
-                  className="w-full h-64 object-cover rounded-lg border"
-                />
-              </div>
-              <div className="space-y-3">
-                <div><span className="font-semibold">Product Name:</span> {viewProduct.name}</div>
-                <div><span className="font-semibold">Artisan:</span> {viewProduct.artisan} (ID: {viewProduct.artisanId})</div>
-                <div><span className="font-semibold">Category:</span> {viewProduct.category}</div>
-                <div><span className="font-semibold">Price:</span> {viewProduct.price.toLocaleString()}đ</div>
-                <div><span className="font-semibold">Status:</span> 
-                  <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
-                    viewProduct.status === 'active' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {viewProduct.status === 'active' ? 'Active' : 'Inactive'}
-                  </span>
+                  <h2 className="text-2xl font-bold text-gray-900">Chi tiết sản phẩm</h2>
+                  <div className="mt-1 text-sm text-gray-500">
+                    Ngày tạo: {new Date(viewProduct?.createdAt).toLocaleDateString('vi-VN')}
+                  </div>
                 </div>
-                <div><span className="font-semibold">Created:</span> {viewProduct.createdAt}</div>
-                <div><span className="font-semibold">Views:</span> {viewProduct.views}</div>
-                <div><span className="font-semibold">Orders:</span> {viewProduct.orders}</div>
-                <div><span className="font-semibold">Description:</span> {viewProduct.description}</div>
+                <motion.button 
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  onClick={() => {
+                    setShowViewModal(false);
+                    setViewProduct(null);
+                  }}
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="overflow-y-auto max-h-[calc(90vh-100px)] p-8">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left Column - Image and Stats */}
+                <div className="lg:col-span-1">
+                  <div className="sticky top-4 space-y-6">
+                    {/* Image */}
+                    <div className="relative group rounded-xl overflow-hidden">
+                      <motion.img 
+                        whileHover={{ scale: 1.02 }}
+                        src={viewProduct?.image || "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg"} 
+                        alt={viewProduct?.name || 'Product'} 
+                        className="w-full aspect-square object-cover shadow-lg transition-transform"
+                        onError={(e) => {
+                          e.target.src = "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg";
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
+
+                    {/* Quick Stats */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                          <MdVisibility className="text-2xl text-amber-500 mx-auto mb-2" />
+                          <div className="text-2xl font-bold text-gray-800">{viewProduct?.views || 0}</div>
+                          <div className="text-sm text-gray-500">Lượt xem</div>
+                        </div>
+                        <div className="text-center p-4 bg-white rounded-lg shadow-sm">
+                          <MdShoppingBag className="text-2xl text-blue-500 mx-auto mb-2" />
+                          <div className="text-2xl font-bold text-gray-800">{viewProduct?.orders || 0}</div>
+                          <div className="text-sm text-gray-500">Đơn hàng</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Status Badge */}
+                    <div className="text-center">
+                      <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${
+                        viewProduct?.status === 'active' 
+                          ? 'bg-green-100 text-green-800 border border-green-200' 
+                          : 'bg-red-100 text-red-800 border border-red-200'
+                  }`}>
+                        <span className={`w-2 h-2 rounded-full mr-2 ${
+                          viewProduct?.status === 'active' ? 'bg-green-500' : 'bg-red-500'
+                        }`}></span>
+                        {viewProduct?.status === 'active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}
+                  </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column - Details and Description */}
+                <div className="lg:col-span-2 space-y-8">
+                  {/* Basic Info Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Product Name */}
+                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-xl">
+                      <div className="text-sm text-blue-600 font-medium mb-1">Tên sản phẩm</div>
+                      <div className="text-xl font-bold text-gray-900">{viewProduct?.name || 'N/A'}</div>
+                    </div>
+                    
+                    {/* Price */}
+                    <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-6 rounded-xl">
+                      <div className="text-sm text-amber-600 font-medium mb-1">Giá bán</div>
+                      <div className="text-xl font-bold text-blue-700">
+                        {typeof viewProduct?.price === 'number' ? viewProduct.price.toLocaleString() : '0'}đ
+                      </div>
+                    </div>
+                    
+                    {/* Artisan Info */}
+                    <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-6 rounded-xl">
+                      <div className="text-sm text-purple-600 font-medium mb-1">Thông tin thợ thủ công</div>
+                      <div className="text-xl font-bold text-gray-900">{viewProduct?.artisan || 'N/A'}</div>
+                    </div>
+                    
+                    {/* Category */}
+                    <div className="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-xl">
+                      <div className="text-sm text-green-600 font-medium mb-1">Danh mục</div>
+                      <div className="text-xl font-bold text-gray-900">{viewProduct?.category || 'N/A'}</div>
+                    </div>
+                  </div>
+
+                  {/* Description Section */}
+                  <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                    <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
+                      <h3 className="text-lg font-semibold text-gray-900">Mô tả sản phẩm</h3>
+                    </div>
+                    <div className="p-6">
+                      <div className="prose prose-sm max-w-none">
+                        {viewProduct?.description ? (
+                          <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                            {viewProduct.description}
+                          </div>
+                        ) : (
+                          <div className="text-gray-500 italic">Chưa có mô tả cho sản phẩm này</div>
+                        )}
+                      </div>
+                    </div>
               </div>
             </div>
           </div>
         </div>
+          </motion.div>
+        </motion.div>
       )}
 
-      {/* Modal xác nhận thay đổi status */}
+      {/* Modal Confirm Status Change */}
       {showStatusModal && statusProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-xs p-6 relative animate-fadeIn">
-            <div className="text-lg font-bold mb-2 text-center">
-              Xác nhận thay đổi trạng thái?
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50"
+        >
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 relative"
+          >
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4">
+                {statusProduct.status === 'active' ? (
+                  <svg className="w-full h-full text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                ) : (
+                  <svg className="w-full h-full text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
             </div>
-            <div className="text-center mb-4 text-gray-600">
-              Bạn có chắc chắn muốn {statusProduct.status === 'active' ? 'vô hiệu hóa' : 'kích hoạt'} sản phẩm "{statusProduct.name}"?
-            </div>
-            <div className="flex justify-center gap-3">
-              <button 
-                className="px-4 py-2 rounded border bg-gray-50 hover:bg-gray-100" 
-                onClick={() => setShowStatusModal(false)}
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                {statusProduct.status === 'active' ? 'Ngừng hoạt động sản phẩm?' : 'Kích hoạt sản phẩm?'}
+              </h3>
+              <p className="text-gray-500">
+                Bạn có chắc chắn muốn {statusProduct.status === 'active' ? 'ngừng hoạt động' : 'kích hoạt'} sản phẩm này?
+              </p>
+              
+              <div className="flex justify-center gap-3 mt-6">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-6 py-2 rounded-lg border hover:bg-gray-50"
+                  onClick={() => {
+                    setShowStatusModal(false);
+                    setStatusProduct(null);
+                  }}
               >
                 Hủy
-              </button>
-              <button 
-                className={`px-4 py-2 rounded text-white font-semibold ${
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`px-6 py-2 text-white rounded-lg ${
                   statusProduct.status === 'active' 
                     ? 'bg-red-600 hover:bg-red-700' 
                     : 'bg-green-600 hover:bg-green-700'
@@ -292,12 +502,13 @@ const ManageProduct = () => {
                 onClick={handleStatusChange}
               >
                 Xác nhận
-              </button>
+                </motion.button>
+              </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

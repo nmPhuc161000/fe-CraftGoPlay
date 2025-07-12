@@ -1,91 +1,142 @@
 import React, { useState, useEffect } from "react";
 import categoryService from "../../../services/apis/cateApi";
+import { motion } from "framer-motion";
 
 const ManageCategory = () => {
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editIdx, setEditIdx] = useState(null);
-  const [form, setForm] = useState({ name: "", desc: "" });
+  const [form, setForm] = useState({ categoryName: "", imageFile: null, image: "" });
   const [formError, setFormError] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewIdx, setViewIdx] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const pageSize = 10;
 
   // Fetch categories from API
-  useEffect(() => {
     const fetchCategories = async () => {
+    try {
+      setLoading(true);
       const res = await categoryService.getAllCategories();
       if (res.success && res.data && res.data.data) {
         setData(res.data.data);
       } else {
         setData([]);
       }
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách danh mục:", error);
+    } finally {
+      setLoading(false);
+      }
     };
+
+  useEffect(() => {
     fetchCategories();
   }, []);
 
-  const filtered = data.filter(c => c.categoryName.toLowerCase().includes(search.toLowerCase()));
+  const filtered = data.filter(c => 
+    c.categoryName?.toLowerCase().includes(search.toLowerCase())
+  );
   const totalPage = Math.ceil(filtered.length / pageSize);
   const paged = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const openAdd = () => {
     setEditIdx(null);
-    setForm({ name: "", desc: "" });
+    setForm({ categoryName: "", imageFile: null, image: "" });
     setShowModal(true);
     setFormError("");
   };
+
   const openEdit = idx => {
     setEditIdx(idx);
-    setForm(data[idx]);
+    const category = data[idx];
+    setForm({
+      categoryName: category.categoryName || "",
+      image: category.image || "",
+      imageFile: null
+    });
     setShowModal(true);
     setFormError("");
   };
+
   const openView = idx => {
-    setViewIdx(idx);
+    const actualIndex = (currentPage - 1) * pageSize + idx;
+    if (actualIndex >= 0 && actualIndex < filtered.length) {
+      setViewIdx(actualIndex);
     setShowViewModal(true);
+    }
   };
-  const handleAddEdit = e => {
+
+  const handleAddEdit = async (e) => {
     e.preventDefault();
-    if (!form.name.trim()) {
+    if (!form.categoryName?.trim()) {
       setFormError("Tên danh mục không được để trống!");
       return;
     }
-    if (!form.desc || form.desc.length < 5) {
-      setFormError("Mô tả phải từ 5 ký tự trở lên!");
+
+    if (editIdx === null && !form.imageFile) {
+      setFormError("Vui lòng chọn ảnh!");
       return;
     }
+
+    try {
+      setLoading(true);
     if (editIdx === null) {
-      // Tạo ID mới bằng cách tìm ID lớn nhất + 1
-      setData(prev => {
-        const maxId = prev.length > 0 ? Math.max(...prev.map(item => item.categoryId)) : 0;
-        const newItem = { categoryId: maxId + 1, ...form };
-        return [newItem, ...prev];
-      });
+        // Tạo mới
+        const res = await categoryService.createCategory({
+          categoryName: form.categoryName,
+          imageFile: form.imageFile,
+          categoryStatus: "Active"
+        });
+
+        if (res.success) {
+          await fetchCategories();
+          setShowModal(false);
+          setForm({ categoryName: "", imageFile: null, image: "" });
     } else {
-      setData(prev => prev.map((item, i) => i === editIdx ? { ...item, ...form } : item));
-    }
+          setFormError(res.error || "Thêm mới thất bại!");
+        }
+      } else {
+        // Cập nhật
+        const category = data[editIdx];
+        const res = await categoryService.updateCategory(category.categoryId, {
+          categoryName: form.categoryName,
+          imageFile: form.imageFile,
+          categoryStatus: category.categoryStatus
+        });
+
+        if (res.success) {
+          await fetchCategories();
     setShowModal(false);
-    setForm({ name: "", desc: "" });
+          setForm({ categoryName: "", imageFile: null, image: "" });
     setEditIdx(null);
-    setFormError("");
+        } else {
+          setFormError(res.error || "Cập nhật thất bại!");
+        }
+      }
+    } catch (err) {
+      setFormError("Có lỗi xảy ra, vui lòng thử lại!");
+      console.error("Lỗi khi thêm/sửa danh mục:", err);
+    } finally {
+      setLoading(false);
+    }
   };
+
   const openDelete = id => {
     setDeleteId(id);
     setShowDeleteModal(true);
   };
+
   const handleDelete = async () => {
     try {
+      setLoading(true);
       const res = await categoryService.deleteCategory(deleteId);
       if (res.success) {
-        // Fetch lại danh sách
-        const fetchRes = await categoryService.getAllCategories();
-        if (fetchRes.success && fetchRes.data && fetchRes.data.data) {
-          setData(fetchRes.data.data);
-        }
+        await fetchCategories();
         setShowDeleteModal(false);
         setDeleteId(null);
       } else {
@@ -93,187 +144,550 @@ const ManageCategory = () => {
       }
     } catch (err) {
       alert("Lỗi khi xóa!");
+      console.error("Lỗi khi xóa danh mục:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
+  if (loading) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="bg-white rounded-2xl shadow-lg p-6 w-full"
+      >
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
-    <div className="bg-amber-25 rounded-2xl shadow p-4 w-full">
-      <div className="flex justify-between items-center mb-4">
-        <div>
-          <div className="font-bold text-xl">Danh sách danh mục</div>
-          <div className="text-sm font-medium text-gray-700 mt-1">Tìm kiếm theo tên</div>
-          <div className="mt-1 flex w-full max-w-xs border rounded overflow-hidden bg-white">
-            <input className="flex-1 px-2 py-1.5 text-sm outline-none bg-transparent" placeholder="Nhập từ khóa tìm kiếm" value={search} onChange={e => setSearch(e.target.value)} />
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white rounded-2xl shadow-lg p-6 w-full"
+    >
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">Quản lý danh mục</h1>
+          <div className="relative">
+            <input 
+              className="w-full md:max-w-xs pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+              placeholder="Tìm kiếm danh mục..." 
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+            <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
           </div>
         </div>
-        <button className="bg-white border border-gray-300 px-4 py-2 rounded shadow-sm font-semibold hover:bg-gray-50 flex items-center gap-2" onClick={openAdd}>
-          + Thêm danh mục
-        </button>
+        
+        <motion.button 
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:shadow-lg transition-all flex items-center gap-2"
+          onClick={openAdd}
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          <span>Thêm danh mục</span>
+        </motion.button>
       </div>
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-sm border-separate border-spacing-0">
-          <thead>
+      
+      <div className="overflow-x-auto rounded-xl shadow">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gradient-to-r from-blue-600 to-blue-700">
             <tr>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tl-lg">STT</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Hình ảnh</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Tên danh mục</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Trạng thái</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Ngày tạo</th>
-              <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tr-lg">Hành động</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">STT</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Hình ảnh</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Tên danh mục</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Trạng thái</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Ngày tạo</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Thao tác</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="bg-white divide-y divide-gray-200">
             {paged.map((row, idx) => (
-              <tr key={row.categoryId} className="border-b last:border-0">
-                <td className="px-3 py-2">{(currentPage - 1) * pageSize + idx + 1}</td>
-                <td className="px-3 py-2">
-                  <img src={row.image} alt={row.categoryName} className="w-12 h-12 object-cover rounded" />
+              <motion.tr 
+                key={row.categoryId}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className="hover:bg-gray-50 transition-colors"
+              >
+                <td className="px-4 py-3 whitespace-nowrap">{(currentPage - 1) * pageSize + idx + 1}</td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <motion.img 
+                    whileHover={{ scale: 1.1 }}
+                    src={row.image} 
+                    alt={row.categoryName} 
+                    className="w-12 h-12 object-cover rounded-lg shadow"
+                    onError={(e) => {
+                      e.target.src = "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg";
+                    }}
+                  />
                 </td>
-                <td className="px-3 py-2 font-semibold">{row.categoryName}</td>
-                <td className="px-3 py-2">{row.categoryStatus}</td>
-                <td className="px-3 py-2">{row.creationDate ? new Date(row.creationDate).toLocaleDateString() : ""}</td>
-                <td className="px-3 py-2 flex gap-2">
-                  <button className="text-green-500 hover:underline" onClick={() => openView((currentPage-1)*pageSize+idx)}>Xem</button>
-                  <button className="text-blue-500 hover:underline" onClick={() => openEdit((currentPage-1)*pageSize+idx)}>Sửa</button>
-                  <button className="text-red-500 hover:underline" onClick={() => openDelete(row.categoryId)}>Xóa</button>
+                <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">{row.categoryName}</td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    row.categoryStatus?.toLowerCase() === 'active' 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {row.categoryStatus?.toLowerCase() === 'active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}
+                  </span>
                 </td>
-              </tr>
+                <td className="px-4 py-3 whitespace-nowrap text-gray-500">
+                  {row.creationDate ? new Date(row.creationDate).toLocaleDateString() : ""}
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="flex gap-2">
+                    <motion.button 
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="text-green-600 hover:text-green-800" 
+                      onClick={() => openView((currentPage-1)*pageSize+idx)}
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </motion.button>
+                    <motion.button 
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="text-blue-600 hover:text-blue-800"
+                      onClick={() => openEdit((currentPage-1)*pageSize+idx)}
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </motion.button>
+                    <motion.button 
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="text-red-600 hover:text-red-800"
+                      onClick={() => openDelete(row.categoryId)}
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </motion.button>
+                  </div>
+                </td>
+              </motion.tr>
             ))}
           </tbody>
         </table>
       </div>
-      <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
-        <span>{(filtered.length === 0 ? 0 : (currentPage - 1) * pageSize + 1)} đến {Math.min(currentPage * pageSize, filtered.length)} trên tổng số {filtered.length}</span>
+      
+      <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
+        <span>
+          {(filtered.length === 0 ? 0 : (currentPage - 1) * pageSize + 1)} đến {Math.min(currentPage * pageSize, filtered.length)} trên tổng số {filtered.length}
+        </span>
         <div className="flex items-center gap-2">
-          <button className="border rounded px-2 py-1" disabled={currentPage === 1} onClick={() => setCurrentPage(p => Math.max(1, p - 1))}>&lt;</button>
-          <span className="border rounded px-2 py-1 bg-white">{currentPage}</span>
-          <button className="border rounded px-2 py-1" disabled={currentPage === totalPage || totalPage === 0} onClick={() => setCurrentPage(p => Math.min(totalPage, p + 1))}>&gt;</button>
-          <select className="border rounded px-2 py-1 ml-2" value={pageSize} disabled>
-            <option>10 / page</option>
-          </select>
+          <motion.button 
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="p-2 rounded-lg border hover:bg-gray-50 disabled:opacity-50"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </motion.button>
+          <span className="px-4 py-2 rounded-lg bg-blue-50 font-medium text-blue-600">{currentPage}</span>
+          <motion.button 
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            className="p-2 rounded-lg border hover:bg-gray-50 disabled:opacity-50"
+            disabled={currentPage === totalPage || totalPage === 0}
+            onClick={() => setCurrentPage(p => Math.min(totalPage, p + 1))}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </motion.button>
         </div>
       </div>
-      {/* Modal Create/Edit Category */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative animate-fadeIn">
-            <button className="absolute top-3 right-3 text-2xl text-gray-400 hover:text-gray-600" onClick={() => { setShowModal(false); setEditIdx(null); }} aria-label="Close">×</button>
-            <div className="text-xl font-bold mb-4">{editIdx === null ? 'Thêm danh mục' : 'Sửa danh mục'}</div>
-            
-            
-            <form className="space-y-4" onSubmit={async e => {
-              e.preventDefault();
-              if (!form.categoryName || !form.categoryName.trim()) {
-                setFormError("Tên loại không được để trống!");
-                return;
-              }
-              if (!form.imageFile) {
-                setFormError("Vui lòng chọn ảnh!");
-                return;
-              }
-              if (editIdx === null) {
-                // Gọi API tạo mới category
-                try {
-                  const res = await categoryService.createCategory({
-                    categoryName: form.categoryName,
-                    imageFile: form.imageFile,
-                    categoryStatus: "Actived"
-                  });
-                  if (res.success) {
-                    // Fetch lại danh sách
-                    const fetchRes = await categoryService.getAllCategories();
-                    if (fetchRes.success && fetchRes.data && fetchRes.data.data) {
-                      setData(fetchRes.data.data);
-                    }
-                    setShowModal(false);
-                    setForm({ categoryName: "", image: "", imageFile: null });
-                    setEditIdx(null);
-                    setFormError("");
-                  } else {
-                    setFormError(res.error || "Thêm mới thất bại!");
-                  }
-                } catch (err) {
-                  setFormError("Lỗi khi thêm mới!");
-                }
-              } else {
-                // Edit local (nếu cần gọi API update thì bổ sung sau)
-                setData(prev => prev.map((item, i) => i === editIdx ? { ...item, categoryName: form.categoryName, image: form.image } : item));
-                setShowModal(false);
-                setForm({ categoryName: "", image: "", imageFile: null });
-                setEditIdx(null);
-                setFormError("");
-              }
-            }}>
-              <div>
-                <label className="block font-medium mb-1">Tên loại</label>
-                <input type="text" className="w-full border rounded px-3 py-2 focus:ring-2 focus:ring-blue-400" placeholder="Nhập tên loại" value={form.categoryName || ''} onChange={e => setForm({ ...form, categoryName: e.target.value })} />
-              </div>
-              <div>
-                <label className="block font-medium mb-1">Hình ảnh</label>
-                <div className="flex items-center gap-4">
-                  <label className="cursor-pointer inline-block px-4 py-2 border border-gray-400 text-gray-800 rounded hover:bg-gray-100 transition font-medium shadow-sm">
-                    Chọn ảnh
-                    <input type="file" accept="image/*" className="hidden" onChange={e => {
-                      const file = e.target.files[0];
-                      if (file) {
-                        setForm(f => ({ ...f, imageFile: file }));
-                        const reader = new FileReader();
-                        reader.onload = ev => setForm(f => ({ ...f, image: ev.target.result }));
-                        reader.readAsDataURL(file);
-                      }
-                    }} />
-                  </label>
-                  {(form.image || form.imageFile) && (
-                    <img src={form.image || (form.imageFile && URL.createObjectURL(form.imageFile))} alt="preview" className="w-12 h-12 object-cover rounded border" />
-                  )}
-                </div>
-                <div className="text-xs text-gray-500 mt-1">Chỉ chấp nhận ảnh PNG, JPG, JPEG. Dung lượng &lt; 2MB.</div>
-                {form.imageFile && <div className="text-xs text-green-600 mt-1">{form.imageFile.name}</div>}
-              </div>
-              {formError && <div className="text-red-500 text-sm font-medium mt-1">{formError}</div>}
-              <div className="flex justify-end gap-2 mt-4">
-                <button type="button" className="px-4 py-2 rounded border bg-gray-50 hover:bg-gray-100" onClick={() => { setShowModal(false); setForm({ categoryName: '', image: '', imageFile: null }); setEditIdx(null); }}>
-                  Hủy
-                </button>
-                <button type="submit" className="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 shadow">
-                  Lưu
-                </button>
-              </div>
-            </form>
 
-            
-          </div>
-        </div>
-      )}
-      {/* Modal xác nhận xóa */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-xs p-6 relative animate-fadeIn">
-            <div className="text-lg font-bold mb-2 text-center">Xác nhận xóa danh mục?</div>
-            <div className="text-center mb-4 text-gray-600">Bạn có chắc chắn muốn xóa danh mục này?</div>
-            <div className="flex justify-center gap-3">
-              <button className="px-4 py-2 rounded border bg-gray-50 hover:bg-gray-100" onClick={() => setShowDeleteModal(false)}>Hủy</button>
-              <button className="px-4 py-2 rounded text-white font-semibold bg-red-600 hover:bg-red-700" onClick={handleDelete}>Xác nhận</button>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* Modal xem chi tiết */}
-      {showViewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative animate-fadeIn">
-            <button className="absolute top-3 right-3 text-2xl text-gray-400 hover:text-gray-600" onClick={() => setShowViewModal(false)} aria-label="Close">×</button>
-            <div className="text-xl font-bold mb-4">Category Detail</div>
-            {viewIdx !== null && (
-              <div className="space-y-3">
-                <div><span className="font-semibold">Tên loại:</span> {data[viewIdx].categoryName}</div>
-                <div><span className="font-semibold">Ảnh:</span><br/>{data[viewIdx].image && <img src={data[viewIdx].image} alt={data[viewIdx].categoryName} className="w-24 h-24 object-cover rounded mt-2" />}</div>
+      {/* Add/Edit Modal */}
+      {showModal && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-25"
+        >
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden relative"
+          >
+            {/* Header */}
+            <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-8 py-6">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {editIdx === null ? 'Thêm danh mục mới' : 'Chỉnh sửa danh mục'}
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {editIdx === null 
+                      ? 'Điền thông tin để tạo danh mục mới' 
+                      : 'Cập nhật thông tin danh mục'}
+                  </p>
+                </div>
+                <motion.button 
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  onClick={() => {
+                    setShowModal(false);
+                    setEditIdx(null);
+                    setForm({ categoryName: "", imageFile: null, image: "" });
+                    setFormError("");
+                  }}
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </motion.button>
               </div>
-            )}
+            </div>
+
+            {/* Form Content */}
+            <div className="p-8">
+              <form onSubmit={handleAddEdit} className="space-y-6">
+                {/* Category Name Input */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tên danh mục
+                  </label>
+                  <input
+                    type="text"
+                    value={form.categoryName}
+                    onChange={e => setForm({ ...form, categoryName: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
+                    placeholder="Nhập tên danh mục..."
+                  />
+                </div>
+
+                {/* Image Upload */}
+              <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hình ảnh danh mục
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Preview */}
+                    <div className="relative group rounded-xl overflow-hidden bg-gray-50 aspect-square flex items-center justify-center border-2 border-dashed border-gray-300">
+                      {(form.imageFile || form.image) ? (
+                        <motion.img
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          src={form.imageFile ? URL.createObjectURL(form.imageFile) : form.image}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.src = "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg";
+                          }}
+                        />
+                      ) : (
+                        <div className="text-center p-4">
+                          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          <p className="mt-1 text-sm text-gray-500">Chưa có ảnh</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Upload Button */}
+                    <div className="flex flex-col justify-center space-y-4">
+                      <motion.label
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="cursor-pointer"
+                      >
+                        <div className="px-4 py-3 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 border border-blue-200 transition-all text-center">
+                          <div className="text-blue-600 font-medium">Tải ảnh lên</div>
+                          <p className="mt-1 text-sm text-blue-500">Định dạng: JPG, PNG (Tối đa 5MB)</p>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={e => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                setForm({ ...form, imageFile: file });
+                              }
+                            }}
+                          />
+                        </div>
+                      </motion.label>
+
+                      {(form.imageFile || form.image) && (
+                        <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          type="button"
+                          className="px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors text-sm font-medium"
+                          onClick={() => setForm({ ...form, imageFile: null, image: "" })}
+                        >
+                          Xóa ảnh
+                        </motion.button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Error Message */}
+                {formError && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-4 rounded-lg bg-red-50 text-red-600 text-sm"
+                  >
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span>{formError}</span>
+              </div>
+                  </motion.div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex justify-end gap-3 pt-4">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    className="px-6 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors font-medium"
+                    onClick={() => {
+                      setShowModal(false);
+                      setEditIdx(null);
+                      setForm({ categoryName: "", imageFile: null, image: "" });
+                      setFormError("");
+                    }}
+                  >
+                    Hủy
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="submit"
+                    className="px-6 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium shadow-sm hover:shadow transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span>Đang xử lý...</span>
+                      </div>
+                    ) : (
+                      <span>{editIdx === null ? 'Thêm danh mục' : 'Cập nhật'}</span>
+                    )}
+                  </motion.button>
+                </div>
+              </form>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* View Modal */}
+      {showViewModal && viewIdx !== null && filtered[viewIdx] && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-opacity-30"
+        >
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden relative"
+          >
+            {/* Header with sticky position */}
+            <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-8 py-6">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Chi tiết danh mục</h2>
+                  <div className="mt-1 text-sm text-gray-500">
+                    Ngày tạo: {filtered[viewIdx].creationDate ? new Date(filtered[viewIdx].creationDate).toLocaleDateString('vi-VN') : "Chưa có"}
+                  </div>
+                </div>
+                <motion.button 
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  onClick={() => {
+                    setShowViewModal(false);
+                    setViewIdx(null);
+                  }}
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Scrollable Content */}
+            <div className="overflow-y-auto max-h-[calc(90vh-100px)] p-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Left Column - Image */}
+                <div className="space-y-6">
+                  <div className="relative group rounded-xl overflow-hidden bg-gray-50 aspect-square flex items-center justify-center">
+                    <motion.img 
+                      whileHover={{ scale: 1.02 }}
+                      src={filtered[viewIdx].image} 
+                      alt={filtered[viewIdx].categoryName}
+                      className="w-full h-full object-cover shadow-lg transition-transform"
+                      onError={(e) => {
+                        e.target.src = "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg";
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  </div>
+
+                  {/* Status Badge */}
+                  <div className="text-center">
+                    <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${
+                      filtered[viewIdx].categoryStatus?.toLowerCase() === 'active'
+                        ? 'bg-green-100 text-green-800 border border-green-200' 
+                        : 'bg-red-100 text-red-800 border border-red-200'
+                    }`}>
+                      <span className={`w-2 h-2 rounded-full mr-2 ${
+                        filtered[viewIdx].categoryStatus?.toLowerCase() === 'active' ? 'bg-green-500' : 'bg-red-500'
+                      }`}></span>
+                      {filtered[viewIdx].categoryStatus?.toLowerCase() === 'active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right Column - Details */}
+                <div className="space-y-6">
+                  {/* Category Name */}
+                  <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-xl">
+                    <div className="text-sm text-blue-600 font-medium mb-1">Tên danh mục</div>
+                    <div className="text-xl font-bold text-gray-900">{filtered[viewIdx].categoryName}</div>
+                  </div>
+
+                  {/* Statistics */}
+                  <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-6 rounded-xl">
+                    <div className="text-sm text-purple-600 font-medium mb-4">Thống kê</div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-white rounded-lg p-4 text-center">
+                        <div className="text-2xl font-bold text-gray-900">{filtered[viewIdx].totalProducts || 0}</div>
+                        <div className="text-sm text-gray-500 mt-1">Sản phẩm</div>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 text-center">
+                        <div className="text-2xl font-bold text-gray-900">{filtered[viewIdx].totalSubCategories || 0}</div>
+                        <div className="text-sm text-gray-500 mt-1">Danh mục con</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Creation Info */}
+                  <div className="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-xl">
+                    <div className="text-sm text-green-600 font-medium mb-1">Thông tin tạo</div>
+                    <div className="space-y-2">
+                      <div>
+                        <span className="text-gray-500">Ngày tạo:</span>
+                        <span className="ml-2 font-medium">
+                          {filtered[viewIdx].creationDate 
+                            ? new Date(filtered[viewIdx].creationDate).toLocaleDateString('vi-VN')
+                            : "Chưa có"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Người tạo:</span>
+                        <span className="ml-2 font-medium">{filtered[viewIdx].createdBy || "Không có thông tin"}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Last Update */}
+                  <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-6 rounded-xl">
+                    <div className="text-sm text-amber-600 font-medium mb-1">Cập nhật gần nhất</div>
+                    <div className="space-y-2">
+                      <div>
+                        <span className="text-gray-500">Thời gian:</span>
+                        <span className="ml-2 font-medium">
+                          {filtered[viewIdx].lastModifiedDate 
+                            ? new Date(filtered[viewIdx].lastModifiedDate).toLocaleDateString('vi-VN')
+                            : "Chưa có cập nhật"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Người cập nhật:</span>
+                        <span className="ml-2 font-medium">{filtered[viewIdx].lastModifiedBy || "Chưa có"}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
           </div>
         </div>
+          </motion.div>
+        </motion.div>
       )}
-    </div>
+
+      {/* Modal Confirm Delete */}
+      {showDeleteModal && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-25"
+        >
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 relative"
+          >
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4">
+                <svg className="w-full h-full text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Xác nhận xóa</h3>
+              <p className="text-gray-500">Bạn có chắc chắn muốn xóa danh mục này? Hành động này không thể hoàn tác.</p>
+              
+              <div className="flex justify-center gap-3 mt-6">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-6 py-2 rounded-lg border hover:bg-gray-50"
+                  onClick={() => setShowDeleteModal(false)}
+                >
+                  Hủy
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  onClick={handleDelete}
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
+                      <span>Đang xử lý...</span>
+          </div>
+                  ) : (
+                    'Xác nhận xóa'
+                  )}
+                </motion.button>
+              </div>
+          </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </motion.div>
   );
 };
 

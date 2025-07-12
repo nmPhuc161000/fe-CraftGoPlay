@@ -56,6 +56,8 @@ export const API_ENDPOINTS_METERIAL = {
 export const API_ENDPOINTS_CATEGORY = {
   GET_CATEGORIES: "/api/Category/GetAllCategories",
   CREATE_CATEGORY: "/api/Category/CreateCategory",
+  UPDATE_CATEGORY: (id) => `/api/Category/UpdateCategory/${categoryId}`,
+  DELETE_CATEGORY: (id) => `/api/Category/CategoryId/Delete`,
 };
 
 export const API_ENDPOINTS_SUBCATEGORY = {
