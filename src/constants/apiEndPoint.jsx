@@ -73,6 +73,7 @@ export const API_ENDPOINTS_USER = {
   CANCEL_REQUEST_UPGRADE_ARTISAN: (userId) => `/api/User/CancelRequest/${userId}`,
   RESEND_SEND_REQUEST_UPGRADE_ARTISAN: (userId, requestId) => `/api/User/ResendRequest?userId=${userId}&requestId=${requestId}`,
   UPDATE_INFORMATION_USER: "/api/User/UpdateInfoUser",
+  UPDATE_INFORMATION_ARTISAN: "/api/User/UpdateInfoUser",
 };
 
 export const API_ENDPOINTS_FAVORITE = {

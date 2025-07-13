@@ -1,3 +1,4 @@
+// /srv/services/apis/userApi.jsx
 import { performApiRequest } from "../../utils/apiUtils";
 import { API_ENDPOINTS_USER } from "../../constants/apiEndPoint";
 
@@ -60,8 +61,18 @@ const userService = {
    */
   async updateUser(userData) {
     return performApiRequest(API_ENDPOINTS_USER.UPDATE_INFORMATION_USER, {
-      data: userData,
       method: "put",
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      data: userData,
+    });
+  },
+
+  async updateArtisan(artisanData) {
+    return performApiRequest(API_ENDPOINTS_USER.UPDATE_INFORMATION_ARTISAN, {
+      method: "put",
+      data: artisanData,
     });
   },
 };

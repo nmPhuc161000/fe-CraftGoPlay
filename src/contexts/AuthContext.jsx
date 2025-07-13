@@ -6,6 +6,7 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [isUpdate, setIsUpdate] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -38,7 +39,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     initializeAuth();
-  }, []); // Chỉ chạy một lần khi component mount
+  }, [isUpdate]); // Chỉ chạy một lần khi component mount
 
   const login = async (userData, token) => {
     if (!userData || !token) {
@@ -83,6 +84,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         login,
         logout,
+        setIsUpdate
       }}
     >
       {children}
