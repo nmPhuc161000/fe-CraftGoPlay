@@ -100,6 +100,15 @@ const productService = {
       method: "delete",
     });
   },
+
+  async getProductsByStatus({ status, pageIndex, pageSize }) {
+    return performApiRequest(
+      API_ENDPOINTS_PRODUCT.GET_PRODUCTS_BY_STATUS(status, pageIndex, pageSize),
+      {
+        method: "get",
+      }
+    );
+  }
 };
 
 export default productService;

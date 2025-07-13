@@ -13,20 +13,6 @@ const Home = () => {
   const scrollToProductsRef = useRef(null);
   const location = useLocation();
 
-  // useEffect(() => {
-  //   const fakeProducts = Array.from({ length: 30 }, (_, i) => ({
-  //     id: i + 1,
-  //     name: `Sản phẩm thủ công ${i + 1}`,
-  //     image:
-  //       "https://kinhtevadubao.vn/stores/news_dataimages/kinhtevadubaovn/082018/09/22/hang-thu-cong-voi-suc-hut-rieng-cua-no-13-.1314.jpg",
-  //     price: 1000000 + i * 100000,
-  //     originalPrice: i % 3 === 0 ? 1200000 + i * 100000 : null,
-  //     tag: i % 5 === 0 ? "Pre-order" : i % 4 === 0 ? "20% OFF" : null,
-  //   }));
-
-  //   setProducts(fakeProducts);
-  // }, []);
-
   const formatVND = (number) => {
     return number?.toLocaleString("vi-VN", { style: "currency", currency: "VND" }) || "";
   };
@@ -42,10 +28,16 @@ const Home = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await productService.getProducts();
-      const data = res?.data?.data || [];
-      console.log("Dữ liệu sản phẩm từ API:", data);
-      setProducts(data);
+      const res = await productService.getProductsByStatus({
+        status: "Active",
+        pageIndex: 1,
+        pageSize: 50,
+      });
+      const productList = res?.data?.data;
+      if (Array.isArray(productList)) {
+        console.log("Sản phẩm lấy về:", productList.length, productList);
+        setProducts(productList);
+      }
     } catch (error) {
       console.error("Lỗi khi lấy sản phẩm:", error);
     }
@@ -198,29 +190,31 @@ const Home = () => {
       <div className="w-full px-20 py-4">
         <div className="w-full">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 px-4 sm:px-6 lg:px-8">
-            {products.map((product, index) => (
+            {products.map((product) => (
               <div
-                key={index}
+                key={product.id}
                 onClick={() => navigate(`/product/${product.id}`)}
                 className="group w-full bg-white shadow rounded-lg overflow-hidden relative text-center transition-transform duration-300 hover:scale-105 hover:shadow-lg cursor-pointer"
               >
                 <div className="relative w-full h-64">
-                  {/* img default */}
+                  {/* Ảnh chính và hover */}
                   <img
-                    src={product.productImages?.[0]?.imageUrl}
+                    src={product.productImages[0].imageUrl}
                     alt={product.name}
                     className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-100 group-hover:opacity-0"
                   />
-                  {/* img2 */}
                   <img
-                    src={product.productImages?.[1]?.imageUrl || product.productImages?.[0]?.imageUrl}
+                    src={
+                      product.productImages[1]?.imageUrl ||
+                      product.productImages[0].imageUrl
+                    }
                     alt={product.name}
                     className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
                   />
                 </div>
 
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold">{product.name}</h3>
+                  <h3 className="text-lg font-semibold line-clamp-2">{product.name}</h3>
                   <div className="mt-2 text-base">
                     <span className="text-red-600 font-semibold">
                       {formatVND(product.price)}
