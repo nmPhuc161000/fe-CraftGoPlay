@@ -21,8 +21,24 @@ const categoryService = {
       data: formData,
     });
   },
+  async updateCategory(categoryId, { categoryName, imageFile, categoryStatus }) {
+    const formData = new FormData();
+    formData.append("CategoryName", categoryName);
+    if (imageFile) {
+      formData.append("Image", imageFile);
+    }
+    formData.append("CategoryStatus", categoryStatus);
+
+    return performApiRequest(API_ENDPOINTS_CATEGORY.UPDATE_CATEGORY(categoryId), {
+      method: "put", 
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      data: formData,
+    });
+  },
   async deleteCategory(categoryId) {
-    return performApiRequest(`/api/Category/CategoryId/Delete?CategoryId=${categoryId}`, {
+    return performApiRequest(API_ENDPOINTS_CATEGORY.DELETE_CATEGORY(categoryId), {
       method: "delete",
     });
   }
