@@ -82,3 +82,10 @@ export const API_ENDPOINTS_ADDRESS = {
   UPDATE_ADDRESS: (addressId) => `/api/UserAddress/UpdateAddress/${addressId}`,
   DELTE_ADDRESS: (addressId) => `/api/UserAddress/DeleteAddress/${addressId}`,
 };
+
+export const API_ENDPOINTS_ORDER = {
+    CREATE_FROM_CART: "/api/Order/create-from-cart",
+    CREATE_DIRECT: "/api/Order/create-direct",
+    GET_VNPAY_URL: (orderId) => `/api/Order/vnpay-url/${orderId}`,
+    VNPAY_RETURN: "/api/Order/vnpay-return",
+};
