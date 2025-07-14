@@ -2,9 +2,9 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   FaSearch,
   FaShoppingBag,
-  FaGlobe,
   FaUser,
   FaSignOutAlt,
+  FaBoxOpen,
 } from "react-icons/fa";
 import { useContext, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext"; // Import AuthContext
@@ -152,6 +152,16 @@ const Header = () => {
                     >
                       <FaUser className="mr-2" />
                       Xem thông tin
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigate("/profile-user/orders");
+                        setShowDropdown(false);
+                      }}
+                      className="flex items-center w-full px-5 py-2 text-sm text-gray-800 hover:bg-gray-100 transition-colors duration-200 rounded-md"
+                    >
+                      <FaBoxOpen className="mr-2" />
+                      Đơn hàng
                     </button>
                     <button
                       onClick={() => {

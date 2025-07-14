@@ -17,6 +17,10 @@ import { decodeToken } from "../../utils/tokenUtils";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import { useNotification } from "../../contexts/NotificationContext"; // dùng context mới
 import { motion } from "framer-motion";
+import {
+  validatePhoneNumber,
+  validateRegisterForm,
+} from "../../utils/validationUtils";
 
 // Tách các thành phần nhỏ thành component riêng
 const Tooltip = ({ content }) => (
@@ -88,18 +92,20 @@ const Register = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState({
+    email: "",
+    userName: "",
     phoneNo: "",
-    password: "",
+    passwordHash: "",
     confirmPassword: "",
   });
   const navigate = useNavigate();
   const { showNotification } = useNotification(); // dùng context mới
 
   const [form, setForm] = useState({
-    userName: "",
-    email: "",
-    phoneNo: "",
-    passwordHash: "",
+    UserName: "",
+    Email: "",
+    PhoneNo: "",
+    PasswordHash: "",
   });
 
   // Các hàm xử lý sự kiện
@@ -136,54 +142,26 @@ const Register = () => {
 
   // Hàm xác thực form
   const validateForm = useCallback(() => {
-    const newErrors = { ...errors };
-    let isValid = true;
-
-    if (form.phoneNo.length < 10) {
-      newErrors.phoneNo = "Số điện thoại phải có ít nhất 10 số";
-      isValid = false;
-    } else {
-      newErrors.phoneNo = "";
-    }
-
-    if (form.passwordHash.length < 8) {
-      newErrors.password = "Mật khẩu phải có ít nhất 8 ký tự";
-      isValid = false;
-    } else {
-      newErrors.password = "";
-    }
-
-    if (form.passwordHash !== confirmPassword) {
-      newErrors.confirmPassword = "Mật khẩu không khớp";
-      isValid = false;
-    } else {
-      newErrors.confirmPassword = "";
-    }
-
-    setErrors(newErrors);
+    const { errors, isValid } = validateRegisterForm(form, confirmPassword);
+    setErrors(errors);
     return isValid;
-  }, [form, confirmPassword, errors]);
+  }, [form, confirmPassword]);
 
   // Hàm xử lý thay đổi số điện thoại
   const handlePhoneChange = useCallback((e) => {
     const value = e.target.value;
-
-    if (!/^\d*$/.test(value)) {
-      setErrors((prev) => ({ ...prev, phoneNo: "Chỉ được nhập số" }));
-      return;
-    }
-
-    setErrors((prev) => ({ ...prev, phoneNo: "" }));
-    setForm((prev) => ({ ...prev, phoneNo: value }));
+    setErrors((prev) => ({
+      ...prev,
+      PhoneNo: validatePhoneNumber(value),
+    }));
+    setForm((prev) => ({ ...prev, PhoneNo: value }));
   }, []);
 
   const handleRegister = useCallback(
     async (e) => {
       e.preventDefault();
-
-      if (!validateForm()) return;
-
       setLoading(true);
+      if (!validateForm()) return;
 
       try {
         const response = await authService.register(form);
@@ -191,10 +169,10 @@ const Register = () => {
         if (response.success) {
           showNotification(MESSAGES.AUTH.REGISTER_SUCCESS);
           // Lưu email vào localStorage để sử dụng ở trang OTP
-          localStorage.setItem("registerEmail", form.email);
+          localStorage.setItem("registerEmail", form.Email);
 
           // Chuyển hướng đến trang OTP và gửi email qua state
-          navigate("/verify-otp", { state: { email: form.email } });
+          navigate("/verify-otp", { state: { Email: form.Email } });
         } else {
           showNotification(response.error || MESSAGES.AUTH.REGISTER_FAILED);
         }
@@ -325,8 +303,9 @@ const Register = () => {
               icon={FaUser}
               label="Tên người dùng"
               placeholder="Tên người dùng"
-              value={form.userName}
-              onChange={(e) => setForm({ ...form, userName: e.target.value })}
+              value={form.UserName}
+              onChange={(e) => setForm({ ...form, UserName: e.target.value })}
+              error={errors.userName}
               tooltipContent={tooltips.userName}
             />
 
@@ -336,8 +315,9 @@ const Register = () => {
               label="Email"
               placeholder="Email"
               autoComplete="username"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              value={form.Email}
+              onChange={(e) => setForm({ ...form, Email: e.target.value })}
+              error={errors.email}
             />
 
             <InputField
@@ -345,7 +325,7 @@ const Register = () => {
               type="tel"
               label="Số điện thoại"
               placeholder="Số điện thoại ít nhất 10 số"
-              value={form.phoneNo}
+              value={form.PhoneNo}
               onChange={handlePhoneChange}
               error={errors.phoneNo}
               maxLength={10}
@@ -358,11 +338,11 @@ const Register = () => {
               label="Mật khẩu"
               placeholder="Mật khẩu"
               autoComplete="new-password"
-              value={form.passwordHash}
+              value={form.PasswordHash}
               onChange={(e) =>
-                setForm({ ...form, passwordHash: e.target.value })
+                setForm({ ...form, PasswordHash: e.target.value })
               }
-              error={errors.password}
+              error={errors.passwordHash}
               tooltipContent={tooltips.password}
             />
 

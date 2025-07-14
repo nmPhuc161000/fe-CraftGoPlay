@@ -56,6 +56,8 @@ export const API_ENDPOINTS_METERIAL = {
 export const API_ENDPOINTS_CATEGORY = {
   GET_CATEGORIES: "/api/Category/GetAllCategories",
   CREATE_CATEGORY: "/api/Category/CreateCategory",
+  UPDATE_CATEGORY: (id) => `/api/Category/UpdateCategory/${categoryId}`,
+  DELETE_CATEGORY: (id) => `/api/Category/CategoryId/Delete`,
 };
 
 export const API_ENDPOINTS_SUBCATEGORY = {
@@ -66,6 +68,12 @@ export const API_ENDPOINTS_SUBCATEGORY = {
 export const API_ENDPOINTS_USER = {
   GET_USER: "/api/User/get-current-user",
   SEND_REQUEST_UPGRADE_ARTISAN: "/api/User/SendRequestUpgradeToArtisan",
+  GET_SEND_REQUEST_UPGRADE_ARTISAN: (userId) => `/api/User/GetSentRequestByUserId/${userId}`,
+  CHECK_SEND_REQUEST_UPGRADE_ARTISAN: (userId) => `/api/User/CheckRequestSent/${userId}`,
+  CANCEL_REQUEST_UPGRADE_ARTISAN: (userId) => `/api/User/CancelRequest/${userId}`,
+  RESEND_SEND_REQUEST_UPGRADE_ARTISAN: (userId, requestId) => `/api/User/ResendRequest?userId=${userId}&requestId=${requestId}`,
+  UPDATE_INFORMATION_USER: "/api/User/UpdateInfoUser",
+  UPDATE_INFORMATION_ARTISAN: "/api/User/UpdateInfoUser",
 };
 
 export const API_ENDPOINTS_FAVORITE = {

@@ -1,15 +1,18 @@
 import { Routes, Route } from "react-router-dom";
-import ProductsTab from "../pages/Profile/components/ProductsTab";
-import OrdersTab from "../pages/Profile/components/OrdersTab";
-import ReviewsTab from "../pages/Profile/components/ReviewsTab";
-import FavoritesTab from "../pages/Profile/components/FavoritesTab";
-import CustomersTab from "../pages/Profile/components/CustomersTab";
-import RevenueTab from "../pages/Profile/components/RevenueTab";
+import ProductsTab from "../pages/Profile/components/artisan/ProductsTab";
+import OrdersTab from "../pages/Profile/components/user/OrdersTab";
+import ArtisanReviewsTab from "../pages/Profile/components/artisan/ArtisanReviewsTab";
+import FavoritesTab from "../pages/Profile/components/user/FavoritesTab";
+import CustomersTab from "../pages/Profile/components/user/CustomersTab";
+import RevenueTab from "../pages/Profile/components/artisan/RevenueTab";
 import ProfileTab from "../pages/Profile/components/ProfileTab";
-import AddProductTab from "../pages/Profile/components/AddProductTab";
-import ProductDetailTab from "../pages/Profile/components/ProductDetailtab";
-import AddressTab from "../pages/Profile/components/AddressTab";
-import UpgradeArtisanTab from "../pages/Profile/components/UpgradeArtisanTab";
+import AddProductTab from "../pages/Profile/components/artisan/AddProductTab";
+import ProductDetailTab from "../pages/Profile/components/artisan/ProductDetailtab";
+import AddressTab from "../pages/Profile/components/user/AddressTab";
+import UpgradeArtisanTab from "../pages/Profile/components/user/UpgradeArtisanTab";
+import CustomerReviewsTab from "../pages/Profile/components/user/CustomerReviewsTab";
+import CoinTab from "../pages/Profile/components/user/CointTab";
+import VoucherTab from "../pages/Profile/components/user/VoucherTab";
 
 const ProfileRoutes = ({ role, user }) => {
   if (!user) return <div>Error: User not found</div>;
@@ -33,6 +36,15 @@ const ProfileRoutes = ({ role, user }) => {
           <Route path="revenue" element={<RevenueTab artisanId={user.id} />} />
           <Route path="add-product" element={<AddProductTab />} />
           <Route path="/products/:productId" element={<ProductDetailTab />} />
+          <Route
+            path="artisanReviews"
+            element={
+              <ArtisanReviewsTab
+                userId={user.id}
+                isArtisan={role === "Artisan"}
+              />
+            }
+          />
         </>
       )}
 
@@ -46,14 +58,13 @@ const ProfileRoutes = ({ role, user }) => {
             path="upgradeArtisan"
             element={<UpgradeArtisanTab userId={user.id} />}
           />
+          <Route path="userReviews" element={<CustomerReviewsTab userId={user.id} />} />
+          <Route path="coins" element={<CoinTab userId={user.id} />} />
+          <Route path="vouchers" element={<VoucherTab userId={user.id} />} />
         </>
       )}
 
       {/* Route chung (nhưng có logic khác nhau theo role) */}
-      <Route
-        path="reviews"
-        element={<ReviewsTab userId={user.id} isArtisan={role === "Artisan"} />}
-      />
 
       {/* Route mặc định */}
       <Route
