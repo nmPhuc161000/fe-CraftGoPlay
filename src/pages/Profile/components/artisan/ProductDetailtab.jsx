@@ -13,6 +13,7 @@ import {
 import { useNotification } from "../../../../contexts/NotificationContext";
 import Loading from "../../../../components/loading/Loading";
 import subCategoryService from "../../../../services/apis/subCateApi";
+import { useConfirm } from "../../../../components/ConfirmForm/ConfirmForm";
 
 export default function ProductDetailTab() {
   const { productId } = useParams();
@@ -41,6 +42,7 @@ export default function ProductDetailTab() {
   const [previewImages, setPreviewImages] = useState([]);
   const navigate = useNavigate();
   const { showNotification } = useNotification();
+  const { confirm, ConfirmComponent } = useConfirm();
 
   // Fetch product and materials data
   useEffect(() => {
@@ -304,7 +306,15 @@ export default function ProductDetailTab() {
   }
 
   const handleDelete = async () => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
+    const confirmed = await confirm({
+      title: "Xóa sản phẩm",
+      message: "Bạn có chắc chắn muốn xóa sản phẩm này?",
+      confirmText: "Xóa",
+      cancelText: "Hủy",
+      type: "danger",
+    });
+
+    if (confirmed) {
       try {
         const response = await productService.deleteProduct(productId);
         if (response.success) {
@@ -675,6 +685,7 @@ export default function ProductDetailTab() {
           </div>
         </div>
       </div>
+      <ConfirmComponent />
     </div>
   );
 }
