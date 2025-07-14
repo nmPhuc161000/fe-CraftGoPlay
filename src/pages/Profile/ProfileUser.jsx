@@ -33,7 +33,7 @@ export default function ProfileUser() {
                 <img
                   className="w-24 h-24 rounded-full border-2 border-[#5e3a1e] object-cover mb-3"
                   src={
-                    user?.avatar ||
+                    user?.thumbnail ||
                     "https://th.bing.com/th/id/OIP.PwEh4SGekpMaWT2d5GWw0wHaHt?rs=1&pid=ImgDetMain"
                   }
                   alt="User avatar"

@@ -55,16 +55,11 @@ const ProfileTab = () => {
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const imageData = reader.result;
-        setAvatarPreview(imageData); // để xem trước
-        setFormData((prev) => ({
-          ...prev,
-          thumbnail: imageData, // để lưu lại khi nhấn Lưu
-        }));
-      };
-      reader.readAsDataURL(file);
+      setAvatarPreview(URL.createObjectURL(file)); // dùng URL để preview
+      setFormData((prev) => ({
+        ...prev,
+        thumbnailFile: file, // lưu file chứ không phải base64
+      }));
     }
   };
 
@@ -93,63 +88,47 @@ const ProfileTab = () => {
     setSuccess(null);
 
     try {
-      // Prepare data based on role
-      let updateData;
+      const updateData = new FormData();
+      const isArtisan = role === "Artisan";
 
-      if (role === "Artisan") {
-        updateData = {
-          Id: user.id,
-          UserName: formData.userName,
-          Email: formData.email,
-          Thumbnail: formData.thumbnail,
-          DateOfBirth: formatBirthdayForAPI(formData.birthday),
-          phoneNumber: formData.phone,
-          PhoneNumber: formData.workshopName,
-          craftSkills: formData.craftSkills,
-          yearsOfExperience: formData.yearsOfExperience,
-          bio: formData.bio,
-        };
+      updateData.append("Id", user.id);
+      updateData.append("UserName", formData.userName);
+      updateData.append("Email", formData.email);
+      updateData.append("DateOfBirth", formatBirthdayForAPI(formData.birthday));
+      updateData.append("PhoneNumber", formData.phone);
 
-        const response = await userService.updateArtisan(updateData);
-        if (response.success) {
-          // updateUser(response.data);
-          setSuccess("Cập nhật thông tin nghệ nhân thành công!");
-        } else {
-          setError(response.error || "Có lỗi xảy ra khi cập nhật thông tin");
-        }
-      } else {
-        updateData = {
-          Id: user.id,
-          UserName: formData.userName,
-          Email: formData.email,
-          Thumbnail: avatarPreview,
-          DateOfBirth: formatBirthdayForAPI(formData.birthday),
-          PhoneNumber: formData.phone,
-        };
-
-        const response = await userService.updateUser(updateData);
-        console.log("data: ", response);
-
-        if (response.success) {
-          //updateUser(response.data);
-          setIsUpdate(true);
-          setSuccess("Cập nhật thông tin người dùng thành công!");
-          showNotification(
-            "Cập nhật thông tin người dùng thành công!",
-            "success"
-          );
-          setIsEditing(false);
-        } else {
-          setError(response.error || "Có lỗi xảy ra khi cập nhật thông tin");
-          showNotification(
-            response.error || "Có lỗi xảy ra khi cập nhật thông tin",
-            "error"
-          );
-          setIsEditing(true);
-        }
+      if (formData.thumbnailFile) {
+        updateData.append("Thumbnail", formData.thumbnailFile);
       }
 
-      setIsEditing(false);
+      if (isArtisan) {
+        updateData.append("WorkshopName", formData.workshopName || "");
+        updateData.append(
+          "CraftSkills",
+          JSON.stringify(formData.craftSkills || [])
+        );
+        updateData.append("YearsOfExperience", formData.yearsOfExperience || 0);
+        updateData.append("Bio", formData.bio || "");
+      }
+
+      // Gọi API tương ứng
+      const response = isArtisan
+        ? await userService.updateArtisan(updateData)
+        : await userService.updateUser(updateData);
+
+      if (response.success) {
+        setSuccess("Cập nhật thông tin thành công!");
+        setIsUpdate(true);
+        setIsEditing(false);
+        showNotification("Cập nhật thông tin thành công!", "success");
+      } else {
+        setError(response.error || "Có lỗi xảy ra khi cập nhật thông tin");
+        showNotification(
+          response.error || "Có lỗi xảy ra khi cập nhật thông tin",
+          "error"
+        );
+        setIsEditing(true);
+      }
     } catch (err) {
       setError("Có lỗi xảy ra khi kết nối với server");
       showNotification("Có lỗi xảy ra khi kết nối với server", "error");
@@ -243,6 +222,7 @@ const ProfileTab = () => {
           <div className="relative group">
             <img
               src={
+                avatarPreview ||
                 formData.thumbnail ||
                 "https://th.bing.com/th/id/OIP.PwEh4SGekpMaWT2d5GWw0wHaHt?rs=1&pid=ImgDetMain"
               }
