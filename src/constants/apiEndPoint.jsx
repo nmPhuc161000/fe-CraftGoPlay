@@ -1,5 +1,6 @@
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
+// Các endpoint cho xác thực
 export const API_ENDPOINTS_AUTH = {
   LOGIN: "/api/Auth/user/login",
   GOOGLE_LOGIN: "/api/Auth/google-login",
@@ -13,6 +14,7 @@ export const API_ENDPOINTS_AUTH = {
   // Thêm các endpoint khác
 };
 
+// Các endpoint cho sản phẩm
 export const API_ENDPOINTS_PRODUCT = {
   GET_PRODUCTS: "/api/Product/GetProducts",
   GET_PRODUCTS_BY_ARTISANID: (
@@ -31,6 +33,7 @@ export const API_ENDPOINTS_PRODUCT = {
     `/api/Product/GetProductsByStatus?pageIndex=${pageIndex}&pageSize=${pageSize}&productStatus=${status}`,
 };
 
+// Các endpoint cho giỏ hàng
 export const API_ENDPOINTS_CART = {
   GET_CART: (userId) => `/api/Cart/GetAllItemCart/${userId}`,
   ADD_TO_CART: (userId) => `/api/Cart/AddToCart/${userId}`,
@@ -38,6 +41,7 @@ export const API_ENDPOINTS_CART = {
   REMOVE_FROM_CART: (cartItemId) => `/api/Cart/Delete/${cartItemId}`,
 };
 
+// Các endpoint cho làng nghề
 export const API_ENDPOINTS_CRAFTVILLAGE = {
   GET_CRAFTVILLAGES: "/api/CraftVillage/GetAllCraftVillages",
   GET_CRAFTVILLAGE_BY_ID: (id) => `/api/CraftVillage/GetCraftVillageById/${id}`,
@@ -46,6 +50,7 @@ export const API_ENDPOINTS_CRAFTVILLAGE = {
   DELETE_CRAFTVILLAGE: (id) => `/api/CraftVillage/DeleteCraftVillage/${id}`,
 };
 
+// Các endpoint cho nguyên liệu
 export const API_ENDPOINTS_METERIAL = {
   GET_METERIALS: "/api/Meterial/GetMeterials",
   CREATE_METERIAL: "/api/Meterial/CreateMeterial",
@@ -53,6 +58,7 @@ export const API_ENDPOINTS_METERIAL = {
   DELETE_METERIAL: (id) => `/api/Meterial/DeleteMeterial/${id}`,
 };
 
+// Các endpoint cho danh mục
 export const API_ENDPOINTS_CATEGORY = {
   GET_CATEGORIES: "/api/Category/GetAllCategories",
   CREATE_CATEGORY: "/api/Category/CreateCategory",
@@ -60,13 +66,15 @@ export const API_ENDPOINTS_CATEGORY = {
   DELETE_CATEGORY: (categoryId) => `/api/Category/CategoryId/Delete?CategoryId=${categoryId}`,
 };
 
+// Các endpoint cho danh mục con
 export const API_ENDPOINTS_SUBCATEGORY = {
   GET_SUBCATEGORIES: "/api/SubCategory/GetAllSubCategories",
   CREATE_SUBCATEGORY: "/api/SubCategory/CreateSubCategory",
   UPDATE_SUBCATEGORY: (id) => `/api/SubCategory/UpdateSubCategory/${id}`,
-  DELETE_SUBCATEGORY: (id) => `/api/SubCategory/DeleteSubCategory/${id}`
+  DELETE_SUBCATEGORY: (id) => `/api/SubCategory/DeleteSubCategory/${id}`,
 };
 
+// Các endpoint cho user
 export const API_ENDPOINTS_USER = {
   GET_USER: "/api/User/get-current-user",
   SEND_REQUEST_UPGRADE_ARTISAN: "/api/User/SendRequestUpgradeToArtisan",
@@ -77,6 +85,7 @@ export const API_ENDPOINTS_USER = {
   UPDATE_INFORMATION_USER: "/api/User/UpdateInfoUser",
 };
 
+// Các endpoint cho yêu thích
 export const API_ENDPOINTS_FAVORITE = {
   GET_FAVORITE: (id) => `/api/Favourite/GetFavourites/${id}`,
   GET_CHECKFAVORITE: (userId, productId) =>
@@ -85,9 +94,18 @@ export const API_ENDPOINTS_FAVORITE = {
   DELETE_FAVORITE: (userId, productId) => `/api/Favourite/DeleteFavourite?userId=${userId}&productId=${productId}`,
 };
 
+// Các endpoint cho địa chỉ
 export const API_ENDPOINTS_ADDRESS = {
   GET_ADDRESS: (userId) => `/api/UserAddress/GetAddress/${userId}`,
   ADD_ADDRESS: "/api/UserAddress/AddNewAddress",
   UPDATE_ADDRESS: (addressId) => `/api/UserAddress/UpdateAddress/${addressId}`,
   DELTE_ADDRESS: (addressId) => `/api/UserAddress/DeleteAddress/${addressId}`,
+};
+
+// Các endpoint cho admin (theo hình ảnh bạn cung cấp)
+export const API_ENDPOINTS_ADMIN = {
+  GET_ACCOUNTS_BY_STATUS: "/api/Admin/GetAllAccountByStatus",
+  CREATE_ACCOUNT: "/api/Admin/CreateNewAccount",
+  UPDATE_ACCOUNT: "/api/Admin/UpdateAccount",
+  DELETE_ACCOUNT: (id) => `/api/Admin/DeleteAccount/${id}`,
 };

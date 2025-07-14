@@ -1,4 +1,5 @@
 import { performApiRequest } from "../../utils/apiUtils";
+import { API_ENDPOINTS_CATEGORY } from "../../constants/apiEndPoint";
 
 const validateStatus = (status) => {
   // Chỉ chấp nhận "Actived" hoặc "Inactived"
@@ -7,7 +8,7 @@ const validateStatus = (status) => {
 
 const categoryService = {
   async getAllCategories() {
-    return performApiRequest("/api/Category/GetAllCategories", {
+    return performApiRequest(API_ENDPOINTS_CATEGORY.GET_CATEGORIES, {
       method: "get",
     });
   },
@@ -25,7 +26,7 @@ const categoryService = {
       CategoryStatus: validateStatus(categoryStatus)
     });
   
-    return performApiRequest("/api/Category/CreateCategory", {
+    return performApiRequest(API_ENDPOINTS_CATEGORY.CREATE_CATEGORY, {
       method: "post",
       data: formData,
     });
@@ -33,14 +34,14 @@ const categoryService = {
 
   async updateCategory(categoryId, { categoryName, imageFile, image, categoryStatus }) {
     if (!categoryId) {
-      throw new Error("CategoryId is required");
+      throw new Error("CategoryId là bắt buộc");
     }
 
     const formData = new FormData();
     
     // Validate và thêm các trường bắt buộc
     if (!categoryName?.trim()) {
-      throw new Error("CategoryName is required");
+      throw new Error("CategoryName là bắt buộc");
     }
     formData.append("CategoryName", categoryName.trim());
     
@@ -64,7 +65,7 @@ const categoryService = {
       CategoryStatus: validatedStatus
     });
 
-    return performApiRequest(`/api/Category/UpdateCategory/${categoryId}`, {
+    return performApiRequest(API_ENDPOINTS_CATEGORY.UPDATE_CATEGORY(categoryId), {
       method: "put",
       data: formData,
     });
@@ -72,15 +73,14 @@ const categoryService = {
 
   async deleteCategory(categoryId) {
     if (!categoryId) {
-      throw new Error("CategoryId is required");
+      throw new Error("CategoryId là bắt buộc");
     }
 
     // Log trước khi xóa
     console.log("Delete Category ID:", categoryId);
     
-    return performApiRequest("/api/Category/CategoryId/Delete", {
-      method: "delete",
-      params: { CategoryId: categoryId }
+    return performApiRequest(API_ENDPOINTS_CATEGORY.DELETE_CATEGORY(categoryId), {
+      method: "delete"
     });
   }
 };

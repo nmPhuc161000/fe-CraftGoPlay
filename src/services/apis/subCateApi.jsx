@@ -25,7 +25,7 @@ const subCategoryService = {
   /**
    * Tạo danh mục con mới
    * @param {FormData} formData - FormData chứa thông tin danh mục con
-   * @return {Promise<{success: boolean, data?: any, error?: string, status?: number}>}
+   * @return {Promise<{success: boolean, data?: any, error?: string, status?: number, message?: string}>}
    */
   async createSubCategory(formData) {
     try {
@@ -51,26 +51,32 @@ const subCategoryService = {
 
       // Đảm bảo CategoryId là string (theo API yêu cầu)
       const categoryId = formData.get('CategoryId');
-      if (categoryId) {
-        formData.set('CategoryId', categoryId.toString());
-      }
+      formData.delete('CategoryId'); // Xóa khỏi form vì không cần trong body
 
-      // Gọi API tạo subcategory
-      const response = await performApiRequest(API_ENDPOINTS_SUBCATEGORY.CREATE_SUBCATEGORY, {
-        method: "post",
-        data: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data'
+      const response = await performApiRequest(
+        `${API_ENDPOINTS_SUBCATEGORY.CREATE_SUBCATEGORY}?CategoryId=${categoryId}`,
+        {
+          method: "post",
+          data: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         }
-      });
+      );
 
-      // Kiểm tra kết quả trả về từ API
-      if (response && response.success) {
-        return response;
+
+      // Chuẩn hóa kết quả trả về dựa trên response thực tế từ API
+      if (response && (response.error === 0 || response.success)) {
+        return {
+          success: true,
+          data: response.data,
+          message: response.message || "Tạo danh mục con thành công",
+          status: 200
+        };
       } else {
         return {
           success: false,
-          error: response?.error || "Tạo danh mục con thất bại",
+          error: response?.message || response?.error || "Tạo danh mục con thất bại",
           status: response?.status || 500
         };
       }

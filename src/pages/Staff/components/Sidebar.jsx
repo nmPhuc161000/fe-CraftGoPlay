@@ -12,33 +12,127 @@ const menu = [
 
 const Sidebar = ({ selected, setSelected, isMobileOpen, onCloseMobile, isDesktopCollapsed, onToggleDesktop }) => {
   const isOpen = !isDesktopCollapsed;
+  
   return (
     <>
-      <div className={`md:hidden fixed inset-0 bg-black/50 z-30 transition-opacity ${isMobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={onCloseMobile}></div>
-      <aside className={`fixed inset-y-0 left-0 bg-white shadow-xl z-40 flex flex-col transition-transform duration-300 md:relative md:translate-x-0 ${isMobileOpen ? 'translate-x-0' : '-translate-x-full'} ${isDesktopCollapsed ? 'md:w-20' : 'md:w-64'}`} style={{ minHeight: '100vh' }}>
-        <div className="flex items-center gap-2 px-4 pt-6 pb-4">
-          <img src={logo} alt="CraftGoPlay Logo" className={`transition-all rounded-full object-cover ${isDesktopCollapsed ? 'h-8 w-8' : 'h-10 w-10'}`} />
-          {!isDesktopCollapsed && <span className="text-lg font-bold tracking-wide">CraftGoPlay</span>}
-          <button className="ml-auto hidden md:flex items-center justify-center w-8 h-8 rounded-full hover:bg-indigo-50 transition" onClick={onToggleDesktop} aria-label="Toggle sidebar">
-            <span className="text-xl">{isOpen ? "«" : "»"}</span>
+      {/* Mobile overlay with smooth fade */}
+      <div 
+        className={`md:hidden fixed inset-0 bg-gradient-to-r from-black/60 via-black/50 to-black/40 z-30 transition-all duration-300 ${
+          isMobileOpen ? 'opacity-100 backdrop-blur-sm' : 'opacity-0 pointer-events-none'
+        }`} 
+        onClick={onCloseMobile}
+      />
+      
+      {/* Main sidebar */}
+      <aside 
+        className={`fixed inset-y-0 left-0 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 shadow-2xl z-40 flex flex-col transition-all duration-300 ease-in-out md:relative md:translate-x-0 ${
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full'
+        } ${isDesktopCollapsed ? 'md:w-20' : 'md:w-72'}`}
+        style={{ minHeight: '100vh' }}
+      >
+        {/* Gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/20 to-purple-900/20 pointer-events-none" />
+        
+        {/* Header section */}
+        <div className="relative flex items-center gap-3 px-4 pt-6 pb-6 border-b border-slate-700/50">
+          <div className="relative group">
+            <img 
+              src={logo} 
+              alt="CraftGoPlay Logo" 
+              className={`transition-all duration-300 rounded-full object-cover ring-2 ring-indigo-400/30 group-hover:ring-indigo-400/60 shadow-lg ${
+                isDesktopCollapsed ? 'h-10 w-10' : 'h-12 w-12'
+              }`} 
+            />
+            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-indigo-500/20 to-purple-500/20 group-hover:from-indigo-500/30 group-hover:to-purple-500/30 transition-all duration-300" />
+          </div>
+          
+          {!isDesktopCollapsed && (
+            <div className="flex flex-col">
+              <span className="text-xl font-bold bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent tracking-wide">
+                CraftGoPlay
+              </span>
+              <span className="text-xs text-slate-400 font-medium">Admin Dashboard</span>
+            </div>
+          )}
+          
+          <button 
+            className="ml-auto hidden md:flex items-center justify-center w-9 h-9 rounded-full bg-slate-800/50 hover:bg-slate-700/50 border border-slate-600/30 hover:border-slate-500/50 transition-all duration-200 group" 
+            onClick={onToggleDesktop} 
+            aria-label="Toggle sidebar"
+          >
+            <span className="text-lg text-slate-300 group-hover:text-white transition-colors duration-200">
+              {isOpen ? "«" : "»"}
+            </span>
           </button>
         </div>
-        <nav className="flex flex-col gap-1 px-2">
-          {menu.map(item => (
+        
+        {/* Navigation section */}
+        <nav className="flex flex-col gap-2 px-3 pt-4 flex-1">
+          {menu.map((item, index) => (
             <button
               key={item.value}
-              className={`flex items-center gap-3 w-full px-3 py-2 rounded-lg transition text-base font-bold ${selected === item.value ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100 text-gray-700'}`}
+              className={`group relative flex items-center gap-4 w-full px-4 py-3 rounded-xl transition-all duration-200 text-base font-medium overflow-hidden ${
+                selected === item.value 
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg shadow-indigo-500/25' 
+                  : 'hover:bg-slate-700/50 text-slate-300 hover:text-white'
+              }`}
               onClick={() => setSelected(item.value)}
-              style={{ minHeight: 40 }}
+              style={{ 
+                minHeight: 48,
+                animationDelay: `${index * 50}ms`
+              }}
             >
-              {item.icon}
-              {isOpen && <span>{item.label}</span>}
+              {/* Background gradient for selected item */}
+              {selected === item.value && (
+                <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/80 to-purple-600/80 rounded-xl" />
+              )}
+              
+              {/* Hover effect background */}
+              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+              
+              {/* Icon container */}
+              <div className={`relative z-10 flex items-center justify-center transition-all duration-200 ${
+                selected === item.value 
+                  ? 'text-white' 
+                  : 'text-slate-400 group-hover:text-indigo-400'
+              }`}>
+                {item.icon}
+              </div>
+              
+              {/* Label with slide animation */}
+              {isOpen && (
+                <span className="relative z-10 transition-all duration-200 group-hover:translate-x-1">
+                  {item.label}
+                </span>
+              )}
+              
+              {/* Active indicator */}
+              {selected === item.value && (
+                <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-white rounded-r-full shadow-lg" />
+              )}
             </button>
           ))}
         </nav>
+        
+        {/* Footer section */}
+        <div className="relative px-4 pb-4 mt-auto">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-slate-700/50">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+            {isOpen && (
+              <div className="flex flex-col">
+                <span className="text-sm text-slate-300 font-medium">System Status</span>
+                <span className="text-xs text-green-400">Online</span>
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
+        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent" />
       </aside>
     </>
   );
 };
 
-export default Sidebar; 
+export default Sidebar;
