@@ -14,6 +14,7 @@ export const performApiRequest = async (
       headers: {
         ...headers, // Kết hợp headers từ tham số truyền vào
       },
+      data,
     };
 
     // Nếu dữ liệu là FormData, xóa Content-Type để Axios tự đặt multipart/form-data
@@ -26,11 +27,10 @@ export const performApiRequest = async (
     } else if (method === "put") {
       response = await axiosInstance.put(endpoint, data, config);
     } else if (method === "delete") {
-      // Xử lý delete request với cả data và params
-      response = await axiosInstance.delete(endpoint, {
-        ...config,
-        data: Object.keys(data).length > 0 ? data : undefined
-      });
+      // Cho phép cả data (nếu API yêu cầu) và params
+      response = params
+        ? await axiosInstance.delete(endpoint, config)
+        : await axiosInstance.delete(endpoint, { ...config, data });
     } else {
       // Mặc định cho post và các phương thức khác
       response = await axiosInstance[method](endpoint, data, config);
