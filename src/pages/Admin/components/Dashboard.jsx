@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from "recharts";
 import { FaUserPlus } from "react-icons/fa";
 import { FaShoppingCart } from "react-icons/fa";
 import { FaCommentDots } from "react-icons/fa";
 import { FaCoins } from "react-icons/fa";
-
+import adminService from "../../../services/apis/adminApi";
 const YEARS = [2023, 2024, 2025];
 const MONTHS = [
   { value: 0, label: "Tất cả các tháng" },
@@ -111,7 +111,30 @@ const PieLegend = ({ data }) => (
 const Dashboard = () => {
   const [year, setYear] = useState(2025);
   const [month, setMonth] = useState(0);
+  const [totalUsers, setTotalUsers] = useState(null);
+
+  // Lấy dữ liệu fake cho các mục khác
   const data = getData(year, month);
+
+  // Lấy tổng số người dùng từ API
+  useEffect(() => {
+    console.log("Dashboard mounted - gọi API");
+
+    adminService.getAccountsByStatus({ pageIndex: 1, pageSize: 1000, status: 1 })
+      .then(res => {
+        console.log("Kết quả API: ", res);
+        if (res?.data?.data && Array.isArray(res.data.data)) {
+          setTotalUsers(res.data.data.length);
+        } else {
+          setTotalUsers(null);
+          console.warn("Dữ liệu không đúng định dạng:", res);
+        }
+      })
+      .catch(err => {
+        console.error("API error:", err);
+        setTotalUsers(null);
+      });
+  }, []);
 
   // Xác định dữ liệu cho BarChart
   let barData = [];
@@ -161,7 +184,9 @@ const Dashboard = () => {
                 <div className="bg-blue-100 text-blue-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl"><FaUserPlus /></div>
                 <div>
                   <div className="text-gray-500 text-xs sm:text-sm">Tổng người dùng</div>
-                  <div className="text-xl sm:text-2xl font-bold">{data.cards.users}</div>
+                  <div className="text-xl sm:text-2xl font-bold">
+                    {totalUsers !== null ? totalUsers : '...'}
+                  </div>
                 </div>
               </div>
               <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
