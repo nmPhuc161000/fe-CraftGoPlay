@@ -83,6 +83,7 @@ export const API_ENDPOINTS_USER = {
   CANCEL_REQUEST_UPGRADE_ARTISAN: (userId) => `/api/User/CancelRequest/${userId}`,
   RESEND_SEND_REQUEST_UPGRADE_ARTISAN: (userId, requestId) => `/api/User/ResendRequest?userId=${userId}&requestId=${requestId}`,
   UPDATE_INFORMATION_USER: "/api/User/UpdateInfoUser",
+  UPDATE_INFORMATION_ARTISAN: "/api/User/UpdateInfoUser",
 };
 
 // Các endpoint cho yêu thích
@@ -100,6 +101,13 @@ export const API_ENDPOINTS_ADDRESS = {
   ADD_ADDRESS: "/api/UserAddress/AddNewAddress",
   UPDATE_ADDRESS: (addressId) => `/api/UserAddress/UpdateAddress/${addressId}`,
   DELTE_ADDRESS: (addressId) => `/api/UserAddress/DeleteAddress/${addressId}`,
+};
+
+export const API_ENDPOINTS_ORDER = {
+    CREATE_FROM_CART: "/api/Order/create-from-cart",
+    CREATE_DIRECT: "/api/Order/create-direct",
+    GET_VNPAY_URL: (orderId) => `/api/Order/vnpay-url/${orderId}`,
+    VNPAY_RETURN: "/api/Order/vnpay-return",
 };
 
 // Các endpoint cho admin (theo hình ảnh bạn cung cấp)

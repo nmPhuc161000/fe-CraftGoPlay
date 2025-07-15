@@ -23,7 +23,7 @@ export const validatePhoneNumber = (phoneNo) => {
 };
 
 export const validatePassword = (password) => {
-  if (password.length < 4) {
+  if (password.length < 5) {
     return "Mật khẩu phải có ít nhất 8 ký tự";
   }
   // Bạn có thể thêm các validate phức tạp hơn cho password ở đây nếu cần

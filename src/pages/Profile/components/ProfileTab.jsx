@@ -1,13 +1,19 @@
 import { useState, useRef, useContext } from "react";
 import { AuthContext } from "../../../contexts/AuthContext";
+import userService from "../../../services/apis/userApi";
+import { useNotification } from "../../../contexts/NotificationContext";
 
 const ProfileTab = () => {
-  const { user } = useContext(AuthContext);
+  const { user, setIsUpdate } = useContext(AuthContext);
   const role = localStorage.getItem("role") || "Customer";
   const [isEditing, setIsEditing] = useState(false);
-  
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+
   const [formData, setFormData] = useState({
     ...user,
+    userName: user.userName || "Nguyễn Văn A",
     phone: user.phoneNumber || "Chưa cập nhật",
     address: user.address || "Chưa cập nhật",
     gender: user.gender || "other",
@@ -16,11 +22,15 @@ const ProfileTab = () => {
     craftSkills: user.craftSkills || ["Gốm", "Thêu", "Mây tre"],
     yearsOfExperience: user.yearsOfExperience || 5,
     preferences: user.preferences || ["Đồ gốm", "Thủ công truyền thống"],
-    bio: user.bio || "Đam mê nghệ thuật truyền thống và chế tác thủ công"
+    bio: user.bio || "Đam mê nghệ thuật truyền thống và chế tác thủ công",
+    thumbnail:
+      user.thumbnail ||
+      "https://th.bing.com/th/id/OIP.PwEh4SGekpMaWT2d5GWw0wHaHt?rs=1&pid=ImgDetMain",
   });
 
   const [avatarPreview, setAvatarPreview] = useState(user.avatar || "");
   const fileInputRef = useRef(null);
+  const { showNotification } = useNotification();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -45,21 +55,87 @@ const ProfileTab = () => {
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+      setAvatarPreview(URL.createObjectURL(file)); // dùng URL để preview
+      setFormData((prev) => ({
+        ...prev,
+        thumbnailFile: file, // lưu file chứ không phải base64
+      }));
     }
   };
 
-  const handleSubmit = () => {
-    const dataToSave = {
-      ...formData,
-      avatar: avatarPreview,
-    };
-    // onSave(dataToSave);
-    setIsEditing(false);
+  // Dùng để hiển thị ngày sinh theo định dạng DD-MM-YYYY
+  const formatBirthdayForDisplay = (birthday) => {
+    if (!birthday) return "Chưa cập nhật";
+    const date = new Date(birthday);
+    const day = `${date.getDate()}`.padStart(2, "0");
+    const month = `${date.getMonth() + 1}`.padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+  // Dùng để format birthday trước khi gửi API dưới dạng MM-DD-YYYY
+  const formatBirthdayForAPI = (birthday) => {
+    if (!birthday) return null;
+    const date = new Date(birthday);
+    const month = `${date.getMonth() + 1}`.padStart(2, "0");
+    const day = `${date.getDate()}`.padStart(2, "0");
+    const year = date.getFullYear();
+    return `${month}-${day}-${year}`;
+  };
+
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const updateData = new FormData();
+      const isArtisan = role === "Artisan";
+
+      updateData.append("Id", user.id);
+      updateData.append("UserName", formData.userName);
+      updateData.append("Email", formData.email);
+      updateData.append("DateOfBirth", formatBirthdayForAPI(formData.birthday));
+      updateData.append("PhoneNumber", formData.phone);
+
+      if (formData.thumbnailFile) {
+        updateData.append("Thumbnail", formData.thumbnailFile);
+      }
+
+      if (isArtisan) {
+        updateData.append("WorkshopName", formData.workshopName || "");
+        updateData.append(
+          "CraftSkills",
+          JSON.stringify(formData.craftSkills || [])
+        );
+        updateData.append("YearsOfExperience", formData.yearsOfExperience || 0);
+        updateData.append("Bio", formData.bio || "");
+      }
+
+      // Gọi API tương ứng
+      const response = isArtisan
+        ? await userService.updateArtisan(updateData)
+        : await userService.updateUser(updateData);
+
+      if (response.success) {
+        setSuccess("Cập nhật thông tin thành công!");
+        setIsUpdate(true);
+        setIsEditing(false);
+        showNotification("Cập nhật thông tin thành công!", "success");
+      } else {
+        setError(response.error || "Có lỗi xảy ra khi cập nhật thông tin");
+        showNotification(
+          response.error || "Có lỗi xảy ra khi cập nhật thông tin",
+          "error"
+        );
+        setIsEditing(true);
+      }
+    } catch (err) {
+      setError("Có lỗi xảy ra khi kết nối với server");
+      showNotification("Có lỗi xảy ra khi kết nối với server", "error");
+      console.error("Update profile error:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const triggerFileInput = () => {
@@ -75,8 +151,8 @@ const ProfileTab = () => {
         {isArray ? (
           <div className="flex flex-wrap gap-2">
             {value.map((item, index) => (
-              <span 
-                key={index} 
+              <span
+                key={index}
                 className="px-2 py-1 bg-amber-100 text-amber-800 rounded-full text-sm"
               >
                 {item}
@@ -116,11 +192,29 @@ const ProfileTab = () => {
                 ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 : "bg-[#5e3a1e] text-white hover:bg-[#7a4b28]"
             }`}
+            disabled={isLoading}
           >
-            {isEditing ? "Hủy chỉnh sửa" : "Chỉnh sửa hồ sơ"}
+            {isLoading
+              ? "Đang xử lý..."
+              : isEditing
+              ? "Hủy chỉnh sửa"
+              : "Chỉnh sửa hồ sơ"}
           </button>
         </div>
       </div>
+
+      {/* Hiển thị thông báo lỗi/thành công */}
+      {error && (
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded">
+          <p>{error}</p>
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded">
+          <p>{success}</p>
+        </div>
+      )}
 
       {/* Avatar Section */}
       <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
@@ -129,6 +223,7 @@ const ProfileTab = () => {
             <img
               src={
                 avatarPreview ||
+                formData.thumbnail ||
                 "https://th.bing.com/th/id/OIP.PwEh4SGekpMaWT2d5GWw0wHaHt?rs=1&pid=ImgDetMain"
               }
               alt="Avatar"
@@ -156,7 +251,9 @@ const ProfileTab = () => {
           <h3 className="mt-4 text-xl font-semibold text-gray-800">
             {formData.userName || "Nguyễn Văn A"}
           </h3>
-          <p className="text-gray-600">{formData.email || "user@example.com"}</p>
+          <p className="text-gray-600">
+            {formData.email || "user@example.com"}
+          </p>
         </div>
       </div>
 
@@ -171,10 +268,19 @@ const ProfileTab = () => {
               Thông tin cơ bản
             </h3>
             <dl className="space-y-1">
-              <InfoField label="Họ và tên" value={formData.userName || "Nguyễn Văn A"} />
-              <InfoField label="Email" value={formData.email || "user@example.com"} />
+              <InfoField
+                label="Họ và tên"
+                value={formData.userName || "Nguyễn Văn A"}
+              />
+              <InfoField
+                label="Email"
+                value={formData.email || "user@example.com"}
+              />
               <InfoField label="Số điện thoại" value={formData.phone} />
-              <InfoField label="Ngày sinh" value={formData.birthday?.split("T")[0] || formData.birthday} />
+              <InfoField
+                label="Ngày sinh"
+                value={formatBirthdayForDisplay(formData.birthday)}
+              />
               {role === "Artisan" && (
                 <InfoField label="Làng nghề" value={formData.workshopName} />
               )}
@@ -190,11 +296,22 @@ const ProfileTab = () => {
             <dl className="space-y-1">
               {role === "Artisan" ? (
                 <>
-                  <InfoField label="Kỹ năng chế tác" value={formData.craftSkills} isArray={true} />
-                  <InfoField label="Số năm kinh nghiệm" value={`${formData.yearsOfExperience} năm`} />
+                  <InfoField
+                    label="Kỹ năng chế tác"
+                    value={formData.craftSkills}
+                    isArray={true}
+                  />
+                  <InfoField
+                    label="Số năm kinh nghiệm"
+                    value={`${formData.yearsOfExperience} năm`}
+                  />
                 </>
               ) : (
-                <InfoField label="Sở thích" value={formData.preferences} isArray={true} />
+                <InfoField
+                  label="Sở thích"
+                  value={formData.preferences}
+                  isArray={true}
+                />
               )}
             </dl>
           </div>
@@ -239,7 +356,8 @@ const ProfileTab = () => {
                   name="email"
                   value={formData.email || ""}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
+                  disabled
+                  className="w-full px-3 py-2 border rounded-md bg-gray-100 text-gray-500 cursor-not-allowed"
                   required
                 />
               </div>
@@ -269,7 +387,9 @@ const ProfileTab = () => {
                 <input
                   type="tel"
                   name="phone"
-                  value={formData.phone === "Chưa cập nhật" ? "" : formData.phone}
+                  value={
+                    formData.phone === "Chưa cập nhật" ? "" : formData.phone
+                  }
                   onChange={handleChange}
                   className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
                   pattern="[0-9]{10,11}"
@@ -283,7 +403,11 @@ const ProfileTab = () => {
                 <input
                   type="date"
                   name="birthday"
-                  value={formData.birthday === "Chưa cập nhật" ? "" : formData.birthday?.split("T")[0] || formData.birthday}
+                  value={
+                    formData.birthday === "Chưa cập nhật"
+                      ? ""
+                      : formData.birthday?.split("T")[0] || formData.birthday
+                  }
                   onChange={handleChange}
                   className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
                 />
@@ -363,15 +487,43 @@ const ProfileTab = () => {
                 type="button"
                 onClick={() => setIsEditing(false)}
                 className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition"
+                disabled={isLoading}
               >
                 Hủy bỏ
               </button>
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="px-6 py-2 bg-[#5e3a1e] text-white rounded-md hover:bg-[#7a4b28] transition"
+                className="px-6 py-2 bg-[#5e3a1e] text-white rounded-md hover:bg-[#7a4b28] transition flex items-center justify-center"
+                disabled={isLoading}
               >
-                Lưu thay đổi
+                {isLoading ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Đang lưu...
+                  </>
+                ) : (
+                  "Lưu thay đổi"
+                )}
               </button>
             </div>
           </div>
