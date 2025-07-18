@@ -6,12 +6,15 @@ import {
     removeFromCart as removeFromCartApi,
     updateCartItem as updateCartItemApi,
 } from "../services/apis/cartApi";
+import { useNotification } from "./NotificationContext";
+
 
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
     const [cartItems, setCartItems] = useState([]);
     const { isAuthenticated, user } = useContext(AuthContext);
+    const { showNotification } = useNotification();
 
     // 1. Lấy giỏ hàng từ API
     const fetchCart = async () => {
@@ -74,11 +77,17 @@ export const CartProvider = ({ children }) => {
     const updateQuantity = async (cartItemId, quantity) => {
         if (!isAuthenticated || !cartItemId || quantity < 1) return;
 
-        const res = await updateCartItemApi(cartItemId, quantity);
-        if (res.success) {
-            await fetchCart();
-        } else {
-            console.error("Lỗi khi cập nhật số lượng:", res.error);
+        try {
+            const res = await updateCartItemApi(cartItemId, quantity);
+            if (res.success) {
+                await fetchCart();
+            } else {
+                showNotification(res.error || "Lỗi khi cập nhật số lượng", "error");
+                console.error("Lỗi khi cập nhật số lượng:", res.error);
+            }
+        } catch (error) {
+            showNotification(error?.response?.data?.message || "Lỗi khi cập nhật số lượng", "error");
+            console.error("Lỗi khi cập nhật số lượng:", error);
         }
     };
 

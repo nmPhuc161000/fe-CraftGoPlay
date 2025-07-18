@@ -4,15 +4,19 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FaMapMarkerAlt, FaTicketAlt } from "react-icons/fa";
 import { AuthContext } from "../../contexts/AuthContext";
 import MainLayout from "../../components/layout/MainLayout";
-import { createOrderFromCart, getVnpayUrl } from "../../services/apis/orderApi";
+import { createOrderFromCart, createOrderDirect, getVnpayUrl } from "../../services/apis/orderApi";
+import { useNotification } from "../../contexts/NotificationContext";
+
 
 const Checkout = () => {
     const { cartItems, removeMultipleItems } = useContext(CartContext);
     const { user: realUser } = useContext(AuthContext);
+    const { showNotification } = useNotification();
     const user = { ...realUser, coins: 5000 };
 
     const navigate = useNavigate();
     const location = useLocation();
+    const buyNow = location.state?.buyNow;
 
     const selectedItemIds = location.state?.selectedItems || [];
 
@@ -28,20 +32,27 @@ const Checkout = () => {
     const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
     useEffect(() => {
-        if (!isPlacingOrder && selectedCartItems.length === 0) {
+        if (!isPlacingOrder && !buyNow && selectedCartItems.length === 0) {
             navigate("/cart");
         }
-    }, [selectedCartItems, isPlacingOrder]);
+    }, [selectedCartItems, isPlacingOrder, buyNow]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
 
-    const getTotal = () =>
-        selectedCartItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+    const getTotal = () => {
+        if (buyNow) {
+            return buyNow.productPrice * buyNow.quantity;
+        }
+        return selectedCartItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+    };
+
+    const maxDiscountByPercent = Math.floor(getTotal() * 0.1 / 100) * 100;
+    const maxDiscountByCoins = user.coins * 100; 
 
     const coinDiscount = useCoins
-        ? Math.min(user.coins, Math.floor(getTotal() / 100)) * 100
+        ? Math.min(maxDiscountByPercent, maxDiscountByCoins)
         : 0;
 
     const groupedCart = selectedCartItems.reduce((acc, item) => {
@@ -62,38 +73,71 @@ const Checkout = () => {
     };
 
     const handlePlaceOrder = async () => {
+        if (!paymentMethod) {
+            showNotification("Vui lòng chọn phương thức thanh toán", "warning");
+            return;
+        }
         setIsPlacingOrder(true);
 
         const formData = new FormData();
         formData.append("UserId", user?.id);
         formData.append("PaymentMethod", paymentMethod === "vnpay" ? "Online" : "Cash");
 
-        selectedCartItems.forEach((item) => {
-            formData.append("SelectedCartItemIds", item.id);
-        });
+        if (buyNow) {
+            // Mua ngay sản phẩm
+            formData.append("ProductId", buyNow.productId);
+            formData.append("Quantity", buyNow.quantity);
 
-        const result = await createOrderFromCart(formData);
+            const result = await createOrderDirect(user?.id, formData);
 
-        if (result.success) {
-            const orderObj = result.data?.data?.[0];
-            const orderId = typeof orderObj === "object" ? orderObj.id : orderObj;
+            if (result.success) {
+                const orderId = result.data?.data?.[0]?.id || result.data?.data;
 
-            if (paymentMethod === "vnpay") {
-                const vnpayResult = await getVnpayUrl(orderId);
-                console.log("vnpayResult", vnpayResult);
-                if (vnpayResult.success && vnpayResult.data) {
-                    window.location.href = vnpayResult.data.data;
+                if (paymentMethod === "vnpay") {
+                    const vnpayResult = await getVnpayUrl(orderId);
+                    if (vnpayResult.success && vnpayResult.data) {
+                        window.location.href = vnpayResult.data.data;
+                    } else {
+                        alert("Không thể tạo URL thanh toán VNPay");
+                        setIsPlacingOrder(false);
+                    }
                 } else {
-                    alert("Không thể tạo URL thanh toán VNPay");
-                    setIsPlacingOrder(false);
+                    navigate("/order-success");
                 }
             } else {
-                await removeMultipleItems(selectedItemIds);
-                navigate("/order-success");
+                alert("Đặt hàng thất bại: " + result.error);
+                setIsPlacingOrder(false);
             }
+
         } else {
-            alert("Đặt hàng thất bại: " + result.error);
-            setIsPlacingOrder(false);
+
+            selectedCartItems.forEach((item) => {
+                formData.append("SelectedCartItemIds", item.id);
+            });
+
+            const result = await createOrderFromCart(formData);
+
+            if (result.success) {
+                const orderObj = result.data?.data?.[0];
+                const orderId = typeof orderObj === "object" ? orderObj.id : orderObj;
+
+                if (paymentMethod === "vnpay") {
+                    const vnpayResult = await getVnpayUrl(orderId);
+                    console.log("vnpayResult", vnpayResult);
+                    if (vnpayResult.success && vnpayResult.data) {
+                        window.location.href = vnpayResult.data.data;
+                    } else {
+                        alert("Không thể tạo URL thanh toán VNPay");
+                        setIsPlacingOrder(false);
+                    }
+                } else {
+                    await removeMultipleItems(selectedItemIds);
+                    navigate("/order-success");
+                }
+            } else {
+                alert("Đặt hàng thất bại: " + result.error);
+                setIsPlacingOrder(false);
+            }
         }
     };
 
@@ -126,36 +170,27 @@ const Checkout = () => {
                             <div className="col-span-2 text-right">Thành tiền</div>
                         </div>
 
-                        {Object.entries(groupedCart).map(([artisanName, items], index) => (
-                            <div key={index} className="mb-6">
-                                <div className="text-[15px] font-semibold mb-3 pb-2">
-                                    🛍 Nghệ nhân: {artisanName}
-                                </div>
+                        {buyNow ? (
+                            <div className="mb-6">
+                                <div className="text-[15px] font-semibold mb-3 pb-2">🛍 Sản phẩm bạn đã chọn</div>
 
-                                {items.map((item, idx) => (
-                                    <div
-                                        key={idx}
-                                        className="grid grid-cols-12 items-center py-3 text-[15px]"
-                                    >
-                                        <div className="col-span-6 flex items-center gap-4">
-                                            <img
-                                                src={item.productImages?.[0]?.imageUrl}
-                                                alt={item.productName}
-                                                className="w-14 h-14 object-cover rounded border"
-                                            />
-                                            <p className="font-medium max-w-[200px] truncate">
-                                                {item.productName}
-                                            </p>
-                                        </div>
-                                        <div className="col-span-2 text-center">
-                                            {(item.unitPrice ?? 0).toLocaleString("vi-VN")}₫
-                                        </div>
-                                        <div className="col-span-2 text-center">{item.quantity}</div>
-                                        <div className="col-span-2 text-right font-medium">
-                                            {(item.unitPrice * item.quantity).toLocaleString("vi-VN")}₫
-                                        </div>
+                                <div className="grid grid-cols-12 items-center py-3 text-[15px]">
+                                    <div className="col-span-6 flex items-center gap-4">
+                                        <img
+                                            src={buyNow.productImage}
+                                            alt={buyNow.productName}
+                                            className="w-14 h-14 object-cover rounded border"
+                                        />
+                                        <p className="font-medium max-w-[200px] truncate">{buyNow.productName}</p>
                                     </div>
-                                ))}
+                                    <div className="col-span-2 text-center">
+                                        {(buyNow.productPrice || 0).toLocaleString("vi-VN")}₫
+                                    </div>
+                                    <div className="col-span-2 text-center">{buyNow.quantity}</div>
+                                    <div className="col-span-2 text-right font-medium">
+                                        {(buyNow.productPrice * buyNow.quantity).toLocaleString("vi-VN")}₫
+                                    </div>
+                                </div>
 
                                 <div className="mt-3 flex flex-col sm:flex-row sm:justify-between gap-3 text-[15px] font-medium">
                                     <div className="text-gray-700">
@@ -164,20 +199,65 @@ const Checkout = () => {
                                     <div className="text-right sm:text-left">
                                         Tổng số tiền:{" "}
                                         <span className="text-red-600 font-semibold">
-                                            {items
-                                                .reduce(
-                                                    (total, item) =>
-                                                        total + item.unitPrice * item.quantity,
-                                                    0
-                                                )
-                                                .toLocaleString("vi-VN")}
-                                            ₫
+                                            {(buyNow.productPrice * buyNow.quantity).toLocaleString("vi-VN")}₫
                                         </span>
                                     </div>
                                 </div>
                             </div>
-                        ))}
+                        ) : (
+                            Object.entries(groupedCart).map(([artisanName, items], index) => (
+                                <div key={index} className="mb-6">
+                                    <div className="text-[15px] font-semibold mb-3 pb-2">
+                                        🛍 Nghệ nhân: {artisanName}
+                                    </div>
+
+                                    {items.map((item, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="grid grid-cols-12 items-center py-3 text-[15px]"
+                                        >
+                                            <div className="col-span-6 flex items-center gap-4">
+                                                <img
+                                                    src={item.productImages?.[0]?.imageUrl}
+                                                    alt={item.productName}
+                                                    className="w-14 h-14 object-cover rounded border"
+                                                />
+                                                <p className="font-medium max-w-[200px] truncate">
+                                                    {item.productName}
+                                                </p>
+                                            </div>
+                                            <div className="col-span-2 text-center">
+                                                {(item.unitPrice ?? 0).toLocaleString("vi-VN")}₫
+                                            </div>
+                                            <div className="col-span-2 text-center">{item.quantity}</div>
+                                            <div className="col-span-2 text-right font-medium">
+                                                {(item.unitPrice * item.quantity).toLocaleString("vi-VN")}₫
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    <div className="mt-3 flex flex-col sm:flex-row sm:justify-between gap-3 text-[15px] font-medium">
+                                        <div className="text-gray-700">
+                                            Phí vận chuyển: <span className="text-red-500">15.000₫</span>
+                                        </div>
+                                        <div className="text-right sm:text-left">
+                                            Tổng số tiền:{" "}
+                                            <span className="text-red-600 font-semibold">
+                                                {items
+                                                    .reduce(
+                                                        (total, item) => total + item.unitPrice * item.quantity,
+                                                        0
+                                                    )
+                                                    .toLocaleString("vi-VN")}
+                                                ₫
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </section>
+
 
                     {/* voucher xu */}
                     <section className="bg-white rounded shadow-sm border border-gray-200 p-4 space-y-4">

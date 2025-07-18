@@ -71,16 +71,16 @@ const Header = () => {
             </Link>
 
             <Link
+              to="/artisan"
+              className="hover:no-underline hover:text-gray-500 transition-colors duration-200 font-extrabold tracking-wider"
+            >
+              Nghệ Nhân
+            </Link>
+            <Link
               to="/about"
               className="hover:no-underline hover:text-gray-500 transition-colors duration-200 font-extrabold tracking-wider"
             >
               Giới thiệu
-            </Link>
-            <Link
-              to="/contact"
-              className="hover:no-underline hover:text-gray-500 transition-colors duration-200 font-extrabold tracking-wider"
-            >
-              Liên hệ
             </Link>
           </div>
 
