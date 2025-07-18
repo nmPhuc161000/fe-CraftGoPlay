@@ -1,62 +1,74 @@
 import React, { useContext, useState, useEffect } from "react";
 import { CartContext } from "../../contexts/CartContext";
-import { FaLock } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FaMapMarkerAlt, FaTicketAlt } from "react-icons/fa";
 import { AuthContext } from "../../contexts/AuthContext";
 import MainLayout from "../../components/layout/MainLayout";
 import { createOrderFromCart, getVnpayUrl } from "../../services/apis/orderApi";
 
 const Checkout = () => {
-    const { cartItems, clearCart } = useContext(CartContext);
-    // const { user } = useContext(AuthContext);
+    const { cartItems, removeMultipleItems } = useContext(CartContext);
     const { user: realUser } = useContext(AuthContext);
     const user = { ...realUser, coins: 5000 };
 
     const navigate = useNavigate();
-    useEffect(() => {
-        if (cartItems.length === 0) {
-            navigate("/cart");
-        }
-        window.scrollTo(0, 0);
-    }, [cartItems]);
+    const location = useLocation();
 
-    const getTotal = () =>
-        cartItems.reduce((total, item) => total + (item?.totalPrice ?? 0), 0);
+    const selectedItemIds = location.state?.selectedItems || [];
+
+    const selectedCartItems = cartItems.filter(item =>
+        selectedItemIds.includes(item.id)
+    );
 
     const [voucherCode, setVoucherCode] = useState("");
     const [discount, setDiscount] = useState(0);
     const [voucherError, setVoucherError] = useState("");
     const [useCoins, setUseCoins] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState("vnpay");
+    const [paymentMethod, setPaymentMethod] = useState("");
+    const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+
+    useEffect(() => {
+        if (!isPlacingOrder && selectedCartItems.length === 0) {
+            navigate("/cart");
+        }
+    }, [selectedCartItems, isPlacingOrder]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
+
+    const getTotal = () =>
+        selectedCartItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+
+    const coinDiscount = useCoins
+        ? Math.min(user.coins, Math.floor(getTotal() / 100)) * 100
+        : 0;
+
+    const groupedCart = selectedCartItems.reduce((acc, item) => {
+        const artisan = item.user?.userName || "Không rõ nghệ nhân";
+        acc[artisan] = acc[artisan] || [];
+        acc[artisan].push(item);
+        return acc;
+    }, {});
 
     const handleApplyVoucher = () => {
         if (voucherCode === "GIAM10") {
-            const discountValue = getTotal() * 0.1;
-            setDiscount(discountValue);
+            setDiscount(getTotal() * 0.1);
             setVoucherError("");
         } else {
             setDiscount(0);
             setVoucherError("Mã không hợp lệ hoặc đã hết hạn");
         }
     };
-    const coinDiscount = useCoins
-        ? Math.min(user?.coins ?? 0, Math.floor(getTotal() / 100)) * 100
-        : 0;
-
-    const groupedCart = cartItems.reduce((groups, item) => {
-        const artisan = item.user?.userName || "Không rõ nghệ nhân";
-        if (!groups[artisan]) groups[artisan] = [];
-        groups[artisan].push(item);
-        return groups;
-    }, {});
 
     const handlePlaceOrder = async () => {
+        setIsPlacingOrder(true);
+
         const formData = new FormData();
         formData.append("UserId", user?.id);
         formData.append("PaymentMethod", paymentMethod === "vnpay" ? "Online" : "Cash");
 
-        cartItems.forEach((item) => {
+        selectedCartItems.forEach((item) => {
             formData.append("SelectedCartItemIds", item.id);
         });
 
@@ -70,16 +82,18 @@ const Checkout = () => {
                 const vnpayResult = await getVnpayUrl(orderId);
                 console.log("vnpayResult", vnpayResult);
                 if (vnpayResult.success && vnpayResult.data) {
-                    window.location.href = vnpayResult.data.data; // ✅ Redirect to VNPay
+                    window.location.href = vnpayResult.data.data;
                 } else {
                     alert("Không thể tạo URL thanh toán VNPay");
+                    setIsPlacingOrder(false);
                 }
             } else {
-                clearCart();
-                navigate("/payment-success");
+                await removeMultipleItems(selectedItemIds);
+                navigate("/order-success");
             }
         } else {
             alert("Đặt hàng thất bại: " + result.error);
+            setIsPlacingOrder(false);
         }
     };
 

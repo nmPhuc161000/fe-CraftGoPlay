@@ -8,12 +8,16 @@ import { FaTrashAlt } from "react-icons/fa";
 const Cart = () => {
     const { cartItems, removeFromCart, updateQuantity } = useContext(CartContext);
 
-    const getTotal = () =>
-        cartItems.reduce((total, item) => total + (item?.totalPrice ?? 0), 0);
+    const getSelectedTotal = () =>
+        cartItems
+            .filter((item) => selectedItems.includes(item.id))
+            .reduce((total, item) => total + (item?.totalPrice ?? 0), 0);
+
     // voucher
     const [voucherCode, setVoucherCode] = useState("");
     const [discount, setDiscount] = useState(0);
     const [voucherError, setVoucherError] = useState("");
+    const [selectedItems, setSelectedItems] = useState([]);
 
     const handleApplyVoucher = () => {
         if (voucherCode === "GIAM10") {
@@ -42,6 +46,30 @@ const Cart = () => {
         });
         return Object.values(groups);
     };
+
+    const toggleItem = (itemId) => {
+        setSelectedItems((prev) =>
+            prev.includes(itemId)
+                ? prev.filter((id) => id !== itemId)
+                : [...prev, itemId]
+        );
+    };
+    const toggleGroup = (group) => {
+        const allSelected = group.items.every((item) => selectedItems.includes(item.id));
+        if (allSelected) {
+            // Bỏ chọn tất cả sp trong group
+            setSelectedItems((prev) => prev.filter((id) => !group.items.some((i) => i.id === id)));
+        } else {
+            // Chọn tất cả sp trong group
+            setSelectedItems((prev) => [
+                ...prev,
+                ...group.items
+                    .filter((item) => !prev.includes(item.id))
+                    .map((item) => item.id),
+            ]);
+        }
+    };
+
 
     return (
         <MainLayout>
@@ -75,20 +103,27 @@ const Cart = () => {
                                     key={groupIndex}
                                     className="border border-gray-300 rounded-md p-4 mb-6"
                                 >
-                                    <div className="flex items-center pb-2 mb-4 border-b border-gray-200">
+                                    <label className="flex items-center gap-2 pb-2 mb-4 border-b border-gray-200 font-semibold cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={group.items.every((item) => selectedItems.includes(item.id))}
+                                            onChange={() => toggleGroup(group)}
+                                            className="form-checkbox accent-[#5e3a1e]"
+                                        />
                                         {group.artisanAvatar ? (
                                             <img
                                                 src={group.artisanAvatar}
                                                 alt={group.artisanName}
-                                                className="w-8 h-8 rounded-full object-cover mr-2"
+                                                className="w-8 h-8 rounded-full object-cover"
                                             />
                                         ) : (
-                                            <div className="w-8 h-8 rounded-full bg-gray-400 text-white flex items-center justify-center mr-2">
+                                            <div className="w-8 h-8 rounded-full bg-gray-400 text-white flex items-center justify-center">
                                                 {group.artisanName?.charAt(0)}
                                             </div>
                                         )}
-                                        <span className="font-semibold">{group.artisanName}</span>
-                                    </div>
+                                        <span>{group.artisanName}</span>
+                                    </label>
+
 
                                     {group.items.map((item, index) => (
                                         <div
@@ -98,6 +133,12 @@ const Cart = () => {
                                         >
                                             {/* Cột: Ảnh + Tên sản phẩm */}
                                             <div className="flex items-center gap-4 min-w-0 overflow-hidden">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedItems.includes(item.id)}
+                                                    onChange={() => toggleItem(item.id)}
+                                                    className="form-checkbox accent-[#5e3a1e]"
+                                                />
                                                 <img
                                                     src={item.productImages?.[0]?.imageUrl}
                                                     alt={item.productName}
@@ -178,7 +219,7 @@ const Cart = () => {
                                     <div className="flex justify-between">
                                         <span>Tạm tính</span>
                                         <span className="text-red-600 font-semibold">
-                                            {getTotal().toLocaleString("vi-VN")} ₫
+                                            {getSelectedTotal().toLocaleString("vi-VN")} ₫
                                         </span>
                                     </div>
 
@@ -193,7 +234,7 @@ const Cart = () => {
                                         <span>Thành tiền</span>
                                         <div className="text-right text-red-600 font-semibold">
                                             <p>
-                                                {(getTotal() - (discount || 0)).toLocaleString("vi-VN")} ₫
+                                                {(getSelectedTotal() - (discount || 0)).toLocaleString("vi-VN")} ₫
                                             </p>
                                         </div>
                                     </div>
@@ -226,7 +267,10 @@ const Cart = () => {
                                 </div>
 
                                 <button
-                                    onClick={() => navigate("/checkout")}
+                                    onClick={() => {
+                                        if (selectedItems.length === 0) return; // Không chọn => không làm gì cả
+                                        navigate("/checkout", { state: { selectedItems } });
+                                    }}
                                     className="w-full py-3 bg-[#5e3a1e] hover:bg-[#4a2f15] text-white rounded flex justify-center items-center gap-2 transition text-[15px]"
                                 >
                                     <FaLock /> Thanh toán
