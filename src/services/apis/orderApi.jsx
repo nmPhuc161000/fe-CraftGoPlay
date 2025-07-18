@@ -14,3 +14,10 @@ export const getVnpayUrl = async (orderId) => {
         method: "get",
     });
 };
+
+export const createOrderDirect = (userId, formData) =>
+  performApiRequest(`${API_ENDPOINTS_ORDER.CREATE_DIRECT}?userId=${userId}`, {
+    method: "post",
+    data: formData,
+    isFormData: true,
+  });
