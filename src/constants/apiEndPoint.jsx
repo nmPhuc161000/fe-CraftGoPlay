@@ -76,7 +76,7 @@ export const API_ENDPOINTS_SUBCATEGORY = {
 
 // Các endpoint cho user
 export const API_ENDPOINTS_USER = {
-  GET_USER: "/api/User/get-current-user",
+  GET_USER: "/api/User/GetCurrentUser",
   SEND_REQUEST_UPGRADE_ARTISAN: "/api/User/SendRequestUpgradeToArtisan",
   GET_SEND_REQUEST_UPGRADE_ARTISAN: (userId) => `/api/User/GetSentRequestByUserId/${userId}`,
   CHECK_SEND_REQUEST_UPGRADE_ARTISAN: (userId) => `/api/User/CheckRequestSent/${userId}`,
@@ -104,7 +104,7 @@ export const API_ENDPOINTS_ADDRESS = {
 };
 
 export const API_ENDPOINTS_ORDER = {
-    CREATE_FROM_CART: "/api/Order/create-from-cart",
+    CREATE_FROM_CART: "/api/Order/CreateFromCart",
     CREATE_DIRECT: "/api/Order/create-direct",
     GET_VNPAY_URL: (orderId) => `/api/Order/vnpay-url/${orderId}`,
     VNPAY_RETURN: "/api/Order/vnpay-return",
