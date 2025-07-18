@@ -4,26 +4,29 @@ import MainLayout from "../../components/layout/MainLayout";
 import { Link, useNavigate } from "react-router-dom";
 import { FaLock } from "react-icons/fa";
 import { FaTrashAlt } from "react-icons/fa";
+import { useNotification } from "../../contexts/NotificationContext";
 
 const Cart = () => {
     const { cartItems, removeFromCart, updateQuantity } = useContext(CartContext);
-
-    const getSelectedTotal = () =>
-        cartItems
-            .filter((item) => selectedItems.includes(item.id))
-            .reduce((total, item) => total + (item?.totalPrice ?? 0), 0);
-
     // voucher
     const [voucherCode, setVoucherCode] = useState("");
     const [discount, setDiscount] = useState(0);
     const [voucherError, setVoucherError] = useState("");
     const [selectedItems, setSelectedItems] = useState([]);
+    const { showNotification } = useNotification();
+
+    const getSelectedTotal = () =>
+        cartItems
+            .filter((item) => selectedItems.includes(item.id))
+            .reduce((total, item) => total + (item?.totalPrice ?? 0), 0);
+    const getTotal = () =>
+        cartItems.reduce((total, item) => total + (item?.totalPrice ?? 0), 0);
 
     const handleApplyVoucher = () => {
         if (voucherCode === "GIAM10") {
             const discountValue = getTotal() * 0.1;
             setDiscount(discountValue);
-            setVoucherError("");
+            showNotification("Áp dụng mã giảm giá thành công!", "success");
         } else {
             setDiscount(0);
             setVoucherError("Mã không hợp lệ hoặc đã hết hạn");
@@ -108,7 +111,7 @@ const Cart = () => {
                                             type="checkbox"
                                             checked={group.items.every((item) => selectedItems.includes(item.id))}
                                             onChange={() => toggleGroup(group)}
-                                            className="form-checkbox accent-[#5e3a1e]"
+                                            className="form-checkbox accent-[#5e3a1e] w-4 h-4"
                                         />
                                         {group.artisanAvatar ? (
                                             <img
@@ -123,7 +126,6 @@ const Cart = () => {
                                         )}
                                         <span>{group.artisanName}</span>
                                     </label>
-
 
                                     {group.items.map((item, index) => (
                                         <div
@@ -171,19 +173,25 @@ const Cart = () => {
                                                     <input
                                                         type="number"
                                                         value={item.quantity}
-                                                        onChange={(e) =>
-                                                            updateQuantity(
-                                                                item.id,
-                                                                Math.max(1, parseInt(e.target.value))
-                                                            )
-                                                        }
+                                                        onChange={(e) => {
+                                                            const newQty = Math.max(1, parseInt(e.target.value) || 1);
+                                                            if (newQty > item.productQuantity) {
+                                                                showNotification("Số lượng vượt quá số lượng trong kho", "error");
+                                                                return;
+                                                            }
+                                                            updateQuantity(item.id, newQty);
+                                                        }}
                                                         min={1}
                                                         className="w-12 text-center h-full border-x border-gray-200 text-[#5e3a1e] font-medium focus:outline-none"
                                                     />
                                                     <button
-                                                        onClick={() =>
-                                                            updateQuantity(item.id, item.quantity + 1)
-                                                        }
+                                                        onClick={() => {
+                                                            if (item.quantity + 1 > item.productQuantity) {
+                                                                showNotification("Số lượng vượt quá số lượng trong kho", "error");
+                                                                return;
+                                                            }
+                                                            updateQuantity(item.id, item.quantity + 1);
+                                                        }}
                                                         className="w-10 h-full flex items-center justify-center text-lg font-bold text-[#5e3a1e] hover:bg-[#f0ece3] transition"
                                                     >
                                                         +

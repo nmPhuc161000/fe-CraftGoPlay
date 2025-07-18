@@ -78,13 +78,31 @@ const ProductDetail = () => {
   }, []);
 
   const handleBuyNow = () => {
-    handleAddToCart();
-    navigate("/checkout");
+    if (!isAuthenticated) {
+      navigate("/login", { state: { from: location.pathname } });
+      return;
+    }
+
+    navigate("/checkout", {
+      state: {
+        buyNow: {
+          productId: product.id,
+          productName: product.name,
+          productPrice: product.price,
+          productImage: selectedImg,
+          quantity: quantity,
+        },
+      },
+    });
   };
 
   const handleAddToCart = () => {
     if (!isAuthenticated) {
       navigate("/login", { state: { from: location.pathname } });
+      return;
+    }
+    if (quantity > product.quantity) {
+      showNotification("Số lượng vượt quá số lượng trong kho", "error");
       return;
     }
     addToCart({
@@ -205,11 +223,10 @@ const ProductDetail = () => {
                 src={imgObj.imageUrl}
                 alt={`thumb-${index}`}
                 onClick={() => setSelectedImg(imgObj.imageUrl)}
-                className={`w-17 h-17 object-cover cursor-pointer border ${
-                  imgObj.imageUrl === selectedImg
-                    ? "border-black"
-                    : "border-gray-300"
-                }`}
+                className={`w-17 h-17 object-cover cursor-pointer border ${imgObj.imageUrl === selectedImg
+                  ? "border-black"
+                  : "border-gray-300"
+                  }`}
               />
             ))}
           </div>
@@ -277,8 +294,9 @@ const ProductDetail = () => {
               </button>
               <span className="px-5 py-2 text-lg">{quantity}</span>
               <button
-                onClick={() => setQuantity((q) => q + 1)}
-                className="px-4 py-2 text-lg font-bold text-[#5e3a1e] hover:bg-[#e6d3bc] transition"
+                onClick={() => setQuantity((q) => Math.min(product.quantity, q + 1))}
+                disabled={quantity >= product.quantity}
+                className={`px-4 py-2 text-lg font-bold text-[#5e3a1e] hover:bg-[#e6d3bc] transition ${quantity >= product.quantity ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 +
               </button>
@@ -309,9 +327,8 @@ const ProductDetail = () => {
               🛒 Thêm vào giỏ hàng
             </button>
             <button
-              className={`border ${
-                isFavorite ? "bg-yellow-50 text-yellow-700" : "text-yellow-700"
-              } border-yellow-700 px-6 py-2 rounded hover:bg-yellow-100 transition-colors`}
+              className={`border ${isFavorite ? "bg-yellow-50 text-yellow-700" : "text-yellow-700"
+                } border-yellow-700 px-6 py-2 rounded hover:bg-yellow-100 transition-colors`}
               onClick={handleFavorite}
             >
               {isFavorite ? "🤎 Đã Thích" : "🤎 Yêu Thích"}
