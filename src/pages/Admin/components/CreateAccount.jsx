@@ -74,6 +74,7 @@ const CreateAccount = () => {
           }))
         );
       }
+      //z
     } catch (err) {
       setData([]);
     }
@@ -370,7 +371,7 @@ const CreateAccount = () => {
               </table>
             </div>
             <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
-              <span>1 to {filteredData.length} of {data. length}</span>
+              <span>1 to {filteredData.length} of {data.length}</span>
               <div className="flex items-center gap-2">
                 <button className="border rounded px-2 py-1"></button>
                 <span className="border rounded px-2 py-1 bg-white">1</span>
