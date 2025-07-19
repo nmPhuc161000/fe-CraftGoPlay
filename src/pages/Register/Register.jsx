@@ -161,7 +161,10 @@ const Register = () => {
     async (e) => {
       e.preventDefault();
       setLoading(true);
-      if (!validateForm()) return;
+      if (!validateForm()) {
+        setLoading(false);
+        return;
+      };
 
       try {
         const response = await authService.register(form);

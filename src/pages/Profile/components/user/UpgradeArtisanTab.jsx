@@ -48,56 +48,68 @@ export default function UpgradeArtisanTab({ userId }) {
         setCraftVillages(villagesResponse.data.data);
 
         // Kiểm tra yêu cầu đã gửi
-        const requestResponse = await userService.getSentRequestByUserId(
-          userId
-        );
-        console.log("data: ", requestResponse.data.data);
+        try {
+          const requestResponse = await userService.getSentRequestByUserId(
+            userId
+          );
+          console.log("data: ", requestResponse.data);
 
-        if (requestResponse.data) {
-          const requestData = requestResponse.data.data;
-          setCheckRequest({
-            isSent: requestData.status !== "Cancelled",
-            message:
-              requestData.status === "Pending"
-                ? "Bạn đã gửi yêu cầu trước đó. Vui lòng chờ phê duyệt."
-                : requestData.status === "Cancelled"
-                ? "Yêu cầu trước đó của bạn đã bị hủy. Bạn có thể gửi lại."
-                : "",
-            status: requestData.status,
-            requestId: requestData.id,
-          });
-
-          // Nếu status là Cancelled, điền lại thông tin cũ
-          if (requestData.status === "Cancelled") {
-            setFormData({
-              Image: null, // Ảnh sẽ xử lý riêng
-              CraftVillageId: requestData.craftVillageId || "",
-              YearsOfExperience: requestData.yearsOfExperience || 0,
-              Description: requestData.description || "",
+          // Kiểm tra kỹ cấu trúc dữ liệu trả về
+          if (requestResponse.data && requestResponse.data.data) {
+            const requestData = requestResponse.data.data;
+            setCheckRequest({
+              isSent: requestData.status !== "Cancelled",
+              message:
+                requestData.status === "Pending"
+                  ? "Bạn đã gửi yêu cầu trước đó. Vui lòng chờ phê duyệt."
+                  : requestData.status === "Cancelled"
+                  ? "Yêu cầu trước đó của bạn đã bị hủy. Bạn có thể gửi lại."
+                  : "",
+              status: requestData.status,
+              requestId: requestData.id,
             });
 
-            if (requestData.image) {
-              setPreviewImage(requestData.image);
+            if (requestData.status === "Cancelled") {
+              setFormData({
+                Image: null,
+                CraftVillageId: requestData.craftVillageId || "",
+                YearsOfExperience: requestData.yearsOfExperience || 0,
+                Description: requestData.description || "",
+              });
+
+              if (requestData.image) {
+                setPreviewImage(requestData.image);
+              }
             }
+          } else {
+            // Nếu không có dữ liệu request
+            setCheckRequest({
+              isSent: false,
+              message: "",
+              status: "",
+              requestId: null,
+            });
           }
-        } else {
-          setCheckRequest({
-            isSent: false,
-            message: "",
-            status: "",
-            requestId: null,
-          });
+        } catch (requestError) {
+          console.error("Lỗi khi tải thông tin yêu cầu:", requestError);
+          // Chỉ thông báo nếu đây không phải là lỗi 404 (không tìm thấy yêu cầu)
+          if (requestError.response?.status !== 404) {
+            showNotification("Không tải được thông tin yêu cầu", "error");
+          }
         }
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu:", error);
-        showNotification("Không tải được thông tin yêu cầu", "error");
+        // Chỉ hiển thị thông báo nếu không phải lỗi hủy request
+        if (!error.message.includes("cancel")) {
+          showNotification("Không tải được thông tin làng nghề", "error");
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [isSentSuccess]);
+  }, [isSentSuccess, userId, showNotification]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

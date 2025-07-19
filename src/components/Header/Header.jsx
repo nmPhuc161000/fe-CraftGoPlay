@@ -18,8 +18,10 @@ const Header = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const { cartItems } = useContext(CartContext);
 
-  const totalCartQuantity = cartItems.reduce((total, item) => total + item.quantity, 0);
-
+  const totalCartQuantity = cartItems.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
 
   // Hàm xử lý đăng xuất
   const handleLogout = () => {
@@ -109,17 +111,21 @@ const Header = () => {
                     className="w-full text-sm text-black outline-none bg-transparent"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
-                        navigate(`/products?search=${encodeURIComponent(searchTerm)}`);
+                        navigate(
+                          `/products?search=${encodeURIComponent(searchTerm)}`
+                        );
                         setShowSearchInput(false);
                       }
                     }}
                   />
                 </div>
               )}
-
             </div>
 
-            <div className="relative cursor-pointer" onClick={() => navigate("/cart")}>
+            <div
+              className="relative cursor-pointer"
+              onClick={() => navigate("/cart")}
+            >
               <FaShoppingBag
                 className="text-xl hover:text-gray-500 tracking-wider"
                 title="Giỏ hàng"
@@ -137,7 +143,15 @@ const Header = () => {
                   onClick={() => setShowDropdown((prev) => !prev)}
                   className="flex items-center space-x-2 text-sm bg-[#f2e8dc] px-3 py-1 rounded-full hover:bg-gray-200 transition-colors duration-200"
                 >
-                  <FaUser />
+                  {user?.thumbnail ? (
+                    <img
+                      src={user.thumbnail}
+                      alt="User avatar"
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <FaUser />
+                  )}
                   <span>Hi, {user?.userName || "User"}</span>
                 </button>
 
