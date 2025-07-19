@@ -47,6 +47,13 @@ const SidebarNavigation = ({ role, isActive }) => {
       show: true,
     },
     {
+      id: "artisanOrders",
+      to: "/profile-user/artisanOrders",
+      icon: "📦",
+      label: "Quản lý đơn hàng",
+      show: role === "Artisan",
+    },
+    {
       id: role === "Artisan" ? "artisanReviews" : "userReviews",
       to:
         role === "Artisan"
