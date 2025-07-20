@@ -16,6 +16,7 @@ import VerifyOtp from "../pages/VerifyOtp/VerifyOtp";
 import About from "../pages/About/About";
 import PaymentSuccess from "../pages/PaymentSuccess/PaymentSuccess";
 import OrderSuccess from "../pages/OrderSuccess/OrderSuccess";
+import ShopArtisan from "../pages/ShopArtisan/ShopArtisan";
 
 // Protected pages
 import ProfileUser from "../pages/Profile/ProfileUser";
@@ -38,6 +39,7 @@ const AppRouter = () => {
           <Route path="/forgetpassword" element={<ForgetPassword />} />
           <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route path="/about" element={<About />} />
+          <Route path="/artisan/:id" element={<ShopArtisan />} />
 
           {/* Product pages */}
           <Route path="/product/:id" element={<ProductDetail />} />
