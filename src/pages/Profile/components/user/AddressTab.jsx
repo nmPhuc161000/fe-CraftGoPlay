@@ -44,7 +44,6 @@ export default function AddressTab({ userId }) {
     }
   };
 
-  // Thay đổi các hàm fetchDistricts và fetchWards
   const fetchDistricts = async (provinceName) => {
     try {
       const province = provinces.find((p) => p.ProvinceName === provinceName);
@@ -125,13 +124,44 @@ export default function AddressTab({ userId }) {
 
   const handleSubmit = async (formData) => {
     try {
+      // Chuyển đổi dữ liệu từ form sang định dạng API yêu cầu
+      const apiData = {
+        UserId: userId,
+        FullName: formData.recipientName,
+        PhoneNumber: formData.phoneNumber,
+        ProviceName: formData.province,
+        DistrictName: formData.district,
+        WardName: formData.ward,
+        HomeNumber: formData.street, // Giả sử street là HomeNumber
+        AddressType: formData.addressType,
+        IsDefault: formData.isDefault,
+        // Các field sau có thể cần thêm logic để lấy ID tương ứng
+        ProviceId: "", // Cần lấy từ provinces
+        DistrictId: "", // Cần lấy từ districts
+        WardCode: "", // Cần lấy từ wards
+      };
+
+      // Lấy các ID tương ứng từ danh sách
+      const provinceObj = provinces.find(
+        (p) => p.ProvinceName === formData.province
+      );
+      const districtObj = districts.find(
+        (d) => d.DistrictName === formData.district
+      );
+      const wardObj = wards.find((w) => w.WardName === formData.ward);
+
+      if (provinceObj) apiData.ProviceId = provinceObj.ProvinceID;
+      if (districtObj) apiData.DistrictId = districtObj.DistrictID;
+      if (wardObj) apiData.WardCode = wardObj.WardCode;
+
       if (currentAddress) {
-        await addressService.updateAddress(currentAddress.id, formData);
+        await addressService.updateAddress(currentAddress.id, apiData);
         showNotification("Cập nhật địa chỉ thành công", "success");
       } else {
-        await addressService.addAddress({ ...formData, userId });
+        await addressService.addNewAddress(apiData); // Sử dụng addNewAddress thay vì addAddress
         showNotification("Thêm địa chỉ mới thành công", "success");
       }
+
       setIsDialogOpen(false);
       fetchAddresses();
     } catch (error) {

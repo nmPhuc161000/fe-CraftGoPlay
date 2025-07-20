@@ -8,6 +8,7 @@ import {
   FiCheck,
 } from "react-icons/fi";
 import { FaBuilding } from "react-icons/fa";
+import { validateAddressForm } from "../../utils/validationAddressUtils";
 
 export default function AddressFormPopup({
   isOpen,
@@ -24,10 +25,13 @@ export default function AddressFormPopup({
     recipientName: "",
     phoneNumber: "",
     province: "",
+    provinceId: "", // Thêm field này
     district: "",
+    districtId: "", // Thêm field này
     ward: "",
+    wardCode: "", // Thêm field này
     street: "",
-    addressType: "HOME", // "HOME" | "OFFICE"
+    addressType: "HOME",
     isDefault: false,
   });
 
@@ -39,78 +43,22 @@ export default function AddressFormPopup({
         recipientName: initialData.recipientName || "",
         phoneNumber: initialData.phoneNumber || "",
         province: initialData.province || "",
+        provinceId: initialData.provinceId || "",
         district: initialData.district || "",
+        districtId: initialData.districtId || "",
         ward: initialData.ward || "",
+        wardCode: initialData.wardCode || "",
         street: initialData.street || "",
-        addressType: initialData.addressType || "HOME",
+        addressType: initialData.addressType || "Home", // Chỉnh thành "Home" thay vì "HOME"
         isDefault: initialData.isDefault || false,
       });
     }
   }, [initialData]);
 
   const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.recipientName.trim()) {
-      newErrors.recipientName = "Vui lòng nhập họ và tên";
-    }
-
-    if (!formData.phoneNumber.trim()) {
-      newErrors.phoneNumber = "Vui lòng nhập số điện thoại";
-    } else if (!/^\d{10,11}$/.test(formData.phoneNumber.replace(/\s/g, ""))) {
-      newErrors.phoneNumber = "Số điện thoại không hợp lệ";
-    }
-
-    if (!formData.province) {
-      newErrors.province = "Vui lòng chọn tỉnh/thành phố";
-    }
-
-    if (!formData.district) {
-      newErrors.district = "Vui lòng chọn quận/huyện";
-    }
-
-    if (!formData.ward) {
-      newErrors.ward = "Vui lòng chọn phường/xã";
-    }
-
-    if (!formData.street.trim()) {
-      newErrors.street = "Vui lòng nhập địa chỉ cụ thể";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: "",
-      }));
-    }
-
-    if (name === "province") {
-      onProvinceChange?.(value);
-      setFormData((prev) => ({
-        ...prev,
-        district: "",
-        ward: "",
-      }));
-    }
-    if (name === "district") {
-      onDistrictChange?.(value);
-      setFormData((prev) => ({
-        ...prev,
-        ward: "",
-      }));
-    }
+    const { isValid, errors } = validateAddressForm(formData);
+    setErrors(errors);
+    return isValid;
   };
 
   const handleSubmit = (e) => {
@@ -121,6 +69,59 @@ export default function AddressFormPopup({
   };
 
   if (!isOpen) return null;
+  const handleProvinceChange = (provinceName) => {
+    const province = provinces.find((p) => p.ProvinceName === provinceName);
+    if (province) {
+      setFormData((prev) => ({
+        ...prev,
+        province: provinceName,
+        provinceId: province.ProvinceID,
+        district: "",
+        districtId: "",
+        ward: "",
+        wardCode: "",
+      }));
+      onProvinceChange?.(provinceName);
+    }
+  };
+
+  const handleDistrictChange = (districtName) => {
+    const district = districts.find((d) => d.DistrictName === districtName);
+    if (district) {
+      setFormData((prev) => ({
+        ...prev,
+        district: districtName,
+        districtId: district.DistrictID,
+        ward: "",
+        wardCode: "",
+      }));
+      onDistrictChange?.(districtName);
+    }
+  };
+
+  const handleWardChange = (wardName) => {
+    const ward = wards.find((w) => w.WardName === wardName);
+    if (ward) {
+      setFormData((prev) => ({
+        ...prev,
+        ward: wardName,
+        wardCode: ward.WardCode,
+      }));
+    }
+  };
+
+  // Cập nhật hàm handleChange chung
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -229,7 +230,10 @@ export default function AddressFormPopup({
                   <select
                     name="province"
                     value={formData.province}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      handleChange(e);
+                      handleProvinceChange(e.target.value);
+                    }}
                     className={`w-full px-3 py-2 pr-8 border rounded-xl focus:outline-none focus:ring-1 focus:ring-[#8f693b]/20 focus:border-[#8f693b] transition-all appearance-none cursor-pointer text-sm ${
                       errors.province
                         ? "border-red-500 bg-red-50"
@@ -269,7 +273,10 @@ export default function AddressFormPopup({
                   <select
                     name="district"
                     value={formData.district}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      handleChange(e);
+                      handleDistrictChange(e.target.value);
+                    }}
                     className={`w-full px-3 py-2 pr-8 border rounded-xl focus:outline-none focus:ring-1 focus:ring-[#8f693b]/20 focus:border-[#8f693b] transition-all appearance-none cursor-pointer text-sm ${
                       errors.district
                         ? "border-red-500 bg-red-50"
@@ -312,7 +319,10 @@ export default function AddressFormPopup({
                   <select
                     name="ward"
                     value={formData.ward}
-                    onChange={handleChange}
+                    onChange={(e) => {
+                      handleChange(e);
+                      handleWardChange(e.target.value);
+                    }}
                     className={`w-full px-3 py-2 pr-8 border rounded-xl focus:outline-none focus:ring-1 focus:ring-[#8f693b]/20 focus:border-[#8f693b] transition-all appearance-none cursor-pointer text-sm ${
                       errors.ward
                         ? "border-red-500 bg-red-50"
@@ -385,10 +395,10 @@ export default function AddressFormPopup({
               <button
                 type="button"
                 onClick={() =>
-                  setFormData({ ...formData, addressType: "HOME" })
+                  setFormData({ ...formData, addressType: "Home" })
                 }
                 className={`flex items-center justify-center gap-2 px-3 py-2 rounded-xl border transition-all ${
-                  formData.addressType === "HOME"
+                  formData.addressType === "Home"
                     ? "border-[#8f693b] bg-gradient-to-br from-amber-50 to-yellow-50 text-[#8f693b] shadow-sm"
                     : "border-gray-200 hover:border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100"
                 }`}
@@ -399,10 +409,10 @@ export default function AddressFormPopup({
               <button
                 type="button"
                 onClick={() =>
-                  setFormData({ ...formData, addressType: "OFFICE" })
+                  setFormData({ ...formData, addressType: "Office" })
                 }
                 className={`flex items-center justify-center gap-2 px-3 py-2 rounded-xl border transition-all ${
-                  formData.addressType === "OFFICE"
+                  formData.addressType === "Office"
                     ? "border-[#8f693b] bg-gradient-to-br from-amber-50 to-yellow-50 text-[#8f693b] shadow-sm"
                     : "border-gray-200 hover:border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100"
                 }`}
@@ -414,33 +424,29 @@ export default function AddressFormPopup({
           </div>
 
           {/* Default Address Checkbox */}
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
-            <div className="relative">
+          <div className="flex items-center p-3 bg-gray-50 rounded-xl border border-gray-200">
+            <label className="relative flex items-center cursor-pointer space-x-3">
               <input
                 type="checkbox"
                 name="isDefault"
                 checked={formData.isDefault}
                 onChange={handleChange}
-                id="isDefault"
-                className="w-5 h-5 text-[#8f693b] bg-white border-2 border-gray-300 rounded-md focus:ring-[#8f693b] focus:ring-1 transition-all opacity-0"
+                className="sr-only"
               />
               <div
-                className={`absolute inset-0 w-5 h-5 rounded-md border-2 transition-all ${
+                className={`w-5 h-5 rounded-md border-2 transition-all flex items-center justify-center ${
                   formData.isDefault
                     ? "bg-[#8f693b] border-[#8f693b]"
                     : "bg-white border-gray-300 hover:border-gray-400"
                 }`}
               >
                 {formData.isDefault && (
-                  <FiCheck className="w-3 h-3 text-white absolute top-0.5 left-0.5" />
+                  <FiCheck className="w-3 h-3 text-white" />
                 )}
               </div>
-            </div>
-            <label
-              htmlFor="isDefault"
-              className="text-sm font-medium text-gray-700 cursor-pointer"
-            >
-              Đặt làm địa chỉ mặc định
+              <span className="text-sm font-medium text-gray-700">
+                Đặt làm địa chỉ mặc định
+              </span>
             </label>
           </div>
 

@@ -12,7 +12,7 @@ import {
   FiFilter,
   FiDollarSign,
   FiAlertCircle,
-  FiSlash
+  FiSlash,
 } from "react-icons/fi";
 
 export default function OrdersTab() {
@@ -34,7 +34,7 @@ export default function OrdersTab() {
     { value: "Rejected", label: "Đã từ chối" },
     { value: "Cancelled", label: "Đã hủy" },
     { value: "WaitingForPayment", label: "Chờ thanh toán" },
-    { value: "Refund", label: "Hoàn tiền" }
+    { value: "Refund", label: "Hoàn tiền" },
   ];
 
   useEffect(() => {
@@ -47,12 +47,13 @@ export default function OrdersTab() {
           const transformed = res.data.data.map((order) => ({
             ...order,
             date: dayjs(order.creationDate).format("DD/MM/YYYY"),
-            formattedDate: dayjs(order.creationDate).format("HH:mm - DD/MM/YYYY"),
+            formattedDate: dayjs(order.creationDate).format("DD/MM/YYYY"),
             statusKey: convertStatus(order.status),
             paymentStatus: order.isPaid ? "Đã thanh toán" : "Chưa thanh toán",
-            paymentMethod: order.paymentMethod === "Online" 
-              ? "Thanh toán online" 
-              : "Thanh toán khi nhận hàng",
+            paymentMethod:
+              order.paymentMethod === "Online"
+                ? "Thanh toán online"
+                : "Thanh toán khi nhận hàng",
           }));
           setOrders(transformed);
           setFilteredOrders(transformed);
@@ -74,23 +75,34 @@ export default function OrdersTab() {
     if (selectedStatus === "all") {
       setFilteredOrders(orders);
     } else {
-      const filtered = orders.filter(order => order.status === selectedStatus);
+      const filtered = orders.filter(
+        (order) => order.status === selectedStatus
+      );
       setFilteredOrders(filtered);
     }
   }, [selectedStatus, orders]);
 
   const convertStatus = (status) => {
     switch (status) {
-      case "Completed": return "completed";
-      case "Shipped": return "shipped";
-      case "Processing": return "processing";
-      case "Accepted": return "accepted";
-      case "Rejected": return "rejected";
-      case "Cancelled": return "cancelled";
-      case "WaitingForPayment": return "waitingForPayment";
-      case "Refund": return "refund";
-      case "Pending": 
-      default: return "pending";
+      case "Completed":
+        return "completed";
+      case "Shipped":
+        return "shipped";
+      case "Processing":
+        return "processing";
+      case "Accepted":
+        return "accepted";
+      case "Rejected":
+        return "rejected";
+      case "Cancelled":
+        return "cancelled";
+      case "WaitingForPayment":
+        return "waitingForPayment";
+      case "Refund":
+        return "refund";
+      case "Pending":
+      default:
+        return "pending";
     }
   };
 
@@ -98,48 +110,48 @@ export default function OrdersTab() {
     pending: {
       text: "Chờ xử lý",
       color: "bg-gray-100 text-gray-800",
-      icon: <FiClock className="text-gray-500" />
+      icon: <FiClock className="text-gray-500" />,
     },
     accepted: {
       text: "Người bán đã xác nhận đơn hàng",
       color: "bg-blue-100 text-blue-800",
-      icon: <FiCheckCircle className="text-blue-500" />
+      icon: <FiCheckCircle className="text-blue-500" />,
     },
     processing: {
       text: "Người bán đang chuẩn bị",
       color: "bg-amber-100 text-amber-800",
-      icon: <FiClock className="text-amber-500" />
+      icon: <FiClock className="text-amber-500" />,
     },
     shipped: {
       text: "Đơn hàng đang giao",
       color: "bg-purple-100 text-purple-800",
-      icon: <FiTruck className="text-purple-500" />
+      icon: <FiTruck className="text-purple-500" />,
     },
     completed: {
       text: "Hoàn thành",
       color: "bg-green-100 text-green-800",
-      icon: <FiCheckCircle className="text-green-500" />
+      icon: <FiCheckCircle className="text-green-500" />,
     },
     rejected: {
       text: "Đã từ chối",
       color: "bg-red-100 text-red-800",
-      icon: <FiXCircle className="text-red-500" />
+      icon: <FiXCircle className="text-red-500" />,
     },
     cancelled: {
       text: "Đã hủy đơn hàng",
       color: "bg-red-100 text-red-800",
-      icon: <FiSlash className="text-red-500" />
+      icon: <FiSlash className="text-red-500" />,
     },
     waitingForPayment: {
       text: "Chờ thanh toán",
       color: "bg-yellow-100 text-yellow-800",
-      icon: <FiDollarSign className="text-yellow-500" />
+      icon: <FiDollarSign className="text-yellow-500" />,
     },
     refund: {
       text: "Hoàn tiền",
       color: "bg-pink-100 text-pink-800",
-      icon: <FiDollarSign className="text-pink-500" />
-    }
+      icon: <FiDollarSign className="text-pink-500" />,
+    },
   };
 
   const formatPrice = (price) => {
@@ -160,7 +172,7 @@ export default function OrdersTab() {
             ({filteredOrders.length}/{orders.length} đơn hàng)
           </span>
         </div>
-        
+
         {/* Filter dropdown */}
         <div className="relative">
           <button
@@ -170,7 +182,7 @@ export default function OrdersTab() {
             <FiFilter />
             <span>Lọc theo trạng thái</span>
           </button>
-          
+
           {showStatusFilter && (
             <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-10 border border-gray-200">
               <div className="p-2">
@@ -200,10 +212,13 @@ export default function OrdersTab() {
       {selectedStatus !== "all" && (
         <div className="mb-4 flex items-center">
           <span className="text-sm text-gray-600 mr-2">Đang lọc:</span>
-          <span className={`px-2 py-1 text-xs rounded-full ${
-            statusConfig[convertStatus(selectedStatus)]?.color || "bg-gray-100 text-gray-800"
-          }`}>
-            {statusFilters.find(f => f.value === selectedStatus)?.label}
+          <span
+            className={`px-2 py-1 text-xs rounded-full ${
+              statusConfig[convertStatus(selectedStatus)]?.color ||
+              "bg-gray-100 text-gray-800"
+            }`}
+          >
+            {statusFilters.find((f) => f.value === selectedStatus)?.label}
           </span>
           <button
             onClick={() => setSelectedStatus("all")}
@@ -221,9 +236,11 @@ export default function OrdersTab() {
       ) : filteredOrders.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <p className="text-gray-500">
-            {selectedStatus === "all" 
-              ? "Bạn chưa có đơn hàng nào" 
-              : `Không có đơn hàng nào ở trạng thái "${statusFilters.find(f => f.value === selectedStatus)?.label}"`}
+            {selectedStatus === "all"
+              ? "Bạn chưa có đơn hàng nào"
+              : `Không có đơn hàng nào ở trạng thái "${
+                  statusFilters.find((f) => f.value === selectedStatus)?.label
+                }"`}
           </p>
         </div>
       ) : (
@@ -235,9 +252,10 @@ export default function OrdersTab() {
             >
               <div className="p-4 border-b border-gray-100 flex justify-between items-center">
                 <div>
-                  <p className="text-sm text-gray-500">Mã đơn hàng</p>
+                  <p className="text-sm text-gray-500">Nghệ nhân</p>
                   <p className="font-medium">
-                    #{order.id.split("-")[0].toUpperCase()}
+                    {/* #{order.id.split("-")[0].toUpperCase()} */}
+                    {order.orderItems?.[0]?.artisanName || "Chưa rõ nghệ nhân"}
                   </p>
                 </div>
                 <div className="text-right">
@@ -252,7 +270,10 @@ export default function OrdersTab() {
                   <div key={index} className="flex items-center mb-3 last:mb-0">
                     <div className="w-16 h-16 rounded-md overflow-hidden bg-gray-100">
                       <img
-                        src={item.product?.productImages?.imageUrl || "https://via.placeholder.com/100"}
+                        src={
+                          item.product?.productImages?.imageUrl ||
+                          "https://via.placeholder.com/100"
+                        }
                         alt={item.product?.name}
                         className="w-full h-full object-cover"
                       />
@@ -280,7 +301,8 @@ export default function OrdersTab() {
                   {statusConfig[order.statusKey]?.icon || <FiAlertCircle />}
                   <span
                     className={`px-2 py-1 text-xs rounded-full ${
-                      statusConfig[order.statusKey]?.color || "bg-gray-100 text-gray-800"
+                      statusConfig[order.statusKey]?.color ||
+                      "bg-gray-100 text-gray-800"
                     }`}
                   >
                     {statusConfig[order.statusKey]?.text || order.status}
