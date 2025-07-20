@@ -63,7 +63,8 @@ export const API_ENDPOINTS_CATEGORY = {
   GET_CATEGORIES: "/api/Category/GetAllCategories",
   CREATE_CATEGORY: "/api/Category/CreateCategory",
   UPDATE_CATEGORY: (categoryId) => `/api/Category/UpdateCategory/${categoryId}`,
-  DELETE_CATEGORY: (categoryId) => `/api/Category/CategoryId/Delete?CategoryId=${categoryId}`,
+  DELETE_CATEGORY: (categoryId) =>
+    `/api/Category/CategoryId/Delete?CategoryId=${categoryId}`,
 };
 
 // Các endpoint cho danh mục con
@@ -76,12 +77,16 @@ export const API_ENDPOINTS_SUBCATEGORY = {
 
 // Các endpoint cho user
 export const API_ENDPOINTS_USER = {
-  GET_USER: "/api/User/get-current-user",
+  GET_USER: "/api/User/GetCurrentUser",
   SEND_REQUEST_UPGRADE_ARTISAN: "/api/User/SendRequestUpgradeToArtisan",
-  GET_SEND_REQUEST_UPGRADE_ARTISAN: (userId) => `/api/User/GetSentRequestByUserId/${userId}`,
-  CHECK_SEND_REQUEST_UPGRADE_ARTISAN: (userId) => `/api/User/CheckRequestSent/${userId}`,
-  CANCEL_REQUEST_UPGRADE_ARTISAN: (userId) => `/api/User/CancelRequest/${userId}`,
-  RESEND_SEND_REQUEST_UPGRADE_ARTISAN: (userId, requestId) => `/api/User/ResendRequest?userId=${userId}&requestId=${requestId}`,
+  GET_SEND_REQUEST_UPGRADE_ARTISAN: (userId) =>
+    `/api/User/GetSentRequestByUserId/${userId}`,
+  CHECK_SEND_REQUEST_UPGRADE_ARTISAN: (userId) =>
+    `/api/User/CheckRequestSent/${userId}`,
+  CANCEL_REQUEST_UPGRADE_ARTISAN: (userId) =>
+    `/api/User/CancelRequest/${userId}`,
+  RESEND_SEND_REQUEST_UPGRADE_ARTISAN: (userId, requestId) =>
+    `/api/User/ResendRequest?userId=${userId}&requestId=${requestId}`,
   UPDATE_INFORMATION_USER: "/api/User/UpdateInfoUser",
   UPDATE_INFORMATION_ARTISAN: "/api/User/UpdateInfoUser",
 };
@@ -92,7 +97,8 @@ export const API_ENDPOINTS_FAVORITE = {
   GET_CHECKFAVORITE: (userId, productId) =>
     `/api/Favourite/CheckFavourite?userId=${userId}&productId=${productId}`,
   ADD_FAVORITE: "/api/Favourite/AddFavourite",
-  DELETE_FAVORITE: (userId, productId) => `/api/Favourite/DeleteFavourite?userId=${userId}&productId=${productId}`,
+  DELETE_FAVORITE: (userId, productId) =>
+    `/api/Favourite/DeleteFavourite?userId=${userId}&productId=${productId}`,
 };
 
 // Các endpoint cho địa chỉ
@@ -104,10 +110,15 @@ export const API_ENDPOINTS_ADDRESS = {
 };
 
 export const API_ENDPOINTS_ORDER = {
-    CREATE_FROM_CART: "/api/Order/create-from-cart",
-    CREATE_DIRECT: "/api/Order/create-direct",
-    GET_VNPAY_URL: (orderId) => `/api/Order/vnpay-url/${orderId}`,
-    VNPAY_RETURN: "/api/Order/vnpay-return",
+  GET_ORDERSBYUSERID: (userId) => `/api/Order/GetOrdersByUserId/${userId}`,
+  GET_ORDERSBYARTISANID: (artisanId) =>
+    `/api/Order/GetOrdersByArtisanId/${artisanId}`,
+  GET_ORDERBYORDERID: (orderId) => `/api/Order/GetOrderByOrderId/${orderId}`,
+  GET_VNPAY_URL: (orderId) => `/api/Order/VnpayUrl/${orderId}`,
+  VNPAY_RETURN: "/api/Order/vnpay-return",
+  CREATE_FROM_CART: "/api/Order/CreateFromCart",
+  CREATE_DIRECT: "/api/Order/CreateDirect",
+  UPDATE_STATUS_ORDER: (orderId) => `/api/Order/status/${orderId}`
 };
 
 // Các endpoint cho admin (theo hình ảnh bạn cung cấp)
