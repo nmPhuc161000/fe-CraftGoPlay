@@ -51,7 +51,7 @@ export default function ArtisanOrdersTab() {
             ...order,
             date: dayjs(order.creationDate).format("DD/MM/YYYY"),
             formattedDate: dayjs(order.creationDate).format(
-              "HH:mm - DD/MM/YYYY"
+              "DD/MM/YYYY"
             ),
             statusKey: convertStatus(order.status),
             paymentStatus: order.isPaid ? "Đã thanh toán" : "Chưa thanh toán",
