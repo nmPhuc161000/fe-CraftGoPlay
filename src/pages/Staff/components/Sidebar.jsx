@@ -113,7 +113,7 @@ const Sidebar = ({ selected, setSelected, isMobileOpen, onCloseMobile, isDesktop
         </nav>
 
         {/* Footer section */}
-        <div className="relative px-4 pb-4 mt-auto">
+        {/* <div className="relative px-4 pb-4 mt-auto">
           <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-slate-700/50">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
             {isOpen && (
@@ -123,7 +123,7 @@ const Sidebar = ({ selected, setSelected, isMobileOpen, onCloseMobile, isDesktop
               </div>
             )}
           </div>
-        </div>
+        </div> */}
 
         {/* Decorative elements */}
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />

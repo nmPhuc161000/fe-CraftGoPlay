@@ -22,15 +22,24 @@ const ArtisanRequestList = () => {
 
   const fetchArtisanRequest = async () => {
     try {
-      console.log("fetchArtisanRequest")
       const response = await artisanRequestService.getAllRequest();
       console.log("Artisan Req: ", response)
       if (response.success && response.data) {
         const apiData = response.data.data
+        console.log(apiData);
         const artisanRequests = Array.isArray(apiData) ? apiData : [];
         console.log(artisanRequests)
         setRequests(artisanRequests)
       }
+    } catch (error) {
+      const errorMessage = error.message || "Không thể kết nối đến server";
+      console.error(errorMessage);
+    }
+  }
+
+  const getUserInfo = async (id) => {
+    try {
+      // const response = await 
     } catch (error) {
       const errorMessage = error.message || "Không thể kết nối đến server";
       console.error(errorMessage);

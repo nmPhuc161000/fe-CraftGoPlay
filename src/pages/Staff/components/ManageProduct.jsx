@@ -14,6 +14,7 @@ const ManageProduct = () => {
   const [statusProduct, setStatusProduct] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+  
 
   // Fetch products from API
   useEffect(() => {
@@ -91,16 +92,38 @@ const ManageProduct = () => {
       setShowStatusModal(true);
     }
   };
+  
 
-  const handleStatusChange = () => {
+  const handleStatusChange = async () => {
     if (statusProduct?.id) {
-      setData(prev => prev.map(item =>
-        item.id === statusProduct.id
-          ? { ...item, status: item.status === 'active' ? 'inactive' : 'active' }
-          : item
-      ));
-      setShowStatusModal(false);
-      setStatusProduct(null);
+      // Giữ lại toàn bộ field, chỉ chỉnh status
+      const updatedStatus = statusProduct.status === 'active' ? 'inactive' : 'active';
+      // Tạo FormData từ product hiện tại
+      const formData = new FormData();
+      Object.entries(statusProduct).forEach(([key, value]) => {
+        // Nếu là status thì cập nhật, còn lại giữ nguyên
+        if (key === 'status') {
+          formData.append('status', updatedStatus);
+        } else {
+          formData.append(key, value);
+        }
+      });
+
+      try {
+        // Gọi API để update product
+        await productService.updateProduct(formData);
+        // Cập nhật lại state local
+        setData(prev => prev.map(item =>
+          item.id === statusProduct.id
+            ? { ...item, status: updatedStatus }
+            : item
+        ));
+      } catch (error) {
+        console.error('Error updating product status:', error);
+      } finally {
+        setShowStatusModal(false);
+        setStatusProduct(null);
+      }
     }
   };
 
@@ -374,18 +397,6 @@ const ManageProduct = () => {
                         </div>
                       </div>
                     </div>
-
-                    {/* Status Badge */}
-                    <div className="text-center">
-                      <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${viewProduct?.status === 'active'
-                        ? 'bg-green-100 text-green-800 border border-green-200'
-                        : 'bg-red-100 text-red-800 border border-red-200'
-                        }`}>
-                        <span className={`w-2 h-2 rounded-full mr-2 ${viewProduct?.status === 'active' ? 'bg-green-500' : 'bg-red-500'
-                          }`}></span>
-                        {viewProduct?.status === 'active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}
-                      </span>
-                    </div>
                   </div>
                 </div>
 
@@ -418,6 +429,17 @@ const ManageProduct = () => {
                       <div className="text-sm text-green-600 font-medium mb-1">Danh mục</div>
                       <div className="text-xl font-bold text-gray-900">{viewProduct?.category || 'N/A'}</div>
                     </div>
+                  </div>
+                  {/* Status Badge */}
+                  <div className="text-left">
+                    <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${viewProduct?.status === 'active'
+                      ? 'bg-green-100 text-green-800 border border-green-200'
+                      : 'bg-red-100 text-red-800 border border-red-200'
+                      }`}>
+                      <span className={`w-2 h-2 rounded-full mr-2 ${viewProduct?.status === 'active' ? 'bg-green-500' : 'bg-red-500'
+                        }`}></span>
+                      {viewProduct?.status === 'active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}
+                    </span>
                   </div>
 
                   {/* Description Section */}

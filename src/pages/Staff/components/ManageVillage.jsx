@@ -1,23 +1,161 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { MdVisibility, MdShoppingBag } from 'react-icons/md';
+import CraftVillageService from "../../../services/apis/craftvillageApi";
 
 const ManageVillage = () => {
+    // Dữ liệu mẫu, mỗi làng gồm: id, name, address, description, establishedAt, status ('active'|'inactive')
     const [data, setData] = useState([]);
+    const [filtered, setFiltered] = useState([]);
     const [search, setSearch] = useState("");
     const [showViewModal, setShowViewModal] = useState(false);
-    const [viewProduct, setViewProduct] = useState(null);
+    const [viewVillage, setViewVillage] = useState(null);
     const [showStatusModal, setShowStatusModal] = useState(false);
-    const [statusProduct, setStatusProduct] = useState(null);
+    const [statusVillage, setStatusVillage] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleteVillage, setDeleteVillage] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [createVillageName, setCreateVillageName] = useState("");
+    const [createVillageDate, setCreateVillageDate] = useState("");
+    const [createVillageDescription, setCreateVillageDescription] = useState("");
+    const [createVillageLocation, setCreateVillageLocation] = useState("");
+    const [createVillageLoading, setCreateVillageLoading] = useState(false);
+    const [createVillageError, setCreateVillageError] = useState("");
     const pageSize = 10;
-    const filtered = data.filter(p => {
-        const searchLower = (search || '').toLowerCase();
-        const nameMatch = p?.name?.toLowerCase()?.includes(searchLower) || false;
-        return nameMatch;
-    });
+
+    // Cập nhật filtered mỗi khi data hoặc search thay đổi
+    useEffect(() => {
+        if (Array.isArray(data)) {
+            const searchLower = (search || '').toLowerCase();
+            setFiltered(
+                data.filter(v => {
+                    // Có thể là v.name hoặc v.village_Name tùy API trả về
+                    const name = v?.name || v?.village_Name || '';
+                    return name.toLowerCase().includes(searchLower);
+                })
+            );
+        } else {
+            setFiltered([]);
+        }
+    }, [data, search]);
+
     const totalPage = Math.max(1, Math.ceil(filtered.length / pageSize));
     const paged = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+    // Xem chi tiết làng
+    const openView = (village) => {
+        setViewVillage(village);
+        setShowViewModal(true);
+    };
+
+    // Mở modal đổi trạng thái
+    const openStatusChange = (village) => {
+        setStatusVillage(village);
+        setShowStatusModal(true);
+    };
+
+    // Mở modal xóa
+    const openDelete = (village) => {
+        setDeleteVillage(village);
+        setShowDeleteModal(true);
+    };
+
+    // Mở modal tạo làng
+    const openCreate = () => {
+        setCreateVillageName("");
+        setCreateVillageDate("");
+        setCreateVillageDescription("");
+        setCreateVillageLocation("");
+        setCreateVillageError("");
+        setShowCreateModal(true);
+    };
+
+    // Xử lý đổi trạng thái thành lập
+    const handleStatusChange = () => {
+        if (!statusVillage) return;
+        setData(prev =>
+            prev.map(v =>
+                v.id === statusVillage.id
+                    ? { ...v, status: v.status === "active" ? "inactive" : "active" }
+                    : v
+            )
+        );
+        setShowStatusModal(false);
+        setStatusVillage(null);
+    };
+
+    // Xử lý "xóa" (chỉ đổi status thành 'inactive')
+    const handleDelete = () => {
+        if (!deleteVillage) return;
+        setData(prev =>
+            prev.map(v =>
+                v.id === deleteVillage.id
+                    ? { ...v, status: "inactive" }
+                    : v
+            )
+        );
+        setShowDeleteModal(false);
+        setDeleteVillage(null);
+    };
+
+    // Xử lý tạo làng mới
+    const handleCreateVillage = async (e) => {
+        e.preventDefault();
+        setCreateVillageError("");
+        if (!createVillageName.trim()) {
+            setCreateVillageError("Vui lòng nhập tên làng.");
+            return;
+        }
+        if (!createVillageDate) {
+            setCreateVillageError("Vui lòng chọn ngày thành lập.");
+            return;
+        }
+        if (!createVillageLocation.trim()) {
+            setCreateVillageError("Vui lòng nhập địa chỉ làng.");
+            return;
+        }
+        if (!createVillageDescription.trim()) {
+            setCreateVillageError("Vui lòng nhập mô tả làng.");
+            return;
+        }
+        setCreateVillageLoading(true);
+        try {
+            // Build formData according to API requirements
+            const formData = {
+                village_Name: createVillageName,
+                description: createVillageDescription,
+                location: createVillageLocation,
+                establishedDate: new Date(createVillageDate).toISOString(), // Ensure ISO string
+            };
+            const response = await CraftVillageService.createCraftVillage(formData);
+            // Optionally, use response.data if API returns the created object
+            setData(prev => [
+                {
+                    ...formData,
+                    id: response?.data?.data?.id || Date.now(), // fallback if no id returned
+                    status: "active",
+                },
+                ...prev,
+            ]);
+            setShowCreateModal(false);
+        } catch (err) {
+            setCreateVillageError("Có lỗi xảy ra khi tạo làng mới.");
+        } finally {
+            setCreateVillageLoading(false);
+        }
+    };
+
+    const fetchCraftVillage = async () => {
+        const response = await CraftVillageService.getCraftVillages();
+        setData(response.data.data);
+        // Không cần setFiltered ở đây vì đã có useEffect theo dõi data
+        console.log(response.data.data);
+    }
+
+    useEffect(() => {
+        fetchCraftVillage();
+    }, []);
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -26,11 +164,11 @@ const ManageVillage = () => {
         >
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <div className="flex-1">
-                    <h1 className="text-2xl font-bold text-gray-800 mb-2">Quản lý sản phẩm thợ thủ công</h1>
+                    <h1 className="text-2xl font-bold text-gray-800 mb-2">Quản lý làng nghề</h1>
                     <div className="relative">
                         <input
                             className="w-full md:max-w-xs pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-                            placeholder="Tìm kiếm theo tên, thợ thủ công hoặc danh mục..."
+                            placeholder="Tìm kiếm theo tên làng..."
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                         />
@@ -39,6 +177,19 @@ const ManageVillage = () => {
                         </svg>
                     </div>
                 </div>
+                <div className="mt-4 md:mt-0">
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="flex items-center gap-2 px-5 py-2 rounded-lg bg-gradient-to-r from-[#b88a5a] to-[#e2b97c] text-white font-semibold shadow hover:from-[#cfa06a] hover:to-[#f3d6a2] transition"
+                        onClick={openCreate}
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Thêm làng mới
+                    </motion.button>
+                </div>
             </div>
 
             <div className="overflow-x-auto rounded-xl shadow">
@@ -46,13 +197,9 @@ const ManageVillage = () => {
                     <thead className="bg-gradient-to-r from-[#8b5e3c] to-[#c7903f]">
                         <tr>
                             <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">STT</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Hình ảnh</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Tên sản phẩm</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Thợ thủ công</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Danh mục</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Giá</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Tên làng</th>
+                            <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Ngày thành lập</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Trạng thái</th>
-                            <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Lượt xem/Đơn hàng</th>
                             <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Thao tác</th>
                         </tr>
                     </thead>
@@ -66,51 +213,28 @@ const ManageVillage = () => {
                                 className="hover:bg-gray-50 transition-colors"
                             >
                                 <td className="px-4 py-3 whitespace-nowrap">{(currentPage - 1) * pageSize + idx + 1}</td>
+                                <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">{row?.village_Name || 'N/A'}</td>
                                 <td className="px-4 py-3 whitespace-nowrap">
-                                    <motion.img
-                                        whileHover={{ scale: 1.1 }}
-                                        src={row?.image || "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg"}
-                                        alt={row?.name || 'Product'}
-                                        className="w-14 h-14 object-cover rounded-lg shadow"
-                                        onError={(e) => {
-                                            e.target.src = "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg";
-                                        }}
-                                    />
-                                </td>
-                                <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">{row?.name || 'N/A'}</td>
-                                <td className="px-4 py-3 whitespace-nowrap">
-                                    <div className="font-medium">{row?.artisan || 'N/A'}</div>
-                                </td>
-                                <td className="px-4 py-3 whitespace-nowrap text-gray-500">{row?.category || 'N/A'}</td>
-                                <td className="px-4 py-3 whitespace-nowrap text-blue-700 font-bold">
-                                    {typeof row?.price === 'number' ? row.price.toLocaleString() : '0'}đ
+                                    {row?.establishedDate
+                                        ? new Date(row.establishedDate).toLocaleDateString('vi-VN')
+                                        : <span className="text-gray-400 italic">Chưa thành lập</span>
+                                    }
                                 </td>
                                 <td className="px-4 py-3 whitespace-nowrap">
-                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${row?.status === 'active'
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-red-100 text-red-800'
+                                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold
+                                        ${row?.status === "active"
+                                            ? "bg-green-100 text-green-700 border border-green-200"
+                                            : "bg-gray-100 text-gray-500 border border-gray-200"
                                         }`}>
-                                        {row?.status === 'active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}
+                                        {row?.status === "active" ? "Đang hoạt động" : "Ngừng hoạt động"}
                                     </span>
-                                </td>
-                                <td className="px-4 py-3 whitespace-nowrap">
-                                    <div className="flex flex-col gap-2">
-                                        <div className="flex items-center gap-2 text-amber-600">
-                                            <MdVisibility className="text-lg" />
-                                            <span>{row?.views || 0}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-blue-600">
-                                            <MdShoppingBag className="text-lg" />
-                                            <span>{row?.orders || 0}</span>
-                                        </div>
-                                    </div>
                                 </td>
                                 <td className="px-4 py-3 whitespace-nowrap">
                                     <div className="flex gap-2">
                                         <motion.button
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.9 }}
-                                            className="text-green-600 hover:text-green-800"
+                                            className="text-blue-600 hover:text-blue-800"
                                             onClick={() => openView(row)}
                                         >
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,11 +245,11 @@ const ManageVillage = () => {
                                         <motion.button
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.9 }}
-                                            className={`${row?.status === 'active' ? 'text-red-600 hover:text-red-800' : 'text-green-600 hover:text-green-800'
+                                            className={`${row?.establishedDate ? 'text-red-600 hover:text-red-800' : 'text-green-600 hover:text-green-800'
                                                 }`}
                                             onClick={() => openStatusChange(row)}
                                         >
-                                            {row?.status === 'active' ? (
+                                            {row?.establishedDate ? (
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
@@ -134,6 +258,17 @@ const ManageVillage = () => {
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                 </svg>
                                             )}
+                                        </motion.button>
+                                        <motion.button
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.9 }}
+                                            className="text-gray-400 hover:text-red-600"
+                                            onClick={() => openDelete(row)}
+                                            title="Xóa làng (chỉ đổi trạng thái)"
+                                        >
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
                                         </motion.button>
                                     </div>
                                 </td>
@@ -174,8 +309,115 @@ const ManageVillage = () => {
                 </div>
             </div>
 
-            {/* Modal View Product */}
-            {showViewModal && viewProduct && (
+            {/* Modal Tạo Làng Nghề */}
+            {showCreateModal && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="fixed inset-0 z-50 flex items-center justify-center"
+                    style={{ background: "rgba(0, 0, 0, 0.5)" }}
+                >
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 relative"
+                    >
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold text-gray-900">Thêm làng nghề mới</h2>
+                            <motion.button
+                                whileHover={{ scale: 1.1, rotate: 90 }}
+                                whileTap={{ scale: 0.9 }}
+                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                                onClick={() => setShowCreateModal(false)}
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </motion.button>
+                        </div>
+                        <form onSubmit={handleCreateVillage} className="space-y-5">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Tên làng <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                    placeholder="Nhập tên làng nghề"
+                                    value={createVillageName}
+                                    onChange={e => setCreateVillageName(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Địa chỉ <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                    placeholder="Nhập địa chỉ làng nghề"
+                                    value={createVillageLocation}
+                                    onChange={e => setCreateVillageLocation(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Ngày thành lập <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="date"
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                    value={createVillageDate}
+                                    onChange={e => setCreateVillageDate(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Mô tả <span className="text-red-500">*</span>
+                                </label>
+                                <textarea
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                    placeholder="Nhập mô tả làng nghề"
+                                    value={createVillageDescription}
+                                    onChange={e => setCreateVillageDescription(e.target.value)}
+                                    rows={3}
+                                    required
+                                />
+                            </div>
+                            {createVillageError && (
+                                <div className="text-red-600 text-sm">{createVillageError}</div>
+                            )}
+                            <div className="flex justify-end gap-3 pt-2">
+                                <motion.button
+                                    type="button"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="px-6 py-2 rounded-lg border hover:bg-gray-50"
+                                    onClick={() => setShowCreateModal(false)}
+                                    disabled={createVillageLoading}
+                                >
+                                    Hủy
+                                </motion.button>
+                                <motion.button
+                                    type="submit"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="px-6 py-2 text-white rounded-lg bg-blue-600 hover:bg-blue-700 font-semibold"
+                                    disabled={createVillageLoading}
+                                >
+                                    {createVillageLoading ? "Đang tạo..." : "Tạo làng"}
+                                </motion.button>
+                            </div>
+                        </form>
+                    </motion.div>
+                </motion.div>
+            )}
+
+            {/* Modal View Village */}
+            {showViewModal && viewVillage && (
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -184,15 +426,20 @@ const ManageVillage = () => {
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        className="bg-white rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden relative"
+                        className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden relative"
                     >
-                        {/* Header with sticky position */}
+                        {/* Header */}
                         <div className="sticky top-0 z-10 bg-white border-b border-gray-100 px-8 py-6">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <h2 className="text-2xl font-bold text-gray-900">Chi tiết sản phẩm</h2>
+                                    <h2 className="text-2xl font-bold text-gray-900">Chi tiết làng nghề</h2>
                                     <div className="mt-1 text-sm text-gray-500">
-                                        Ngày tạo: {new Date(viewProduct?.createdAt).toLocaleDateString('vi-VN')}
+                                        Ngày thành lập: {viewVillage?.establishedDate ? new Date(viewVillage.establishedDate).toLocaleDateString('vi-VN') : 'Chưa thành lập'}
+                                    </div>
+                                    <div className="mt-1 text-sm text-gray-500">
+                                        Trạng thái: <span className={`font-semibold ${viewVillage?.status === "active" ? "text-green-600" : "text-gray-500"}`}>
+                                            {viewVillage?.status === "active" ? "Đang hoạt động" : "Ngừng hoạt động"}
+                                        </span>
                                     </div>
                                 </div>
                                 <motion.button
@@ -201,7 +448,7 @@ const ManageVillage = () => {
                                     className="text-gray-400 hover:text-gray-600 transition-colors"
                                     onClick={() => {
                                         setShowViewModal(false);
-                                        setViewProduct(null);
+                                        setViewVillage(null);
                                     }}
                                 >
                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,102 +458,54 @@ const ManageVillage = () => {
                             </div>
                         </div>
 
-                        {/* Scrollable Content */}
+                        {/* Content */}
                         <div className="overflow-y-auto max-h-[calc(90vh-100px)] p-8">
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                {/* Left Column - Image and Stats */}
-                                <div className="lg:col-span-1">
-                                    <div className="sticky top-4 space-y-6">
-                                        {/* Image */}
-                                        <div className="relative group rounded-xl overflow-hidden">
-                                            <motion.img
-                                                whileHover={{ scale: 1.02 }}
-                                                src={viewProduct?.image || "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg"}
-                                                alt={viewProduct?.name || 'Product'}
-                                                className="w-full aspect-square object-cover shadow-lg transition-transform"
-                                                onError={(e) => {
-                                                    e.target.src = "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg";
-                                                }}
-                                            />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                        </div>
-
-                                        {/* Quick Stats */}
-                                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6">
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-                                                    <MdVisibility className="text-2xl text-amber-500 mx-auto mb-2" />
-                                                    <div className="text-2xl font-bold text-gray-800">{viewProduct?.views || 0}</div>
-                                                    <div className="text-sm text-gray-500">Lượt xem</div>
-                                                </div>
-                                                <div className="text-center p-4 bg-white rounded-lg shadow-sm">
-                                                    <MdShoppingBag className="text-2xl text-blue-500 mx-auto mb-2" />
-                                                    <div className="text-2xl font-bold text-gray-800">{viewProduct?.orders || 0}</div>
-                                                    <div className="text-sm text-gray-500">Đơn hàng</div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Status Badge */}
-                                        <div className="text-center">
-                                            <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold ${viewProduct?.status === 'active'
-                                                ? 'bg-green-100 text-green-800 border border-green-200'
-                                                : 'bg-red-100 text-red-800 border border-red-200'
-                                                }`}>
-                                                <span className={`w-2 h-2 rounded-full mr-2 ${viewProduct?.status === 'active' ? 'bg-green-500' : 'bg-red-500'
-                                                    }`}></span>
-                                                {viewProduct?.status === 'active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}
-                                            </span>
-                                        </div>
-                                    </div>
+                            <div className="space-y-6">
+                                {/* Tên làng */}
+                                <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-xl">
+                                    <div className="text-sm text-blue-600 font-medium mb-1">Tên làng</div>
+                                    <div className="text-xl font-bold text-gray-900">{viewVillage?.village_Name || 'N/A'}</div>
                                 </div>
-
-                                {/* Right Column - Details and Description */}
-                                <div className="lg:col-span-2 space-y-8">
-                                    {/* Basic Info Cards */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        {/* Product Name */}
-                                        <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-xl">
-                                            <div className="text-sm text-blue-600 font-medium mb-1">Tên sản phẩm</div>
-                                            <div className="text-xl font-bold text-gray-900">{viewProduct?.name || 'N/A'}</div>
-                                        </div>
-
-                                        {/* Price */}
-                                        <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-6 rounded-xl">
-                                            <div className="text-sm text-amber-600 font-medium mb-1">Giá bán</div>
-                                            <div className="text-xl font-bold text-blue-700">
-                                                {typeof viewProduct?.price === 'number' ? viewProduct.price.toLocaleString() : '0'}đ
-                                            </div>
-                                        </div>
-
-                                        {/* Artisan Info */}
-                                        <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-6 rounded-xl">
-                                            <div className="text-sm text-purple-600 font-medium mb-1">Thông tin thợ thủ công</div>
-                                            <div className="text-xl font-bold text-gray-900">{viewProduct?.artisan || 'N/A'}</div>
-                                        </div>
-
-                                        {/* Category */}
-                                        <div className="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-xl">
-                                            <div className="text-sm text-green-600 font-medium mb-1">Danh mục</div>
-                                            <div className="text-xl font-bold text-gray-900">{viewProduct?.category || 'N/A'}</div>
-                                        </div>
+                                {/* Địa chỉ */}
+                                <div className="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-xl">
+                                    <div className="text-sm text-green-600 font-medium mb-1">Địa chỉ</div>
+                                    <div className="text-xl font-bold text-gray-900">{viewVillage?.location || 'N/A'}</div>
+                                </div>
+                                {/* Ngày thành lập */}
+                                <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-6 rounded-xl">
+                                    <div className="text-sm text-amber-600 font-medium mb-1">Ngày thành lập</div>
+                                    <span className="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-800 border border-gray-200">
+                                        {viewVillage?.establishedDate
+                                            ? new Date(viewVillage.establishedDate).toLocaleDateString('vi-VN')
+                                            : <span className="text-gray-400 italic">Chưa thành lập</span>
+                                        }
+                                    </span>
+                                </div>
+                                {/* Trạng thái */}
+                                <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 rounded-xl">
+                                    <div className="text-sm text-gray-600 font-medium mb-1">Trạng thái</div>
+                                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold
+                                        ${viewVillage?.status === "active"
+                                            ? "bg-green-100 text-green-700 border border-green-200"
+                                            : "bg-gray-100 text-gray-500 border border-gray-200"
+                                        }`}>
+                                        {viewVillage?.status === "active" ? "Đang hoạt động" : "Ngừng hoạt động"}
+                                    </span>
+                                </div>
+                                {/* Mô tả */}
+                                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                                    <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
+                                        <h3 className="text-lg font-semibold text-gray-900">Mô tả làng nghề</h3>
                                     </div>
-
-                                    {/* Description Section */}
-                                    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-                                        <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
-                                            <h3 className="text-lg font-semibold text-gray-900">Mô tả sản phẩm</h3>
-                                        </div>
-                                        <div className="p-6">
-                                            <div className="prose prose-sm max-w-none">
-                                                {viewProduct?.description ? (
-                                                    <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
-                                                        {viewProduct.description}
-                                                    </div>
-                                                ) : (
-                                                    <div className="text-gray-500 italic">Chưa có mô tả cho sản phẩm này</div>
-                                                )}
-                                            </div>
+                                    <div className="p-6">
+                                        <div className="prose prose-sm max-w-none">
+                                            {viewVillage?.description ? (
+                                                <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
+                                                    {viewVillage.description}
+                                                </div>
+                                            ) : (
+                                                <div className="text-gray-500 italic">Chưa có mô tả cho làng nghề này</div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -317,7 +516,7 @@ const ManageVillage = () => {
             )}
 
             {/* Modal Confirm Status Change */}
-            {showStatusModal && statusProduct && (
+            {showStatusModal && statusVillage && (
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -330,7 +529,7 @@ const ManageVillage = () => {
                     >
                         <div className="text-center">
                             <div className="w-16 h-16 mx-auto mb-4">
-                                {statusProduct.status === 'active' ? (
+                                {statusVillage.establishedDate ? (
                                     <svg className="w-full h-full text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
@@ -341,10 +540,10 @@ const ManageVillage = () => {
                                 )}
                             </div>
                             <h3 className="text-xl font-bold text-gray-900 mb-2">
-                                {statusProduct.status === 'active' ? 'Ngừng hoạt động sản phẩm?' : 'Kích hoạt sản phẩm?'}
+                                {statusVillage.establishedDate ? 'Chuyển sang chưa thành lập?' : 'Xác nhận đã thành lập?'}
                             </h3>
                             <p className="text-gray-500">
-                                Bạn có chắc chắn muốn {statusProduct.status === 'active' ? 'ngừng hoạt động' : 'kích hoạt'} sản phẩm này?
+                                Bạn có chắc chắn muốn {statusVillage.establishedDate ? 'chuyển làng về trạng thái chưa thành lập' : 'xác nhận làng đã thành lập'}?
                             </p>
 
                             <div className="flex justify-center gap-3 mt-6">
@@ -354,7 +553,7 @@ const ManageVillage = () => {
                                     className="px-6 py-2 rounded-lg border hover:bg-gray-50"
                                     onClick={() => {
                                         setShowStatusModal(false);
-                                        setStatusProduct(null);
+                                        setStatusVillage(null);
                                     }}
                                 >
                                     Hủy
@@ -362,11 +561,61 @@ const ManageVillage = () => {
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
-                                    className={`px-6 py-2 text-white rounded-lg ${statusProduct.status === 'active'
+                                    className={`px-6 py-2 text-white rounded-lg ${statusVillage.establishedDate
                                         ? 'bg-red-600 hover:bg-red-700'
                                         : 'bg-green-600 hover:bg-green-700'
                                         }`}
                                     onClick={handleStatusChange}
+                                >
+                                    Xác nhận
+                                </motion.button>
+                            </div>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+
+            {/* Modal Confirm Delete */}
+            {showDeleteModal && deleteVillage && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50"
+                >
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 relative"
+                    >
+                        <div className="text-center">
+                            <div className="w-16 h-16 mx-auto mb-4">
+                                <svg className="w-full h-full text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </div>
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">
+                                Xác nhận xóa làng nghề?
+                            </h3>
+                            <p className="text-gray-500">
+                                Bạn có chắc chắn muốn <span className="font-semibold text-red-600">xóa</span> làng nghề này? (Thao tác này chỉ đổi trạng thái sang "Ngừng hoạt động")
+                            </p>
+                            <div className="flex justify-center gap-3 mt-6">
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="px-6 py-2 rounded-lg border hover:bg-gray-50"
+                                    onClick={() => {
+                                        setShowDeleteModal(false);
+                                        setDeleteVillage(null);
+                                    }}
+                                >
+                                    Hủy
+                                </motion.button>
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="px-6 py-2 text-white rounded-lg bg-red-600 hover:bg-red-700"
+                                    onClick={handleDelete}
                                 >
                                     Xác nhận
                                 </motion.button>
