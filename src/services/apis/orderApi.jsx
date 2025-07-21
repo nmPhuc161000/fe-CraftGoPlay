@@ -10,13 +10,13 @@ export const createOrderFromCart = (formData) =>
   });
 //vnpay
 export const getVnpayUrl = async (orderId) => {
-  return performApiRequest(`/api/Order/vnpay-url/${orderId}`, {
+  return performApiRequest(API_ENDPOINTS_ORDER.GET_VNPAY_URL(orderId), {
     method: "get",
   });
 };
 
 export const createOrderDirect = (userId, formData) =>
-  performApiRequest(`${API_ENDPOINTS_ORDER.CREATE_DIRECT}?userId=${userId}`, {
+  performApiRequest(API_ENDPOINTS_ORDER.CREATE_DIRECT(userId), {
     method: "post",
     data: formData,
     isFormData: true,

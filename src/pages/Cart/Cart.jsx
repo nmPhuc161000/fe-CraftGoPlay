@@ -7,7 +7,7 @@ import { FaTrashAlt } from "react-icons/fa";
 import { useNotification } from "../../contexts/NotificationContext";
 
 const Cart = () => {
-    const { cartItems, removeFromCart, updateQuantity } = useContext(CartContext);
+    const { cartItems, removeFromCart, updateQuantity, getStock } = useContext(CartContext);
     // voucher
     const [voucherCode, setVoucherCode] = useState("");
     const [discount, setDiscount] = useState(0);
@@ -160,12 +160,12 @@ const Cart = () => {
                                             <div className="flex justify-center">
                                                 <div className="flex items-center h-10 w-[120px] rounded-md border border-gray-300 overflow-hidden bg-white shadow-sm">
                                                     <button
-                                                        onClick={() =>
-                                                            updateQuantity(
-                                                                item.id,
-                                                                Math.max(1, item.quantity - 1)
-                                                            )
-                                                        }
+                                                        onClick={() => {
+                                                            const newQty = item.quantity - 1;
+                                                            if (newQty >= 1) {
+                                                                updateQuantity(item.id, newQty);
+                                                            }
+                                                        }}
                                                         className="w-10 h-full flex items-center justify-center text-lg font-bold text-[#5e3a1e] hover:bg-[#f0ece3] transition"
                                                     >
                                                         −
@@ -175,8 +175,9 @@ const Cart = () => {
                                                         value={item.quantity}
                                                         onChange={(e) => {
                                                             const newQty = Math.max(1, parseInt(e.target.value) || 1);
-                                                            if (newQty > item.productQuantity) {
-                                                                showNotification("Số lượng vượt quá số lượng trong kho", "error");
+                                                            const stock = getStock(item.product);
+                                                            if (newQty > stock) {
+                                                                showNotification(`Chỉ còn ${stock} sản phẩm trong kho`, "error");
                                                                 return;
                                                             }
                                                             updateQuantity(item.id, newQty);
@@ -186,11 +187,13 @@ const Cart = () => {
                                                     />
                                                     <button
                                                         onClick={() => {
-                                                            if (item.quantity + 1 > item.productQuantity) {
-                                                                showNotification("Số lượng vượt quá số lượng trong kho", "error");
+                                                            const newQty = item.quantity + 1;
+                                                            const stock = getStock(item.product);
+                                                            if (newQty > stock) {
+                                                                showNotification(`Chỉ còn ${stock} sản phẩm trong kho`, "error");
                                                                 return;
                                                             }
-                                                            updateQuantity(item.id, item.quantity + 1);
+                                                            updateQuantity(item.id, newQty);
                                                         }}
                                                         className="w-10 h-full flex items-center justify-center text-lg font-bold text-[#5e3a1e] hover:bg-[#f0ece3] transition"
                                                     >
@@ -200,12 +203,12 @@ const Cart = () => {
                                             </div>
 
                                             {/* Cột: Số tiền */}
-                                            <div className="text-center text-red-600 font-semibold">
+                                            < div className="text-center text-red-600 font-semibold" >
                                                 {(item?.totalPrice ?? 0).toLocaleString("vi-VN")}₫
                                             </div>
 
                                             {/* Cột: Xoá */}
-                                            <div className="flex justify-center">
+                                            < div className="flex justify-center" >
                                                 <button
                                                     onClick={() => removeFromCart(item.id)}
                                                     className="text-[#5e3a1e] hover:text-red-600 text-lg transition-transform duration-200"
@@ -292,10 +295,10 @@ const Cart = () => {
                                 ← Tiếp tục mua sắm
                             </Link>
                         </div>
-                    </div>
+                    </div >
                 )}
-            </div>
-        </MainLayout>
+            </div >
+        </MainLayout >
     );
 
 };
