@@ -5,7 +5,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ArtisanAccount from "./components/ArtisanAccount";
 import CreateAccount from "./components/CreateAccount";
-import OrderHistory from "./components/OrderHistory";
+import OrderHistory from "../Staff/components/OrderHistory";
 
 const Admin = () => {
   const [selected, setSelected] = useState("dashboard");
@@ -30,7 +30,6 @@ const Admin = () => {
           {selected === "dashboard" && <Dashboard />}
           {selected === "artisan" && <ArtisanAccount />}
           {selected === "customer" && <CreateAccount />}
-          {selected === "order-history" && <OrderHistory />}
         </main>
         <Footer />
       </div>
