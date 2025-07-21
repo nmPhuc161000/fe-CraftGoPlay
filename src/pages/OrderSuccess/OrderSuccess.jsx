@@ -20,7 +20,7 @@ const OrderSuccess = () => {
                     Quay về trang chủ
                 </Link>
                 <Link
-                    to="/orders"
+                    to="/profile-user/orders"
                     className="border border-[#5e3a1e] text-[#5e3a1e] px-6 py-3 rounded hover:bg-[#f5f5f5] transition"
                 >
                     Xem đơn hàng
