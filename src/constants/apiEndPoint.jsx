@@ -119,8 +119,8 @@ export const API_ENDPOINTS_ORDER = {
   GET_VNPAY_URL: (orderId) => `/api/Order/VnpayUrl/${orderId}`,
   VNPAY_RETURN: "/api/Order/vnpay-return",
   CREATE_FROM_CART: "/api/Order/CreateFromCart",
-  CREATE_DIRECT: "/api/Order/CreateDirect",
-  UPDATE_STATUS_ORDER: (orderId) => `/api/Order/status/${orderId}`,
+  CREATE_DIRECT: (userId) => `/api/Order/CreateDirect/${userId}`,
+  UPDATE_STATUS_ORDER: (orderId) => `/api/Order/status/${orderId}`
 };
 
 // Các endpoint cho admin (theo hình ảnh bạn cung cấp)
