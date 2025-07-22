@@ -1,13 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-
-const initialSkills = [
-  {
-    id: "71481618-616b-455a-fc29-08ddc8235bfb",
-    name: "Sáng tạo và thiết kế",
-    status: "active",
-  },
-];
+import craftskillService from "../../../services/apis/craftskillApi";
 
 function generateId() {
   // Simple random id generator
@@ -17,8 +10,8 @@ function generateId() {
   );
 }
 
-const ManageSkill = () => {
-  const [data, setData] = useState(initialSkills);
+const ManageSkill = ()=>{
+  const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -37,6 +30,22 @@ const ManageSkill = () => {
     currentPage * pageSize
   );
 
+  useEffect(() => {
+    fetchCraftSkills();
+  }, []);
+
+  const fetchCraftSkills = async () => {
+    try {
+      const response = await craftskillService.getAllCraftSkills();
+      setData(response.data.data);
+      console.log(response.data.data);
+    } catch (error) {
+      console.error("Error fetching craft skills:", error);
+  }
+}
+
+
+
   // Đổi status giữa active/inactive
   const handleToggleStatus = (id) => {
     setData((prev) =>
@@ -52,7 +61,7 @@ const ManageSkill = () => {
   };
 
   // Thêm kỹ năng mới
-  const handleAddSkill = () => {
+  const handleAddSkill = async () => {
     const trimmed = newSkillName.trim();
     if (!trimmed) {
       setAddError("Tên kỹ năng không được để trống.");
@@ -68,19 +77,20 @@ const ManageSkill = () => {
       return;
     }
 
-    
-    setData((prev) => [
-      {
-        id: generateId(),
-        name: trimmed,
-        status: "active",
-      },
-      ...prev,
-    ]);
-    setShowAddModal(false);
-    setNewSkillName("");
-    setAddError("");
-    setCurrentPage(1);
+    try {
+      const formData = { name: trimmed };
+      const response = await craftskillService.createCraftSkill(formData);
+      // Giả sử API trả về object skill mới trong response.data.data
+      const newSkill = response.data.data;
+      fetchCraftSkills();
+      setShowAddModal(false);
+      setNewSkillName("");
+      setAddError("");
+      setCurrentPage(1);
+    } catch (error) {
+      setAddError("Có lỗi xảy ra khi thêm kỹ năng. Vui lòng thử lại.");
+      console.error("Error creating craft skill:", error);
+    }
   };
 
   return (
@@ -409,4 +419,4 @@ const ManageSkill = () => {
   );
 };
 
-export default ManageSkill;
+export default ManageSkill

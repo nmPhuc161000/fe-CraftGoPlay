@@ -135,3 +135,8 @@ export const API_ENDPOINTS_ARTISANREQUEST = {
   APRROVE_REQUEST: (id) => `/api/ArtisanRequest/ApprovedRequest/${id}`,
   REJECT_REQUEST: "/api/ArtisanRequest/RejectedRequest"
 }
+
+export const API_ENDPOINTS_CRAFT_SKILL = {
+  GET_ALL_CRAFT_SKILLS: "/api/CraftSkill/GetAllCraftSkills",
+  CREATE_CRAFT_SKILL: "/api/CraftSkill/CreateNewCraftSkill",
+}
