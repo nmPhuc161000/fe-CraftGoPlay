@@ -4,7 +4,7 @@ import { performApiRequest } from "../../utils/apiUtils";
 
 export const getProducts = () => axios.get(API_ENDPOINTS_PRODUCT.GET_PRODUCTS);
 export const getProductById = (id) =>
-  axios.get(`${API_ENDPOINTS_PRODUCT.GET_PRODUCT_BY_ID}/${id}`);
+  axios.get(API_ENDPOINTS_PRODUCT.GET_PRODUCT_BY_ID(id));
 
 const productService = {
   async getProducts() {

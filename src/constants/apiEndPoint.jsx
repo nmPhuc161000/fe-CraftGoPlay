@@ -106,7 +106,9 @@ export const API_ENDPOINTS_ADDRESS = {
   GET_ADDRESS: (userId) => `/api/UserAddress/GetAddress/${userId}`,
   ADD_ADDRESS: "/api/UserAddress/AddNewAddress",
   UPDATE_ADDRESS: (addressId) => `/api/UserAddress/UpdateAddress/${addressId}`,
-  DELTE_ADDRESS: (addressId) => `/api/UserAddress/DeleteAddress/${addressId}`,
+  SET_DEFAULT_ADDRESS: (addressId) =>
+    `/api/UserAddress/SetDefaultAddress/${addressId}`,
+  DELETE_ADDRESS: (addressId) => `/api/UserAddress/DeleteAddress/${addressId}`,
 };
 
 export const API_ENDPOINTS_ORDER = {
@@ -117,7 +119,7 @@ export const API_ENDPOINTS_ORDER = {
   GET_VNPAY_URL: (orderId) => `/api/Order/VnpayUrl/${orderId}`,
   VNPAY_RETURN: "/api/Order/vnpay-return",
   CREATE_FROM_CART: "/api/Order/CreateFromCart",
-  CREATE_DIRECT: "/api/Order/CreateDirect",
+  CREATE_DIRECT: (userId) => `/api/Order/CreateDirect/${userId}`,
   UPDATE_STATUS_ORDER: (orderId) => `/api/Order/status/${orderId}`
 };
 

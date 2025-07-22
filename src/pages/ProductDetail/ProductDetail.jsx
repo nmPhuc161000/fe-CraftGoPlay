@@ -26,6 +26,17 @@ const ProductDetail = () => {
   const { isAuthenticated, user } = useContext(AuthContext);
   const { addToCart } = useContext(CartContext);
 
+  const cartItem = useContext(CartContext)?.cartItems?.find(item => item.product?.id === product?.id);
+  const quantityInCart = cartItem?.quantity || 0;
+  //tong trong kho
+  const totalStock = Number(product?.quantity) || 0;
+  //so sanh so luong da ban
+  const quantitySold = Number(product?.quantitySold) || 0;
+  const availableStock = totalStock - quantitySold;
+  //kiem tra neu vuot qua so luong trong kho
+  const isPlusDisabled = (quantity + quantityInCart) >= availableStock;
+
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -101,16 +112,22 @@ const ProductDetail = () => {
       navigate("/login", { state: { from: location.pathname } });
       return;
     }
-    if (quantity > product.quantity) {
-      showNotification("Số lượng vượt quá số lượng trong kho", "error");
+    if (quantity + quantityInCart > availableStock) {
+      const remaining = Math.max(0, availableStock - quantityInCart);
+      showNotification(
+        `Chỉ còn ${remaining} sản phẩm trong kho. Bạn đã có ${quantityInCart} trong giỏ hàng.`,
+        "error"
+      );
       return;
     }
+
     addToCart({
       id: product.id,
       name: product.name,
       price: product.price,
       image: selectedImg,
       quantity: quantity,
+      stock: product.quantity,
     });
     setShowMessage(true);
     setTimeout(() => setShowMessage(false), 3500);
@@ -191,13 +208,6 @@ const ProductDetail = () => {
 
   return (
     <MainLayout>
-      {showMessage && (
-        <Notification
-          message="Đã thêm sản phẩm vào giỏ hàng!"
-          type="success"
-          onClose={() => setShowMessage(false)}
-        />
-      )}
       {showFavoriteMessage && (
         <Notification
           message="Đã thêm vào danh sách yêu thích!"
@@ -294,9 +304,9 @@ const ProductDetail = () => {
               </button>
               <span className="px-5 py-2 text-lg">{quantity}</span>
               <button
-                onClick={() => setQuantity((q) => Math.min(product.quantity, q + 1))}
-                disabled={quantity >= product.quantity}
-                className={`px-4 py-2 text-lg font-bold text-[#5e3a1e] hover:bg-[#e6d3bc] transition ${quantity >= product.quantity ? "opacity-50 cursor-not-allowed" : ""}`}
+                onClick={() => setQuantity((q) => q + 1)}
+                disabled={isPlusDisabled}
+                className={`px-4 py-2 text-lg font-bold text-[#5e3a1e] hover:bg-[#e6d3bc] transition ${isPlusDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 +
               </button>
@@ -308,7 +318,7 @@ const ProductDetail = () => {
               👍 <span>Bảo hành</span>
             </div>
             <div className="flex items-center gap-1">
-              📦 <span> Còn {product.quantity} sản phẩm</span>
+              📦 <span> Còn {availableStock} sản phẩm</span>
             </div>
           </div>
 
@@ -321,8 +331,12 @@ const ProductDetail = () => {
               Mua ngay
             </button>
             <button
-              className="text-white px-6 py-2 rounded bg-[#5e3a1e] hover:bg-[#4a2f15]"
+              className={`text-white px-6 py-2 rounded transition duration-200 ${product.quantity > 0
+                ? "bg-[#5e3a1e] hover:bg-[#4a2f15] cursor-pointer"
+                : "bg-gray-400 cursor-not-allowed opacity-60"
+                }`}
               onClick={handleAddToCart}
+              disabled={product.quantity <= 0}
             >
               🛒 Thêm vào giỏ hàng
             </button>

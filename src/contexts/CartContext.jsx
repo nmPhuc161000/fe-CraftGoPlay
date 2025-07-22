@@ -7,9 +7,17 @@ import {
     updateCartItem as updateCartItemApi,
 } from "../services/apis/cartApi";
 import { useNotification } from "./NotificationContext";
+import { getProductById } from "../services/apis/productApi";
 
 
 export const CartContext = createContext();
+
+const getStock = (product) => {
+    if (!product) return 0;
+    const qty = Number(product.quantity) || 0;
+    const sold = Number(product.quantitySold) || 0;
+    return Math.max(0, qty - sold);
+};
 
 export const CartProvider = ({ children }) => {
     const [cartItems, setCartItems] = useState([]);
@@ -21,7 +29,23 @@ export const CartProvider = ({ children }) => {
         if (isAuthenticated && user?.id && user?.roleId === 4) {
             const res = await getCart(user.id);
             if (res.success) {
-                const items = res.data?.data?.items || [];
+                const items = await Promise.all(
+                    (res.data?.data?.items || []).map(async item => {
+                        const productRes = await getProductById(item.productId);
+                        const productData = productRes?.data?.data || {};
+
+                        return {
+                            ...item,
+                            product: {
+                                id: item.productId,
+                                name: item.productName,
+                                quantity: productData.quantity,
+                                quantitySold: productData.quantitySold,
+                                productImages: item.productImages || [],
+                            }
+                        };
+                    })
+                );
                 setCartItems(items);
             } else {
                 console.error("Lỗi khi tải giỏ hàng:", res.error);
@@ -41,14 +65,43 @@ export const CartProvider = ({ children }) => {
 
     // 2. Thêm sản phẩm vào giỏ hàng
     const addToCart = async (product) => {
-        if (!isAuthenticated || !user?.id || !product || product.quantity <= 0)
-            return;
+        if (!isAuthenticated || !user?.id || !product?.id || product.quantity <= 0) return;
 
-        const res = await addToCartApi(user.id, product.id, product.quantity);
-        if (res.success) {
-            await fetchCart();
-        } else {
-            console.error("Lỗi khi thêm vào giỏ hàng:", res.error);
+        try {
+            
+            const productRes = await getProductById(product.id);
+            const latestProduct = productRes?.data?.data;
+
+            if (!latestProduct) {
+                showNotification("Không tìm thấy sản phẩm", "error");
+                return;
+            }
+
+            const stock = getStock(latestProduct); // số lượng còn trong kho mới nhất
+            const existingQuantity = cartItems.find(item => item.product?.id === product.id)?.quantity || 0;
+            const totalAfterAdd = existingQuantity + product.quantity;
+
+            if (totalAfterAdd > stock) {
+                const remaining = Math.max(0, stock - existingQuantity);
+                showNotification(
+                    `Chỉ còn ${remaining} sản phẩm trong kho. Bạn đã có ${existingQuantity} trong giỏ hàng.`,
+                    "error"
+                );
+                return;
+            }
+
+            const res = await addToCartApi(user.id, product.id, product.quantity);
+            if (res?.success) {
+                await fetchCart();
+                showNotification("Đã thêm sản phẩm vào giỏ hàng", "success");
+            } else {
+                console.error("Lỗi khi thêm vào giỏ hàng:", res?.error);
+                showNotification("Lỗi khi thêm sản phẩm vào giỏ hàng", "error");
+            }
+
+        } catch (err) {
+            console.error("Lỗi kết nối khi thêm vào giỏ hàng:", err);
+            showNotification("Không thể kết nối tới máy chủ", "error");
         }
     };
 
@@ -74,11 +127,28 @@ export const CartProvider = ({ children }) => {
     };
 
     // 4. Cập nhật số lượng
-    const updateQuantity = async (cartItemId, quantity) => {
-        if (!isAuthenticated || !cartItemId || quantity < 1) return;
+    const updateQuantity = async (cartItemId, newQuantity) => {
+        if (!isAuthenticated || !cartItemId || newQuantity < 1) return;
+
+        const item = cartItems.find(item => item.id === cartItemId);
+
+        if (!item) {
+            showNotification("Không tìm thấy sản phẩm trong giỏ hàng", "error");
+            return;
+        }
+        console.log("DEBUG product:", item.product);
+        const stock = getStock(item.product);
+
+        if (newQuantity > stock) {
+            showNotification(
+                `Chỉ còn ${stock} sản phẩm trong kho. Bạn không thể cập nhật vượt quá số lượng này.`,
+                "error"
+            );
+            return;
+        }
 
         try {
-            const res = await updateCartItemApi(cartItemId, quantity);
+            const res = await updateCartItemApi(cartItemId, newQuantity);
             if (res.success) {
                 await fetchCart();
             } else {
@@ -86,7 +156,10 @@ export const CartProvider = ({ children }) => {
                 console.error("Lỗi khi cập nhật số lượng:", res.error);
             }
         } catch (error) {
-            showNotification(error?.response?.data?.message || "Lỗi khi cập nhật số lượng", "error");
+            showNotification(
+                error?.response?.data?.message || "Lỗi khi cập nhật số lượng",
+                "error"
+            );
             console.error("Lỗi khi cập nhật số lượng:", error);
         }
     };
@@ -114,6 +187,7 @@ export const CartProvider = ({ children }) => {
                 updateQuantity,
                 cartCount,
                 clearCart,
+                getStock,
             }}
         >
             {children}
