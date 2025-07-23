@@ -21,6 +21,10 @@ export default function AddProductTab() {
     Status: "Active",
     Artisan_id: user?.id,
     MeterialIds: [], // Thay đổi từ string sang array
+    Weight: 0, // Thêm trường Weight (gram)
+    Length: 0, // Thêm trường Length (cm)
+    Width: 0, // Thêm trường Width (cm)
+    Height: 0,
   });
   const [previewImages, setPreviewImages] = useState([]); // Thay đổi từ single image sang array
   const [isDragging, setIsDragging] = useState(false);
@@ -327,6 +331,90 @@ export default function AddProductTab() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
               required
             />
+          </div>
+
+          <div>
+            <label
+              htmlFor="Weight"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Trọng lượng (gram)*
+            </label>
+            <input
+              type="number"
+              id="Weight"
+              name="Weight"
+              value={formData.Weight}
+              onChange={handleChange}
+              min="0"
+              max="1600000"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">Tối đa 1,600,000 gram</p>
+          </div>
+
+          <div>
+            <label
+              htmlFor="Length"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Chiều dài (cm)*
+            </label>
+            <input
+              type="number"
+              id="Length"
+              name="Length"
+              value={formData.Length}
+              onChange={handleChange}
+              min="0"
+              max="200"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">Tối đa 200 cm</p>
+          </div>
+
+          <div>
+            <label
+              htmlFor="Width"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Chiều rộng (cm)*
+            </label>
+            <input
+              type="number"
+              id="Width"
+              name="Width"
+              value={formData.Width}
+              onChange={handleChange}
+              min="0"
+              max="200"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">Tối đa 200 cm</p>
+          </div>
+
+          <div>
+            <label
+              htmlFor="Height"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Chiều cao (cm)*
+            </label>
+            <input
+              type="number"
+              id="Height"
+              name="Height"
+              value={formData.Height}
+              onChange={handleChange}
+              min="0"
+              max="200"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">Tối đa 200 cm</p>
           </div>
 
           <div className="md:col-span-2">
