@@ -104,6 +104,7 @@ export const API_ENDPOINTS_FAVORITE = {
 // Các endpoint cho địa chỉ
 export const API_ENDPOINTS_ADDRESS = {
   GET_ADDRESS: (userId) => `/api/UserAddress/GetAddress/${userId}`,
+  GET_DEFAULT_ADDRESS: (userId) => `/api/UserAddress/GetDefaultAddress/${userId}`,
   ADD_ADDRESS: "/api/UserAddress/AddNewAddress",
   UPDATE_ADDRESS: (addressId) => `/api/UserAddress/UpdateAddress/${addressId}`,
   SET_DEFAULT_ADDRESS: (addressId) =>

@@ -9,6 +9,12 @@ const addressService = {
     });
   },
 
+    async getDefaultAddress(userId) {
+    return performApiRequest(API_ENDPOINTS_ADDRESS.GET_DEFAULT_ADDRESS(userId), {
+      method: "get",
+    });
+  },
+
   async addNewAddress(addressData) {
     const formData = new FormData();
 

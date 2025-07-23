@@ -88,7 +88,7 @@ const ProductDetail = () => {
     fakeFetchReviews();
   }, []);
 
-  const handleBuyNow = () => {
+  const handleBuyNow = (product) => {
     if (!isAuthenticated) {
       navigate("/login", { state: { from: location.pathname } });
       return;
@@ -102,6 +102,7 @@ const ProductDetail = () => {
           productPrice: product.price,
           productImage: selectedImg,
           quantity: quantity,
+          artisanName: product.artisanName,
         },
       },
     });
@@ -244,12 +245,12 @@ const ProductDetail = () => {
 
         {/* thong tin */}
         <div className="md:w-1/2">
-          <h1 className="text-3xl font-bold">{product.name}</h1>
+          <h1 className="text-3xl font-bold leading-snug break-words">{product.name}</h1>
           <p className="text-2xl text-red-600 mt-2">
             {product.price.toLocaleString()}₫
           </p>
           <div className="mt-4">
-            <h3 className="font-semibold text-lg mb-2">Mô Tả Sản Phẩm</h3>
+            <h3 className="font-semibold text-lg mb-2 leading-snug break-words">Mô Tả Sản Phẩm</h3>
             <p className="">{product.description}</p>
           </div>
 
@@ -326,7 +327,7 @@ const ProductDetail = () => {
           <div className="mt-6 flex flex-wrap gap-4">
             <button
               className="text-white px-6 py-2 rounded bg-[#5e3a1e] hover:bg-[#4a2f15]"
-              onClick={handleBuyNow}
+              onClick={() => handleBuyNow(product)}
             >
               Mua ngay
             </button>
