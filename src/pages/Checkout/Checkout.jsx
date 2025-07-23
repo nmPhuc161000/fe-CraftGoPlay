@@ -6,7 +6,7 @@ import { AuthContext } from "../../contexts/AuthContext";
 import MainLayout from "../../components/layout/MainLayout";
 import { createOrderFromCart, createOrderDirect, getVnpayUrl } from "../../services/apis/orderApi";
 import { useNotification } from "../../contexts/NotificationContext";
-
+import addressService from "../../services/apis/addressApi";
 
 const Checkout = () => {
     const { cartItems, removeMultipleItems } = useContext(CartContext);
@@ -30,6 +30,8 @@ const Checkout = () => {
     const [useCoins, setUseCoins] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState("");
     const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+    const [addresses, setAddresses] = useState([]);
+    const [selectedAddressId, setSelectedAddressId] = useState(null);
 
     useEffect(() => {
         if (!isPlacingOrder && !buyNow && selectedCartItems.length === 0) {
@@ -41,6 +43,23 @@ const Checkout = () => {
         window.scrollTo(0, 0);
     }, []);
 
+    useEffect(() => {
+        const fetchDefaultAddress = async () => {
+            try {
+                const res = await addressService.getDefaultAddress(user.id);
+                const defaultAddress = res?.data?.data;
+                if (defaultAddress) {
+                    setAddresses([defaultAddress]);
+                    setSelectedAddressId(defaultAddress.id);
+                }
+            } catch (err) {
+                console.error("Lỗi khi lấy địa chỉ mặc định:", err);
+            }
+        };
+
+        fetchDefaultAddress();
+    }, [user?.id]);
+
     const getTotal = () => {
         if (buyNow) {
             return buyNow.productPrice * buyNow.quantity;
@@ -49,7 +68,7 @@ const Checkout = () => {
     };
 
     const maxDiscountByPercent = Math.floor(getTotal() * 0.1 / 100) * 100;
-    const maxDiscountByCoins = user.coins * 100; 
+    const maxDiscountByCoins = user.coins * 100;
 
     const coinDiscount = useCoins
         ? Math.min(maxDiscountByPercent, maxDiscountByCoins)
@@ -82,6 +101,7 @@ const Checkout = () => {
         const formData = new FormData();
         formData.append("UserId", user?.id);
         formData.append("PaymentMethod", paymentMethod === "vnpay" ? "Online" : "Cash");
+        formData.append("AddressId", selectedAddressId);
 
         if (buyNow) {
             // Mua ngay sản phẩm
@@ -110,7 +130,6 @@ const Checkout = () => {
             }
 
         } else {
-
             selectedCartItems.forEach((item) => {
                 formData.append("SelectedCartItemIds", item.id);
             });
@@ -154,9 +173,17 @@ const Checkout = () => {
                             <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
                                 <FaMapMarkerAlt className="text-[#5e3a1e]" /> Địa chỉ nhận hàng
                             </h2>
-                            <p>Nguyễn Văn A | 0901234567</p>
-                            <p>example@gmail.com</p>
-                            <p>123 Đường ABC, Quận XYZ, TP.HCM</p>
+                            {(() => {
+                                const selectedAddress = addresses.find(addr => addr.id === selectedAddressId);
+                                if (!selectedAddress) return <p>Chưa có địa chỉ được chọn.</p>;
+                                return (
+                                    <>
+                                        <p>{selectedAddress.fullName} | {selectedAddress.phoneNumber}</p>
+                                        <p>{realUser?.email}</p>
+                                        <p>{selectedAddress.fullAddress}</p>
+                                    </>
+                                );
+                            })()}
                         </div>
                         <button className="text-[15px] text-[#b28940] hover:underline">Thay đổi</button>
                     </section>
@@ -172,7 +199,7 @@ const Checkout = () => {
 
                         {buyNow ? (
                             <div className="mb-6">
-                                <div className="text-[15px] font-semibold mb-3 pb-2">🛍 Sản phẩm bạn đã chọn</div>
+                                <div className="text-[15px] font-semibold mb-3 pb-2">🛍 Nghệ nhân: {buyNow.artisanName}</div>
 
                                 <div className="grid grid-cols-12 items-center py-3 text-[15px]">
                                     <div className="col-span-6 flex items-center gap-4">
