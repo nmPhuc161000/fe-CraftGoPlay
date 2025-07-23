@@ -11,21 +11,15 @@ const STATUS_COLOR = {
 };
 
 const ArtisanAccount = () => {
+  const [users, setUsers] = useState([]);
   const [openActionIdx, setOpenActionIdx] = useState(null);
   const actionMenuRef = useRef(null);
-  const [data, setData] = useState(() => {
-    const savedData = localStorage.getItem('adminArtisanData');
-    return savedData ? JSON.parse(savedData) : FAKE_DATA;
-  });
+  const [data, setData] = useState(FAKE_DATA);
   const [search, setSearch] = useState("");
   const [confirmModal, setConfirmModal] = useState({ open: false, idx: null, action: null });
   const actionBtnRefs = useRef([]);
   const [actionMenuPos, setActionMenuPos] = useState({ top: 0, left: 0 });
 
-  // Lưu dữ liệu vào localStorage khi data thay đổi
-  useEffect(() => {
-    localStorage.setItem('adminArtisanData', JSON.stringify(data));
-  }, [data]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -100,15 +94,14 @@ const ArtisanAccount = () => {
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm border-separate border-spacing-0">
                 <thead>
-                  <tr>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tl-lg">ID</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Họ và tên</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Tên đăng nhập</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Email</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Chức vụ</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Trạng thái</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tr-lg">Thao tác</th>
-                  </tr>
+                    <tr style={{ background: 'linear-gradient(90deg, #5e3a1e 0%, #c7903f 100%)' }}>
+                      <th className="px-3 py-2 text-left font-semibold rounded-tl-lg text-white">ID</th>
+                      <th className="px-3 py-2 text-left font-semibold text-white">Họ và tên</th>
+                      <th className="px-3 py-2 text-left font-semibold text-white">Tên đăng nhập</th>
+                      <th className="px-3 py-2 text-left font-semibold text-white">Email</th>
+                      <th className="px-3 py-2 text-left font-semibold text-white">Trạng thái</th>
+                      <th className="px-3 py-2 text-left font-semibold rounded-tr-lg text-white">Thao tác</th>
+                    </tr>
                 </thead>
                 <tbody>
                   {filteredData.map((row, idx) => (
@@ -118,15 +111,41 @@ const ArtisanAccount = () => {
                       <td className="px-3 py-2">{row.username}</td>
                       <td className="px-3 py-2">{row.email}</td>
                       <td className="px-3 py-2">
-                        <span className="border border-blue-200 bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs font-semibold">{row.role}</span>
-                      </td>
-                      <td className="px-3 py-2">
-                        <span className={`px-2 py-1 rounded text-xs font-semibold ${STATUS_COLOR[row.status]}`}>{row.status === 'Active' ? 'Đang hoạt động' : 'Ngừng hoạt động'}</span>
+                        <span
+                          className={`
+                            inline-flex items-center gap-1
+                            px-3 py-1.5 rounded-full text-xs font-semibold border
+                            shadow-sm transition-all
+                            cursor-pointer
+                            ${row.status === 'Active'
+                              ? 'bg-gradient-to-r from-green-200 to-green-100 text-green-800 border-green-300'
+                              : 'bg-white text-red-600 border-red-300'}
+                          `}
+                        >
+                          {row.status === 'Active' ? (
+                            <>
+                              <svg className="w-3.5 h-3.5 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                <circle cx="10" cy="10" r="8" />
+                                <path d="M7.5 10.5l2 2 3-4" stroke="#22c55e" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+                              </svg>
+                              <span>Đang hoạt động</span>
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-3.5 h-3.5 mr-1 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                <circle cx="10" cy="10" r="8" />
+                                <line x1="7" y1="7" x2="13" y2="13" stroke="#ef4444" strokeWidth="1.5" />
+                                <line x1="13" y1="7" x2="7" y2="13" stroke="#ef4444" strokeWidth="1.5" />
+                              </svg>
+                              <span className="text-red-600">Ngừng hoạt động</span>
+                            </>
+                          )}
+                        </span>
                       </td>
                       <td className="px-3 py-2 relative">
                         <button
                           ref={el => actionBtnRefs.current[idx] = el}
-                          className="p-1 rounded hover:bg-gray-100"
+                          className="p-1 rounded hover:bg-gray-100 cursor-pointer"
                           onClick={e => {
                             const rect = e.currentTarget.getBoundingClientRect();
                             setActionMenuPos({ top: rect.bottom + window.scrollY, left: rect.right + window.scrollX });

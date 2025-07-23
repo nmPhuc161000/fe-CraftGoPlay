@@ -285,14 +285,14 @@ const CreateAccount = () => {
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm border-separate border-spacing-0">
                 <thead>
-                  <tr>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tl-lg">ID</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Họ và tên</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Tên đăng nhập</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Email</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Chức vụ</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Trạng thái</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tr-lg">Thao tác</th>
+                  <tr style={{ background: 'linear-gradient(90deg, #5e3a1e 0%, #c7903f 100%)' }}>
+                    <th className="px-3 py-2 text-left text-white font-semibold rounded-tl-lg">ID</th>
+                    <th className="px-3 py-2 text-left text-white font-semibold">Họ và tên</th>
+                    <th className="px-3 py-2 text-left text-white font-semibold">Tên đăng nhập</th>
+                    <th className="px-3 py-2 text-left text-white font-semibold">Email</th>
+                    <th className="px-3 py-2 text-left text-white font-semibold">Chức vụ</th>
+                    <th className="px-3 py-2 text-left text-white font-semibold">Trạng thái</th>
+                    <th className="px-3 py-2 text-left text-white font-semibold rounded-tr-lg">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>

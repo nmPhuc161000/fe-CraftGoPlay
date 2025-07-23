@@ -141,4 +141,5 @@ export const API_ENDPOINTS_ARTISANREQUEST = {
 export const API_ENDPOINTS_CRAFT_SKILL = {
   GET_ALL_CRAFT_SKILLS: "/api/CraftSkill/GetAllCraftSkills",
   CREATE_CRAFT_SKILL: "/api/CraftSkill/CreateNewCraftSkill",
+  UPDATE_CRAFT_SKILL: `/api/CraftSkill/UpdateCraftSkill`,
 }
