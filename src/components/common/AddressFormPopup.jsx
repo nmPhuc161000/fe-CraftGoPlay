@@ -170,20 +170,55 @@ const AddressFormPopup = ({
     setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
-  const handleLocationChange = (field, value, options, idField, callback) => {
-    const selected = options.find((item) => item[`${field}Name`] === value);
+  // Fixed function - separate handlers for each location level
+  const handleProvinceChange = (e) => {
+    const value = e.target.value;
+    const selected = provinces.find((item) => item.ProvinceName === value);
+    
     if (selected) {
       setFormData((prev) => ({
         ...prev,
-        [field]: value,
-        [idField]: selected[`${field}ID`] || selected.WardCode || "",
-        ...(field === "province"
-          ? { district: "", districtId: "", ward: "", wardCode: "" }
-          : {}),
-        ...(field === "district" ? { ward: "", wardCode: "" } : {}),
+        province: value,
+        provinceId: selected.ProvinceID || "",
+        district: "", // Reset district when province changes
+        districtId: "",
+        ward: "", // Reset ward when province changes  
+        wardCode: "",
       }));
-      callback?.(value);
+      onProvinceChange?.(value);
     }
+    setErrors((prev) => ({ ...prev, province: "" }));
+  };
+
+  const handleDistrictChange = (e) => {
+    const value = e.target.value;
+    const selected = districts.find((item) => item.DistrictName === value);
+    
+    if (selected) {
+      setFormData((prev) => ({
+        ...prev,
+        district: value,
+        districtId: selected.DistrictID || "",
+        ward: "", // Reset ward when district changes
+        wardCode: "",
+      }));
+      onDistrictChange?.(value);
+    }
+    setErrors((prev) => ({ ...prev, district: "" }));
+  };
+
+  const handleWardChange = (e) => {
+    const value = e.target.value;
+    const selected = wards.find((item) => item.WardName === value);
+    
+    if (selected) {
+      setFormData((prev) => ({
+        ...prev,
+        ward: value,
+        wardCode: selected.WardCode || "",
+      }));
+    }
+    setErrors((prev) => ({ ...prev, ward: "" }));
   };
 
   const handleSubmit = (e) => {
@@ -259,15 +294,7 @@ const AddressFormPopup = ({
               <FormSelect
                 name="province"
                 value={formData.province}
-                onChange={(e) =>
-                  handleLocationChange(
-                    "province",
-                    e.target.value,
-                    provinces,
-                    "provinceId",
-                    onProvinceChange
-                  )
-                }
+                onChange={handleProvinceChange}
                 options={provinces.map((p) => ({
                   value: p.ProvinceName,
                   label: p.ProvinceName,
@@ -278,15 +305,7 @@ const AddressFormPopup = ({
               <FormSelect
                 name="district"
                 value={formData.district}
-                onChange={(e) =>
-                  handleLocationChange(
-                    "district",
-                    e.target.value,
-                    districts,
-                    "districtId",
-                    onDistrictChange
-                  )
-                }
+                onChange={handleDistrictChange}
                 options={districts.map((d) => ({
                   value: d.DistrictName,
                   label: d.DistrictName,
@@ -298,14 +317,7 @@ const AddressFormPopup = ({
               <FormSelect
                 name="ward"
                 value={formData.ward}
-                onChange={(e) =>
-                  handleLocationChange(
-                    "ward",
-                    e.target.value,
-                    wards,
-                    "wardCode"
-                  )
-                }
+                onChange={handleWardChange}
                 options={wards.map((w) => ({
                   value: w.WardName,
                   label: w.WardName,

@@ -43,13 +43,34 @@ export const validateProductData = (productData) => {
       status: 400,
     };
   }
-  // if (!productData.MeterialIds || productData.MeterialIds.length === 0) {
-  //   return {
-  //     success: false,
-  //     error: "Vui lòng chọn ít nhất một chất liệu",
-  //     status: 400,
-  //   };
-  // }
+  if (productData.Weight <= 0 || productData.Weight > 1600000) {
+    return {
+      success: false,
+      error: "Trọng lượng phải từ 1 đến 1,600,000 gram",
+    };
+  }
+
+  if (productData.Length <= 0 || productData.Length > 200) {
+    return {
+      success: false,
+      error: "Chiều dài phải từ 1 đến 200 cm",
+    };
+  }
+
+  if (productData.Width <= 0 || productData.Width > 200) {
+    return {
+      success: false,
+      error: "Chiều rộng phải từ 1 đến 200 cm",
+    };
+  }
+
+  if (productData.Height <= 0 || productData.Height > 200) {
+    return {
+      success: false,
+      error: "Chiều cao phải từ 1 đến 200 cm",
+    };
+  }
+  
   if (!productData.Images || productData.Images.length === 0) {
     return {
       success: false,

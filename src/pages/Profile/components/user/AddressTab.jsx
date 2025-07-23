@@ -92,33 +92,53 @@ export default function AddressTab({ userId }) {
 
     if (confirmed) {
       try {
-        await addressService.deleteAddress(addressId);
-        setState((prev) => ({
-          ...prev,
-          addresses: prev.addresses.filter((addr) => addr.id !== addressId),
-        }));
-        showNotification("Xóa địa chỉ thành công", "success");
+        const response = await addressService.deleteAddress(addressId);
+
+        // Kiểm tra response từ API
+        if (response.status === 200 || response.data?.success) {
+          setState((prev) => ({
+            ...prev,
+            addresses: prev.addresses.filter((addr) => addr.id !== addressId),
+          }));
+          showNotification("Xóa địa chỉ thành công", "success");
+        } else {
+          throw new Error(response.data?.message || "Xóa địa chỉ thất bại");
+        }
       } catch (error) {
-        showNotification("Xóa địa chỉ thất bại", "error");
         console.error("Error deleting address:", error);
+        showNotification(
+          error.response?.data?.message ||
+            error.message ||
+            "Xóa địa chỉ thất bại",
+          "error"
+        );
       }
     }
   };
 
   const handleSetDefault = async (addressId) => {
     try {
-      await addressService.setDefaultAddress(addressId);
-      setState((prev) => ({
-        ...prev,
-        addresses: prev.addresses.map((addr) => ({
-          ...addr,
-          isDefault: addr.id === addressId,
-        })),
-      }));
-      showNotification("Đã đặt làm địa chỉ mặc định", "success");
+      const response = await addressService.setDefaultAddress(addressId);
+
+      // Kiểm tra response từ API
+      if (response.status === 200 || response.data?.success) {
+        setState((prev) => ({
+          ...prev,
+          addresses: prev.addresses.map((addr) => ({
+            ...addr,
+            isDefault: addr.id === addressId,
+          })),
+        }));
+        showNotification("Đã đặt làm địa chỉ mặc định", "success");
+      } else {
+        throw new Error(response.data?.message || "Thao tác thất bại");
+      }
     } catch (error) {
-      showNotification("Thao tác thất bại", "error");
       console.error("Error setting default address:", error);
+      showNotification(
+        error.response?.data?.message || error.message || "Thao tác thất bại",
+        "error"
+      );
     }
   };
 
@@ -164,6 +184,13 @@ export default function AddressTab({ userId }) {
       );
       const wardObj = state.wards.find((w) => w.WardName === ward);
 
+      // Kiểm tra dữ liệu trước khi gửi
+      if (!provinceObj || !districtObj || !wardObj) {
+        showNotification("Vui lòng chọn đầy đủ thông tin địa chỉ", "error");
+        return;
+      }
+
+      // Map đúng field names theo API yêu cầu
       const apiData = {
         UserId: userId,
         ProviceId: provinceObj?.ProvinceID || "",
@@ -172,29 +199,62 @@ export default function AddressTab({ userId }) {
         ProviceName: province,
         DistrictName: district,
         WardName: ward,
-        ...rest,
+        // Map các field từ form sang tên field API yêu cầu
+        FullName: formData.recipientName, // recipientName -> FullName
+        PhoneNumber: formData.phoneNumber, // phoneNumber -> PhoneNumber
+        HomeNumber: formData.street, // street -> HomeNumber
+        AddressType: formData.addressType, // addressType -> AddressType
+        IsDefault: formData.isDefault, // isDefault -> IsDefault
       };
 
-      await (state.currentAddress
+      console.log("Sending API data:", apiData); // Debug log
+
+      const response = await (state.currentAddress
         ? addressService.updateAddress(state.currentAddress.id, apiData)
         : addressService.addNewAddress(apiData));
 
-      showNotification(
-        state.currentAddress
-          ? "Cập nhật địa chỉ thành công"
-          : "Thêm địa chỉ mới thành công",
-        "success"
-      );
-      setState((prev) => ({ ...prev, isDialogOpen: false }));
-      fetchData();
+      console.log("API Response:", response); // Debug log
+
+      // Kiểm tra response từ API
+      if (
+        response.status === 200 ||
+        response.status === 201 ||
+        response.data?.success
+      ) {
+        showNotification(
+          state.currentAddress
+            ? "Cập nhật địa chỉ thành công"
+            : "Thêm địa chỉ mới thành công",
+          "success"
+        );
+        setState((prev) => ({ ...prev, isDialogOpen: false }));
+        await fetchData(); // Reload data
+      } else {
+        // API trả về lỗi nhưng không throw exception
+        throw new Error(response.data?.message || "Thao tác thất bại");
+      }
     } catch (error) {
-      showNotification(
-        state.currentAddress
-          ? "Cập nhật địa chỉ thất bại"
-          : "Thêm địa chỉ mới thất bại",
-        "error"
-      );
       console.error("Error submitting address:", error);
+
+      // Xử lý chi tiết các loại lỗi
+      let errorMessage = state.currentAddress
+        ? "Cập nhật địa chỉ thất bại"
+        : "Thêm địa chỉ mới thất bại";
+
+      if (error.response) {
+        // Server trả về error response
+        const responseData = error.response.data;
+        if (responseData?.message) {
+          errorMessage = responseData.message;
+        } else if (responseData?.data && Array.isArray(responseData.data)) {
+          // Trường hợp có validation errors
+          errorMessage = responseData.data.join(", ");
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      showNotification(errorMessage, "error");
     }
   };
 
