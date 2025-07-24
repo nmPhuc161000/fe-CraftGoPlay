@@ -104,7 +104,8 @@ export const API_ENDPOINTS_FAVORITE = {
 // Các endpoint cho địa chỉ
 export const API_ENDPOINTS_ADDRESS = {
   GET_ADDRESS: (userId) => `/api/UserAddress/GetAddress/${userId}`,
-  GET_DEFAULT_ADDRESS: (userId) => `/api/UserAddress/GetDefaultAddress/${userId}`,
+  GET_DEFAULT_ADDRESS: (userId) =>
+    `/api/UserAddress/GetDefaultAddress/${userId}`,
   ADD_ADDRESS: "/api/UserAddress/AddNewAddress",
   UPDATE_ADDRESS: (addressId) => `/api/UserAddress/UpdateAddress/${addressId}`,
   SET_DEFAULT_ADDRESS: (addressId) =>
@@ -113,15 +114,16 @@ export const API_ENDPOINTS_ADDRESS = {
 };
 
 export const API_ENDPOINTS_ORDER = {
-  GET_ORDERSBYUSERID: (userId) => `/api/Order/GetOrdersByUserId/${userId}`,
-  GET_ORDERSBYARTISANID: (artisanId) =>
-    `/api/Order/GetOrdersByArtisanId/${artisanId}`,
+  GET_ORDERSBYUSERID: (userId, pageIndex, pageSize, status) =>
+    `/api/Order/GetOrdersByUserId/${userId}?pageIndex=${userId}&pageSize=${pageSize}&status=${status}`,
+  GET_ORDERSBYARTISANID: (artisanId, pageIndex, pageSize, status) =>
+    `/api/Order/GetOrdersByArtisanId/${artisanId}/?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}`,
   GET_ORDERBYORDERID: (orderId) => `/api/Order/GetOrderByOrderId/${orderId}`,
   GET_VNPAY_URL: (orderId) => `/api/Order/VnpayUrl/${orderId}`,
   VNPAY_RETURN: "/api/Order/vnpay-return",
   CREATE_FROM_CART: "/api/Order/CreateFromCart",
   CREATE_DIRECT: (userId) => `/api/Order/CreateDirect/${userId}`,
-  UPDATE_STATUS_ORDER: (orderId) => `/api/Order/status/${orderId}`
+  UPDATE_STATUS_ORDER: (orderId) => `/api/Order/status/${orderId}`,
 };
 
 // Các endpoint cho admin (theo hình ảnh bạn cung cấp)
@@ -136,10 +138,10 @@ export const API_ENDPOINTS_ARTISANREQUEST = {
   GET_ALL_REQUEST: "/api/ArtisanRequest/GetAllRequest",
   GET_REQUEST_BY_ID: (id) => `/api/ArtisanRequest/GetRequestById/${id}`,
   APRROVE_REQUEST: (id) => `/api/ArtisanRequest/ApprovedRequest/${id}`,
-  REJECT_REQUEST: "/api/ArtisanRequest/RejectedRequest"
-}
+  REJECT_REQUEST: "/api/ArtisanRequest/RejectedRequest",
+};
 
 export const API_ENDPOINTS_CRAFT_SKILL = {
   GET_ALL_CRAFT_SKILLS: "/api/CraftSkill/GetAllCraftSkills",
   CREATE_CRAFT_SKILL: "/api/CraftSkill/CreateNewCraftSkill",
-}
+};

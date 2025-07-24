@@ -26,7 +26,7 @@ export default function ProfileUser() {
       <div className="py-8 bg-gray-50 min-h-screen">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6 px-4">
           {/* Sidebar */}
-          <div className="w-full md:w-64 flex-shrink-0 bg-white rounded-lg shadow-lg h-fit md:sticky md:top-6">
+          <div className="w-full md:w-64 flex-shrink-0 bg-white rounded-lg shadow-lg h-fit sticky top-24">
             {/* Profile Summary */}
             <div className="p-4 border-b">
               <div className="flex flex-col items-center text-center">
@@ -67,7 +67,7 @@ export default function ProfileUser() {
           {/* Main Content */}
           <div className="flex-1 bg-white rounded-lg shadow-lg overflow-hidden">
             {/* Cover Photo */}
-            <div className="h-48 bg-gradient-to-r from-[#4a2d16] to-[#6e4b2a]"></div>
+            {/* <div className="h-48 bg-gradient-to-r from-[#4a2d16] to-[#6e4b2a]"></div> */}
 
             {/* Tab Content */}
             <div className="p-6">

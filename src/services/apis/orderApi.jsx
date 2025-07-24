@@ -23,24 +23,45 @@ export const createOrderDirect = (userId, formData) =>
   });
 
 const orderService = {
-  async getOrderByUserId(userId) {
-    return performApiRequest(API_ENDPOINTS_ORDER.GET_ORDERSBYUSERID(userId), {
-      method: "get",
-    });
-  },
-  async getOrderByArtisanId(artisanId) {
+  async getOrderByUserId(userId, pageIndex = 1, pageSize = 10, status = "") {
     return performApiRequest(
-      API_ENDPOINTS_ORDER.GET_ORDERSBYARTISANID(artisanId),
+      API_ENDPOINTS_ORDER.GET_ORDERSBYUSERID(
+        userId,
+        pageIndex,
+        pageSize,
+        status
+      ),
       {
         method: "get",
       }
     );
   },
+
+  async getOrderByArtisanId(
+    artisanId,
+    pageIndex = 1,
+    pageSize = 10,
+    status = ""
+  ) {
+    return performApiRequest(
+      API_ENDPOINTS_ORDER.GET_ORDERSBYARTISANID(
+        artisanId,
+        pageIndex,
+        pageSize,
+        status
+      ),
+      {
+        method: "get",
+      }
+    );
+  },
+
   async getOrderByOrderId(orderId) {
     return performApiRequest(API_ENDPOINTS_ORDER.GET_ORDERBYORDERID(orderId), {
       method: "get",
     });
   },
+  
   async updateStatusOrder(orderId, status) {
     const formData = new FormData();
     formData.append("Status", status);
