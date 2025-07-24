@@ -1,65 +1,55 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../contexts/AuthContext";
 import orderService from "../../../../services/apis/orderApi";
-import dayjs from "dayjs";
-import {
-  FiPackage,
-  FiCheck,
-  FiX,
-  FiTruck,
-  FiDollarSign,
-  FiUser,
-  FiMapPin,
-  FiClock,
-  FiSlash,
-  FiAlertCircle,
-  FiFilter,
-} from "react-icons/fi";
 import { useNotification } from "../../../../contexts/NotificationContext";
+import {
+  statusFilters,
+  statusConfig,
+  convertStatus,
+  formatPrice,
+  transformOrderData,
+} from "../../../../utils/orderUtils";
+import { FiPackage, FiUser, FiMapPin, FiDollarSign } from "react-icons/fi";
 
-export default function ArtisanOrdersTab() {
+const ArtisanOrdersTab = () => {
   const { user } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
+  const [statusCounts, setStatusCounts] = useState({});
   const [loading, setLoading] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const [showStatusFilter, setShowStatusFilter] = useState(false);
   const { showNotification } = useNotification();
 
-  // Danh sách các trạng thái có thể lọc
-  const statusFilters = [
-    { value: "all", label: "Tất cả" },
-    { value: "Pending", label: "Chờ xử lý" },
-    { value: "Accepted", label: "Đã chấp nhận" },
-    { value: "Processing", label: "Đang chuẩn bị" },
-    { value: "Shipped", label: "Đang giao" },
-    { value: "Completed", label: "Hoàn thành" },
-    { value: "Rejected", label: "Đã từ chối" },
-    { value: "Cancelled", label: "Đã hủy" },
-    { value: "WaitingForPayment", label: "Chờ thanh toán" },
-    { value: "Refund", label: "Hoàn tiền" },
-  ];
-
+  // Fetch orders based on status
   useEffect(() => {
-    const fetchOrders = async () => {
+    const fetchOrders = async (status = "") => {
       try {
         setLoading(true);
-        const res = await orderService.getOrderByArtisanId(user.id);
+        const res = await orderService.getOrderByArtisanId(
+          user.id,
+          1,
+          100,
+          status
+        );
 
         if (res.data.error === 0 && Array.isArray(res.data.data)) {
-          const transformed = res.data.data.map((order) => ({
-            ...order,
-            date: dayjs(order.creationDate).format("DD/MM/YYYY"),
-            formattedDate: dayjs(order.creationDate).format(
-              "DD/MM/YYYY"
-            ),
-            statusKey: convertStatus(order.status),
-            paymentStatus: order.isPaid ? "Đã thanh toán" : "Chưa thanh toán",
-            paymentMethod:
-              order.paymentMethod === "Online" ? "Online" : "Tiền mặt",
-          }));
-          setOrders(transformed);
-          setFilteredOrders(transformed); // Mặc định hiển thị tất cả đơn hàng
+          const transformed = res.data.data.map(transformOrderData);
+
+          if (status === "") {
+            const counts = statusFilters.reduce((acc, filter) => {
+              if (filter.value === "all") {
+                acc[filter.value] = transformed.length;
+              } else {
+                acc[filter.value] = transformed.filter(
+                  (order) => order.status === filter.value
+                ).length;
+              }
+              return acc;
+            }, {});
+            setStatusCounts(counts);
+            setOrders(transformed);
+          }
+          setFilteredOrders(transformed);
         }
       } catch (err) {
         console.error("Lỗi khi lấy đơn hàng:", err);
@@ -69,64 +59,40 @@ export default function ArtisanOrdersTab() {
     };
 
     if (user?.id) {
-      fetchOrders();
+      fetchOrders(selectedStatus === "all" ? "" : selectedStatus);
     }
-  }, [user]);
-
-  // Hàm lọc đơn hàng theo trạng thái
-  useEffect(() => {
-    if (selectedStatus === "all") {
-      setFilteredOrders(orders);
-    } else {
-      const filtered = orders.filter(
-        (order) => order.status === selectedStatus
-      );
-      setFilteredOrders(filtered);
-    }
-  }, [selectedStatus, orders]);
-
-  const convertStatus = (status) => {
-    switch (status) {
-      case "Completed":
-        return "completed";
-      case "Shipped":
-        return "shipped";
-      case "Processing":
-        return "processing";
-      case "Accepted":
-        return "accepted";
-      case "Rejected":
-        return "rejected";
-      case "Cancelled":
-        return "cancelled";
-      case "WaitingForPayment":
-        return "waitingForPayment";
-      case "Refund":
-        return "refund";
-      case "Pending":
-      default:
-        return "pending";
-    }
-  };
+  }, [user, selectedStatus]);
 
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
       setLoading(true);
       const res = await orderService.updateStatusOrder(orderId, newStatus);
-
       if (res.data.error === 0) {
-        // Cập nhật lại danh sách đơn hàng
-        const updatedOrders = orders.map((order) =>
-          order.id === orderId
-            ? {
-                ...order,
-                statusKey: convertStatus(newStatus),
-                status: newStatus,
-              }
-            : order
+        setOrders((prev) =>
+          prev.map((order) =>
+            order.id === orderId
+              ? { ...order, statusKey: convertStatus(newStatus), status: newStatus }
+              : order
+          )
         );
+        setFilteredOrders((prev) =>
+          prev.map((order) =>
+            order.id === orderId
+              ? { ...order, statusKey: convertStatus(newStatus), status: newStatus }
+              : order
+          ).filter((order) => selectedStatus === "all" || order.status === selectedStatus)
+        );
+        setStatusCounts((prev) => {
+          const newCounts = { ...prev };
+          const oldStatus = orders.find((o) => o.id === orderId)?.status;
+          if (oldStatus && oldStatus !== newStatus) {
+            newCounts[oldStatus] = (newCounts[oldStatus] || 0) - 1;
+            newCounts[newStatus] = (newCounts[newStatus] || 0) + 1;
+            newCounts["all"] = orders.length;
+          }
+          return newCounts;
+        });
         showNotification("Cập nhật đơn hàng thành công", "success");
-        setOrders(updatedOrders);
       }
     } catch (err) {
       console.error("Lỗi khi cập nhật trạng thái:", err);
@@ -135,184 +101,103 @@ export default function ArtisanOrdersTab() {
     }
   };
 
-  const statusConfig = {
-    pending: {
-      text: "Chờ xử lý",
-      color: "bg-gray-100 text-gray-800",
-      icon: <FiClock className="text-gray-500" />,
-    },
-    accepted: {
-      text: "Đã chấp nhận",
-      color: "bg-blue-100 text-blue-800",
-      icon: <FiCheck className="text-blue-500" />,
-    },
-    processing: {
-      text: "Đang chuẩn bị",
-      color: "bg-amber-100 text-amber-800",
-      icon: <FiPackage className="text-amber-500" />,
-    },
-    shipped: {
-      text: "Đang giao hàng",
-      color: "bg-purple-100 text-purple-800",
-      icon: <FiTruck className="text-purple-500" />,
-    },
-    completed: {
-      text: "Hoàn thành",
-      color: "bg-green-100 text-green-800",
-      icon: <FiCheck className="text-green-500" />,
-    },
-    rejected: {
-      text: "Đã từ chối",
-      color: "bg-red-100 text-red-800",
-      icon: <FiX className="text-red-500" />,
-    },
-    cancelled: {
-      text: "Đã hủy",
-      color: "bg-red-100 text-red-800",
-      icon: <FiSlash className="text-red-500" />,
-    },
-    waitingForPayment: {
-      text: "Chờ thanh toán",
-      color: "bg-yellow-100 text-yellow-800",
-      icon: <FiDollarSign className="text-yellow-500" />,
-    },
-    refund: {
-      text: "Hoàn tiền",
-      color: "bg-pink-100 text-pink-800",
-      icon: <FiDollarSign className="text-pink-500" />,
-    },
-  };
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
-  };
-
   const getAvailableStatusActions = (currentStatus) => {
-    switch (currentStatus) {
-      case "Pending":
-        return [
-          {
-            status: "Accepted",
-            label: "Chấp nhận",
-            color: "bg-green-600 hover:bg-green-700",
-          },
-          {
-            status: "Rejected",
-            label: "Từ chối",
-            color: "bg-red-600 hover:bg-red-700",
-          },
-        ];
-      case "Accepted":
-        return [
-          {
-            status: "Processing",
-            label: "Bắt đầu chuẩn bị",
-            color: "bg-blue-600 hover:bg-blue-700",
-          },
-          {
-            status: "Cancelled",
-            label: "Hủy đơn",
-            color: "bg-red-600 hover:bg-red-700",
-          },
-        ];
-      case "Processing":
-        return [
-          {
-            status: "Shipped",
-            label: "Bắt đầu giao hàng",
-            color: "bg-purple-600 hover:bg-purple-700",
-          },
-          {
-            status: "Cancelled",
-            label: "Hủy đơn",
-            color: "bg-red-600 hover:bg-red-700",
-          },
-        ];
-      case "Shipped":
-        return [
-          {
-            status: "Completed",
-            label: "Hoàn thành",
-            color: "bg-green-600 hover:bg-green-700",
-          },
-        ];
-      default:
-        return [];
-    }
+    const actions = {
+      Created: [
+        { status: "Confirmed", label: "Xác nhận đơn hàng", color: "bg-green-600 hover:bg-green-700" },
+        { status: "Rejected", label: "Từ chối đơn hàng", color: "bg-red-600 hover:bg-red-700" },
+      ],
+      Confirmed: [
+        { status: "Preparing", label: "Bắt đầu chuẩn bị", color: "bg-blue-600 hover:bg-blue-700" },
+        { status: "Cancelled", label: "Hủy đơn hàng", color: "bg-red-600 hover:bg-red-700" },
+      ],
+      Preparing: [
+        { status: "ReadyForShipment", label: "Sẵn sàng giao hàng", color: "bg-purple-600 hover:bg-purple-700" },
+        { status: "Cancelled", label: "Hủy đơn hàng", color: "bg-red-600 hover:bg-red-700" },
+      ],
+      ReadyForShipment: [
+        { status: "Shipped", label: "Bắt đầu giao hàng", color: "bg-purple-600 hover:bg-purple-700" },
+      ],
+      Shipped: [
+        { status: "Delivered", label: "Xác nhận đã giao", color: "bg-green-600 hover:bg-green-700" },
+        { status: "DeliveryFailed", label: "Giao hàng thất bại", color: "bg-red-600 hover:bg-red-700" },
+      ],
+      Delivered: [
+        { status: "Completed", label: "Hoàn thành đơn hàng", color: "bg-green-600 hover:bg-green-700" },
+      ],
+      ReturnRequested: [
+        { status: "Returned", label: "Xác nhận đã trả hàng", color: "bg-pink-600 hover:bg-pink-700" },
+      ],
+    };
+    return actions[currentStatus] || [];
   };
+
+  // Loading skeleton
+  const renderSkeleton = () => (
+    <div className="space-y-4">
+      {[...Array(3)].map((_, index) => (
+        <div key={index} className="bg-white rounded-lg shadow-sm p-4 animate-pulse">
+          <div className="flex justify-between mb-4">
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+          </div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+          <div className="flex items-center mb-4">
+            <div className="w-16 h-16 bg-gray-200 rounded"></div>
+            <div className="ml-3 flex-1">
+              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            </div>
+          </div>
+          <div className="flex justify-between">
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 
   return (
-    <div className="p-4 md:p-6">
+    <div className="p-4 md:p-6 bg-gray-50 min-h-screen">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
         <h2 className="text-2xl font-bold text-[#5e3a1e] flex items-center">
           <FiPackage className="mr-2" /> Quản lý đơn hàng
         </h2>
+      </div>
 
-        {/* Filter dropdown */}
-        <div className="relative">
-          <button
-            onClick={() => setShowStatusFilter(!showStatusFilter)}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50"
-          >
-            <FiFilter />
-            <span>Lọc theo trạng thái</span>
-          </button>
-
-          {showStatusFilter && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-10 border border-gray-200">
-              <div className="p-2">
-                {statusFilters.map((filter) => (
-                  <div
-                    key={filter.value}
-                    onClick={() => {
-                      setSelectedStatus(filter.value);
-                      setShowStatusFilter(false);
-                    }}
-                    className={`px-4 py-2 text-sm rounded cursor-pointer ${
-                      selectedStatus === filter.value
-                        ? "bg-[#5e3a1e] text-white"
-                        : "hover:bg-gray-100"
-                    }`}
-                  >
-                    {filter.label}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+      {/* Horizontal Status Filter with Counts */}
+      <div className="mb-6 overflow-x-auto pb-2">
+        <div className="flex gap-2">
+          {statusFilters.map((filter) => (
+            <button
+              key={filter.value}
+              onClick={() => setSelectedStatus(filter.value)}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap flex items-center gap-2 ${
+                selectedStatus === filter.value
+                  ? "bg-[#5e3a1e] text-white"
+                  : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-100"
+              }`}
+            >
+              {filter.icon}
+              {filter.label}
+              <span className={`text-xs px-2 py-0.5 rounded-full ${
+                selectedStatus === filter.value
+                  ? "bg-white text-[#5e3a1e]"
+                  : "bg-gray-100 text-gray-600"
+              }`}>
+                {statusCounts[filter.value] || 0}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Hiển thị trạng thái filter đang chọn */}
-      {selectedStatus !== "all" && (
-        <div className="mb-4 flex items-center">
-          <span className="text-sm text-gray-600 mr-2">Đang lọc:</span>
-          <span
-            className={`px-2 py-1 text-xs rounded-full ${
-              statusConfig[convertStatus(selectedStatus)]?.color ||
-              "bg-gray-100 text-gray-800"
-            }`}
-          >
-            {statusFilters.find((f) => f.value === selectedStatus)?.label}
-          </span>
-          <button
-            onClick={() => setSelectedStatus("all")}
-            className="ml-2 text-sm text-[#5e3a1e] hover:underline"
-          >
-            (Xóa lọc)
-          </button>
-        </div>
-      )}
-
       {loading ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500">Đang tải dữ liệu...</p>
-        </div>
+        renderSkeleton()
       ) : filteredOrders.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 rounded-lg">
+        <div className="text-center py-12 bg-white rounded-lg shadow-sm">
           <p className="text-gray-500">
             {selectedStatus === "all"
               ? "Chưa có đơn hàng nào"
@@ -325,11 +210,10 @@ export default function ArtisanOrdersTab() {
         <div className="space-y-4">
           {filteredOrders.map((order) => {
             const availableActions = getAvailableStatusActions(order.status);
-
             return (
               <div
                 key={order.id}
-                className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden"
+                className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200"
               >
                 {/* Header: Order ID + Date */}
                 <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -401,7 +285,7 @@ export default function ArtisanOrdersTab() {
                 <div className="p-4">
                   <div className="flex justify-between items-center mb-3">
                     <div className="flex items-center">
-                      {statusConfig[order.statusKey]?.icon || <FiAlertCircle />}
+                      {statusConfig[order.statusKey]?.icon || <FiPackage />}
                       <span
                         className={`ml-2 px-3 py-1 text-xs rounded-full ${
                           statusConfig[order.statusKey]?.color ||
@@ -431,7 +315,6 @@ export default function ArtisanOrdersTab() {
                       </span>
                     </div>
 
-                    {/* Action Buttons */}
                     <div className="space-x-2">
                       {availableActions.map((action, index) => (
                         <button
@@ -440,9 +323,9 @@ export default function ArtisanOrdersTab() {
                             handleUpdateStatus(order.id, action.status)
                           }
                           disabled={loading}
-                          className={`px-3 py-1 text-white rounded text-sm ${
-                            action.color
-                          } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                          className={`px-3 py-1.5 text-white rounded text-sm font-medium transition-colors duration-200 ${action.color} ${
+                            loading ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
                         >
                           {action.label}
                         </button>
@@ -457,4 +340,6 @@ export default function ArtisanOrdersTab() {
       )}
     </div>
   );
-}
+};
+
+export default React.memo(ArtisanOrdersTab);
