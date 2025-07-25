@@ -15,6 +15,7 @@ import Product from "../pages/Product/Product";
 import VerifyOtp from "../pages/VerifyOtp/VerifyOtp";
 import About from "../pages/About/About";
 import PaymentSuccess from "../pages/PaymentSuccess/PaymentSuccess";
+import PaymentFailed from "../pages/PaymentSuccess/PaymentFailed";
 import OrderSuccess from "../pages/OrderSuccess/OrderSuccess";
 import ShopArtisan from "../pages/ShopArtisan/ShopArtisan";
 
@@ -76,6 +77,14 @@ const AppRouter = () => {
             element={
               <ProtectedRoute>
                 <PaymentSuccess />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payment-failed"
+            element={
+              <ProtectedRoute>
+                <PaymentFailed />
               </ProtectedRoute>
             }
           />
