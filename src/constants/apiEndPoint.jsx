@@ -129,6 +129,9 @@ export const API_ENDPOINTS_ADMIN = {
   CREATE_ACCOUNT: "/api/Admin/CreateNewAccount",
   UPDATE_ACCOUNT: "/api/Admin/UpdateAccount",
   DELETE_ACCOUNT: (id) => `/api/Admin/DeleteAccount/${id}`,
+  GET_ORDERS_BY_STATUS: (status, pageIndex, pageSize) =>
+    `/api/Admin/GetOrders?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}`,
+  CREATE_STAFF: "/api/Admin/CreateStaffAccount",
 };
 
 export const API_ENDPOINTS_ARTISANREQUEST = {

@@ -24,21 +24,16 @@ const menu = [
   },
 ];
 
+// Gộp "Nhân viên" vào quản lý tài khoản
 const managerAccountSubMenu = [
   { label: "Thợ thủ công", value: "artisan" },
   { label: "Khách hàng", value: "customer" },
+  { label: "Nhân viên", value: "staff"},
 ];
 
 const managerIcon = (
   <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-2.67 0-8 1.34-8 4v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2c0-2.66-5.33-4-8-4Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const orderIcon = (
-  <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
-    <rect x="3" y="7" width="18" height="13" rx="2" stroke="currentColor" strokeWidth="2" fill="none" />
-    <path d="M16 3v4M8 3v4" stroke="currentColor" strokeWidth="2" />
   </svg>
 );
 
@@ -58,7 +53,8 @@ const Sidebar = ({ selected, setSelected, isMobileOpen, onCloseMobile, isDesktop
     hoverTimeout.current = setTimeout(() => setHoverManager(false), 200);
   };
 
-  const managerSelectedList = ['artisan', 'customer', 'manager'];
+  // Gộp luôn staff vào managerSelectedList
+  const managerSelectedList = ['artisan', 'customer', 'manager', 'staff'];
 
   return (
     <>
@@ -135,7 +131,7 @@ const Sidebar = ({ selected, setSelected, isMobileOpen, onCloseMobile, isDesktop
             )}
           </button>
 
-          {/* Manager Account group */}
+          {/* Manager Account group (gồm cả Nhân viên) */}
           <div className="relative"
             onMouseEnter={handleMouseEnterManager}
             onMouseLeave={handleMouseLeaveManager}
@@ -192,7 +188,8 @@ const Sidebar = ({ selected, setSelected, isMobileOpen, onCloseMobile, isDesktop
                     }}
                     style={{ animationDelay: `${index * 50}ms` }}
                   >
-                    <div className="w-2 h-2 bg-current rounded-full opacity-60"></div>
+                    {item.icon && <span className="flex items-center">{item.icon}</span>}
+                    {!item.icon && <div className="w-2 h-2 bg-current rounded-full opacity-60"></div>}
                     <span>{item.label}</span>
                   </button>
                 ))}
@@ -219,8 +216,8 @@ const Sidebar = ({ selected, setSelected, isMobileOpen, onCloseMobile, isDesktop
                         transition: 'all 0.3s ease-in-out'
                       }}
                     >
-                      <div className={`w-2 h-2 rounded-full transition-all duration-200 ${selected === item.value ? 'bg-[#c7903f]' : 'bg-[#e2c9b0]'
-                        }`}></div>
+                      {item.icon && <span className="flex items-center">{item.icon}</span>}
+                      {!item.icon && <div className={`w-2 h-2 rounded-full transition-all duration-200 ${selected === item.value ? 'bg-[#c7903f]' : 'bg-[#e2c9b0]'}`}></div>}
                       <span>{item.label}</span>
                     </button>
                   ))}

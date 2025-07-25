@@ -52,7 +52,7 @@ const Sidebar = ({ selected, setSelected, isMobileOpen, onCloseMobile, isDesktop
                 CraftGoPlay
               </span>
 
-              <span className="text-xs text-slate-400 font-medium">Admin Dashboard</span>
+              <span className="text-xs text-slate-400 font-medium">Staff Dashboard</span>
             </div>
           )}
 

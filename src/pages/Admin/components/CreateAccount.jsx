@@ -278,9 +278,9 @@ const CreateAccount = () => {
                   </button>
                 </div>
               </div>
-              <button className="bg-white border border-gray-300 px-4 py-2 rounded shadow-sm font-semibold hover:bg-gray-50 flex items-center gap-2" onClick={() => setShowModal(true)}>
+              {/* <button className="bg-white border border-gray-300 px-4 py-2 rounded shadow-sm font-semibold hover:bg-gray-50 flex items-center gap-2" onClick={() => setShowModal(true)}>
                 + Thêm khách hàng
-              </button>
+              </button> */}
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm border-separate border-spacing-0">
