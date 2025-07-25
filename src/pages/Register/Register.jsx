@@ -164,7 +164,7 @@ const Register = () => {
       if (!validateForm()) {
         setLoading(false);
         return;
-      };
+      }
 
       try {
         const response = await authService.register(form);
@@ -280,13 +280,16 @@ const Register = () => {
         alt="background"
         className="absolute inset-0 w-full h-full object-cover blur-md brightness-75 z-[-1]"
       />
+
       <div className="bg-[#fffdf8] shadow-2xl rounded-2xl max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 overflow-hidden">
         <div className="bg-[#f2e8dc] text-[#5e3a1e] flex flex-col justify-center items-center p-8 space-y-4">
-          <img
-            src={registerImg}
-            alt="CraftGoPlay Logo"
-            className="w-40 h-40 object-contain rounded-full shadow-md"
-          />
+          <Link to="/">
+            <img
+              src={registerImg}
+              alt="CraftGoPlay Logo"
+              className="w-40 h-40 object-contain rounded-full shadow-md"
+            />
+          </Link>
           <h2 className="text-2xl font-bold text-center">
             Tôn vinh bàn tay và khối óc của nghệ sỹ, nghệ nhân Việt Nam
           </h2>
