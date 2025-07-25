@@ -168,24 +168,27 @@ const Checkout = () => {
                 <div className="w-[80%] max-w-[1400px] mx-auto space-y-6">
 
                     {/* dia chi */}
-                    <section className="bg-white rounded shadow-sm border border-gray-200 p-4 flex justify-between items-start">
+                    <section className="bg-white rounded shadow-sm border border-gray-200 p-4 flex justify-between items-start gap-4 transition duration-300 hover:shadow-lg">
                         <div>
-                            <h2 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                                <FaMapMarkerAlt className="text-[#5e3a1e]" /> Địa chỉ nhận hàng
+                            <h2 className="text-xl font-semibold mb-3 flex items-center gap-2 text-[#5e3a1e]">
+                                <FaMapMarkerAlt className="text-[#b28940]" />
+                                Địa chỉ nhận hàng
                             </h2>
                             {(() => {
                                 const selectedAddress = addresses.find(addr => addr.id === selectedAddressId);
-                                if (!selectedAddress) return <p>Chưa có địa chỉ được chọn.</p>;
+                                if (!selectedAddress) return <p className="text-gray-500">Chưa có địa chỉ được chọn.</p>;
                                 return (
-                                    <>
-                                        <p>{selectedAddress.fullName} | {selectedAddress.phoneNumber}</p>
+                                    <div className="space-y-1 text-[15px] leading-relaxed">
+                                        <p><span className="font-medium">{selectedAddress.fullName}</span> | {selectedAddress.phoneNumber}</p>
                                         <p>{realUser?.email}</p>
-                                        <p>{selectedAddress.fullAddress}</p>
-                                    </>
+                                        <p className="text-[#5e3a1e]">{selectedAddress.fullAddress}</p>
+                                    </div>
                                 );
                             })()}
                         </div>
-                        <button className="text-[15px] text-[#b28940] hover:underline">Thay đổi</button>
+                        <button className="text-[15px] text-[#b28940] hover:text-[#a77a2d] font-medium hover:underline transition">
+                            Thay đổi
+                        </button>
                     </section>
 
                     {/* sp */}
