@@ -21,6 +21,17 @@ const ManageVillage = () => {
     const [createVillageLocation, setCreateVillageLocation] = useState("");
     const [createVillageLoading, setCreateVillageLoading] = useState(false);
     const [createVillageError, setCreateVillageError] = useState("");
+
+    // Update modal state
+    const [showUpdateModal, setShowUpdateModal] = useState(false);
+    const [updateVillage, setUpdateVillage] = useState(null);
+    const [updateVillageName, setUpdateVillageName] = useState("");
+    const [updateVillageDate, setUpdateVillageDate] = useState("");
+    const [updateVillageDescription, setUpdateVillageDescription] = useState("");
+    const [updateVillageLocation, setUpdateVillageLocation] = useState("");
+    const [updateVillageLoading, setUpdateVillageLoading] = useState(false);
+    const [updateVillageError, setUpdateVillageError] = useState("");
+
     const pageSize = 10;
 
     // Cập nhật filtered mỗi khi data hoặc search thay đổi
@@ -68,6 +79,21 @@ const ManageVillage = () => {
         setCreateVillageLocation("");
         setCreateVillageError("");
         setShowCreateModal(true);
+    };
+
+    // Mở modal update làng
+    const openUpdate = (village) => {
+        setUpdateVillage(village);
+        setUpdateVillageName(village?.village_Name || "");
+        setUpdateVillageDate(
+            village?.establishedDate
+                ? new Date(village.establishedDate).toISOString().split("T")[0]
+                : ""
+        );
+        setUpdateVillageDescription(village?.description || "");
+        setUpdateVillageLocation(village?.location || "");
+        setUpdateVillageError("");
+        setShowUpdateModal(true);
     };
 
     // Xử lý đổi trạng thái thành lập
@@ -142,6 +168,58 @@ const ManageVillage = () => {
             setCreateVillageError("Có lỗi xảy ra khi tạo làng mới.");
         } finally {
             setCreateVillageLoading(false);
+        }
+    };
+
+    // Xử lý cập nhật làng nghề
+    const handleUpdateVillage = async (e) => {
+        e.preventDefault();
+        setUpdateVillageError("");
+        if (!updateVillageName.trim()) {
+            setUpdateVillageError("Vui lòng nhập tên làng.");
+            return;
+        }
+        if (!updateVillageDate) {
+            setUpdateVillageError("Vui lòng chọn ngày thành lập.");
+            return;
+        }
+        if (!updateVillageLocation.trim()) {
+            setUpdateVillageError("Vui lòng nhập địa chỉ làng.");
+            return;
+        }
+        if (!updateVillageDescription.trim()) {
+            setUpdateVillageError("Vui lòng nhập mô tả làng.");
+            return;
+        }
+        setUpdateVillageLoading(true);
+        try {
+            const formData = {
+                id: updateVillage.id,
+                village_Name: updateVillageName,
+                description: updateVillageDescription,
+                location: updateVillageLocation,
+                establishedDate: new Date(updateVillageDate).toISOString(),
+            };
+            const response = await CraftVillageService.updateCraftVillage(formData);
+            // Cập nhật lại data local
+            setData(prev =>
+                prev.map(v =>
+                    v.id === updateVillage.id
+                        ? {
+                            ...v,
+                            village_Name: updateVillageName,
+                            description: updateVillageDescription,
+                            location: updateVillageLocation,
+                            establishedDate: new Date(updateVillageDate).toISOString(),
+                        }
+                        : v
+                )
+            );
+            setShowUpdateModal(false);
+        } catch (err) {
+            setUpdateVillageError("Có lỗi xảy ra khi cập nhật làng nghề.");
+        } finally {
+            setUpdateVillageLoading(false);
         }
     };
 
@@ -241,6 +319,19 @@ const ManageVillage = () => {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
+                                        </motion.button>
+                                        {/* Nút update */}
+                                        <motion.button
+                                            whileHover={{ scale: 1.1 }}
+                                            whileTap={{ scale: 0.9 }}
+                                            className="text-yellow-500 hover:text-yellow-700"
+                                            onClick={() => openUpdate(row)}
+                                            title="Cập nhật làng nghề"
+                                        >
+                                            {/* Pencil/Edit icon */}
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
                                         </motion.button>
                                         <motion.button
                                             whileHover={{ scale: 1.1 }}
@@ -409,6 +500,113 @@ const ManageVillage = () => {
                                     disabled={createVillageLoading}
                                 >
                                     {createVillageLoading ? "Đang tạo..." : "Tạo làng"}
+                                </motion.button>
+                            </div>
+                        </form>
+                    </motion.div>
+                </motion.div>
+            )}
+
+            {/* Modal Update Village */}
+            {showUpdateModal && updateVillage && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="fixed inset-0 z-50 flex items-center justify-center"
+                    style={{ background: "rgba(0, 0, 0, 0.5)" }}
+                >
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 relative"
+                    >
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-xl font-bold text-gray-900">Cập nhật làng nghề</h2>
+                            <motion.button
+                                whileHover={{ scale: 1.1, rotate: 90 }}
+                                whileTap={{ scale: 0.9 }}
+                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                                onClick={() => setShowUpdateModal(false)}
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </motion.button>
+                        </div>
+                        <form onSubmit={handleUpdateVillage} className="space-y-5">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Tên làng <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                    placeholder="Nhập tên làng nghề"
+                                    value={updateVillageName}
+                                    onChange={e => setUpdateVillageName(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Địa chỉ <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                    placeholder="Nhập địa chỉ làng nghề"
+                                    value={updateVillageLocation}
+                                    onChange={e => setUpdateVillageLocation(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Ngày thành lập <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    type="date"
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                    value={updateVillageDate}
+                                    onChange={e => setUpdateVillageDate(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Mô tả <span className="text-red-500">*</span>
+                                </label>
+                                <textarea
+                                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                                    placeholder="Nhập mô tả làng nghề"
+                                    value={updateVillageDescription}
+                                    onChange={e => setUpdateVillageDescription(e.target.value)}
+                                    rows={3}
+                                    required
+                                />
+                            </div>
+                            {updateVillageError && (
+                                <div className="text-red-600 text-sm">{updateVillageError}</div>
+                            )}
+                            <div className="flex justify-end gap-3 pt-2">
+                                <motion.button
+                                    type="button"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="px-6 py-2 rounded-lg border hover:bg-gray-50"
+                                    onClick={() => setShowUpdateModal(false)}
+                                    disabled={updateVillageLoading}
+                                >
+                                    Hủy
+                                </motion.button>
+                                <motion.button
+                                    type="submit"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="px-6 py-2 text-white rounded-lg bg-yellow-500 hover:bg-yellow-600 font-semibold"
+                                    disabled={updateVillageLoading}
+                                >
+                                    {updateVillageLoading ? "Đang cập nhật..." : "Cập nhật"}
                                 </motion.button>
                             </div>
                         </form>

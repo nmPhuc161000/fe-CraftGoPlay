@@ -1,56 +1,40 @@
-import React, { useState } from "react";
-import { FaHourglassHalf, FaBoxOpen, FaTruck, FaStar, FaCheckCircle, FaTimesCircle, FaExclamationTriangle, FaSearch } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import { 
+  FaHourglassHalf, // Pending
+  FaCheckCircle,   // Accepted, Paid, Completed
+  FaTimesCircle,   // Rejected, Cancelled
+  FaMoneyBillWave, // Paid, Refund
+  FaTruck,         // Shipped
+  FaExclamationTriangle, // Refund
+  FaSearch,
+  FaBoxOpen
+} from "react-icons/fa";
+import adminService from "../../../services/apis/adminApi";
 
+// Các trạng thái lấy từ API: Pending, Accepted, Rejected, Paid, Cancelled, Shipped, Refund, WaitingForPayment, Processing, Completed
 const STATUS_TABS = [
-  { key: "all", label: "Tất cả đơn hàng", icon: null },
-  { key: "pending", label: "Chờ xác nhận", icon: <FaHourglassHalf className="text-yellow-500" /> },
-  { key: "packing", label: "Đang đóng gói", icon: <FaBoxOpen className="text-blue-400" /> },
-  { key: "delivering", label: "Đang giao hàng", icon: <FaTruck className="text-blue-600" /> },
-  { key: "pending_feedback", label: "Chờ phản hồi", icon: <FaStar className="text-yellow-400" /> },
-  { key: "success", label: "Thành công", icon: <FaCheckCircle className="text-green-500" /> },
-  { key: "cancel", label: "Đã hủy", icon: <FaTimesCircle className="text-gray-400" /> },
-  { key: "bad_feedback", label: "Phản hồi xấu", icon: <FaExclamationTriangle className="text-orange-400" /> },
-];
-
-const FAKE_ORDERS = [
-  {
-    code: "OD24220250601010940",
-    created: "01/06/2025 08:09",
-    status: "pending",
-    paid: true,
-    total: 44444,
-    items: [
-      {
-        name: "Sản phẩm thủ công bằng Tre",
-        img: "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg",
-        quantity: 1,
-        serial: null,
-        warranty: null,
-      },
-    ],
-    combo: "Combo thủ công",
-  },
-  {
-    code: "OD24220250601005059",
-    created: "01/06/2025 07:50",
-    status: "success",
-    paid: true,
-    total: 44444,
-    items: [
-      {
-        name: "Sản phẩm thủ công bằng Tre",
-        img: "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg",
-        quantity: 1,
-        serial: "TCH0001",
-        warranty: "01/09/2025 00:53",
-      },
-    ],
-    combo: "Combo thủ công",
-  },
-  // ... Thêm nhiều đơn hàng giả với các trạng thái khác nhau nếu muốn ...
+  { key: "", label: "Tất cả đơn hàng", icon: null },
+  { key: "Pending", label: "Chờ xác nhận", icon: <FaHourglassHalf className="text-yellow-500" /> },
+  { key: "Accepted", label: "Đã xác nhận", icon: <FaCheckCircle className="text-blue-500" /> },
+  { key: "Rejected", label: "Từ chối", icon: <FaTimesCircle className="text-red-400" /> },
+  { key: "Paid", label: "Đã thanh toán", icon: <FaMoneyBillWave className="text-green-500" /> },
+  { key: "Cancelled", label: "Đã hủy", icon: <FaTimesCircle className="text-gray-400" /> },
+  { key: "Shipped", label: "Đã giao hàng", icon: <FaTruck className="text-blue-600" /> },
+  { key: "Refund", label: "Hoàn tiền", icon: <FaExclamationTriangle className="text-orange-400" /> },
+  { key: "WaitingForPayment", label: "Chờ thanh toán", icon: <FaHourglassHalf className="text-yellow-400" /> },
+  { key: "Processing", label: "Đang xử lý", icon: <FaHourglassHalf className="text-blue-400" /> },
+  { key: "Completed", label: "Hoàn thành", icon: <FaCheckCircle className="text-green-500" /> },
 ];
 
 const STATUS_BADGE = {
+  0: { text: "Chờ xác nhận", color: "bg-yellow-100 text-yellow-700 border border-yellow-300" },
+  1: { text: "Đang đóng gói", color: "bg-blue-100 text-blue-700 border border-blue-300" },
+  2: { text: "Đang giao hàng", color: "bg-blue-100 text-blue-700 border border-blue-300" },
+  3: { text: "Chờ phản hồi", color: "bg-yellow-100 text-yellow-700 border border-yellow-300" },
+  4: { text: "Thành công", color: "bg-green-100 text-green-700 border border-green-300" },
+  5: { text: "Đã hủy", color: "bg-gray-100 text-gray-500 border border-gray-300" },
+  6: { text: "Phản hồi xấu", color: "bg-orange-100 text-orange-700 border border-orange-300" },
+  // fallback for string status if needed
   pending: { text: "Chờ xác nhận", color: "bg-yellow-100 text-yellow-700 border border-yellow-300" },
   packing: { text: "Đang đóng gói", color: "bg-blue-100 text-blue-700 border border-blue-300" },
   delivering: { text: "Đang giao hàng", color: "bg-blue-100 text-blue-700 border border-blue-300" },
@@ -60,15 +44,76 @@ const STATUS_BADGE = {
   bad_feedback: { text: "Phản hồi xấu", color: "bg-orange-100 text-orange-700 border border-orange-300" },
 };
 
-const OrderHistory = () => {
-  const [tab, setTab] = useState("all");
-  const [search, setSearch] = useState("");
+const statusKeyMap = {
+  0: "pending",
+  1: "packing",
+  2: "delivering",
+  3: "pending_feedback",
+  4: "success",
+  5: "cancel",
+  6: "bad_feedback",
+};
 
-  const filtered = FAKE_ORDERS.filter(order => {
-    const matchTab = tab === "all" ? true : order.status === tab;
-    const matchSearch = order.code.toLowerCase().includes(search.toLowerCase());
-    return matchTab && matchSearch;
-  });
+const OrderHistory = () => {
+  const [tab, setTab] = useState("");
+  const [search, setSearch] = useState("");
+  // orders là kiểu dữ liệu trả về từ API, ví dụ mẫu:
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    fetchOrders();
+    // eslint-disable-next-line
+  }, [tab]);
+
+  // Hàm này về cơ bản là đúng, nhưng có thể cải thiện kiểm tra null/undefined để tránh lỗi khi dữ liệu API không đầy đủ.
+  function parseApiOrder(apiOrder) {
+    // Kiểm tra apiOrder có tồn tại không
+    if (!apiOrder) return {};
+
+    // Kiểm tra orderItems có phải là mảng không
+    const orderItems = Array.isArray(apiOrder.orderItems) ? apiOrder.orderItems : [];
+
+    return {
+      creationDate: apiOrder.creationDate
+        ? new Date(apiOrder.creationDate).toLocaleString("vi-VN", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "",
+      status: apiOrder.status ?? 0, // fallback to 0 nếu không có
+      isPaid: apiOrder.isPaid ?? false,
+      paymentMethod: apiOrder.paymentMethod ?? "",
+      totalPrice: apiOrder.totalPrice ?? 0,
+      products: orderItems.map((item) => {
+        // Kiểm tra product và productImages
+        const product = item.product || {};
+        return {
+          name: product.name ?? "",
+          imageUrl: product.productImages.imageUrl ?? "",
+          quantity: item.quantity ?? 1,
+          price: item.unitPrice ?? 0,
+        };
+      }),
+    };
+  }
+
+  async function fetchOrders() {
+    try {
+      const res = await adminService.getOrdersByStatus(tab, 1, 10);
+      const apiData = res?.data?.data || [];
+      // If apiData is an array of products, map each to an order
+      const parsedOrders = Array.isArray(apiData)
+        ? apiData.map(parseApiOrder)
+        : [];
+        console.log(parsedOrders);
+      setOrders(parsedOrders);
+    } catch (err) {
+      setOrders([]);
+    }
+  }
 
   return (
     <div className="w-full min-h-screen bg-amber-25 flex justify-center items-start py-8 px-2">
@@ -89,7 +134,7 @@ const OrderHistory = () => {
             >
               {t.icon} {t.label}
               {t.key === "all" && (
-                <span className="ml-1 px-2 py-0.5 rounded-full bg-blue-200 text-blue-700 text-xs font-bold">{FAKE_ORDERS.length}</span>
+                <span className="ml-1 px-2 py-0.5 rounded-full bg-blue-200 text-blue-700 text-xs font-bold">{orders.length}</span>
               )}
             </button>
           ))}
@@ -106,48 +151,59 @@ const OrderHistory = () => {
         </div>
         {/* Order List */}
         <div className="space-y-8">
-          {filtered.length === 0 && (
+          {orders.length === 0 && (
             <div className="text-center text-gray-400 py-12">Không tìm thấy đơn hàng nào.</div>
           )}
-          {filtered.map((order, idx) => (
-            <div key={order.code} className="bg-white rounded-2xl shadow-lg border border-blue-100 p-6 md:p-8 flex flex-col gap-4">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-                <div className="flex flex-col gap-1">
-                  <div className="text-xs text-gray-500 font-medium">Mã đơn hàng: <span className="font-bold text-gray-700">{order.code}</span></div>
-                  <div className="text-xs text-gray-500">Ngày tạo: <span className="font-semibold">{order.created}</span></div>
-                </div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  {order.paid && <span className="text-xs font-bold text-green-500">ĐÃ THANH TOÁN</span>}
-                  <span className={`text-xs font-semibold px-2 py-1 rounded border ${STATUS_BADGE[order.status]?.color || "bg-gray-100 text-gray-500 border-gray-200"}`}>{STATUS_BADGE[order.status]?.text || order.status}</span>
-                </div>
-              </div>
-              <div className="mt-2 border-l-4 border-blue-100 bg-blue-50 rounded-xl p-4 flex flex-col gap-4">
-                <div className="flex items-center gap-2 text-base font-medium text-blue-700">
-                  <FaBoxOpen />
-                  {order.combo}
-                </div>
-                {order.items.map((item, i) => (
-                  <div key={i} className="flex items-center gap-4 bg-white rounded-xl p-3 shadow-sm border border-blue-50">
-                    <img src={item.img} alt={item.name} className="w-16 h-16 object-cover rounded border" />
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-700 text-base">{item.name}</div>
-                      <div className="text-xs text-gray-500">Số lượng: {item.quantity}</div>
-                      {item.serial && <div className="text-xs text-gray-400">Mã bảo hành: <span className="font-semibold">{item.serial}</span></div>}
-                      {item.warranty && <div className="text-xs text-green-500">Bảo hành đến: {item.warranty}</div>}
+          {orders.map((order, idx) => {
+            const statusKey = statusKeyMap[order.status] || order.status;
+            const badge = STATUS_BADGE[order.status] || STATUS_BADGE[statusKey] || { text: statusKey, color: "bg-gray-100 text-gray-500 border border-gray-200" };
+            return (
+              <div key={order.orderCode} className="bg-white rounded-2xl shadow-lg border border-blue-100 p-6 md:p-8 flex flex-col gap-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                  <div className="flex flex-col gap-1">
+                    {/* <div className="text-xs text-gray-500 font-medium">
+                      Mã đơn hàng: <span className="font-bold text-gray-700">{order.orderCode}</span>
+                    </div> */}
+                    <div className="text-xs text-gray-500">
+                      Ngày tạo: <span className="font-semibold">{order.creationDate}</span>
                     </div>
-                    <div className="text-xl font-bold text-red-500 whitespace-nowrap">{order.total.toLocaleString()}đ</div>
                   </div>
-                ))}
-                <div className="flex justify-end mt-2">
-                  <span className="font-bold text-lg text-black">Tổng: <span className="text-red-500">{order.total.toLocaleString()}đ</span></span>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {order.isPaid && <span className="text-xs font-bold text-green-500 flex items-center gap-1"><FaMoneyBillWave />ĐÃ THANH TOÁN</span>}
+                    <span className={`text-xs font-semibold px-2 py-1 rounded border ${badge.color}`}>{badge.text}</span>
+                  </div>
+                </div>
+                <div className="mt-2 border-l-4 border-blue-100 bg-blue-50 rounded-xl p-4 flex flex-col gap-4">
+                  <div className="flex items-center gap-2 text-base font-medium text-blue-700">
+                    <FaBoxOpen />
+                    {order.paymentMethod && (
+                      <span className="ml-2 text-xs text-gray-500 font-normal">Phương thức: <span className="font-semibold">{order.paymentMethod}</span></span>
+                    )}
+                  </div>
+                  {order.products.map((item, i) => (
+                    <div key={i} className="flex items-center gap-4 bg-white rounded-xl p-3 shadow-sm border border-blue-50">
+                      <img src={item.imageUrl} alt={item.name} className="w-16 h-16 object-cover rounded border" />
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-700 text-base">{item.name}</div>
+                        <div className="text-xs text-gray-500">Số lượng: {item.quantity}</div>
+                        <div className="text-xs text-gray-500">Đơn giá: <span className="font-semibold text-blue-700">{item.price.toLocaleString()}đ</span></div>
+                      </div>
+                      <div className="text-xl font-bold text-red-500 whitespace-nowrap">{(item.price * item.quantity).toLocaleString()}đ</div>
+                    </div>
+                  ))}
+                  <div className="flex justify-end mt-2">
+                    <span className="font-bold text-lg text-black">
+                      Tổng: <span className="text-red-500">{order.totalPrice.toLocaleString()}đ</span>
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
   );
 };
 
-export default OrderHistory; 
+export default OrderHistory;

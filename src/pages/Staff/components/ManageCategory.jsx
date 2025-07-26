@@ -29,6 +29,7 @@ const ManageCategory = () => {
       const res = await categoryService.getAllCategories();
       if (res.success && res.data && res.data.data) {
         setData(res.data.data);
+        console.log(res.data.data);
       } else {
         setData([]);
       }

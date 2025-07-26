@@ -74,17 +74,39 @@ const SubCategoryModal = ({
                                     <label className="block text-sm font-medium text-gray-700 mb-2">
                                         Danh mục cha
                                     </label>
-                                    <select
-                                        value={form.categoryId}
-                                        onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
-                                    >
-                                        <option value="">-- Chọn danh mục cha --</option>
-                                        {categories.map((cat) => (
-                                            <option key={cat.categoryId} value={cat.categoryId}>
-                                                {cat.categoryName}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <div className="relative">
+                                        <motion.div
+                                            initial={{ boxShadow: "0 0 0 0 rgba(59,130,246,0)" }}
+                                            whileFocus={{ boxShadow: "0 0 0 3px rgba(59,130,246,0.25)" }}
+                                            whileHover={{ scale: 1.01, boxShadow: "0 2px 8px 0 rgba(59,130,246,0.10)" }}
+                                            className="w-full"
+                                        >
+                                            <select
+                                                value={form.categoryId}
+                                                onChange={(e) => setForm({ ...form, categoryId: e.target.value })}
+                                                className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all bg-white appearance-none text-gray-700 font-medium shadow-sm hover:border-blue-300"
+                                            >
+                                                <option value="" disabled>
+                                                    -- Chọn danh mục cha --
+                                                </option>
+                                                {categories.map((cat) => (
+                                                    <option key={cat.categoryId} value={cat.categoryId}>
+                                                        {cat.categoryName}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <motion.div
+                                                initial={{ rotate: 0 }}
+                                                animate={{ rotate: form.categoryId ? 180 : 0 }}
+                                                transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                                                className="pointer-events-none absolute inset-y-0 right-3 flex items-center"
+                                            >
+                                                <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </motion.div>
+                                        </motion.div>
+                                    </div>
                                     {formError && typeof formError === 'string' && formError.toLowerCase().includes('danh mục') && (
                                         <p className="mt-1 text-sm text-red-600">{formError}</p>
                                     )}
