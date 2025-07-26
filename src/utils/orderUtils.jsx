@@ -150,6 +150,7 @@ export const transformOrderData = (order) => ({
   formattedDate: dayjs(order.creationDate).format("DD/MM/YYYY"),
   statusKey: convertStatus(order.status),
   paymentStatus: order.isPaid ? "Đã thanh toán" : "Chưa thanh toán",
+  delivery_Amount: formatPrice(order.delivery_Amount),
   paymentMethod:
     order.paymentMethod === "Online" ? "Thanh toán online" : "Thanh toán khi nhận hàng",
 });

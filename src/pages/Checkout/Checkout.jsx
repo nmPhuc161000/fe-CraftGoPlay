@@ -135,11 +135,13 @@ const Checkout = () => {
             });
 
             const result = await createOrderFromCart(formData);
+            console.log("Order result:", result);
+            
 
             if (result.success) {
-                const orderObj = result.data?.data?.[0];
+                const orderObj = result.data?.data;
                 const orderId = typeof orderObj === "object" ? orderObj.id : orderObj;
-
+                console.log("orderObj result:", orderObj);
                 if (paymentMethod === "vnpay") {
                     const vnpayResult = await getVnpayUrl(orderId);
                     console.log("vnpayResult", vnpayResult);
