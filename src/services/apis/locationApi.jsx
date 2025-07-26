@@ -24,9 +24,13 @@ const locationService = {
       .post("/master-data/ward", { district_id: districtId })
       .then((res) => res.data),
 
-  postFeeShip: (data) => {
+  getFeeShip: (data) => {
     return ghnApi
-      .post("/v2/shipping-order/fee", data)
+      .post("/v2/shipping-order/fee", {
+        header: {
+          ShopId: import.meta.env.VITE_SHOPID_GHN, // Nhớ thay shop_id thực
+        },
+      },data)
       .then((res) => res.data)
       .catch((error) => {
         // Ném lỗi để xử lý ở nơi gọi

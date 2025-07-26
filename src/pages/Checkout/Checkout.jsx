@@ -109,9 +109,10 @@ const Checkout = () => {
             formData.append("Quantity", buyNow.quantity);
 
             const result = await createOrderDirect(user?.id, formData);
+            console.log("Order result:", result);
 
             if (result.success) {
-                const orderId = result.data?.data?.[0]?.id || result.data?.data;
+                const orderId = result.data?.data;
 
                 if (paymentMethod === "vnpay") {
                     const vnpayResult = await getVnpayUrl(orderId);
@@ -136,14 +137,13 @@ const Checkout = () => {
 
             const result = await createOrderFromCart(formData);
             console.log("Order result:", result);
-            
 
             if (result.success) {
-                const orderObj = result.data?.data;
-                const orderId = typeof orderObj === "object" ? orderObj.id : orderObj;
-                console.log("orderObj result:", orderObj);
+                const transactionId = result.data?.data;
+                console.log("orderId result:", transactionId);
+
                 if (paymentMethod === "vnpay") {
-                    const vnpayResult = await getVnpayUrl(orderId);
+                    const vnpayResult = await getVnpayUrl(transactionId);
                     console.log("vnpayResult", vnpayResult);
                     if (vnpayResult.success && vnpayResult.data) {
                         window.location.href = vnpayResult.data.data;
