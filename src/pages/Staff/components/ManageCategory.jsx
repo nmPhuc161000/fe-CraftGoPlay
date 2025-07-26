@@ -7,11 +7,11 @@ const ManageCategory = () => {
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editIdx, setEditIdx] = useState(null);
-  const [form, setForm] = useState({ 
-    categoryName: "", 
-    imageFile: null, 
+  const [form, setForm] = useState({
+    categoryName: "",
+    imageFile: null,
     image: "",
-    categoryStatus: "Actived" 
+    categoryStatus: "Actived"
   });
   const [formError, setFormError] = useState("");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -29,6 +29,7 @@ const ManageCategory = () => {
       const res = await categoryService.getAllCategories();
       if (res.success && res.data && res.data.data) {
         setData(res.data.data);
+        console.log(res.data.data);
       } else {
         setData([]);
       }
@@ -43,7 +44,7 @@ const ManageCategory = () => {
     fetchCategories();
   }, []);
 
-  const filtered = data.filter(c => 
+  const filtered = data.filter(c =>
     c.categoryName?.toLowerCase().includes(search.toLowerCase())
   );
   const totalPage = Math.ceil(filtered.length / pageSize);
@@ -51,11 +52,11 @@ const ManageCategory = () => {
 
   const openAdd = () => {
     setEditIdx(null);
-    setForm({ 
-      categoryName: "", 
-      imageFile: null, 
+    setForm({
+      categoryName: "",
+      imageFile: null,
       image: "",
-      categoryStatus: "Actived" 
+      categoryStatus: "Actived"
     });
     setShowModal(true);
     setFormError("");
@@ -113,11 +114,11 @@ const ManageCategory = () => {
         if (res.success) {
           await fetchCategories();
           setShowModal(false);
-          setForm({ 
-            categoryName: "", 
-            imageFile: null, 
+          setForm({
+            categoryName: "",
+            imageFile: null,
             image: "",
-            categoryStatus: "Actived" 
+            categoryStatus: "Actived"
           });
         } else {
           // Xử lý hiển thị lỗi
@@ -150,11 +151,11 @@ const ManageCategory = () => {
         if (res.success) {
           await fetchCategories();
           setShowModal(false);
-          setForm({ 
-            categoryName: "", 
-            imageFile: null, 
+          setForm({
+            categoryName: "",
+            imageFile: null,
             image: "",
-            categoryStatus: "Actived" 
+            categoryStatus: "Actived"
           });
           setEditIdx(null);
         } else {
@@ -185,7 +186,7 @@ const ManageCategory = () => {
 
   // Hàm xử lý style cho status badge
   const getStatusStyle = (status) => {
-    return status === "Actived" 
+    return status === "Actived"
       ? 'bg-green-50 text-green-600'
       : 'bg-red-50 text-red-600';
   };
@@ -200,9 +201,9 @@ const ManageCategory = () => {
     try {
       setLoading(true);
       console.log("Deleting category:", deleteId);
-      
+
       const res = await categoryService.deleteCategory(deleteId);
-      
+
       if (res.success) {
         await fetchCategories();
         setShowDeleteModal(false);
@@ -239,7 +240,7 @@ const ManageCategory = () => {
 
   if (loading) {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="bg-white rounded-2xl shadow-lg p-6 w-full"
@@ -252,7 +253,7 @@ const ManageCategory = () => {
   }
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="bg-white rounded-2xl shadow-lg p-6 w-full"
@@ -261,9 +262,9 @@ const ManageCategory = () => {
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Quản lý danh mục</h1>
           <div className="relative">
-            <input 
+            <input
               className="w-full md:max-w-xs pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-              placeholder="Tìm kiếm danh mục..." 
+              placeholder="Tìm kiếm danh mục..."
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
@@ -272,11 +273,11 @@ const ManageCategory = () => {
             </svg>
           </div>
         </div>
-        
-        <motion.button 
+
+        <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:shadow-lg transition-all flex items-center gap-2"
+          className="px-6 py-2.5 bg-gradient-to-r from-[#8b5e3c] to-[#c7903f] text-white rounded-lg hover:shadow-lg transition-all flex items-center gap-2"
           onClick={openAdd}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -285,10 +286,10 @@ const ManageCategory = () => {
           <span>Thêm danh mục</span>
         </motion.button>
       </div>
-      
+
       <div className="overflow-x-auto rounded-xl shadow">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gradient-to-r from-blue-600 to-blue-700">
+          <thead className="bg-gradient-to-r from-[#8b5e3c] to-[#c7903f]">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">STT</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Hình ảnh</th>
@@ -300,7 +301,7 @@ const ManageCategory = () => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {paged.map((row, idx) => (
-              <motion.tr 
+              <motion.tr
                 key={row.categoryId}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -309,10 +310,10 @@ const ManageCategory = () => {
               >
                 <td className="px-4 py-3 whitespace-nowrap">{(currentPage - 1) * pageSize + idx + 1}</td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <motion.img 
+                  <motion.img
                     whileHover={{ scale: 1.1 }}
-                    src={row.image} 
-                    alt={row.categoryName} 
+                    src={row.image}
+                    alt={row.categoryName}
                     className="w-12 h-12 object-cover rounded-lg shadow"
                     onError={(e) => {
                       e.target.src = "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg";
@@ -321,11 +322,10 @@ const ManageCategory = () => {
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">{row.categoryName}</td>
                 <td className="px-4 py-3 whitespace-nowrap">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    row.categoryStatus === "Actived"
-                      ? 'bg-green-50 text-green-600' 
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${row.categoryStatus === "Actived"
+                      ? 'bg-green-50 text-green-600'
                       : 'bg-red-50 text-red-600'
-                  }`}>
+                    }`}>
                     {getStatusDisplay(row.categoryStatus)}
                   </span>
                 </td>
@@ -334,28 +334,28 @@ const ManageCategory = () => {
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex gap-2">
-                    <motion.button 
+                    <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
-                      className="text-green-600 hover:text-green-800" 
-                      onClick={() => openView((currentPage-1)*pageSize+idx)}
+                      className="text-green-600 hover:text-green-800"
+                      onClick={() => openView((currentPage - 1) * pageSize + idx)}
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                       </svg>
                     </motion.button>
-                    <motion.button 
+                    <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       className="text-blue-600 hover:text-blue-800"
-                      onClick={() => openEdit((currentPage-1)*pageSize+idx)}
+                      onClick={() => openEdit((currentPage - 1) * pageSize + idx)}
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </motion.button>
-                    <motion.button 
+                    <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
                       className="text-red-600 hover:text-red-800"
@@ -372,13 +372,13 @@ const ManageCategory = () => {
           </tbody>
         </table>
       </div>
-      
+
       <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
         <span>
           {(filtered.length === 0 ? 0 : (currentPage - 1) * pageSize + 1)} đến {Math.min(currentPage * pageSize, filtered.length)} trên tổng số {filtered.length}
         </span>
         <div className="flex items-center gap-2">
-          <motion.button 
+          <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             className="p-2 rounded-lg border hover:bg-gray-50 disabled:opacity-50"
@@ -390,7 +390,7 @@ const ManageCategory = () => {
             </svg>
           </motion.button>
           <span className="px-4 py-2 rounded-lg bg-blue-50 font-medium text-blue-600">{currentPage}</span>
-          <motion.button 
+          <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             className="p-2 rounded-lg border hover:bg-gray-50 disabled:opacity-50"
@@ -406,12 +406,12 @@ const ManageCategory = () => {
 
       {/* Add/Edit Modal */}
       {showModal && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-25"
         >
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden relative"
@@ -424,23 +424,23 @@ const ManageCategory = () => {
                     {editIdx === null ? 'Thêm danh mục mới' : 'Chỉnh sửa danh mục'}
                   </h2>
                   <p className="mt-1 text-sm text-gray-500">
-                    {editIdx === null 
-                      ? 'Điền thông tin để tạo danh mục mới' 
+                    {editIdx === null
+                      ? 'Điền thông tin để tạo danh mục mới'
                       : 'Cập nhật thông tin danh mục'}
                   </p>
                 </div>
-                <motion.button 
+                <motion.button
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                   onClick={() => {
                     setShowModal(false);
                     setEditIdx(null);
-                    setForm({ 
-                      categoryName: "", 
-                      imageFile: null, 
+                    setForm({
+                      categoryName: "",
+                      imageFile: null,
                       image: "",
-                      categoryStatus: "Actived" 
+                      categoryStatus: "Actived"
                     });
                     setFormError("");
                   }}
@@ -470,7 +470,7 @@ const ManageCategory = () => {
                 </div>
 
                 {/* Image Upload */}
-              <div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Hình ảnh danh mục
                   </label>
@@ -549,7 +549,7 @@ const ManageCategory = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <span>{formError}</span>
-              </div>
+                    </div>
                   </motion.div>
                 )}
 
@@ -563,11 +563,11 @@ const ManageCategory = () => {
                     onClick={() => {
                       setShowModal(false);
                       setEditIdx(null);
-                      setForm({ 
-                        categoryName: "", 
-                        imageFile: null, 
+                      setForm({
+                        categoryName: "",
+                        imageFile: null,
                         image: "",
-                        categoryStatus: "Actived" 
+                        categoryStatus: "Actived"
                       });
                       setFormError("");
                     }}
@@ -599,12 +599,12 @@ const ManageCategory = () => {
 
       {/* View Modal */}
       {showViewModal && viewIdx !== null && filtered[viewIdx] && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-opacity-30"
         >
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden relative"
@@ -618,7 +618,7 @@ const ManageCategory = () => {
                     Ngày tạo: {filtered[viewIdx].creationDate ? new Date(filtered[viewIdx].creationDate).toLocaleDateString('vi-VN') : "Chưa có"}
                   </div>
                 </div>
-                <motion.button 
+                <motion.button
                   whileHover={{ scale: 1.1, rotate: 90 }}
                   whileTap={{ scale: 0.9 }}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -640,9 +640,9 @@ const ManageCategory = () => {
                 {/* Left Column - Image */}
                 <div className="space-y-6">
                   <div className="relative group rounded-xl overflow-hidden bg-gray-50 aspect-square flex items-center justify-center">
-                    <motion.img 
+                    <motion.img
                       whileHover={{ scale: 1.02 }}
-                      src={filtered[viewIdx].image} 
+                      src={filtered[viewIdx].image}
                       alt={filtered[viewIdx].categoryName}
                       className="w-full h-full object-cover shadow-lg transition-transform"
                       onError={(e) => {
@@ -654,14 +654,12 @@ const ManageCategory = () => {
 
                   {/* Status Badge */}
                   <div className="text-center">
-                    <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
-                      filtered[viewIdx].categoryStatus === "Actived"
-                        ? 'bg-green-50 text-green-600' 
+                    <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${filtered[viewIdx].categoryStatus === "Actived"
+                        ? 'bg-green-50 text-green-600'
                         : 'bg-red-50 text-red-600'
-                    }`}>
-                      <span className={`w-2 h-2 rounded-full mr-2 ${
-                        filtered[viewIdx].categoryStatus === "Actived" ? 'bg-green-500' : 'bg-red-500'
-                      }`}></span>
+                      }`}>
+                      <span className={`w-2 h-2 rounded-full mr-2 ${filtered[viewIdx].categoryStatus === "Actived" ? 'bg-green-500' : 'bg-red-500'
+                        }`}></span>
                       {getStatusDisplay(filtered[viewIdx].categoryStatus)}
                     </span>
                   </div>
@@ -697,7 +695,7 @@ const ManageCategory = () => {
                       <div>
                         <span className="text-gray-500">Ngày tạo:</span>
                         <span className="ml-2 font-medium">
-                          {filtered[viewIdx].creationDate 
+                          {filtered[viewIdx].creationDate
                             ? new Date(filtered[viewIdx].creationDate).toLocaleDateString('vi-VN')
                             : "Chưa có"}
                         </span>
@@ -716,7 +714,7 @@ const ManageCategory = () => {
                       <div>
                         <span className="text-gray-500">Thời gian:</span>
                         <span className="ml-2 font-medium">
-                          {filtered[viewIdx].lastModifiedDate 
+                          {filtered[viewIdx].lastModifiedDate
                             ? new Date(filtered[viewIdx].lastModifiedDate).toLocaleDateString('vi-VN')
                             : "Chưa có cập nhật"}
                         </span>
@@ -728,20 +726,20 @@ const ManageCategory = () => {
                     </div>
                   </div>
                 </div>
-          </div>
-        </div>
+              </div>
+            </div>
           </motion.div>
         </motion.div>
       )}
 
       {/* Modal Confirm Delete */}
       {showDeleteModal && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-25"
         >
-          <motion.div 
+          <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 relative"
@@ -751,10 +749,10 @@ const ManageCategory = () => {
                 <svg className="w-full h-full text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-            </div>
+              </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Xác nhận xóa</h3>
               <p className="text-gray-500">Bạn có chắc chắn muốn xóa danh mục này? Hành động này không thể hoàn tác.</p>
-              
+
               <div className="flex justify-center gap-3 mt-6">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -774,13 +772,13 @@ const ManageCategory = () => {
                     <div className="flex items-center gap-2">
                       <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin"></div>
                       <span>Đang xử lý...</span>
-          </div>
+                    </div>
                   ) : (
                     'Xác nhận xóa'
                   )}
                 </motion.button>
               </div>
-          </div>
+            </div>
           </motion.div>
         </motion.div>
       )}

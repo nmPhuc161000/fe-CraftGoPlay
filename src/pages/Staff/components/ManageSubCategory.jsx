@@ -7,10 +7,12 @@ import SubCategoryTable from "./SubCategoryTable";
 import SubCategoryModal from "./SubCategoryModal";
 import SubCategoryViewModal from "./SubCategoryViewModal";
 import DeleteConfirmModal from "./DeleteConfirmModal";
+import artisanRequestService from "../../../services/apis/artisanrequestApi";
 
 const ManageSubCategory = () => {
   const [data, setData] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [artisanRequests, setArtisanRequests] = useState([]);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editIdx, setEditIdx] = useState(null);
@@ -40,7 +42,6 @@ const ManageSubCategory = () => {
         const apiData = response.data.data || response.data;
         const categories = Array.isArray(apiData) ? apiData : [];
         setCategories(categories);
-        console.log("Loaded categories:", categories); // Debug log
       } else {
         console.error("Failed to load categories:", response.error);
         setFormError("Không thể tải danh sách danh mục");
@@ -65,7 +66,6 @@ const ManageSubCategory = () => {
           ...sc,
           categoryId: sc.category?.id || sc.categoryId
         })) : [];
-        console.log("Processed SubCategories:", subCategories); // Log dữ liệu đã xử lý
         setData(subCategories);
         toast.success("Đã tải danh sách danh mục con");
       } else {
@@ -89,7 +89,8 @@ const ManageSubCategory = () => {
 
   const getCategoryNameById = (categoryId) => {
     if (!categoryId) return "Chưa có";
-    const category = categories.find(cat => cat.id === categoryId);
+    const category = categories.find(cat => cat.categoryId === categoryId);
+    console.log(categories)
     return category ? category.categoryName : "Chưa có";
   };
 
@@ -146,11 +147,12 @@ const ManageSubCategory = () => {
 
   const openEdit = idx => {
     const subcategory = filtered[idx];
+    console.log(subcategory)
     setForm({
       subName: subcategory.subName,
       image: subcategory.image,
       status: subcategory.status,
-      categoryId: typeof subcategory.categoryId === 'string' ? parseInt(subcategory.categoryId) : subcategory.categoryId
+      categoryId: subcategory.categoryId
     });
     setImagePreview(subcategory.image);
     setEditIdx(idx);
@@ -186,35 +188,35 @@ const ManageSubCategory = () => {
   const handleAddEdit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-  
+
     try {
       setLoading(true);
       const formData = new FormData();
-  
+
       console.log("Current form state:", form);
       console.log("Selected categoryId:", form.categoryId);
-  
+
       formData.append("SubName", form.subName.trim());
       formData.append("Status", form.status);
-  
+
       let categoryId = form.categoryId;
       if (!categoryId || categoryId === "") {
         throw new Error("Vui lòng chọn danh mục cha");
       }
       categoryId = categoryId.toString(); // Đảm bảo là chuỗi
       formData.append("CategoryId", categoryId);
-  
+
       console.log("FormData contents:");
       for (let [key, value] of formData.entries()) {
         console.log(key + ":", value);
       }
-  
+
       if (imageFile) {
         formData.append("Image", imageFile);
       } else if (form.image) {
         formData.append("Image", form.image);
       }
-  
+
       let response;
       if (editIdx === null) {
         response = await subCategoryService.createSubCategory(formData);
@@ -339,7 +341,7 @@ const ManageSubCategory = () => {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:shadow-lg transition-all flex items-center gap-2"
+          className="px-6 py-2.5 bg-gradient-to-r from-[#8b5e3c] to-[#c7903f] text-white rounded-lg hover:shadow-lg transition-all flex items-center gap-2"
           onClick={openAdd}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -350,7 +352,7 @@ const ManageSubCategory = () => {
       </div>
 
       <SubCategoryTable
-        paged={paged.length > 0 ? paged : [{ subId: 1, subName: "Mẫu", image: "", status: "Actived", categoryId: null, creationDate: new Date() }]}
+        paged={paged}
         currentPage={currentPage}
         pageSize={pageSize}
         filtered={filtered}

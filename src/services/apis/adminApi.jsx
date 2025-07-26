@@ -85,6 +85,20 @@ const adminService = {
             method: "delete",
         });
     },
+    async getOrdersByStatus(status, pageIndex, pageSize) {
+        return performApiRequest(API_ENDPOINTS_ADMIN.GET_ORDERS_BY_STATUS(status, pageIndex, pageSize), {
+            method: "get",
+        });
+    },
+    async createStaff(staffData) {
+        return performApiRequest(API_ENDPOINTS_ADMIN.CREATE_STAFF, {
+            method: "post",
+            data: staffData,
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+    }
 };
 
 export default adminService;

@@ -43,13 +43,13 @@ export const validateProductData = (productData) => {
       status: 400,
     };
   }
-  if (!productData.MeterialIds || productData.MeterialIds.length === 0) {
-    return {
-      success: false,
-      error: "Vui lòng chọn ít nhất một chất liệu",
-      status: 400,
-    };
-  }
+  // if (!productData.MeterialIds || productData.MeterialIds.length === 0) {
+  //   return {
+  //     success: false,
+  //     error: "Vui lòng chọn ít nhất một chất liệu",
+  //     status: 400,
+  //   };
+  // }
   if (!productData.Images || productData.Images.length === 0) {
     return {
       success: false,
