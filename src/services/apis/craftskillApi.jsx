@@ -13,5 +13,11 @@ const craftskillService = {
             data: craftSkill,
         });
     },
+    async updateCraftSkill(craftSkill) {
+        return performApiRequest(API_ENDPOINTS_CRAFT_SKILL.UPDATE_CRAFT_SKILL, {
+            method: "put",
+            data: craftSkill,
+        });
+    },
 }
 export default craftskillService;

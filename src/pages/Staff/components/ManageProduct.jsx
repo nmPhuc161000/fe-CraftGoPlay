@@ -31,7 +31,7 @@ const ManageProduct = () => {
           setData([]);
           return;
         }
-
+        console.log(response?.data?.data);
         // Kiểm tra và xử lý dữ liệu an toàn
         const responseData = response?.data?.data || [];
         if (Array.isArray(responseData)) {

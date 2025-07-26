@@ -10,13 +10,17 @@ function generateId() {
   );
 }
 
-const ManageSkill = ()=>{
+const ManageSkill = () => {
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newSkillName, setNewSkillName] = useState("");
   const [addError, setAddError] = useState("");
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [updateSkillId, setUpdateSkillId] = useState(null);
+  const [updateSkillName, setUpdateSkillName] = useState("");
+  const [updateError, setUpdateError] = useState("");
   const pageSize = 10;
 
   const filtered = data.filter((skill) => {
@@ -41,10 +45,8 @@ const ManageSkill = ()=>{
       console.log(response.data.data);
     } catch (error) {
       console.error("Error fetching craft skills:", error);
-  }
-}
-
-
+    }
+  };
 
   // Đổi status giữa active/inactive
   const handleToggleStatus = (id) => {
@@ -81,7 +83,7 @@ const ManageSkill = ()=>{
       const formData = { name: trimmed };
       const response = await craftskillService.createCraftSkill(formData);
       // Giả sử API trả về object skill mới trong response.data.data
-      const newSkill = response.data.data;
+      // const newSkill = response.data.data;
       fetchCraftSkills();
       setShowAddModal(false);
       setNewSkillName("");
@@ -91,6 +93,47 @@ const ManageSkill = ()=>{
       setAddError("Có lỗi xảy ra khi thêm kỹ năng. Vui lòng thử lại.");
       console.error("Error creating craft skill:", error);
     }
+  };
+
+  // Cập nhật kỹ năng
+  const handleUpdateSkill = async () => {
+    const trimmed = updateSkillName.trim();
+    if (!trimmed) {
+      setUpdateError("Tên kỹ năng không được để trống.");
+      return;
+    }
+    // Check duplicate name (case-insensitive), exclude current
+    if (
+      data.some(
+        (skill) =>
+          skill.id !== updateSkillId &&
+          skill.name.trim().toLowerCase() === trimmed.toLowerCase()
+      )
+    ) {
+      setUpdateError("Tên kỹ năng đã tồn tại.");
+      return;
+    }
+
+    try {
+      const formData = { id: updateSkillId, name: trimmed };
+      await craftskillService.updateCraftSkill(formData);
+      fetchCraftSkills();
+      setShowUpdateModal(false);
+      setUpdateSkillId(null);
+      setUpdateSkillName("");
+      setUpdateError("");
+    } catch (error) {
+      setUpdateError("Có lỗi xảy ra khi cập nhật kỹ năng. Vui lòng thử lại.");
+      console.error("Error updating craft skill:", error);
+    }
+  };
+
+  // Mở popup cập nhật
+  const openUpdateModal = (skill) => {
+    setUpdateSkillId(skill.id);
+    setUpdateSkillName(skill.name);
+    setUpdateError("");
+    setShowUpdateModal(true);
   };
 
   return (
@@ -220,7 +263,7 @@ const ManageSkill = ()=>{
                       </span>
                     )}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
+                  <td className="px-4 py-3 whitespace-nowrap flex gap-2">
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.9 }}
@@ -267,6 +310,19 @@ const ManageSkill = ()=>{
                           />
                         </svg>
                       )}
+                    </motion.button>
+                    {/* Nút update dạng icon */}
+                    <motion.button
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="px-2 py-1 rounded text-blue-600 hover:bg-blue-50 transition-colors"
+                      title="Cập nhật kỹ năng"
+                      onClick={() => openUpdateModal(row)}
+                    >
+                      {/* Pencil/Edit icon */}
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
                     </motion.button>
                   </td>
                 </motion.tr>
@@ -409,6 +465,91 @@ const ManageSkill = ()=>{
                   onClick={handleAddSkill}
                 >
                   Thêm
+                </motion.button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* Modal Cập nhật kỹ năng */}
+      {showUpdateModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30"
+          style={{ background: "rgba(0, 0, 0, 0.5)" }}
+        >
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 relative"
+          >
+            <button
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+              onClick={() => {
+                setShowUpdateModal(false);
+                setUpdateError("");
+                setUpdateSkillId(null);
+                setUpdateSkillName("");
+              }}
+              title="Đóng"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+            <div className="text-center">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Cập nhật kỹ năng
+              </h3>
+              <div className="mb-4">
+                <input
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                  placeholder="Nhập tên kỹ năng..."
+                  value={updateSkillName}
+                  onChange={(e) => {
+                    setUpdateSkillName(e.target.value);
+                    setUpdateError("");
+                  }}
+                  maxLength={100}
+                  autoFocus
+                />
+                {updateError && (
+                  <div className="text-red-600 text-sm mt-1">{updateError}</div>
+                )}
+              </div>
+              <div className="flex justify-center gap-3 mt-4">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-6 py-2 rounded-lg border hover:bg-gray-50"
+                  onClick={() => {
+                    setShowUpdateModal(false);
+                    setUpdateError("");
+                    setUpdateSkillId(null);
+                    setUpdateSkillName("");
+                  }}
+                >
+                  Hủy
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-6 py-2 text-white rounded-lg bg-blue-600 hover:bg-blue-700 font-semibold"
+                  onClick={handleUpdateSkill}
+                >
+                  Cập nhật
                 </motion.button>
               </div>
             </div>

@@ -74,6 +74,7 @@ const CreateAccount = () => {
           }))
         );
       }
+      //z
     } catch (err) {
       setData([]);
     }
@@ -278,21 +279,21 @@ const CreateAccount = () => {
                   </button>
                 </div>
               </div>
-              <button className="bg-white border border-gray-300 px-4 py-2 rounded shadow-sm font-semibold hover:bg-gray-50 flex items-center gap-2" onClick={() => setShowModal(true)}>
+              {/* <button className="bg-white border border-gray-300 px-4 py-2 rounded shadow-sm font-semibold hover:bg-gray-50 flex items-center gap-2" onClick={() => setShowModal(true)}>
                 + Thêm khách hàng
-              </button>
+              </button> */}
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm border-separate border-spacing-0">
                 <thead>
-                  <tr>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tl-lg">ID</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Họ và tên</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Tên đăng nhập</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Email</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Chức vụ</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold">Trạng thái</th>
-                    <th className="px-3 py-2 text-left bg-blue-600 text-white font-semibold rounded-tr-lg">Thao tác</th>
+                  <tr style={{ background: 'linear-gradient(90deg, #5e3a1e 0%, #c7903f 100%)' }}>
+                    <th className="px-3 py-2 text-left text-white font-semibold rounded-tl-lg">ID</th>
+                    <th className="px-3 py-2 text-left text-white font-semibold">Họ và tên</th>
+                    <th className="px-3 py-2 text-left text-white font-semibold">Tên đăng nhập</th>
+                    <th className="px-3 py-2 text-left text-white font-semibold">Email</th>
+                    <th className="px-3 py-2 text-left text-white font-semibold">Chức vụ</th>
+                    <th className="px-3 py-2 text-left text-white font-semibold">Trạng thái</th>
+                    <th className="px-3 py-2 text-left text-white font-semibold rounded-tr-lg">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -370,7 +371,7 @@ const CreateAccount = () => {
               </table>
             </div>
             <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
-              <span>1 to {filteredData.length} of {data. length}</span>
+              <span>1 to {filteredData.length} of {data.length}</span>
               <div className="flex items-center gap-2">
                 <button className="border rounded px-2 py-1"></button>
                 <span className="border rounded px-2 py-1 bg-white">1</span>

@@ -26,6 +26,14 @@ const CraftVillageService = {
       }
     );
   },
+  async updateCraftVillage(formData) {
+    return performApiRequest(
+      API_ENDPOINTS_CRAFTVILLAGE.UPDATE_CRAFTVILLAGE(formData.id),
+      {
+        method: "put",
+        data: formData,
+      });
+  },
 };
 
 export default CraftVillageService;
