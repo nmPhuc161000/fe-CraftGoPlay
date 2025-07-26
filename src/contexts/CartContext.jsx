@@ -28,6 +28,7 @@ export const CartProvider = ({ children }) => {
     const fetchCart = async () => {
         if (isAuthenticated && user?.id && user?.roleId === 4) {
             const res = await getCart(user.id);
+
             if (res.success) {
                 const items = await Promise.all(
                     (res.data?.data?.items || []).map(async item => {
@@ -48,13 +49,13 @@ export const CartProvider = ({ children }) => {
                 );
                 setCartItems(items);
             } else {
-                console.error("Lỗi khi tải giỏ hàng:", res.error);
                 setCartItems([]);
             }
         } else {
             setCartItems([]);
         }
     };
+
 
     useEffect(() => {
         if (isAuthenticated && user?.id && user?.roleId === 4) {
@@ -68,7 +69,7 @@ export const CartProvider = ({ children }) => {
         if (!isAuthenticated || !user?.id || !product?.id || product.quantity <= 0) return;
 
         try {
-            
+
             const productRes = await getProductById(product.id);
             const latestProduct = productRes?.data?.data;
 
