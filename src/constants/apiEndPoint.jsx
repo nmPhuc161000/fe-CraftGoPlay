@@ -115,7 +115,7 @@ export const API_ENDPOINTS_ADDRESS = {
 
 export const API_ENDPOINTS_ORDER = {
   GET_ORDERSBYUSERID: (userId, pageIndex, pageSize, status) =>
-    `/api/Order/GetOrdersByUserId/${userId}?pageIndex=${userId}&pageSize=${pageSize}&status=${status}`,
+    `/api/Order/GetOrdersByUserId/${userId}?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}`,
   GET_ORDERSBYARTISANID: (artisanId, pageIndex, pageSize, status) =>
     `/api/Order/GetOrdersByArtisanId/${artisanId}/?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}`,
   GET_ORDERBYORDERID: (orderId) => `/api/Order/GetOrderByOrderId/${orderId}`,

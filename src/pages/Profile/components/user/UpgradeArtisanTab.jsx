@@ -1,9 +1,11 @@
-// src/components/UpgradeArtisanTab.jsx
+// src/pages/Profile/components/user/UpgradeArtisanTab.jsx
 import { useCallback, useEffect, useState } from "react";
 import userService from "../../../../services/apis/userApi";
 import { useNotification } from "../../../../contexts/NotificationContext";
 import { FiUpload, FiX } from "react-icons/fi";
 import CraftVillageService from "../../../../services/apis/craftvillageApi";
+import locationService from "../../../../services/apis/locationApi";
+import LoadingSpinner from "../../../../components/common/LoadingSpinner";
 
 export default function UpgradeArtisanTab({ userId }) {
   const [formData, setFormData] = useState({
@@ -11,6 +13,14 @@ export default function UpgradeArtisanTab({ userId }) {
     CraftVillageId: "",
     YearsOfExperience: 0,
     Description: "",
+    province: "",
+    provinceId: "",
+    district: "",
+    districtId: "",
+    ward: "",
+    wardCode: "",
+    street: "",
+    PhoneNumber: "", // Thêm field PhoneNumber
   });
   const [craftVillages, setCraftVillages] = useState([]);
   const [selectedVillage, setSelectedVillage] = useState(null);
@@ -25,13 +35,17 @@ export default function UpgradeArtisanTab({ userId }) {
   const [isLoading, setIsLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
+  const [loadingLocations, setLoadingLocations] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
 
     if (name === "CraftVillageId") {
       const village = craftVillages.find((v) => v.id === value);
@@ -39,22 +53,118 @@ export default function UpgradeArtisanTab({ userId }) {
     }
   };
 
+  const fetchProvinces = useCallback(async () => {
+    try {
+      setLoadingLocations(true);
+      const response = await locationService.getProvince();
+      setProvinces(response.data || []);
+    } catch (error) {
+      showNotification("Không tải được danh sách tỉnh/thành", "error");
+      console.error("Error fetching provinces:", error);
+    } finally {
+      setLoadingLocations(false);
+    }
+  }, [showNotification]);
+
+  const fetchDistricts = useCallback(async (provinceName) => {
+    try {
+      setLoadingLocations(true);
+      const province = provinces.find((p) => p.ProvinceName === provinceName);
+      if (!province) return;
+      const response = await locationService.getDistrict(province.ProvinceID);
+      setDistricts(response.data || []);
+      setWards([]);
+      setFormData((prev) => ({
+        ...prev,
+        district: "",
+        districtId: "",
+        ward: "",
+        wardCode: "",
+      }));
+    } catch (error) {
+      showNotification("Không tải được danh sách quận/huyện", "error");
+      console.error("Error fetching districts:", error);
+    } finally {
+      setLoadingLocations(false);
+    }
+  }, [provinces, showNotification]);
+
+  const fetchWards = useCallback(async (districtName) => {
+    try {
+      setLoadingLocations(true);
+      const district = districts.find((d) => d.DistrictName === districtName);
+      if (!district) return;
+      const response = await locationService.getWard(district.DistrictID);
+      setWards(response.data || []);
+      setFormData((prev) => ({
+        ...prev,
+        ward: "",
+        wardCode: "",
+      }));
+    } catch (error) {
+      showNotification("Không tải được danh sách phường/xã", "error");
+      console.error("Error fetching wards:", error);
+    } finally {
+      setLoadingLocations(false);
+    }
+  }, [districts, showNotification]);
+
+  const handleProvinceChange = useCallback(
+    (e) => {
+      const value = e.target.value;
+      const selected = provinces.find((p) => p.ProvinceName === value);
+      setFormData((prev) => ({
+        ...prev,
+        province: value,
+        provinceId: selected ? selected.ProvinceID : "",
+        district: "",
+        districtId: "",
+        ward: "",
+        wardCode: "",
+      }));
+      if (selected) fetchDistricts(value);
+    },
+    [provinces, fetchDistricts]
+  );
+
+  const handleDistrictChange = useCallback(
+    (e) => {
+      const value = e.target.value;
+      const selected = districts.find((d) => d.DistrictName === value);
+      setFormData((prev) => ({
+        ...prev,
+        district: value,
+        districtId: selected ? selected.DistrictID : "",
+        ward: "",
+        wardCode: "",
+      }));
+      if (selected) fetchWards(value);
+    },
+    [districts, fetchWards]
+  );
+
+  const handleWardChange = useCallback(
+    (e) => {
+      const value = e.target.value;
+      const selected = wards.find((w) => w.WardName === value);
+      setFormData((prev) => ({
+        ...prev,
+        ward: value,
+        wardCode: selected ? selected.WardCode : "",
+      }));
+    },
+    [wards]
+  );
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Lấy danh sách làng nghề
         const villagesResponse = await CraftVillageService.getCraftVillages();
         setCraftVillages(villagesResponse.data.data);
 
-        // Kiểm tra yêu cầu đã gửi
         try {
-          const requestResponse = await userService.getSentRequestByUserId(
-            userId
-          );
-          console.log("data: ", requestResponse.data);
-
-          // Kiểm tra kỹ cấu trúc dữ liệu trả về
+          const requestResponse = await userService.getSentRequestByUserId(userId);
           if (requestResponse.data && requestResponse.data.data) {
             const requestData = requestResponse.data.data;
             setCheckRequest({
@@ -75,14 +185,18 @@ export default function UpgradeArtisanTab({ userId }) {
                 CraftVillageId: requestData.craftVillageId || "",
                 YearsOfExperience: requestData.yearsOfExperience || 0,
                 Description: requestData.description || "",
+                province: requestData.province || "",
+                provinceId: requestData.provinceId || "",
+                district: requestData.district || "",
+                districtId: requestData.districtId || "",
+                ward: requestData.ward || "",
+                wardCode: requestData.wardCode || "",
+                street: requestData.street || "",
+                PhoneNumber: requestData.phoneNumber || "", // Lấy từ requestData nếu có
               });
-
-              if (requestData.image) {
-                setPreviewImage(requestData.image);
-              }
+              if (requestData.image) setPreviewImage(requestData.image);
             }
           } else {
-            // Nếu không có dữ liệu request
             setCheckRequest({
               isSent: false,
               message: "",
@@ -92,14 +206,13 @@ export default function UpgradeArtisanTab({ userId }) {
           }
         } catch (requestError) {
           console.error("Lỗi khi tải thông tin yêu cầu:", requestError);
-          // Chỉ thông báo nếu đây không phải là lỗi 404 (không tìm thấy yêu cầu)
           if (requestError.response?.status !== 404) {
             showNotification("Không tải được thông tin yêu cầu", "error");
           }
         }
+        await fetchProvinces();
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu:", error);
-        // Chỉ hiển thị thông báo nếu không phải lỗi hủy request
         if (!error.message.includes("cancel")) {
           showNotification("Không tải được thông tin làng nghề", "error");
         }
@@ -109,7 +222,7 @@ export default function UpgradeArtisanTab({ userId }) {
     };
 
     fetchData();
-  }, [isSentSuccess, userId, showNotification]);
+  }, [isSentSuccess, userId, showNotification, fetchProvinces]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -117,9 +230,7 @@ export default function UpgradeArtisanTab({ userId }) {
 
     try {
       const formDataToSend = new FormData();
-      if (formData.Image) {
-        formDataToSend.append("Image", formData.Image);
-      }
+      if (formData.Image) formDataToSend.append("Image", formData.Image);
       formDataToSend.append("CraftVillageId", formData.CraftVillageId);
       formDataToSend.append(
         "YearsOfExperience",
@@ -127,8 +238,15 @@ export default function UpgradeArtisanTab({ userId }) {
       );
       formDataToSend.append("Description", formData.Description);
       formDataToSend.append("UserId", userId);
+      formDataToSend.append("ProviceId", formData.provinceId);
+      formDataToSend.append("DistrictId", formData.districtId);
+      formDataToSend.append("WardCode", formData.wardCode);
+      formDataToSend.append("ProviceName", formData.province);
+      formDataToSend.append("DistrictName", formData.district);
+      formDataToSend.append("WardName", formData.ward);
+      formDataToSend.append("HomeNumber", formData.street);
+      formDataToSend.append("PhoneNumber", formData.PhoneNumber); // Thêm PhoneNumber
 
-      // Nếu là yêu cầu gửi lại sau khi hủy
       if (checkRequest.status === "Cancelled" && checkRequest.requestId) {
         formDataToSend.append("RequestId", checkRequest.requestId);
       }
@@ -140,13 +258,19 @@ export default function UpgradeArtisanTab({ userId }) {
       }
 
       showNotification("Yêu cầu của bạn đã được gửi thành công!", "success");
-
-      // Reset form và cập nhật trạng thái
       setFormData({
         Image: null,
         CraftVillageId: "",
         YearsOfExperience: 0,
         Description: "",
+        province: "",
+        provinceId: "",
+        district: "",
+        districtId: "",
+        ward: "",
+        wardCode: "",
+        street: "",
+        PhoneNumber: "",
       });
       setPreviewImage(null);
       setSelectedVillage(null);
@@ -159,32 +283,25 @@ export default function UpgradeArtisanTab({ userId }) {
     }
   };
 
-  // Các hàm xử lý ảnh giữ nguyên như cũ
+  // Các hàm xử lý ảnh giữ nguyên
   const handleImageChange = useCallback((files) => {
     if (!files || files.length === 0) {
       showNotification("Vui lòng chọn một file!", "error");
       return;
     }
-
     const file = files[0];
-
     if (!file.type.match("image.*")) {
       showNotification(`File ${file.name} không phải là ảnh!`, "error");
       return;
     }
-
     if (file.size > 5 * 1024 * 1024) {
       showNotification(`File ${file.name} vượt quá 5MB!`, "error");
       return;
     }
-
     const reader = new FileReader();
     reader.onload = (e) => {
       setPreviewImage(e.target.result);
-      setFormData((prev) => ({
-        ...prev,
-        Image: file,
-      }));
+      setFormData((prev) => ({ ...prev, Image: file }));
     };
     reader.readAsDataURL(file);
   }, []);
@@ -208,7 +325,6 @@ export default function UpgradeArtisanTab({ userId }) {
     [handleImageChange]
   );
 
-  // Hàm format ngày tháng
   const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString("vi-VN", options);
@@ -216,14 +332,12 @@ export default function UpgradeArtisanTab({ userId }) {
 
   const handleResendRequest = async () => {
     if (!checkRequest.requestId) return;
-
     setIsLoading(true);
     try {
       const response = await userService.resendRequest(
         userId,
         checkRequest.requestId
       );
-
       if (response.success) {
         showNotification("Đã gửi lại yêu cầu thành công!", "success");
         setCheckRequest({
@@ -251,7 +365,6 @@ export default function UpgradeArtisanTab({ userId }) {
     try {
       setIsLoading(true);
       const response = await userService.cancelArtisanRequest(userId);
-
       if (response.success) {
         showNotification("Đã hủy yêu cầu thành công!", "success");
         setCheckRequest({
@@ -319,11 +432,21 @@ export default function UpgradeArtisanTab({ userId }) {
           </button>
         </div>
       ) : checkRequest.status === "Cancelled" ? (
-        // Hiển thị khi yêu cầu đã bị hủy
         <div className="space-y-4">
           <div className="p-4 bg-blue-50 border-l-4 border-blue-400 rounded">
             <div className="flex items-center">
-              <svg className="h-5 w-5 text-blue-400 mr-3" /* ... */ />
+              <svg
+                className="h-5 w-5 text-blue-400 mr-3"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 102 0V6zm-1 7a1 1 0 100 2 1 1 0 000-2z"
+                  clipRule="evenodd"
+                />
+              </svg>
               <p className="text-sm text-blue-700">{checkRequest.message}</p>
             </div>
           </div>
@@ -390,6 +513,113 @@ export default function UpgradeArtisanTab({ userId }) {
                 </p>
               </div>
             )}
+          </div>
+
+          {/* Phần chọn địa chỉ */}
+          <div>
+            <label className="block text-gray-700 mb-2" htmlFor="province">
+              Tỉnh/Thành
+            </label>
+            <select
+              id="province"
+              name="province"
+              value={formData.province}
+              onChange={handleProvinceChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+              disabled={isLoading || checkRequest.isSent || loadingLocations}
+            >
+              <option value="">Chọn tỉnh/thành</option>
+              {provinces.map((province) => (
+                <option
+                  key={province.ProvinceID}
+                  value={province.ProvinceName}
+                >
+                  {province.ProvinceName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-2" htmlFor="district">
+              Quận/Huyện
+            </label>
+            <select
+              id="district"
+              name="district"
+              value={formData.district}
+              onChange={handleDistrictChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+              disabled={isLoading || checkRequest.isSent || !formData.province || loadingLocations}
+            >
+              <option value="">Chọn quận/huyện</option>
+              {districts.map((district) => (
+                <option
+                  key={district.DistrictID}
+                  value={district.DistrictName}
+                >
+                  {district.DistrictName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-2" htmlFor="ward">
+              Phường/Xã
+            </label>
+            <select
+              id="ward"
+              name="ward"
+              value={formData.ward}
+              onChange={handleWardChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+              disabled={isLoading || checkRequest.isSent || !formData.district || loadingLocations}
+            >
+              <option value="">Chọn phường/xã</option>
+              {wards.map((ward) => (
+                <option key={ward.WardCode} value={ward.WardName}>
+                  {ward.WardName}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-2" htmlFor="street">
+              Số nhà, tên đường
+            </label>
+            <input
+              type="text"
+              id="street"
+              name="street"
+              value={formData.street}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Nhập số nhà, tên đường"
+              required
+              disabled={checkRequest.isSent}
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-2" htmlFor="PhoneNumber">
+              Số điện thoại
+            </label>
+            <input
+              type="text"
+              id="PhoneNumber"
+              name="PhoneNumber"
+              value={formData.PhoneNumber}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Nhập số điện thoại"
+              required
+              disabled={checkRequest.isSent}
+            />
           </div>
 
           {/* Phần chọn làng nghề */}
@@ -493,6 +723,8 @@ export default function UpgradeArtisanTab({ userId }) {
           >
             {isLoading ? "Đang gửi..." : "Gửi yêu cầu"}
           </button>
+
+          {loadingLocations && <LoadingSpinner message="Đang tải dữ liệu địa chỉ..." />}
         </form>
       )}
     </div>
