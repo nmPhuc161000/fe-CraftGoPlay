@@ -42,6 +42,8 @@ const ProductDetail = () => {
       try {
         const res = await productService.getProductById(id);
         const data = res.data?.data;
+        console.log("Product data:", data);
+        
         setProduct(data);
         if (data?.productImages?.length > 0) {
           setSelectedImg(data.productImages[0].imageUrl);
@@ -103,6 +105,11 @@ const ProductDetail = () => {
           productImage: selectedImg,
           quantity: quantity,
           artisanName: product.artisanName,
+          artisanId: product.artisan_id,
+          weight: product.weight,
+          height: product.height,
+          width: product.width,
+          length: product.length,
         },
       },
     });
