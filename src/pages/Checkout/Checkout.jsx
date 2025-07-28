@@ -129,11 +129,11 @@ const Checkout = () => {
       paymentMethod === "vnpay" ? "Online" : "Cash"
     );
     formData.append("AddressId", selectedAddressId);
-    formData.append("DeliveryAmount", totalShippingFee);
 
     if (buyNow) {
       formData.append("ProductId", buyNow.productId);
       formData.append("Quantity", buyNow.quantity);
+      formData.append("DeliveryAmount", totalShippingFee);
 
       const result = await createOrderDirect(user?.id, formData);
       console.log("Order result:", result);
@@ -160,6 +160,22 @@ const Checkout = () => {
       selectedCartItems.forEach((item) => {
         formData.append("SelectedCartItemIds", item.id);
       });
+
+      // Tạo đối tượng deliveryAmounts từ shippingFees
+      const deliveryAmounts = {};
+      shippingFees.forEach((fee) => {
+        // Tìm artisanId tương ứng với artisanName
+        const artisanItems = selectedCartItems.filter(
+          (item) => item.user?.userName === fee.artisanName
+        );
+        if (artisanItems.length > 0) {
+          const artisanId = artisanItems[0].product.artisanId; // Lấy artisanId từ item đầu tiên
+          deliveryAmounts[artisanId] = fee.fee;
+        }
+      });
+
+      // Gửi deliveryAmounts dưới dạng JSON
+      formData.append("DeliveryAmounts", JSON.stringify(deliveryAmounts));
 
       const result = await createOrderFromCart(formData);
       console.log("Order result:", result);
@@ -331,7 +347,7 @@ const Checkout = () => {
                 );
               }
 
-              console.log(`Request feeData cho ${name}:`, feeData); // Debug
+              // console.log(`Request feeData cho ${name}:`, feeData); // Debug
 
               let feeResult;
               try {
