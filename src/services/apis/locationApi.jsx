@@ -25,18 +25,16 @@ const locationService = {
       .then((res) => res.data),
 
   getFeeShip: (data) => {
-    return ghnApi
-      .post("/v2/shipping-order/fee", {
-        header: {
-          ShopId: import.meta.env.VITE_SHOPID_GHN, // Nhớ thay shop_id thực
-        },
-      },data)
-      .then((res) => res.data)
-      .catch((error) => {
-        // Ném lỗi để xử lý ở nơi gọi
-        throw error.response ? error.response.data : error;
-      });
-  },
+    return ghnApi.post("/v2/shipping-order/fee", data, {
+      headers: {
+        ShopId: import.meta.env.VITE_SHOPID_GHN,
+      }
+    })
+    .then(res => res.data)
+    .catch(error => {
+      throw error.response ? error.response.data : error;
+    });
+  }
 };
 
 export default locationService;

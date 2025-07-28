@@ -15,6 +15,12 @@ const addressService = {
     });
   },
 
+  async getAddressOfArtisan(artisanId) {
+    return performApiRequest(API_ENDPOINTS_ADDRESS.GET_ADDRESS_BY_ARTISANID(artisanId), {
+      method: "get",
+    })
+  },
+
   async addNewAddress(addressData) {
     const formData = new FormData();
 

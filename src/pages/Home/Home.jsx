@@ -14,7 +14,10 @@ const Home = () => {
   const location = useLocation();
 
   const formatVND = (number) => {
-    return number?.toLocaleString("vi-VN", { style: "currency", currency: "VND" }) || "";
+    return (
+      number?.toLocaleString("vi-VN", { style: "currency", currency: "VND" }) ||
+      ""
+    );
   };
 
   const fetchCategories = async () => {
@@ -33,10 +36,10 @@ const Home = () => {
         pageIndex: 1,
         pageSize: 50,
       });
-      const productList = res?.data?.data;
+      const productList = res.data?.data;
+      setProducts(productList);
       if (Array.isArray(productList)) {
         console.log("Sản phẩm lấy về:", productList.length, productList);
-        setProducts(productList);
       }
     } catch (error) {
       console.error("Lỗi khi lấy sản phẩm:", error);
@@ -134,7 +137,9 @@ const Home = () => {
               key={index}
               onClick={() =>
                 navigate(
-                  `/products?category=${encodeURIComponent(category.categoryName)}`
+                  `/products?category=${encodeURIComponent(
+                    category.categoryName
+                  )}`
                 )
               }
               className="bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md hover:scale-105 transition-transform cursor-pointer overflow-hidden"
@@ -214,7 +219,9 @@ const Home = () => {
                 </div>
 
                 <div className="p-4">
-                  <h3 className="text-lg font-semibold line-clamp-2">{product.name}</h3>
+                  <h3 className="text-lg font-semibold line-clamp-2">
+                    {product.name}
+                  </h3>
                   <div className="mt-2 text-base">
                     <span className="text-red-600 font-semibold">
                       {formatVND(product.price)}

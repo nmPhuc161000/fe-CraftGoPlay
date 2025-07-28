@@ -40,9 +40,14 @@ export const CartProvider = ({ children }) => {
                             product: {
                                 id: item.productId,
                                 name: item.productName,
+                                artisanId: productData.artisan_id,
                                 quantity: productData.quantity,
                                 quantitySold: productData.quantitySold,
                                 productImages: item.productImages || [],
+                                length: productData.length,
+                                width: productData.width,
+                                height: productData.height,
+                                weight: productData.weight,
                             }
                         };
                     })
