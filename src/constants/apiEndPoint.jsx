@@ -149,3 +149,7 @@ export const API_ENDPOINTS_CRAFT_SKILL = {
   CREATE_CRAFT_SKILL: "/api/CraftSkill/CreateNewCraftSkill",
   UPDATE_CRAFT_SKILL: `/api/CraftSkill/UpdateCraftSkill`,
 };
+
+export const API_ENDPOINTS_WALLET = {
+  GET_WALLET_BY_USER_ID: (userId) => `/api/Wallet/GetWalletByUserId/${userId}`,
+};

@@ -31,10 +31,9 @@ const SidebarNavigation = ({ role, isActive }) => {
   }, [location.pathname]);
 
   const getItemClass = (active) =>
-    `flex items-center px-4 py-3 rounded-lg mb-1 transition-all duration-150 ${
-      active
-        ? "bg-[#8f693b] text-white"
-        : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
+    `flex items-center px-4 py-3 rounded-lg mb-1 transition-all duration-150 ${active
+      ? "bg-[#8f693b] text-white"
+      : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
     }`;
 
   const navItems = [
@@ -87,6 +86,13 @@ const SidebarNavigation = ({ role, isActive }) => {
       label: "Kho voucher",
       show: role === "User",
     },
+    {
+      id: "refundWallet",
+      to: "/profile-user/refundWallet",
+      icon: "💰",
+      label: "Ví hoàn tiền",
+      show: role === "User",
+    },
   ];
 
   const accountItems = [
@@ -131,9 +137,8 @@ const SidebarNavigation = ({ role, isActive }) => {
               <span className="ml-3">Tài khoản của tôi</span>
             </div>
             <span
-              className={`ml-2 text-sm transition-transform duration-200 ${
-                isAccountOpen ? "rotate-180" : ""
-              }`}
+              className={`ml-2 text-sm transition-transform duration-200 ${isAccountOpen ? "rotate-180" : ""
+                }`}
             >
               ▼
             </span>
