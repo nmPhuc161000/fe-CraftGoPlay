@@ -14,6 +14,7 @@ import CustomerReviewsTab from "../pages/Profile/components/user/CustomerReviews
 import CoinTab from "../pages/Profile/components/user/CointTab";
 import VoucherTab from "../pages/Profile/components/user/VoucherTab";
 import ArtisanOrdersTab from "../pages/Profile/components/artisan/ArtisanOrdersTab";
+import RefundWalletTab from "../pages/Profile/components/user/RefundWalletTab";
 
 const ProfileRoutes = ({ role, user }) => {
   if (!user) return <div>Error: User not found</div>;
@@ -66,6 +67,7 @@ const ProfileRoutes = ({ role, user }) => {
           />
           <Route path="coins" element={<CoinTab userId={user.id} />} />
           <Route path="vouchers" element={<VoucherTab userId={user.id} />} />
+          <Route path="refundWallet" element={<RefundWalletTab />} />
         </>
       )}
 
