@@ -132,38 +132,44 @@ const Home = () => {
         </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
-          {categories.map((category, index) => (
-            <div
-              key={index}
-              onClick={() =>
-                navigate(
-                  `/products?category=${encodeURIComponent(
-                    category.categoryName
-                  )}`
-                )
-              }
-              className="bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md hover:scale-105 transition-transform cursor-pointer overflow-hidden"
-            >
-              <div className="w-full h-32">
-                {category.image ? (
-                  <img
-                    src={category.image}
-                    alt={category.categoryName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
-                    Không có ảnh
-                  </div>
-                )}
-              </div>
-              <div className="p-2 text-center">
-                <span className="text-base font-medium text-[#5e3a1e] leading-tight block">
-                  {category.categoryName}
-                </span>
-              </div>
+          {categories.length === 0 ? (
+            <div className="col-span-full text-center text-gray-500">
+              Không có danh mục sản phẩm nào.
             </div>
-          ))}
+          ) : (
+            categories.map((category, index) => (
+              <div
+                key={index}
+                onClick={() =>
+                  navigate(
+                    `/products?category=${encodeURIComponent(
+                      category.categoryName
+                    )}`
+                  )
+                }
+                className="bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md hover:scale-105 transition-transform cursor-pointer overflow-hidden"
+              >
+                <div className="w-full h-32">
+                  {category.image ? (
+                    <img
+                      src={category.image}
+                      alt={category.categoryName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
+                      Không có ảnh
+                    </div>
+                  )}
+                </div>
+                <div className="p-2 text-center">
+                  <span className="text-base font-medium text-[#5e3a1e] leading-tight block">
+                    {category.categoryName}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -195,46 +201,52 @@ const Home = () => {
       <div className="w-full px-20 py-4">
         <div className="w-full">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 px-4 sm:px-6 lg:px-8">
-            {products.map((product) => (
-              <div
-                key={product.id}
-                onClick={() => navigate(`/product/${product.id}`)}
-                className="group w-full bg-white shadow rounded-lg overflow-hidden relative text-center transition-transform duration-300 hover:scale-105 hover:shadow-lg cursor-pointer"
-              >
-                <div className="relative w-full h-64">
-                  {/* Ảnh chính và hover */}
-                  <img
-                    src={product.productImages[0].imageUrl}
-                    alt={product.name}
-                    className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-100 group-hover:opacity-0"
-                  />
-                  <img
-                    src={
-                      product.productImages[1]?.imageUrl ||
-                      product.productImages[0].imageUrl
-                    }
-                    alt={product.name}
-                    className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
-                  />
-                </div>
+            {products.length === 0 ? (
+              <div className="col-span-full text-center text-gray-500">
+                Hiện chưa có sản phẩm nào.
+              </div>
+            ) : (
+              products.map((product) => (
+                <div
+                  key={product.id}
+                  onClick={() => navigate(`/product/${product.id}`)}
+                  className="group w-full bg-white shadow rounded-lg overflow-hidden relative text-center transition-transform duration-300 hover:scale-105 hover:shadow-lg cursor-pointer"
+                >
+                  <div className="relative w-full h-64">
+                    {/* Ảnh chính và hover */}
+                    <img
+                      src={product.productImages[0].imageUrl}
+                      alt={product.name}
+                      className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-100 group-hover:opacity-0"
+                    />
+                    <img
+                      src={
+                        product.productImages[1]?.imageUrl ||
+                        product.productImages[0].imageUrl
+                      }
+                      alt={product.name}
+                      className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+                    />
+                  </div>
 
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold line-clamp-2">
-                    {product.name}
-                  </h3>
-                  <div className="mt-2 text-base">
-                    <span className="text-red-600 font-semibold">
-                      {formatVND(product.price)}
-                    </span>
-                    {product.originalPrice && (
-                      <span className="ml-2 line-through text-gray-500">
-                        {formatVND(product.originalPrice)}
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold line-clamp-2">
+                      {product.name}
+                    </h3>
+                    <div className="mt-2 text-base">
+                      <span className="text-red-600 font-semibold">
+                        {formatVND(product.price)}
                       </span>
-                    )}
+                      {product.originalPrice && (
+                        <span className="ml-2 line-through text-gray-500">
+                          {formatVND(product.originalPrice)}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </div>
