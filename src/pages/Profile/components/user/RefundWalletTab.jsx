@@ -38,6 +38,9 @@ const RefundWalletTab = () => {
         const date = new Date(dateStr);
         return date.toLocaleDateString("vi-VN");
     };
+    const totalRefund = transactions
+        .filter((tx) => tx.type === "Refund")
+        .reduce((sum, tx) => sum + tx.amount, 0);
 
     return (
         <div className="p-4">
@@ -51,25 +54,33 @@ const RefundWalletTab = () => {
             </div>
 
             <h3 className="text-lg font-semibold mb-4">Lịch sử hoàn tiền</h3>
+            <p className="text-md font-bold">
+                Tổng tiền đã hoàn:{" "}
+                <span className="text-green-600">{formatCurrency(totalRefund)}</span>
+            </p>
 
-            {transactions.length === 0 ? (
+            {transactions.filter(tx => tx.type === "Refund").length === 0 ? (
                 <p>Chưa có giao dịch hoàn tiền nào.</p>
             ) : (
                 <div className="space-y-4">
-                    {transactions.map((tx) => (
-                        <div
-                            key={tx.id}
-                            className="border rounded-lg p-4 shadow-sm bg-white"
-                        >
-                            <p className="text-md font-bold">📦 {tx.description}</p>
-                            <p className="text-sm text-green-600 mt-1">
-                                Số tiền hoàn: +{formatCurrency(tx.amount)}
-                            </p>
-                            <p className="text-sm text-gray-500 mt-1">
-                                Ngày: {formatDate(tx.dateTransaction)}
-                            </p>
-                        </div>
-                    ))}
+                    {transactions
+                        .filter((tx) => tx.type === "Refund")
+                        .map((tx) => (
+                            <div
+                                key={tx.id}
+                                className="border rounded-lg p-4 shadow-sm bg-white"
+                            >
+                                <p className="text-md font-bold">
+                                    📦 Đơn hàng #{tx.description?.match(/[0-9a-fA-F-]{36}/)?.[0]?.split("-")[0]?.toUpperCase()}
+                                </p>
+                                <p className="text-sm text-green-600 mt-1">
+                                    Số tiền hoàn: +{formatCurrency(tx.amount)}
+                                </p>
+                                <p className="text-sm text-gray-500 mt-1">
+                                    Ngày: {formatDate(tx.dateTransaction)}
+                                </p>
+                            </div>
+                        ))}
                 </div>
             )}
         </div>
