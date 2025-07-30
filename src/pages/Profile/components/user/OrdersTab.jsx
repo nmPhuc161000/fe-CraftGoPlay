@@ -35,6 +35,9 @@ const OrdersTab = () => {
   const [expandedOrders, setExpandedOrders] = useState({});
   const { showNotification } = useNotification();
 
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+
   // Fetch orders based on status
   useEffect(() => {
     const fetchOrders = async (status = "") => {
@@ -147,9 +150,9 @@ const OrdersTab = () => {
     switch (currentStatus) {
       case "Created":
         return [
-          { 
-            action: "cancel", 
-            label: "Hủy đơn hàng", 
+          {
+            action: "cancel",
+            label: "Hủy đơn hàng",
             color: "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-200",
             icon: <FiX className="w-4 h-4" />
           },
@@ -159,60 +162,54 @@ const OrdersTab = () => {
       case "AwaitingPayment":
       case "ReadyForShipment":
         return [
-          { 
-            action: "cancel", 
-            label: "Hủy đơn hàng", 
+          {
+            action: "cancel",
+            label: "Hủy đơn hàng",
             color: "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-200",
             icon: <FiX className="w-4 h-4" />
           },
-          { 
-            action: "contact", 
-            label: "Liên hệ nghệ nhân", 
+          {
+            action: "contact",
+            label: "Liên hệ nghệ nhân",
             color: "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
             icon: <FiUser className="w-4 h-4" />
           },
         ];
       case "Shipped":
         return [
-          { 
-            action: "contact", 
-            label: "Liên hệ nghệ nhân", 
+          {
+            action: "contact",
+            label: "Liên hệ nghệ nhân",
             color: "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
             icon: <FiUser className="w-4 h-4" />
-          },
-          { 
-            action: "cancel", 
-            label: "Hủy đơn hàng", 
-            color: "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-200",
-            icon: <FiX className="w-4 h-4" />
           },
         ];
       case "Delivered":
         return [
-          { 
-            action: "returnRequest", 
-            label: "Yêu cầu trả hàng", 
+          {
+            action: "returnRequest",
+            label: "Yêu cầu trả hàng",
             color: "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-orange-200",
             icon: <FiPackage className="w-4 h-4" />
           },
-          { 
-            action: "complete", 
-            label: "Xác nhận đã nhận hàng", 
+          {
+            action: "complete",
+            label: "Xác nhận đã nhận hàng",
             color: "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-green-200",
             icon: <FiCheck className="w-4 h-4" />
           },
         ];
       case "Completed":
         return [
-          { 
-            action: "returnRequest", 
-            label: "Yêu cầu trả hàng", 
+          {
+            action: "returnRequest",
+            label: "Yêu cầu trả hàng",
             color: "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-orange-200",
             icon: <FiPackage className="w-4 h-4" />
           },
-          { 
-            action: "ratting", 
-            label: "Đánh giá sản phẩm", 
+          {
+            action: "ratting",
+            label: "Đánh giá sản phẩm",
             color: "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 shadow-yellow-200",
             icon: <FiStar className="w-4 h-4" />
           },
@@ -250,21 +247,19 @@ const OrdersTab = () => {
                 <button
                   key={filter.value}
                   onClick={() => setSelectedStatus(filter.value)}
-                  className={`group relative flex items-center px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
-                    selectedStatus === filter.value
-                      ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200"
-                      : "bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 hover:border-blue-300"
-                  }`}
+                  className={`group relative flex items-center px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 transform hover:scale-105 ${selectedStatus === filter.value
+                    ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200"
+                    : "bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 hover:border-blue-300"
+                    }`}
                 >
                   <div className="flex items-center">
                     {filter.icon}
                     <span className="ml-2">{filter.label}</span>
                     {statusCounts[filter.value] > 0 && (
-                      <span className={`ml-3 px-2 py-1 rounded-full text-xs font-bold ${
-                        selectedStatus === filter.value
-                          ? "bg-white text-blue-600"
-                          : "bg-blue-100 text-blue-700"
-                      }`}>
+                      <span className={`ml-3 px-2 py-1 rounded-full text-xs font-bold ${selectedStatus === filter.value
+                        ? "bg-white text-blue-600"
+                        : "bg-blue-100 text-blue-700"
+                        }`}>
                         {statusCounts[filter.value]}
                       </span>
                     )}
@@ -419,7 +414,7 @@ const OrdersTab = () => {
                             </div>
                           </div>
                         </div>
-                        
+
                         <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                           <h5 className="font-semibold text-gray-900 mb-3 flex items-center">
                             <FiTruck className="mr-2 text-orange-600" />
@@ -439,13 +434,50 @@ const OrdersTab = () => {
                         {getAvailableUserActions(order.status).map((action) => (
                           <button
                             key={action.action}
-                            onClick={() => handleUserAction(order.id, action.action)}
+                            onClick={() => {
+                              if (action.action === "cancel") {
+                                setSelectedOrderId(order.id);
+                                setShowCancelModal(true);
+                              } else {
+                                handleUserAction(order.id, action.action);
+                              }
+                            }}
                             className={`flex items-center px-6 py-3 rounded-xl text-white text-sm font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg ${action.color}`}
                           >
                             {action.icon}
                             <span className="ml-2">{action.label}</span>
                           </button>
                         ))}
+
+                        {/* Modal xác nhận hủy đơn */}
+                        {showCancelModal && (
+                          <div className="fixed inset-0 bg-opacity-30 backdrop-blur-sm z-50 flex items-center justify-center">
+                            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center">
+                              <h2 className="text-xl font-semibold text-red-600 mb-4">Xác nhận hủy đơn hàng</h2>
+                              <p className="text-gray-700 mb-6">
+                                Bạn có chắc chắn muốn <span className="font-semibold text-red-500">hủy đơn hàng</span> này không?
+                              </p>
+                              <div className="flex justify-center gap-4">
+                                <button
+                                  onClick={() => {
+                                    handleUserAction(selectedOrderId, "cancel");
+                                    setShowCancelModal(false);
+                                  }}
+                                  className="px-6 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition font-semibold shadow-md"
+                                >
+                                  Xác nhận
+                                </button>
+                                <button
+                                  onClick={() => setShowCancelModal(false)}
+                                  className="px-6 py-2 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 transition font-semibold"
+                                >
+                                  Hủy
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
                       </div>
                     </div>
                   </div>
