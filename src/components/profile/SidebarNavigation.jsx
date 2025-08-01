@@ -73,8 +73,8 @@ const SidebarNavigation = ({ role, isActive }) => {
       show: true,
     },
     {
-      id: role === "Artisan" ? "revenue" : "coins",
-      to: role === "Artisan" ? "/profile-user/revenue" : "/profile-user/coins",
+      id: role === "Artisan" ? "revenue" : "points",
+      to: role === "Artisan" ? "/profile-user/revenue" : "/profile-user/points",
       icon: role === "Artisan" ? "📊" : "🪙",
       label: role === "Artisan" ? "Doanh thu" : "Kho xu",
       show: true,
