@@ -11,10 +11,11 @@ import ProductDetailTab from "../pages/Profile/components/artisan/ProductDetailt
 import AddressTab from "../pages/Profile/components/user/AddressTab";
 import UpgradeArtisanTab from "../pages/Profile/components/user/UpgradeArtisanTab";
 import CustomerReviewsTab from "../pages/Profile/components/user/CustomerReviewsTab";
-import CoinTab from "../pages/Profile/components/user/CointTab";
 import VoucherTab from "../pages/Profile/components/user/VoucherTab";
 import ArtisanOrdersTab from "../pages/Profile/components/artisan/ArtisanOrdersTab";
 import RefundWalletTab from "../pages/Profile/components/user/RefundWalletTab";
+import DailyCheckInTab from "../pages/Profile/components/user/DailyCheckinTab";
+import PointTab from "../pages/Profile/components/user/PointTab";
 
 const ProfileRoutes = ({ role, user }) => {
   if (!user) return <div>Error: User not found</div>;
@@ -65,9 +66,10 @@ const ProfileRoutes = ({ role, user }) => {
             path="userReviews"
             element={<CustomerReviewsTab userId={user.id} />}
           />
-          <Route path="coins" element={<CoinTab userId={user.id} />} />
+          <Route path="points" element={<PointTab userId={user.id} />} />
           <Route path="vouchers" element={<VoucherTab userId={user.id} />} />
           <Route path="refundWallet" element={<RefundWalletTab />} />
+          <Route path="daily-checkin" element={<DailyCheckInTab />} />
         </>
       )}
 
