@@ -106,7 +106,8 @@ export const API_ENDPOINTS_ADDRESS = {
   GET_ADDRESS: (userId) => `/api/UserAddress/GetAddress/${userId}`,
   GET_DEFAULT_ADDRESS: (userId) =>
     `/api/UserAddress/GetDefaultAddress/${userId}`,
-  GET_ADDRESS_BY_ARTISANID:(artisanId) => `/api/UserAddress/GetAddressOfArtisan/${artisanId}`,
+  GET_ADDRESS_BY_ARTISANID: (artisanId) =>
+    `/api/UserAddress/GetAddressOfArtisan/${artisanId}`,
   ADD_ADDRESS: "/api/UserAddress/AddNewAddress",
   UPDATE_ADDRESS: (addressId) => `/api/UserAddress/UpdateAddress/${addressId}`,
   SET_DEFAULT_ADDRESS: (addressId) =>
@@ -153,6 +154,9 @@ export const API_ENDPOINTS_CRAFT_SKILL = {
 
 export const API_ENDPOINTS_WALLET = {
   GET_WALLET_BY_USER_ID: (userId) => `/api/Wallet/GetWalletByUserId/${userId}`,
+  GET_WALLET_BY_ARTISAN_ID: (artisanId) =>
+    `/api/Wallet/GetWalletByArtisanId/${artisanId}`,
+  GET_WALLET_SYSTEM: "/api/Wallet/GetWalletSystem",
 };
 
 export const API_ENDPOINTS_RATING = {
