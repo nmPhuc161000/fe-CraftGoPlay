@@ -14,6 +14,7 @@ import CustomerReviewsTab from "../pages/Profile/components/user/CustomerReviews
 import VoucherTab from "../pages/Profile/components/user/VoucherTab";
 import ArtisanOrdersTab from "../pages/Profile/components/artisan/ArtisanOrdersTab";
 import RefundWalletTab from "../pages/Profile/components/user/RefundWalletTab";
+import ProductRatingTab from "../pages/Profile/components/user/ProductRatingTab";
 import DailyCheckInTab from "../pages/Profile/components/user/DailyCheckinTab";
 import PointTab from "../pages/Profile/components/user/PointTab";
 
@@ -69,6 +70,7 @@ const ProfileRoutes = ({ role, user }) => {
           <Route path="points" element={<PointTab userId={user.id} />} />
           <Route path="vouchers" element={<VoucherTab userId={user.id} />} />
           <Route path="refundWallet" element={<RefundWalletTab />} />
+          <Route path="productRating" element={<ProductRatingTab />} />
           <Route path="daily-checkin" element={<DailyCheckInTab />} />
         </>
       )}
