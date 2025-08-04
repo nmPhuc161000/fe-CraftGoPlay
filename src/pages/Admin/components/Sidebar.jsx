@@ -225,6 +225,30 @@ const Sidebar = ({ selected, setSelected, isMobileOpen, onCloseMobile, isDesktop
               </div>
             )}
           </div>
+
+          <button
+            className={`group flex items-center gap-4 w-full px-4 py-3 rounded-xl transition-all duration-200 text-base font-semibold relative overflow-hidden ${
+              selected === 'walletSystem'
+                ? 'bg-gradient-to-r from-[#7a4a22] to-[#c7903f] text-white shadow-lg shadow-[#c7903f]/30 scale-105'
+                : 'hover:bg-gradient-to-r hover:from-[#f5e7d6] hover:to-[#fff8f2] text-[#7a4a22] hover:text-[#c7903f] hover:shadow-md hover:scale-102'
+            }`}
+            onClick={() => setSelected('walletSystem')}
+            style={{ minHeight: 48 }}
+          >
+            <div className={`transition-all duration-200 ${selected === 'walletSystem' ? 'scale-110' : 'group-hover:scale-110'}`}>
+              {React.cloneElement(menu[0].icon, {
+                className: selected === 'walletSystem'
+                  ? 'text-white'
+                  : 'text-[#7a4a22] group-hover:text-[#c7903f]'
+              })}
+            </div>
+            {isOpen && (
+              <span className="transition-all duration-200 group-hover:translate-x-1">Ví hệ thống</span>
+            )}
+            {selected === 'walletSystem' && (
+              <div className="absolute right-2 w-2 h-2 bg-white rounded-full animate-pulse"></div>
+            )}
+          </button>
         </nav>
 
         {/* Footer */}

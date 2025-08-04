@@ -34,7 +34,7 @@ const Home = () => {
       const res = await productService.getProductsByStatus({
         status: "Active",
         pageIndex: 1,
-        pageSize: 50,
+        pageSize: 10,
       });
       const productList = res.data?.data;
       setProducts(productList);
