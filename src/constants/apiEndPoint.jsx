@@ -158,3 +158,7 @@ export const API_ENDPOINTS_WALLET = {
     `/api/Wallet/GetWalletByArtisanId/${artisanId}`,
   GET_WALLET_SYSTEM: "/api/Wallet/GetWalletSystem",
 };
+
+export const API_ENDPOINTS_RATING = {
+  RATE_PRODUCT: "/api/Rating/RatingProduct",
+};

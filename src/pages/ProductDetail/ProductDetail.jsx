@@ -43,7 +43,7 @@ const ProductDetail = () => {
         const res = await productService.getProductById(id);
         const data = res.data?.data;
         console.log("Product data:", data);
-        
+
         setProduct(data);
         if (data?.productImages?.length > 0) {
           setSelectedImg(data.productImages[0].imageUrl);
@@ -260,6 +260,14 @@ const ProductDetail = () => {
             <h3 className="font-semibold text-lg mb-2 leading-snug break-words">Mô Tả Sản Phẩm</h3>
             <p className="">{product.description}</p>
           </div>
+          <ul className=" mt-4 text-gray-800 space-y-1 text-base list-disc list-inside">
+            <li>
+              <span className="font-medium text-[#5e3a1e]">Trọng lượng:</span> {product.weight}g
+            </li>
+            <li>
+              <span className="font-medium text-[#5e3a1e]">Kích thước:</span> {product.length}cm × {product.width}cm × {product.height}cm
+            </li>
+          </ul>
 
           {/* gioi thieu them */}
           <div className="mt-6">
