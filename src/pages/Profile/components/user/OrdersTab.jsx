@@ -23,7 +23,7 @@ import {
   FiCreditCard,
   FiTruck,
   FiStar,
-  FiCheck
+  FiCheck,
 } from "react-icons/fi";
 
 const OrdersTab = () => {
@@ -46,7 +46,12 @@ const OrdersTab = () => {
     const fetchOrders = async (status = "") => {
       try {
         setLoading(true);
-        const res = await orderService.getOrderByUserId(user.id, 1, 100, status);
+        const res = await orderService.getOrderByUserId(
+          user.id,
+          1,
+          100,
+          status
+        );
 
         if (res.data.error === 0 && Array.isArray(res.data.data)) {
           const transformed = res.data.data.map(transformOrderData);
@@ -141,13 +146,18 @@ const OrdersTab = () => {
       if (newStatus) {
         const updatedOrders = orders.map((order) =>
           order.id === orderId
-            ? { ...order, status: newStatus, statusKey: convertStatus(newStatus) }
+            ? {
+                ...order,
+                status: newStatus,
+                statusKey: convertStatus(newStatus),
+              }
             : order
         );
         setOrders(updatedOrders);
         setFilteredOrders(
           updatedOrders.filter(
-            (order) => selectedStatus === "all" || order.status === selectedStatus
+            (order) =>
+              selectedStatus === "all" || order.status === selectedStatus
           )
         );
 
@@ -178,7 +188,10 @@ const OrdersTab = () => {
         100,
         selectedStatus === "all" ? "" : selectedStatus
       );
-      if (originalRes.data.error === 0 && Array.isArray(originalRes.data.data)) {
+      if (
+        originalRes.data.error === 0 &&
+        Array.isArray(originalRes.data.data)
+      ) {
         const transformed = originalRes.data.data.map(transformOrderData);
         setOrders(transformed);
         setFilteredOrders(transformed);
@@ -195,8 +208,9 @@ const OrdersTab = () => {
           {
             action: "cancel",
             label: "Hủy đơn hàng",
-            color: "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-200",
-            icon: <FiX className="w-4 h-4" />
+            color:
+              "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-200",
+            icon: <FiX className="w-4 h-4" />,
           },
         ];
       case "Confirmed":
@@ -207,14 +221,16 @@ const OrdersTab = () => {
           {
             action: "cancel",
             label: "Hủy đơn hàng",
-            color: "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-200",
-            icon: <FiX className="w-4 h-4" />
+            color:
+              "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-200",
+            icon: <FiX className="w-4 h-4" />,
           },
           {
             action: "contact",
             label: "Liên hệ nghệ nhân",
-            color: "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
-            icon: <FiUser className="w-4 h-4" />
+            color:
+              "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
+            icon: <FiUser className="w-4 h-4" />,
           },
         ];
       case "Shipped":
@@ -222,8 +238,9 @@ const OrdersTab = () => {
           {
             action: "contact",
             label: "Liên hệ nghệ nhân",
-            color: "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
-            icon: <FiUser className="w-4 h-4" />
+            color:
+              "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
+            icon: <FiUser className="w-4 h-4" />,
           },
         ];
       case "Delivered":
@@ -231,14 +248,16 @@ const OrdersTab = () => {
           {
             action: "returnRequest",
             label: "Yêu cầu trả hàng",
-            color: "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-orange-200",
-            icon: <FiPackage className="w-4 h-4" />
+            color:
+              "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-orange-200",
+            icon: <FiPackage className="w-4 h-4" />,
           },
           {
             action: "complete",
             label: "Xác nhận đã nhận hàng",
-            color: "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-green-200",
-            icon: <FiCheck className="w-4 h-4" />
+            color:
+              "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-green-200",
+            icon: <FiCheck className="w-4 h-4" />,
           },
         ];
       case "Completed":
@@ -246,14 +265,16 @@ const OrdersTab = () => {
           {
             action: "returnRequest",
             label: "Yêu cầu trả hàng",
-            color: "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-orange-200",
-            icon: <FiPackage className="w-4 h-4" />
+            color:
+              "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-orange-200",
+            icon: <FiPackage className="w-4 h-4" />,
           },
           {
             action: "rating",
             label: "Đánh giá sản phẩm",
-            color: "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 shadow-yellow-200",
-            icon: <FiStar className="w-4 h-4" />
+            color:
+              "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 shadow-yellow-200",
+            icon: <FiStar className="w-4 h-4" />,
           },
         ];
       default:
@@ -273,8 +294,12 @@ const OrdersTab = () => {
       <div className="container mx-auto p-6 max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Đơn hàng của tôi</h1>
-          <p className="text-gray-600">Quản lý và theo dõi các đơn hàng của bạn</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Đơn hàng của tôi
+          </h1>
+          <p className="text-gray-600">
+            Quản lý và theo dõi các đơn hàng của bạn
+          </p>
         </div>
 
         {/* Status Filter Bar */}
@@ -289,19 +314,23 @@ const OrdersTab = () => {
                 <button
                   key={filter.value}
                   onClick={() => setSelectedStatus(filter.value)}
-                  className={`group relative flex items-center px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 transform hover:scale-105 ${selectedStatus === filter.value
-                    ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200"
-                    : "bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 hover:border-blue-300"
-                    }`}
+                  className={`group relative flex items-center px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
+                    selectedStatus === filter.value
+                      ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200"
+                      : "bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 hover:border-blue-300"
+                  }`}
                 >
                   <div className="flex items-center">
                     {filter.icon}
                     <span className="ml-2">{filter.label}</span>
                     {statusCounts[filter.value] > 0 && (
-                      <span className={`ml-3 px-2 py-1 rounded-full text-xs font-bold ${selectedStatus === filter.value
-                        ? "bg-white text-blue-600"
-                        : "bg-blue-100 text-blue-700"
-                        }`}>
+                      <span
+                        className={`ml-3 px-2 py-1 rounded-full text-xs font-bold ${
+                          selectedStatus === filter.value
+                            ? "bg-white text-blue-600"
+                            : "bg-blue-100 text-blue-700"
+                        }`}
+                      >
                         {statusCounts[filter.value]}
                       </span>
                     )}
@@ -319,8 +348,12 @@ const OrdersTab = () => {
               <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200"></div>
               <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent absolute top-0"></div>
             </div>
-            <p className="mt-6 text-lg text-gray-600 font-medium">Đang tải đơn hàng...</p>
-            <p className="mt-2 text-sm text-gray-500">Vui lòng chờ trong giây lát</p>
+            <p className="mt-6 text-lg text-gray-600 font-medium">
+              Đang tải đơn hàng...
+            </p>
+            <p className="mt-2 text-sm text-gray-500">
+              Vui lòng chờ trong giây lát
+            </p>
           </div>
         ) : filteredOrders.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-12">
@@ -328,8 +361,12 @@ const OrdersTab = () => {
               <div className="bg-gray-100 rounded-full w-24 h-24 flex items-center justify-center mx-auto mb-6">
                 <FiShoppingBag className="text-4xl text-gray-400" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Không có đơn hàng nào</h3>
-              <p className="text-gray-600 mb-6">Bạn chưa có đơn hàng nào trong danh mục này</p>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Không có đơn hàng nào
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Bạn chưa có đơn hàng nào trong danh mục này
+              </p>
               <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-8 py-3 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg shadow-blue-200">
                 Bắt đầu mua sắm
               </button>
@@ -355,7 +392,7 @@ const OrdersTab = () => {
                           </div>
                           <div>
                             <h3 className="text-lg font-bold text-gray-900">
-                              Đơn hàng #{order.id.split('-')[0].toUpperCase()}
+                              Đơn hàng #{order.id.split("-")[0].toUpperCase()}
                             </h3>
                             <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
                               <div className="flex items-center">
@@ -369,9 +406,15 @@ const OrdersTab = () => {
                             </div>
                           </div>
                         </div>
-                        <div className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${statusConfig[order.statusKey].color}`}>
+                        <div
+                          className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
+                            statusConfig[order.statusKey].color
+                          }`}
+                        >
                           {statusConfig[order.statusKey].icon}
-                          <span className="ml-2">{statusConfig[order.statusKey].text}</span>
+                          <span className="ml-2">
+                            {statusConfig[order.statusKey].text}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -413,22 +456,34 @@ const OrdersTab = () => {
                                   </div>
                                 </div>
                                 <div className="flex-1">
-                                  <h5 className="font-semibold text-gray-900 mb-2">{item.product.name}</h5>
+                                  <h5 className="font-semibold text-gray-900 mb-2">
+                                    {item.product.name}
+                                  </h5>
                                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
                                     <div className="flex items-center">
                                       <FiUser className="mr-1 text-gray-400" />
-                                      <span className="font-medium">Nghệ nhân:</span>
-                                      <span className="ml-1">{item.artisanName}</span>
+                                      <span className="font-medium">
+                                        Nghệ nhân:
+                                      </span>
+                                      <span className="ml-1">
+                                        {item.artisanName}
+                                      </span>
                                     </div>
                                     <div className="flex items-center">
                                       <FiPackage className="mr-1 text-gray-400" />
-                                      <span className="font-medium">Số lượng:</span>
-                                      <span className="ml-1">{item.quantity}</span>
+                                      <span className="font-medium">
+                                        Số lượng:
+                                      </span>
+                                      <span className="ml-1">
+                                        {item.quantity}
+                                      </span>
                                     </div>
                                     <div className="flex items-center">
                                       <FiDollarSign className="mr-1 text-gray-400" />
                                       <span className="font-medium">Giá:</span>
-                                      <span className="ml-1 font-semibold text-blue-600">{formatPrice(item.unitPrice)}</span>
+                                      <span className="ml-1 font-semibold text-blue-600">
+                                        {formatPrice(item.unitPrice)}
+                                      </span>
                                     </div>
                                   </div>
                                 </div>
@@ -447,12 +502,18 @@ const OrdersTab = () => {
                           </h5>
                           <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Phương thức:</span>
-                              <span className="font-medium">{order.paymentMethod}</span>
+                              <span className="text-gray-600">
+                                Phương thức:
+                              </span>
+                              <span className="font-medium">
+                                {order.paymentMethod}
+                              </span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-600">Trạng thái:</span>
-                              <span className="font-medium">{order.paymentStatus}</span>
+                              <span className="font-medium">
+                                {order.paymentStatus}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -464,8 +525,12 @@ const OrdersTab = () => {
                           </h5>
                           <div className="space-y-2 text-sm">
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Phí vận chuyển:</span>
-                              <span className="font-medium text-orange-600">{order.delivery_Amount}</span>
+                              <span className="text-gray-600">
+                                Phí vận chuyển:
+                              </span>
+                              <span className="font-medium text-orange-600">
+                                {order.delivery_Amount}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -498,9 +563,15 @@ const OrdersTab = () => {
                         {showCancelModal && (
                           <div className="fixed inset-0 bg-opacity-30 backdrop-blur-sm z-50 flex items-center justify-center">
                             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center">
-                              <h2 className="text-xl font-semibold text-red-600 mb-4">Xác nhận hủy đơn hàng</h2>
+                              <h2 className="text-xl font-semibold text-red-600 mb-4">
+                                Xác nhận hủy đơn hàng
+                              </h2>
                               <p className="text-gray-700 mb-6">
-                                Bạn có chắc chắn muốn <span className="font-semibold text-red-500">hủy đơn hàng</span> này không?
+                                Bạn có chắc chắn muốn{" "}
+                                <span className="font-semibold text-red-500">
+                                  hủy đơn hàng
+                                </span>{" "}
+                                này không?
                               </p>
                               <div className="flex justify-center gap-4">
                                 <button
