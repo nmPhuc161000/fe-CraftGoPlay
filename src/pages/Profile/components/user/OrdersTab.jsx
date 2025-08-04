@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../contexts/AuthContext";
 import orderService from "../../../../services/apis/orderApi";
 import { useNotification } from "../../../../contexts/NotificationContext";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   statusFilters,
   statusConfig,
@@ -37,6 +38,8 @@ const OrdersTab = () => {
 
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Fetch orders based on status
   useEffect(() => {
@@ -77,6 +80,15 @@ const OrdersTab = () => {
     }
   }, [user, selectedStatus]);
 
+  useEffect(() => {
+    if (location.state?.expandedOrderId) {
+      setExpandedOrders((prev) => ({
+        ...prev,
+        [location.state.expandedOrderId]: true,
+      }));
+    }
+  }, [location.state]);
+
   const handleUserAction = async (orderId, action) => {
     try {
       setLoading(true);
@@ -92,6 +104,36 @@ const OrdersTab = () => {
         case "returnRequest":
           newStatus = "ReturnRequested";
           break;
+        case "rating":
+          const order = orders.find((o) => o.id === orderId);
+          console.log("Order found for rating:", order);
+          if (order && order.orderItems && order.orderItems.length > 0) {
+            if (order.orderItems.length > 1) {
+              const queryParams = new URLSearchParams({
+                orderId,
+                orderItems: encodeURIComponent(
+                  JSON.stringify(
+                    order.orderItems.map((item) => ({
+                      id: item.product.id,
+                      name: item.product.name,
+                      imageUrl: item.product.productImages?.imageUrl || "",
+                    }))
+                  )
+                ),
+              }).toString();
+              navigate(`/profile-user/productRating?${queryParams}`);
+            } else {
+              const item = order.orderItems[0];
+              const url = `/profile-user/productRating?orderId=${orderId}&productId=${item.product.id}&productName=${encodeURIComponent(
+                item.product.name
+              )}&productImage=${encodeURIComponent(item.product.productImages?.imageUrl || "")}`;
+              navigate(url);
+              console.log("Navigating to single-product:", url);
+            }
+          } else {
+            showNotification("Không tìm thấy sản phẩm trong đơn hàng để đánh giá", "error");
+          }
+          return;
         default:
           return;
       }
@@ -208,7 +250,7 @@ const OrdersTab = () => {
             icon: <FiPackage className="w-4 h-4" />
           },
           {
-            action: "ratting",
+            action: "rating",
             label: "Đánh giá sản phẩm",
             color: "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 shadow-yellow-200",
             icon: <FiStar className="w-4 h-4" />
@@ -438,6 +480,9 @@ const OrdersTab = () => {
                               if (action.action === "cancel") {
                                 setSelectedOrderId(order.id);
                                 setShowCancelModal(true);
+                              } else if (action.action === "rating") {
+                                setSelectedOrderId(order.id);
+                                handleUserAction(order.id, action.action);
                               } else {
                                 handleUserAction(order.id, action.action);
                               }
@@ -477,7 +522,6 @@ const OrdersTab = () => {
                             </div>
                           </div>
                         )}
-                        
                       </div>
                     </div>
                   </div>

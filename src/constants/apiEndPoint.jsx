@@ -154,3 +154,7 @@ export const API_ENDPOINTS_CRAFT_SKILL = {
 export const API_ENDPOINTS_WALLET = {
   GET_WALLET_BY_USER_ID: (userId) => `/api/Wallet/GetWalletByUserId/${userId}`,
 };
+
+export const API_ENDPOINTS_RATING = {
+  RATE_PRODUCT: "/api/Rating/RatingProduct",
+};
