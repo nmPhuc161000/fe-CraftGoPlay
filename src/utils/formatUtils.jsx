@@ -1,4 +1,4 @@
-// utils/formatUtils.js
+// /src/utils/formatUtils.js
 export const formatTransactionId = (id) => {
   if (!id) return '#';
   const parts = id.split('-');
