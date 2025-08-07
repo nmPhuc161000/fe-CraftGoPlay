@@ -162,3 +162,7 @@ export const API_ENDPOINTS_WALLET = {
 export const API_ENDPOINTS_RATING = {
   RATE_PRODUCT: "/api/Rating/RatingProduct",
 };
+
+export const API_ENDPOINTS_POINT = {
+  GET_POINT_BY_USER_ID: (userId) => `/api/Point/GetPointsByUserId/${userId}`,
+}
