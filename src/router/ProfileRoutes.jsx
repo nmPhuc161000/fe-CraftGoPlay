@@ -15,7 +15,7 @@ import VoucherTab from "../pages/Profile/components/user/VoucherTab";
 import ArtisanOrdersTab from "../pages/Profile/components/artisan/ArtisanOrdersTab";
 import RefundWalletTab from "../pages/Profile/components/user/RefundWalletTab";
 import ProductRatingTab from "../pages/Profile/components/user/ProductRatingTab";
-import DailyCheckInTab from "../pages/Profile/components/user/DailyCheckinTab";
+import DailyCheckInTab from "../pages/Profile/components/user/DailyCheckInTab";
 import PointTab from "../pages/Profile/components/user/PointTab";
 
 const ProfileRoutes = ({ role, user }) => {

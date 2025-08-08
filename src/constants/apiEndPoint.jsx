@@ -164,3 +164,7 @@ export const API_ENDPOINTS_RATING = {
   GET_RATINGS_BY_USER_ID: (userId, pageIndex = 0, pageSize = 10) =>
     `/api/Rating/GetRatingsByUserId/${userId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
 };
+
+export const API_ENDPOINTS_POINT = {
+  GET_POINT_BY_USER_ID: (userId) => `/api/Point/GetPointsByUserId/${userId}`,
+}
