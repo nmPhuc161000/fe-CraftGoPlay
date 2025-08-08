@@ -76,8 +76,12 @@ const ProductRatingTab = () => {
       };
       const res = await ratingService.rateProduct(data);
       if (res.data.error === 0) {
-        showNotification("Đánh giá sản phẩm thành công", "success");
-        navigate("/profile-user/orders", { state: { expandedOrderId: searchParams.get("orderId") } });
+        showNotification("Đánh giá thành công! +100 xu đã được cộng vào ví", "success");
+        setTimeout(() => {
+          navigate("/profile-user/orders", {
+            state: { expandedOrderId: searchParams.get("orderId") },
+          });
+        }, 1000);
       } else {
         showNotification(res.data.message || "Sản phẩm đã được đánh giá", "success");
       }

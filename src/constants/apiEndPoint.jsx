@@ -161,4 +161,6 @@ export const API_ENDPOINTS_WALLET = {
 
 export const API_ENDPOINTS_RATING = {
   RATE_PRODUCT: "/api/Rating/RatingProduct",
+  GET_RATINGS_BY_USER_ID: (userId, pageIndex = 0, pageSize = 10) =>
+    `/api/Rating/GetRatingsByUserId/${userId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
 };
