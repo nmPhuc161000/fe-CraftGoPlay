@@ -8,6 +8,12 @@ const ratingService = {
             data,
         });
     },
+    async getRatingsByUserId(userId, pageIndex = 0, pageSize = 10) {
+        const url = API_ENDPOINTS_RATING.GET_RATINGS_BY_USER_ID(userId, pageIndex, pageSize);
+        return performApiRequest(url, {
+            method: "get",
+        });
+    },
 };
 
 export default ratingService;
