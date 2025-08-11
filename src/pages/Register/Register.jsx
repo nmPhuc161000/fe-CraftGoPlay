@@ -170,7 +170,7 @@ const Register = () => {
         const response = await authService.register(form);
 
         if (response.success) {
-          showNotification(MESSAGES.AUTH.REGISTER_SUCCESS);
+          showNotification(MESSAGES.AUTH.REGISTER_SUCCESS, "success");
           // Lưu email vào localStorage để sử dụng ở trang OTP
           localStorage.setItem("registerEmail", form.Email);
 
