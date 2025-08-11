@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthContext } from "../../../../contexts/AuthContext";
 import ratingService from "../../../../services/apis/ratingApi";
 import { FiStar, FiArrowLeft } from "react-icons/fi";
-import { useNotification } from "../../../../contexts/NotificationContext"; // Kiểm tra đường dẫn
+import { useNotification } from "../../../../contexts/NotificationContext";
 
 const ProductRatingTab = () => {
   const navigate = useNavigate();
@@ -15,17 +15,19 @@ const ProductRatingTab = () => {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedProductId, setSelectedProductId] = useState(null);
+  const [selectedOrderItemId, setSelectedOrderItemId] = useState(null);
   const [selectedProductName, setSelectedProductName] = useState("");
   const [selectedProductImage, setSelectedProductImage] = useState("");
   const [availableProducts, setAvailableProducts] = useState([]);
-  const notification = useNotification(); // Lấy giá trị từ useNotification
-  const showNotification = notification?.showNotification || ((msg, type) => console.log(`${type}: ${msg}`)); // [SỬA] - Fallback
+  const notification = useNotification();
+  const showNotification = notification?.showNotification || ((msg, type) => console.log(`${type}: ${msg}`));
 
   useEffect(() => {
     const orderId = searchParams.get("orderId");
     const productId = searchParams.get("productId");
     const productName = searchParams.get("productName");
     const orderItems = searchParams.get("orderItems");
+    const orderItemId = searchParams.get("orderItemId");
 
     if (orderItems) {
       try {
@@ -44,6 +46,11 @@ const ProductRatingTab = () => {
       if (productImage) {
         setSelectedProductImage(decodeURIComponent(productImage));
       }
+      if (orderItemId) {
+        setSelectedOrderItemId(orderItemId);
+      } else {
+        console.warn("orderItemId không được cung cấp trong searchParams. Vui lòng kiểm tra với backend.");
+      }
     } else {
       console.warn("Thiếu tham số cần thiết:", { productId, productName });
     }
@@ -51,18 +58,24 @@ const ProductRatingTab = () => {
 
   const handleStarHover = (value) => setHoverRating(value);
   const handleStarLeave = () => setHoverRating(0);
-  const handleStarClick = (value) => setRating(value);
+  const handleStarClick = (value) => {
+    console.log("Selected rating:", value); // Debug
+    setRating(value);
+  };
 
-  const handleSelectProduct = (productId, productName, productImage) => {
+  const handleSelectProduct = (productId, productName, productImage, orderItemId) => {
+    console.log("Selected product:", { productId, orderItemId }); // Debug
     setSelectedProductId(productId);
+    setSelectedOrderItemId(orderItemId); // Gán orderItemId từ availableProducts
     setSelectedProductName(productName);
     setSelectedProductImage(productImage || "");
     setAvailableProducts([]);
   };
 
   const handleSubmitRating = async () => {
-    if (!rating || !selectedProductId || !content.trim()) {
-      alert("Vui lòng chọn số sao và viết nhận xét");
+    console.log("Submit data:", { rating, selectedProductId, content, selectedOrderItemId }); // Debug
+    if (!rating || !selectedProductId || !content.trim() || !selectedOrderItemId) {
+      alert("Vui lòng chọn số sao, viết nhận xét và đảm bảo mã mục đơn hàng (orderItemId) hợp lệ. Vui lòng kiểm tra lại hoặc liên hệ hỗ trợ.");
       return;
     }
 
@@ -71,22 +84,42 @@ const ProductRatingTab = () => {
       const data = {
         userId: user?.id || "",
         productId: selectedProductId,
+        orderItemId: selectedOrderItemId,
         star: rating,
         comment: content,
       };
       const res = await ratingService.rateProduct(data);
-      if (res.data.error === 0) {
-        showNotification("Đánh giá sản phẩm thành công", "success");
-        navigate("/profile-user/orders", { state: { expandedOrderId: searchParams.get("orderId") } });
+      console.log("API response:", res);
+      if (res.status === 200) {
+        showNotification("Đánh giá thành công! +100 xu đã được cộng vào ví", "success");
+        setTimeout(() => {
+          navigate("/profile-user/orders", {
+            state: { expandedOrderId: searchParams.get("orderId") },
+          });
+        }, 1000);
       } else {
-        showNotification(res.data.message || "Sản phẩm đã được đánh giá", "success");
+        showNotification("Sản phẩm đã được đánh giá!", "warning");
+        setTimeout(() => {
+          navigate("/profile-user/orders", {
+            state: { expandedOrderId: searchParams.get("orderId") },
+          });
+        }, 1000);
       }
     } catch (err) {
-      console.error("Lỗi API đầy đủ:", err);
-      showNotification(
-        err.response?.data?.message || err.message || "Lỗi khi đánh giá sản phẩm",
-        "error"
-      );
+      if (typeof errorMessage === "string" && errorMessage.includes("Bạn đã đánh giá sản phẩm này rồi")) {
+        showNotification("Sản phẩm đã được đánh giá!", "warning");
+        if (orderId) {
+          setTimeout(() => {
+            navigate("/profile-user/orders", {
+              state: { expandedOrderId: orderId },
+            });
+          }, 2000); 
+        } else {
+          console.warn("orderId is null, navigation aborted");
+        }
+      } else {
+        showNotification(errorMessage, "error");
+      }
     } finally {
       setLoading(false);
     }
@@ -120,7 +153,7 @@ const ProductRatingTab = () => {
                 <div
                   key={item.id}
                   className="relative bg-white rounded-xl border border-gray-100 overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer transform hover:-translate-y-2"
-                  onClick={() => handleSelectProduct(item.id, item.name, item.imageUrl)}
+                  onClick={() => handleSelectProduct(item.id, item.name, item.imageUrl, item.orderItemId)}
                 >
                   <div className="w-full h-56 overflow-hidden">
                     {item.imageUrl ? (
