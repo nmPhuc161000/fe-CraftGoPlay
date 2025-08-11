@@ -106,8 +106,22 @@ const AppRouter = () => {
           />
 
           {/* Admin routes */}
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/staff" element={<Staff />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/staff"
+            element={
+              <ProtectedRoute>
+                <Staff />
+              </ProtectedRoute>
+            }
+          />
 
           {/* ========== Special Home Route ========== */}
           {/* Giữ nguyên route Home đặc biệt của bạn */}

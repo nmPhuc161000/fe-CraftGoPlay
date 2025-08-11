@@ -26,6 +26,7 @@ const SubCategoryModal = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-25"
+                    style={{ background: "rgba(0, 0, 0, 0.5)" }}
                 >
                     <motion.div
                         initial={{ scale: 0.9, opacity: 0 }}

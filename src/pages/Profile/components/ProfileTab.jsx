@@ -282,7 +282,7 @@ const ProfileTab = () => {
                 value={formatBirthdayForDisplay(formData.birthday)}
               />
               {role === "Artisan" && (
-                <InfoField label="Làng nghề" value={formData.workshopName} />
+                <InfoField label="Làng nghề" value={formData.craftVillage.village_Name} />
               )}
             </dl>
           </div>
