@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import Sidebar from "../../components/AdminAndStaff/Sidebar";
-import Footer from "./components/Footer";
 import ManageProduct from "./components/ManageProduct";
 import ManageCategory from "./components/ManageCategory";
 import ManageSubCategory from "./components/ManageSubCategory";
@@ -34,7 +33,6 @@ const Staff = () => {
           {selected === 'skill' && <ManageSkill />}
           {selected === 'craftVilage' && <ManageVillage />}
           {selected === 'history' && <OrderHistory />}
-          <Footer />
         </main>
       </div>
     </div>
