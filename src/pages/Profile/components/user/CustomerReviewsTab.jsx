@@ -42,9 +42,9 @@ const CustomerReviewsTab = () => {
               >
                 {/* Ảnh sản phẩm */}
                 <div className="w-full md:w-40 h-40 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                  {product.imageUrl ? (
+                  {product ? (
                     <img
-                      src={product.imageUrl}
+                      src={product.productImages?.[0]?.imageUrl}
                       alt={product.name}
                       className="w-full h-full object-cover"
                     />

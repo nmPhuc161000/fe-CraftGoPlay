@@ -163,6 +163,8 @@ export const API_ENDPOINTS_RATING = {
   RATE_PRODUCT: "/api/Rating/RatingProduct",
   GET_RATINGS_BY_USER_ID: (userId, pageIndex = 0, pageSize = 10) =>
     `/api/Rating/GetRatingsByUserId/${userId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
+  GET_RATINGS_BY_PRODUCT_ID: (productId, pageIndex = 0, pageSize = 10) =>
+    `/api/Rating/GetRatingsByProductId/${productId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
 };
 
 export const API_ENDPOINTS_POINT = {
