@@ -108,7 +108,7 @@ const Checkout = () => {
   };
 
   const maxDiscountByPercent = Math.floor((getTotal() * 0.1) / 100) * 100; 
-  const maxDiscountByCoins = userCoins * 1; // 1 xu = 100 VNĐ
+  const maxDiscountByCoins = userCoins * 100; // 1 xu = 100 VNĐ
 
   const coinDiscount = useCoins
     ? Math.min(maxDiscountByPercent, maxDiscountByCoins)
