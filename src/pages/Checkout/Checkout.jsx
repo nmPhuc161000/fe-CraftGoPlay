@@ -150,6 +150,7 @@ const Checkout = () => {
       formData.append("ProductId", buyNow.productId);
       formData.append("Quantity", buyNow.quantity);
       formData.append("DeliveryAmount", totalShippingFee);
+      formData.append("VoucherCode", voucherCode);
 
       const result = await createOrderDirect(realUser?.id, formData);
       console.log("Order result:", result);
@@ -192,6 +193,7 @@ const Checkout = () => {
 
       // Gửi deliveryAmounts dưới dạng JSON
       formData.append("DeliveryAmounts", JSON.stringify(deliveryAmounts));
+      formData.append("VoucherCode", voucherCode);
 
       const result = await createOrderFromCart(formData);
       console.log("Order result:", result);

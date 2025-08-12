@@ -410,6 +410,7 @@ const ManageCategory = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-25"
+          style={{ background: "rgba(0, 0, 0, 0.5)" }}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -603,6 +604,7 @@ const ManageCategory = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-opacity-30"
+          style={{ background: "rgba(0, 0, 0, 0.5)" }}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -738,6 +740,7 @@ const ManageCategory = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-25"
+          style={{ background: "rgba(0, 0, 0, 0.5)" }}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
