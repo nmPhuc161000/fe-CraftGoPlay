@@ -12,6 +12,7 @@ const Product = () => {
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
   const [isArtistOpen, setIsArtistOpen] = useState(true);
   const [categories, setCategories] = useState([]);
+  const [artisans, setArtisans] = useState([]);
   const [sortOrder, setSortOrder] = useState("");
   const location = useLocation();
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
@@ -51,7 +52,15 @@ const Product = () => {
         subCategoryName: selectedSubCategories.join(","),
         artisanName: selectedArtisan,
       });
-      setProducts(res?.data?.data || []);
+      const fetchedProducts = res?.data?.data || [];
+      setProducts(fetchedProducts);
+
+      const uniqueArtisans = [
+        ...new Set(fetchedProducts.map((product) => product.artisanName)),
+      ]
+        .filter((name) => name) 
+        .map((name) => ({ artisanName: name, value: name }));
+      setArtisans(uniqueArtisans);
     } catch (error) {
       console.error("Lỗi khi lấy sản phẩm:", error);
     }
@@ -134,11 +143,10 @@ const Product = () => {
                 title="Nghệ nhân"
                 isOpen={isArtistOpen}
                 toggle={() => setIsArtistOpen(!isArtistOpen)}
-                items={[
-                  { label: "Nguyễn Văn A", value: "Nguyễn Văn A" },
-                  { label: "Trần Thị B", value: "Trần Thị B" },
-                  { label: "Phạm Văn C", value: "Phạm Văn C" },
-                ]}
+                items={artisans.map((artisan) => ({
+                  label: artisan.artisanName,
+                  value: artisan.artisanName,
+                }))}
                 onSelect={(name) => {
                   setSelectedArtisan(name);
                   setSelectedSubCategory("");
