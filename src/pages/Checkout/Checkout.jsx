@@ -12,13 +12,12 @@ import {
 import { useNotification } from "../../contexts/NotificationContext";
 import addressService from "../../services/apis/addressApi";
 import locationService from "../../services/apis/locationApi";
+import pointService from "../../services/apis/pointApi";
 
 const Checkout = () => {
   const { cartItems, removeMultipleItems } = useContext(CartContext);
   const { user: realUser } = useContext(AuthContext);
   const { showNotification } = useNotification();
-  const user = { ...realUser, coins: 5000 };
-
   const navigate = useNavigate();
   const location = useLocation();
   const buyNow = location.state?.buyNow;
@@ -33,6 +32,7 @@ const Checkout = () => {
   const [discount, setDiscount] = useState(0);
   const [voucherError, setVoucherError] = useState("");
   const [useCoins, setUseCoins] = useState(false);
+  const [userCoins, setUserCoins] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [addresses, setAddresses] = useState([]);
@@ -67,7 +67,7 @@ const Checkout = () => {
   useEffect(() => {
     const fetchDefaultAddress = async () => {
       try {
-        const res = await addressService.getDefaultAddress(user.id);
+        const res = await addressService.getDefaultAddress(realUser.id);
         const defaultAddress = res?.data?.data;
         if (defaultAddress) {
           setAddresses([defaultAddress]);
@@ -79,7 +79,23 @@ const Checkout = () => {
     };
 
     fetchDefaultAddress();
-  }, [user?.id]);
+  }, [realUser?.id]);
+  useEffect(() => {
+    const fetchUserCoins = async () => {
+      try {
+        if (realUser?.id) {
+          const response = await pointService.getPointByUserId(realUser.id);
+          if (response.data?.data?.amount) {
+            setUserCoins(response.data.data.amount);
+          }
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy số xu:", error);
+        showNotification("Không thể lấy số xu hiện tại.", "warning");
+      }
+    };
+    fetchUserCoins();
+  }, [realUser?.id]);
 
   const getTotal = () => {
     if (buyNow) {
@@ -91,8 +107,8 @@ const Checkout = () => {
     );
   };
 
-  const maxDiscountByPercent = Math.floor((getTotal() * 0.1) / 100) * 100;
-  const maxDiscountByCoins = user.coins * 100;
+  const maxDiscountByPercent = Math.floor((getTotal() * 0.1) / 100) * 100; 
+  const maxDiscountByCoins = userCoins * 1; // 1 xu = 100 VNĐ
 
   const coinDiscount = useCoins
     ? Math.min(maxDiscountByPercent, maxDiscountByCoins)
@@ -123,7 +139,7 @@ const Checkout = () => {
     setIsPlacingOrder(true);
 
     const formData = new FormData();
-    formData.append("UserId", user?.id);
+    formData.append("UserId", realUser?.id);
     formData.append(
       "PaymentMethod",
       paymentMethod === "vnpay" ? "Online" : "Cash"
@@ -135,7 +151,7 @@ const Checkout = () => {
       formData.append("Quantity", buyNow.quantity);
       formData.append("DeliveryAmount", totalShippingFee);
 
-      const result = await createOrderDirect(user?.id, formData);
+      const result = await createOrderDirect(realUser?.id, formData);
       console.log("Order result:", result);
 
       if (result.success) {
@@ -636,10 +652,10 @@ const Checkout = () => {
 
             <div className="flex items-center justify-between">
               <label className="text-[15px] font-medium">
-                Dùng {user?.coins ?? 0} xu
+                Dùng {userCoins} xu
                 <br />
                 <span className="text-xs text-gray-500">
-                  Giảm tối đa {(coinDiscount || 0).toLocaleString("vi-VN")}₫
+                Giảm tối đa {(coinDiscount || 0).toLocaleString("vi-VN")}₫ ({Math.floor((coinDiscount || 0) / 100)} xu)
                 </span>
               </label>
               <label className="relative inline-flex items-center cursor-pointer w-11 h-6">
