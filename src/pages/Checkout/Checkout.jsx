@@ -107,12 +107,19 @@ const Checkout = () => {
     );
   };
 
-  const maxDiscountByPercent = Math.floor((getTotal() * 0.1) / 100) * 100; 
+  const maxDiscountByPercent = Math.floor((getTotal() * 0.15) / 100) * 100; 
   const maxDiscountByCoins = userCoins * 100; // 1 xu = 100 VNĐ
 
-  const coinDiscount = useCoins
-    ? Math.min(maxDiscountByPercent, maxDiscountByCoins)
-    : 0;
+  let coinDiscount = 0;
+  if (useCoins) {
+    const coinDiscountRaw = maxDiscountByPercent / 100;
+    const coinDiscountRounded = Math.floor(coinDiscountRaw); // làm tròn số nguyên
+    coinDiscount = Math.min(
+      maxDiscountByPercent,
+      maxDiscountByCoins,
+      coinDiscountRounded * 100 
+    );
+  }
 
   const groupedCart = selectedCartItems.reduce((acc, item) => {
     const artisan = item.user?.userName || "Không rõ nghệ nhân";
