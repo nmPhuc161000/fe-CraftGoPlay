@@ -251,13 +251,11 @@ const ArtisanReturnRequestsTab = () => {
                             <div className="p-4 flex justify-between items-center">
                                 <span
                                     className={`px-3 py-1 text-xs rounded-full ${req.status === "Pending"
-                                        ? "bg-yellow-100 text-yellow-700"
-                                        : req.status === "Approved"
-                                            ? "bg-green-100 text-green-700"
-                                            : req.status === "Rejected"
-                                                ? "bg-red-100 text-red-700"
-                                                : req.status === "Refunded"
-                                                    ? "bg-blue-100 text-blue-700"
+                                            ? "bg-yellow-100 text-yellow-700"
+                                            : req.status === "Approved"
+                                                ? "bg-green-100 text-green-700"
+                                                : req.status === "Rejected"
+                                                    ? "bg-red-100 text-red-700"
                                                     : "bg-gray-100 text-gray-700"
                                         }`}
                                 >
@@ -277,17 +275,6 @@ const ArtisanReturnRequestsTab = () => {
                                             className="px-3 py-1 text-xs bg-red-500 text-white rounded"
                                         >
                                             Từ chối
-                                        </button>
-                                    </div>
-                                )}
-
-                                {req.status === "Approved" && (
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => handleChangeStatus(req.id, "Refunded")}
-                                            className="px-3 py-1 text-xs bg-blue-500 text-white rounded"
-                                        >
-                                            Hoàn tiền
                                         </button>
                                     </div>
                                 )}
