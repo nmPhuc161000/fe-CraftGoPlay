@@ -1,11 +1,8 @@
 import React, { useState } from "react";
-import Sidebar from "./components/Sidebar";
+import Sidebar from "../../components/AdminAndStaff/Sidebar";
 import Dashboard from "./components/Dashboard";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
 import ArtisanAccount from "./components/ArtisanAccount";
 import CreateAccount from "./components/CreateAccount";
-import OrderHistory from "../Staff/components/OrderHistory";
 import StaffAccount from "./components/StaffAccount";
 import WalletSystem from "./components/WalletSystem";
 
@@ -24,21 +21,19 @@ const Admin = () => {
         onCloseMobile={() => setIsSidebarOpen(false)}
         isDesktopCollapsed={isDesktopSidebarCollapsed}
         onToggleDesktop={() => setIsDesktopSidebarCollapsed(v => !v)}
+        userRole="admin"
       />
-      {/* Phần phải: header, body, footer */}
-      <div className="flex flex-col flex-1 min-h-screen">
-        <Header onToggleMobileMenu={() => setIsSidebarOpen(true)} />
-        <main className="flex-1 p-4 md:p-8 overflow-auto bg-white">
+      <div className="flex flex-col flex-1 min-h-0">
+        <main className="flex-1 p-4 md:p-8 overflow-y-scroll bg-white max-h-[calc(100vh-68px)]">
           {selected === "dashboard" && <Dashboard />}
           {selected === "artisan" && <ArtisanAccount />}
           {selected === "customer" && <CreateAccount />}
           {selected === "staff" && <StaffAccount />}
           {selected === "walletSystem" && <WalletSystem />}
         </main>
-        <Footer />
       </div>
     </div>
   );
 };
 
-export default Admin; 
+export default Admin;

@@ -123,7 +123,7 @@ const ArtisanOrdersTab = () => {
         { status: "DeliveryFailed", label: "Giao hàng thất bại", color: "bg-red-600 hover:bg-red-700" },
       ],
       Delivered: [
-        { status: "Completed", label: "Hoàn thành đơn hàng", color: "bg-green-600 hover:bg-green-700" },
+        { status: "DeliveryFailed", label: "Giao hàng thất bại", color: "bg-red-600 hover:bg-red-700" },
       ],
       ReturnRequested: [
         { status: "Returned", label: "Xác nhận đã trả hàng", color: "bg-pink-600 hover:bg-pink-700" },

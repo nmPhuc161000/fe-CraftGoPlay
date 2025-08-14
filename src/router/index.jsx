@@ -18,6 +18,7 @@ import PaymentSuccess from "../pages/PaymentSuccess/PaymentSuccess";
 import PaymentFailed from "../pages/PaymentSuccess/PaymentFailed";
 import OrderSuccess from "../pages/OrderSuccess/OrderSuccess";
 import ShopArtisan from "../pages/ShopArtisan/ShopArtisan";
+import Forbidden from "../pages/Forbidden/Forbidden";
 
 // Protected pages
 import ProfileUser from "../pages/Profile/ProfileUser";
@@ -41,6 +42,7 @@ const AppRouter = () => {
           <Route path="/verify-otp" element={<VerifyOtp />} />
           <Route path="/about" element={<About />} />
           <Route path="/artisan/:id" element={<ShopArtisan />} />
+          <Route path="/forbidden" element={<Forbidden />} />
 
           {/* Product pages */}
           <Route path="/product/:id" element={<ProductDetail />} />
@@ -106,8 +108,24 @@ const AppRouter = () => {
           />
 
           {/* Admin routes */}
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/staff" element={<Staff />} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={["Admin"]}>
+                <Admin />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Staff routes */}
+          <Route
+            path="/staff"
+            element={
+              <ProtectedRoute allowedRoles={["Staff"]}>
+                <Staff />
+              </ProtectedRoute>
+            }
+          />
 
           {/* ========== Special Home Route ========== */}
           {/* Giữ nguyên route Home đặc biệt của bạn */}

@@ -98,6 +98,12 @@ const OrdersTab = () => {
     try {
       setLoading(true);
       let newStatus = "";
+      const order = orders.find((o) => o.id === orderId);
+
+      if (!order) {
+        showNotification("Không tìm thấy đơn hàng", "error");
+        return;
+      }
 
       switch (action) {
         case "cancel":
@@ -107,10 +113,51 @@ const OrdersTab = () => {
           newStatus = "Completed";
           break;
         case "returnRequest":
-          newStatus = "ReturnRequested";
-          break;
+          if (
+          order.orderItems &&
+          Array.isArray(order.orderItems) &&
+          order.orderItems.length > 0
+        ) {
+          // Kiểm tra dữ liệu hợp lệ
+          const validItems = order.orderItems.every(
+            (item) =>
+              item &&
+              item.id &&
+              item.product &&
+              typeof item.product.name === "string" &&
+              item.product.productImages &&
+              typeof item.product.productImages.imageUrl === "string"
+          );
+          if (!validItems) {
+            showNotification("Dữ liệu sản phẩm không hợp lệ", "error");
+            return;
+          }
+
+          if (order.orderItems.length > 1) {
+            const queryParams = new URLSearchParams({
+              orderId: order.id,
+              orderItems: encodeURIComponent(
+                JSON.stringify(
+                  order.orderItems.map((item) => ({
+                    orderItemId: item.id,
+                    name: item.product.name,
+                    imageUrl: item.product.productImages?.imageUrl || "",
+                  }))
+                )
+              ),
+            }).toString();
+            navigate(`/profile-user/returnRequest?${queryParams}`);
+          } else {
+            const item = order.orderItems[0];
+            navigate(
+              `/profile-user/returnRequest?orderItemId=${item.id}&orderId=${order.id}`
+            );
+          }
+        } else {
+          showNotification("Không tìm thấy sản phẩm trong đơn hàng", "error");
+        }
+        return;
         case "rating":
-          const order = orders.find((o) => o.id === orderId);
           console.log("Order found for rating:", order);
           if (order && order.orderItems && order.orderItems.length > 0) {
             if (order.orderItems.length > 1) {
@@ -122,6 +169,7 @@ const OrdersTab = () => {
                       id: item.product.id,
                       name: item.product.name,
                       imageUrl: item.product.productImages?.imageUrl || "",
+                      orderItemId: item.id,
                     }))
                   )
                 ),
@@ -131,7 +179,7 @@ const OrdersTab = () => {
               const item = order.orderItems[0];
               const url = `/profile-user/productRating?orderId=${orderId}&productId=${item.product.id}&productName=${encodeURIComponent(
                 item.product.name
-              )}&productImage=${encodeURIComponent(item.product.productImages?.imageUrl || "")}`;
+              )}&productImage=${encodeURIComponent(item.product.productImages?.imageUrl || "")}&orderItemId=${item.id}`;
               navigate(url);
               console.log("Navigating to single-product:", url);
             }
@@ -147,10 +195,10 @@ const OrdersTab = () => {
         const updatedOrders = orders.map((order) =>
           order.id === orderId
             ? {
-                ...order,
-                status: newStatus,
-                statusKey: convertStatus(newStatus),
-              }
+              ...order,
+              status: newStatus,
+              statusKey: convertStatus(newStatus),
+            }
             : order
         );
         setOrders(updatedOrders);
@@ -314,22 +362,20 @@ const OrdersTab = () => {
                 <button
                   key={filter.value}
                   onClick={() => setSelectedStatus(filter.value)}
-                  className={`group relative flex items-center px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
-                    selectedStatus === filter.value
+                  className={`group relative flex items-center px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 transform hover:scale-105 ${selectedStatus === filter.value
                       ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200"
                       : "bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 hover:border-blue-300"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center">
                     {filter.icon}
                     <span className="ml-2">{filter.label}</span>
                     {statusCounts[filter.value] > 0 && (
                       <span
-                        className={`ml-3 px-2 py-1 rounded-full text-xs font-bold ${
-                          selectedStatus === filter.value
+                        className={`ml-3 px-2 py-1 rounded-full text-xs font-bold ${selectedStatus === filter.value
                             ? "bg-white text-blue-600"
                             : "bg-blue-100 text-blue-700"
-                        }`}
+                          }`}
                       >
                         {statusCounts[filter.value]}
                       </span>
@@ -407,9 +453,8 @@ const OrdersTab = () => {
                           </div>
                         </div>
                         <div
-                          className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
-                            statusConfig[order.statusKey].color
-                          }`}
+                          className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${statusConfig[order.statusKey].color
+                            }`}
                         >
                           {statusConfig[order.statusKey].icon}
                           <span className="ml-2">

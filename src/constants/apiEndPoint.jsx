@@ -163,8 +163,27 @@ export const API_ENDPOINTS_RATING = {
   RATE_PRODUCT: "/api/Rating/RatingProduct",
   GET_RATINGS_BY_USER_ID: (userId, pageIndex = 0, pageSize = 10) =>
     `/api/Rating/GetRatingsByUserId/${userId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
+  GET_RATINGS_BY_PRODUCT_ID: (productId, pageIndex = 0, pageSize = 10) =>
+    `/api/Rating/GetRatingsByProductId/${productId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
 };
 
 export const API_ENDPOINTS_POINT = {
   GET_POINT_BY_USER_ID: (userId) => `/api/Point/GetPointsByUserId/${userId}`,
 }
+
+export const API_ENDPOINTS_DAILY_CHECKIN = {
+  
+  HASCHECKEDIN: (userId) => `/api/DailyCheckIn/HasCheckedIn/${userId}`,
+  GET_CURRENT_STREAK: (userId) => `/api/DailyCheckIn/CurrentStreak/${userId}`,
+  CHECK_IN: `/api/DailyCheckIn/CheckIn`,
+  UPDATE_STREAK: (userId) => `/api/DailyCheckIn/UpdateStreak/${userId}`,
+};
+
+export const API_ENDPOINTS_RETURN_REQUEST = {
+  CREATE_RETURN_REQUEST: "/api/ReturnRequest/ReturnRequest",
+   GET_RETURN_REQUEST_BY_ARTISAN_ID: (artisanId, pageIndex, pageSize, status) =>
+    `/api/ReturnRequest/GetReturnRequestByArtisanId/${artisanId}?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}`,
+   UPDATE_STATUS_RETURN_REQUEST: (returnRequestId, status) =>
+    `/api/ReturnRequest/UpdateStatusReturnRequest/${returnRequestId}?status=${status}`,
+
+};

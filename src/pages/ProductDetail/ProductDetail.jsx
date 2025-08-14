@@ -17,7 +17,6 @@ const ProductDetail = () => {
 
   const [selectedImg, setSelectedImg] = useState(null);
   const [quantity, setQuantity] = useState(1);
-  const [reviews, setReviews] = useState([]);
   const [product, setProduct] = useState(null);
   const [showMessage, setShowMessage] = useState(false);
   const [showFavoriteMessage, setShowFavoriteMessage] = useState(false);
@@ -55,40 +54,6 @@ const ProductDetail = () => {
 
     fetchProduct();
   }, [id]);
-
-  // Fake fetch API
-  useEffect(() => {
-    const fakeFetchReviews = async () => {
-      const response = await new Promise((resolve) =>
-        setTimeout(() => {
-          resolve([
-            {
-              id: 1,
-              name: "Nguyễn Văn A",
-              rating: 5,
-              comment: "Sản phẩm rất đẹp và chất lượng, giao hàng nhanh.",
-            },
-            {
-              id: 2,
-              name: "Trần Thị B",
-              rating: 4,
-              comment: "Đóng gói kỹ, sản phẩm như mô tả, sẽ ủng hộ tiếp.",
-            },
-            {
-              id: 3,
-              name: "Lê Minh C",
-              rating: 5,
-              comment: "Tinh xảo, đúng chất hàng thủ công. Rất hài lòng!",
-            },
-          ]);
-        }, 500)
-      );
-
-      setReviews(response);
-    };
-
-    fakeFetchReviews();
-  }, []);
 
   const handleBuyNow = (product) => {
     if (!isAuthenticated) {
@@ -370,7 +335,7 @@ const ProductDetail = () => {
       {/* dang gia san pham */}
       <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent my-12"></div>
       <div className="container mx-auto px-6 pb-12 text-[#5e3a1e]">
-        <ProductReviews reviews={reviews} />
+        <ProductReviews productId={id} />
       </div>
     </MainLayout>
   );

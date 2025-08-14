@@ -112,7 +112,7 @@ const Register = () => {
   const handleAuthSuccess = useCallback((token, role) => {
     localStorage.setItem("token", token);
     localStorage.setItem("role", role);
-    showNotification(MESSAGES.AUTH.GOOGLE_REGISTER_AND_LOGIN_SUCCESS);
+    showNotification(MESSAGES.AUTH.GOOGLE_REGISTER_AND_LOGIN_SUCCESS, "success");
 
     const redirectPaths = {
       Artisan: "/profile-user/profile",
@@ -170,7 +170,7 @@ const Register = () => {
         const response = await authService.register(form);
 
         if (response.success) {
-          showNotification(MESSAGES.AUTH.REGISTER_SUCCESS);
+          showNotification(MESSAGES.AUTH.REGISTER_SUCCESS, "success");
           // Lưu email vào localStorage để sử dụng ở trang OTP
           localStorage.setItem("registerEmail", form.Email);
 

@@ -9,6 +9,9 @@ import productService from "../../services/apis/productApi";
 const Home = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMorePages, setHasMorePages] = useState(true);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const scrollToProductsRef = useRef(null);
   const location = useLocation();
@@ -29,27 +32,37 @@ const Home = () => {
     }
   };
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (page = 1) => {
+    setLoading(true);
     try {
       const res = await productService.getProductsByStatus({
         status: "Active",
-        pageIndex: 1,
-        pageSize: 10,
+        pageIndex: page,
+        pageSize: 50,
       });
-      const productList = res.data?.data;
+      const productList = res.data?.data || [];
+      const count = res.data?.count || 0;
+
+      // Cập nhật danh sách sản phẩm cho trang hiện tại
       setProducts(productList);
+
+      // Kiểm tra xem còn trang tiếp theo không
+      setHasMorePages(count === 50);
+
       if (Array.isArray(productList)) {
-        console.log("Sản phẩm lấy về:", productList.length, productList);
+        console.log("Sản phẩm lấy về (trang", page, "):", productList.length, productList);
       }
     } catch (error) {
       console.error("Lỗi khi lấy sản phẩm:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchCategories();
-    fetchProducts();
-  }, []);
+    fetchProducts(currentPage);
+  }, [currentPage]);
 
   useEffect(() => {
     if (window.location.pathname === "/" && window.location.hash) {
@@ -63,6 +76,17 @@ const Home = () => {
       }, 100);
     }
   }, [location.hash]);
+
+  const handlePageChange = (direction) => {
+    if (direction === "next" && hasMorePages && !loading) {
+      setCurrentPage((prevPage) => prevPage + 1);
+    } else if (direction === "prev" && currentPage > 1 && !loading) {
+      setCurrentPage((prevPage) => prevPage - 1);
+    }
+    if (scrollToProductsRef.current) {
+      scrollToProductsRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   return (
     <MainLayout>
@@ -181,9 +205,9 @@ const Home = () => {
               Sản phẩm dành cho bạn
             </h2>
             <p className="text-[#5e3a1e] mt-2 max-w-2xl">
-              Khám phá những sản phẩm board games được yêu thích nhất, nổi tiếng
+              Khám phá những sản phẩm được yêu thích nhất, nổi tiếng
               với thiết kế tinh tế, chế tác thủ công và chất liệu bền vững.
-              Maztermind mang đến một trải nghiệm chơi cao cấp, khác biệt.
+              Crafgoplay mang đến một trải nghiệm cao cấp, khác biệt.
             </p>
           </div>
           <div>
@@ -201,9 +225,13 @@ const Home = () => {
       <div className="w-full px-20 py-4">
         <div className="w-full">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 px-4 sm:px-6 lg:px-8">
-            {products.length === 0 ? (
+            {products.length === 0 && !loading ? (
               <div className="col-span-full text-center text-gray-500">
                 Hiện chưa có sản phẩm nào.
+              </div>
+            ) : loading ? (
+              <div className="col-span-full text-center text-gray-500">
+                Đang tải sản phẩm...
               </div>
             ) : (
               products.map((product) => (
@@ -213,7 +241,6 @@ const Home = () => {
                   className="group w-full bg-white shadow rounded-lg overflow-hidden relative text-center transition-transform duration-300 hover:scale-105 hover:shadow-lg cursor-pointer"
                 >
                   <div className="relative w-full h-64">
-                    {/* Ảnh chính và hover */}
                     <img
                       src={product.productImages[0].imageUrl}
                       alt={product.name}
@@ -228,7 +255,6 @@ const Home = () => {
                       className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
                     />
                   </div>
-
                   <div className="p-4">
                     <h3 className="text-lg font-semibold line-clamp-2">
                       {product.name}
@@ -247,6 +273,33 @@ const Home = () => {
                 </div>
               ))
             )}
+          </div>
+
+          {/* Phân trang */}
+          <div className="flex justify-center items-center mt-8 gap-4">
+            <button
+              onClick={() => handlePageChange("prev")}
+              disabled={currentPage === 1 || loading}
+              className={`px-4 py-2 rounded-md ${currentPage === 1 || loading
+                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  : "bg-[#5e3a1e] text-white hover:bg-[#4a2e15]"
+                }`}
+            >
+              Trước
+            </button>
+            <span className="text-[#5e3a1e] font-semibold">
+              Trang {currentPage}
+            </span>
+            <button
+              onClick={() => handlePageChange("next")}
+              disabled={!hasMorePages || loading}
+              className={`px-4 py-2 rounded-md ${!hasMorePages || loading
+                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  : "bg-[#5e3a1e] text-white hover:bg-[#4a2e15]"
+                }`}
+            >
+              Tiếp
+            </button>
           </div>
         </div>
       </div>

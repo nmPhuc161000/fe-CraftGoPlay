@@ -50,7 +50,7 @@ const VerifyOtp = () => {
 
       if (response.success) {
         localStorage.removeItem("registerEmail");
-        showNotification(MESSAGES.AUTH.VERIFY_EMAIL_SUCCESS);
+        showNotification(MESSAGES.AUTH.VERIFY_EMAIL_SUCCESS, "success");
         navigate("/login");
       } else {
         setError(response.error || MESSAGES.AUTH.OTP_VERIFICATION_FAILED);
