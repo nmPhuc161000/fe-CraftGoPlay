@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import categoryService from "../../../services/apis/cateApi";
 import { motion } from "framer-motion";
 
@@ -20,7 +20,9 @@ const ManageCategory = () => {
   const [viewIdx, setViewIdx] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
   const pageSize = 10;
+  const inputRef = useRef(null);
 
   // Fetch categories from API
   const fetchCategories = async () => {
@@ -29,7 +31,6 @@ const ManageCategory = () => {
       const res = await categoryService.getAllCategories();
       if (res.success && res.data && res.data.data) {
         setData(res.data.data);
-        console.log(res.data.data);
       } else {
         setData([]);
       }
@@ -100,15 +101,11 @@ const ManageCategory = () => {
 
     try {
       setLoading(true);
-      // Log form data trước khi gửi
-      console.log("Form Data:", form);
-
       if (editIdx === null) {
-        // Tạo mới
         const res = await categoryService.createCategory({
           categoryName: form.categoryName.trim(),
           imageFile: form.imageFile,
-          categoryStatus: "Actived" // Luôn set Actived khi tạo mới
+          categoryStatus: "Actived"
         });
 
         if (res.success) {
@@ -121,7 +118,6 @@ const ManageCategory = () => {
             categoryStatus: "Actived"
           });
         } else {
-          // Xử lý hiển thị lỗi
           let errorMessage = "Thêm mới thất bại!";
           if (res.error) {
             if (typeof res.error === 'string') {
@@ -130,11 +126,9 @@ const ManageCategory = () => {
               errorMessage = Object.values(res.error).flat().join(", ");
             }
           }
-          console.error("Create Error:", res.error);
           setFormError(errorMessage);
         }
       } else {
-        // Cập nhật
         const category = filtered[editIdx];
         if (!category || !category.categoryId) {
           setFormError("Không tìm thấy thông tin danh mục!");
@@ -167,28 +161,18 @@ const ManageCategory = () => {
               errorMessage = Object.values(res.error).flat().join(", ");
             }
           }
-          console.error("Update Error:", res.error);
           setFormError(errorMessage);
         }
       }
     } catch (err) {
-      console.error("Error in handleAddEdit:", err);
       setFormError(err?.message || "Có lỗi xảy ra, vui lòng thử lại!");
     } finally {
       setLoading(false);
     }
   };
 
-  // Hàm xử lý hiển thị trạng thái
   const getStatusDisplay = (status) => {
     return status === "Actived" ? "Đang hoạt động" : "Ngừng hoạt động";
-  };
-
-  // Hàm xử lý style cho status badge
-  const getStatusStyle = (status) => {
-    return status === "Actived"
-      ? 'bg-green-50 text-green-600'
-      : 'bg-red-50 text-red-600';
   };
 
   const handleDelete = async () => {
@@ -200,8 +184,6 @@ const ManageCategory = () => {
 
     try {
       setLoading(true);
-      console.log("Deleting category:", deleteId);
-
       const res = await categoryService.deleteCategory(deleteId);
 
       if (res.success) {
@@ -217,11 +199,9 @@ const ManageCategory = () => {
             errorMessage = Object.values(res.error).flat().join(", ");
           }
         }
-        console.error("Delete Error:", res.error);
         alert(errorMessage);
       }
     } catch (err) {
-      console.error("Error in handleDelete:", err);
       alert(err?.message || "Có lỗi xảy ra khi xóa danh mục!");
     } finally {
       setLoading(false);
@@ -233,9 +213,49 @@ const ManageCategory = () => {
       alert("Không tìm thấy thông tin danh mục!");
       return;
     }
-    console.log("Opening delete modal for category:", categoryId);
     setDeleteId(categoryId);
     setShowDeleteModal(true);
+  };
+
+  // Handle drag and drop
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      if (file.type.startsWith('image/')) {
+        setForm({ ...form, imageFile: file, image: URL.createObjectURL(file) });
+      } else {
+        setFormError("Vui lòng chọn file ảnh (JPG, PNG)");
+      }
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      setForm({ ...form, imageFile: file, image: URL.createObjectURL(file) });
+    } else {
+      setFormError("Vui lòng chọn file ảnh (JPG, PNG)");
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setForm({ ...form, imageFile: null, image: "" });
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
   };
 
   if (loading) {
@@ -470,71 +490,66 @@ const ManageCategory = () => {
                   />
                 </div>
 
-                {/* Image Upload */}
+                {/* Image Upload with Drag and Drop */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Hình ảnh danh mục
                   </label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Preview */}
-                    <div className="relative group rounded-xl overflow-hidden bg-gray-50 aspect-square flex items-center justify-center border-2 border-dashed border-gray-300">
-                      {(form.imageFile || form.image) ? (
+                  <div
+                    className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                      dragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300 bg-gray-50'
+                    }`}
+                    onDragEnter={handleDrag}
+                    onDragOver={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDrop={handleDrop}
+                  >
+                    <input
+                      type="file"
+                      ref={inputRef}
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                      id="image-upload"
+                    />
+                    {!form.image ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V8m0 0L3 12m4-4l4 4m6 4V8m0 0l-4 4m4-4l4 4" />
+                        </svg>
+                        <p className="text-sm text-gray-500">
+                          Kéo và thả hình ảnh vào đây hoặc{' '}
+                          <label
+                            htmlFor="image-upload"
+                            className="text-blue-600 hover:text-blue-800 cursor-pointer"
+                          >
+                            chọn từ máy tính
+                          </label>
+                        </p>
+                        <p className="text-xs text-gray-400">Chỉ chấp nhận file JPG, PNG (tối đa 5MB)</p>
+                      </div>
+                    ) : (
+                      <div className="relative">
                         <motion.img
+                          src={form.image}
+                          alt="Preview"
+                          className="max-h-48 mx-auto rounded-lg object-cover"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          src={form.imageFile ? URL.createObjectURL(form.imageFile) : form.image}
-                          alt="Preview"
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.src = "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg";
-                          }}
                         />
-                      ) : (
-                        <div className="text-center p-4">
-                          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          <p className="mt-1 text-sm text-gray-500">Chưa có ảnh</p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Upload Button */}
-                    <div className="flex flex-col justify-center space-y-4">
-                      <motion.label
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="cursor-pointer"
-                      >
-                        <div className="px-4 py-3 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 border border-blue-200 transition-all text-center">
-                          <div className="text-blue-600 font-medium">Tải ảnh lên</div>
-                          <p className="mt-1 text-sm text-blue-500">Định dạng: JPG, PNG (Tối đa 5MB)</p>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={e => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                setForm({ ...form, imageFile: file });
-                              }
-                            }}
-                          />
-                        </div>
-                      </motion.label>
-
-                      {(form.imageFile || form.image) && (
                         <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
                           type="button"
-                          className="px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 transition-colors text-sm font-medium"
-                          onClick={() => setForm({ ...form, imageFile: null, image: "" })}
+                          className="absolute top-2 right-2 bg-red-600 text-white rounded-full p-1.5"
+                          onClick={handleRemoveImage}
                         >
-                          Xóa ảnh
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
                         </motion.button>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -669,13 +684,11 @@ const ManageCategory = () => {
 
                 {/* Right Column - Details */}
                 <div className="space-y-6">
-                  {/* Category Name */}
                   <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-6 rounded-xl">
                     <div className="text-sm text-blue-600 font-medium mb-1">Tên danh mục</div>
                     <div className="text-xl font-bold text-gray-900">{filtered[viewIdx].categoryName}</div>
                   </div>
 
-                  {/* Statistics */}
                   <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-6 rounded-xl">
                     <div className="text-sm text-purple-600 font-medium mb-4">Thống kê</div>
                     <div className="grid grid-cols-2 gap-4">
@@ -690,7 +703,6 @@ const ManageCategory = () => {
                     </div>
                   </div>
 
-                  {/* Creation Info */}
                   <div className="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-xl">
                     <div className="text-sm text-green-600 font-medium mb-1">Thông tin tạo</div>
                     <div className="space-y-2">
@@ -709,7 +721,6 @@ const ManageCategory = () => {
                     </div>
                   </div>
 
-                  {/* Last Update */}
                   <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-6 rounded-xl">
                     <div className="text-sm text-amber-600 font-medium mb-1">Cập nhật gần nhất</div>
                     <div className="space-y-2">
@@ -789,4 +800,4 @@ const ManageCategory = () => {
   );
 };
 
-export default ManageCategory; 
+export default ManageCategory;

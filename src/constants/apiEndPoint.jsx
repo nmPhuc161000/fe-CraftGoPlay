@@ -170,3 +170,11 @@ export const API_ENDPOINTS_RATING = {
 export const API_ENDPOINTS_POINT = {
   GET_POINT_BY_USER_ID: (userId) => `/api/Point/GetPointsByUserId/${userId}`,
 }
+
+export const API_ENDPOINTS_DAILY_CHECKIN = {
+  
+  HASCHECKEDIN: (userId) => `/api/DailyCheckIn/HasCheckedIn/${userId}`,
+  GET_CURRENT_STREAK: (userId) => `/api/DailyCheckIn/CurrentStreak/${userId}`,
+  CHECK_IN: `/api/DailyCheckIn/CheckIn`,
+  UPDATE_STREAK: (userId) => `/api/DailyCheckIn/UpdateStreak/${userId}`,
+};
