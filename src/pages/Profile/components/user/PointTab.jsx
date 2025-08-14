@@ -35,7 +35,7 @@ const PointTab = () => {
             history: response.data.data.pointTransactions.map((transaction) => {
               const details = getTransactionDetails(transaction.status);
               return {
-                id: transaction.point_Id,
+                id: transaction.id,
                 type: details.type,
                 amount: details.isPositive ? transaction.amount : -transaction.amount,
                 reason: transaction.description,

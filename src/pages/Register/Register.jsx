@@ -112,7 +112,7 @@ const Register = () => {
   const handleAuthSuccess = useCallback((token, role) => {
     localStorage.setItem("token", token);
     localStorage.setItem("role", role);
-    showNotification(MESSAGES.AUTH.GOOGLE_REGISTER_AND_LOGIN_SUCCESS);
+    showNotification(MESSAGES.AUTH.GOOGLE_REGISTER_AND_LOGIN_SUCCESS, "success");
 
     const redirectPaths = {
       Artisan: "/profile-user/profile",
