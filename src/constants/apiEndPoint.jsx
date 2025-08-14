@@ -170,3 +170,11 @@ export const API_ENDPOINTS_RATING = {
 export const API_ENDPOINTS_POINT = {
   GET_POINT_BY_USER_ID: (userId) => `/api/Point/GetPointsByUserId/${userId}`,
 }
+
+export const API_ENDPOINTS_RETURN_REQUEST = {
+  CREATE_RETURN_REQUEST: "/api/ReturnRequest/ReturnRequest",
+   GET_RETURN_REQUEST_BY_ARTISAN_ID: (artisanId, pageIndex, pageSize, status) =>
+    `/api/ReturnRequest/GetReturnRequestByArtisanId/${artisanId}?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}`,
+   UPDATE_STATUS_RETURN_REQUEST: (returnRequestId, status) =>
+    `/api/ReturnRequest/UpdateStatusReturnRequest/${returnRequestId}?status=${status}`,
+};

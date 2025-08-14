@@ -53,6 +53,13 @@ const SidebarNavigation = ({ role, isActive }) => {
       show: role === "Artisan",
     },
     {
+      id: "returnRequests",
+      to: "/profile-user/returnRequests",
+      icon: "↩️",
+      label: "Yêu cầu trả hàng",
+      show: role === "Artisan",
+    },
+    {
       id: role === "Artisan" ? "artisanReviews" : "userReviews",
       to:
         role === "Artisan"

@@ -98,6 +98,12 @@ const OrdersTab = () => {
     try {
       setLoading(true);
       let newStatus = "";
+      const order = orders.find((o) => o.id === orderId);
+
+      if (!order) {
+        showNotification("Không tìm thấy đơn hàng", "error");
+        return;
+      }
 
       switch (action) {
         case "cancel":
@@ -107,10 +113,51 @@ const OrdersTab = () => {
           newStatus = "Completed";
           break;
         case "returnRequest":
-          newStatus = "ReturnRequested";
-          break;
+          if (
+          order.orderItems &&
+          Array.isArray(order.orderItems) &&
+          order.orderItems.length > 0
+        ) {
+          // Kiểm tra dữ liệu hợp lệ
+          const validItems = order.orderItems.every(
+            (item) =>
+              item &&
+              item.id &&
+              item.product &&
+              typeof item.product.name === "string" &&
+              item.product.productImages &&
+              typeof item.product.productImages.imageUrl === "string"
+          );
+          if (!validItems) {
+            showNotification("Dữ liệu sản phẩm không hợp lệ", "error");
+            return;
+          }
+
+          if (order.orderItems.length > 1) {
+            const queryParams = new URLSearchParams({
+              orderId: order.id,
+              orderItems: encodeURIComponent(
+                JSON.stringify(
+                  order.orderItems.map((item) => ({
+                    orderItemId: item.id,
+                    name: item.product.name,
+                    imageUrl: item.product.productImages?.imageUrl || "",
+                  }))
+                )
+              ),
+            }).toString();
+            navigate(`/profile-user/returnRequest?${queryParams}`);
+          } else {
+            const item = order.orderItems[0];
+            navigate(
+              `/profile-user/returnRequest?orderItemId=${item.id}&orderId=${order.id}`
+            );
+          }
+        } else {
+          showNotification("Không tìm thấy sản phẩm trong đơn hàng", "error");
+        }
+        return;
         case "rating":
-          const order = orders.find((o) => o.id === orderId);
           console.log("Order found for rating:", order);
           if (order && order.orderItems && order.orderItems.length > 0) {
             if (order.orderItems.length > 1) {
