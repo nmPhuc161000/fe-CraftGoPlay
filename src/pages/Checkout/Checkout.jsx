@@ -724,7 +724,7 @@ const Checkout = () => {
                 <span>
                   {shippingFees.length > 1
                     ? "Tổng phí vận chuyển"
-                    : "Phí vận chuyển"}
+                    : "Tổng Phí vận chuyển"}
                 </span>
                 <span>{totalShippingFee.toLocaleString("vi-VN")}₫</span>
               </div>
@@ -763,7 +763,7 @@ const Checkout = () => {
             <button
               onClick={handlePlaceOrder}
               disabled={isPlacingOrder}
-              className={`w-full py-3 bg-[#5e3a1e] hover:bg-[#4a2f15] text-white rounded font-semibold transition ${
+              className={`w-full py-3 bg-gradient-to-r from-[#5e3a1e] to-[#8b5e34] hover:opacity-95 text-white rounded font-semibold transition ${
                 isPlacingOrder ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >

@@ -15,11 +15,16 @@ const ratingService = {
         });
     },
     async getRatingsByProductId(productId, pageIndex = 0, pageSize = 10) {
-    const url = API_ENDPOINTS_RATING.GET_RATINGS_BY_PRODUCT_ID(productId, pageIndex, pageSize);
-    return performApiRequest(url, {
-      method: "get",
-    });
-  },
+        const url = API_ENDPOINTS_RATING.GET_RATINGS_BY_PRODUCT_ID(productId, pageIndex, pageSize);
+        return performApiRequest(url, {
+            method: "get",
+        });
+    },
+    async getRatingsByArtisanId(artisanId, pageIndex = 0, pageSize = 10) {
+        const url = API_ENDPOINTS_RATING.GET_RATINGS_BY_ARTISAN_ID(artisanId, pageIndex, pageSize);
+        return performApiRequest(url, { method: "get" });
+    },
+
 };
 
 export default ratingService;

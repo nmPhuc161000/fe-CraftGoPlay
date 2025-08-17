@@ -165,6 +165,8 @@ export const API_ENDPOINTS_RATING = {
     `/api/Rating/GetRatingsByUserId/${userId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
   GET_RATINGS_BY_PRODUCT_ID: (productId, pageIndex = 0, pageSize = 10) =>
     `/api/Rating/GetRatingsByProductId/${productId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
+  GET_RATINGS_BY_ARTISAN_ID: (artisanId, pageIndex = 0, pageSize = 10) =>
+    `/api/Rating/GetRatingsByArtisanId/${artisanId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
 };
 
 export const API_ENDPOINTS_POINT = {
