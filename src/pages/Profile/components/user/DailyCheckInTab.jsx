@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import DailyCheckInService from "../../../../services/apis/dailyCheckInApi"; // Adjust path as needed
 import { AuthContext } from "../../../../contexts/AuthContext";
+import { useNotification } from "../../../../contexts/NotificationContext";
 
 const DailyCheckInTab = () => {
   const [checkInStatus, setCheckInStatus] = useState([
@@ -26,6 +27,7 @@ const DailyCheckInTab = () => {
   ];
   const { user } = useContext(AuthContext);
   const userId = user?.id;
+  const { showNotification } = useNotification();
 
   useEffect(() => {
     const fetchInitialData = async () => {
@@ -51,7 +53,7 @@ const DailyCheckInTab = () => {
         setCheckInStatus(newStatus);
       } catch (error) {
         console.error("Error fetching initial data:", error);
-        alert("Không thể tải dữ liệu điểm danh. Vui lòng thử lại!");
+        // alert("Không thể tải dữ liệu điểm danh. Vui lòng thử lại!");
       }
     };
 
@@ -60,7 +62,7 @@ const DailyCheckInTab = () => {
 
   const handleCheckIn = async () => {
     if (hasCheckedInToday) {
-      alert("Bạn đã điểm danh hôm nay!");
+      showNotification("Bạn đã điểm danh hôm nay!", "info");
       return;
     }
 
@@ -77,17 +79,21 @@ const DailyCheckInTab = () => {
         newStatus[todayIndex] = true;
         setCheckInStatus(newStatus);
         setHasCheckedInToday(true);
-        alert(
-          response.data.message || `Bạn đã nhận ${rewards[todayIndex]} xu!`
+        showNotification(
+          response.data.message || `Bạn đã nhận ${rewards[todayIndex]} xu!`,
+          "success"
         );
       }
     } catch (error) {
       console.error("Check-in error:", error);
-      alert("Điểm danh thất bại. Vui lòng thử lại!");
+      showNotification(
+        error?.response?.data?.message || "Lỗi khi điểm danh",
+        "error"
+      );
     }
   };
 
-  const currentStreak = checkInStatus.filter(status => status).length;
+  const currentStreak = checkInStatus.filter((status) => status).length;
 
   return (
     <div className="w-full p-6 bg-white rounded-xl shadow-md">
