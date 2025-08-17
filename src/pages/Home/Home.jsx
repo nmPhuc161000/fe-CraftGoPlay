@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 //import { homeApi } from "../../services";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
 import loginImg from "../../assets/images/background2.png";
 import categoryService from "../../services/apis/cateApi";
@@ -50,7 +50,13 @@ const Home = () => {
       setHasMorePages(count === 50);
 
       if (Array.isArray(productList)) {
-        console.log("Sản phẩm lấy về (trang", page, "):", productList.length, productList);
+        console.log(
+          "Sản phẩm lấy về (trang",
+          page,
+          "):",
+          productList.length,
+          productList
+        );
       }
     } catch (error) {
       console.error("Lỗi khi lấy sản phẩm:", error);
@@ -129,7 +135,10 @@ const Home = () => {
           </div>
 
           {/* ô 3 */}
-          <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition">
+          <Link
+            to="/game"
+            className="flex justify-between items-center p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition"
+          >
             <div>
               <h3 className="font-bold text-lg mb-1">Trò chơi</h3>
               <p className="text-sm">Thu thập & tích lũy voucher!</p>
@@ -139,7 +148,7 @@ const Home = () => {
               alt="Top Up"
               className="w-16 h-16 object-contain"
             />
-          </div>
+          </Link>
         </div>
       </div>
 
@@ -205,9 +214,9 @@ const Home = () => {
               Sản phẩm dành cho bạn
             </h2>
             <p className="text-[#5e3a1e] mt-2 max-w-2xl">
-              Khám phá những sản phẩm được yêu thích nhất, nổi tiếng
-              với thiết kế tinh tế, chế tác thủ công và chất liệu bền vững.
-              Crafgoplay mang đến một trải nghiệm cao cấp, khác biệt.
+              Khám phá những sản phẩm được yêu thích nhất, nổi tiếng với thiết
+              kế tinh tế, chế tác thủ công và chất liệu bền vững. Crafgoplay
+              mang đến một trải nghiệm cao cấp, khác biệt.
             </p>
           </div>
           <div>
@@ -280,10 +289,11 @@ const Home = () => {
             <button
               onClick={() => handlePageChange("prev")}
               disabled={currentPage === 1 || loading}
-              className={`px-4 py-2 rounded-md ${currentPage === 1 || loading
+              className={`px-4 py-2 rounded-md ${
+                currentPage === 1 || loading
                   ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                   : "bg-[#5e3a1e] text-white hover:bg-[#4a2e15]"
-                }`}
+              }`}
             >
               Trước
             </button>
@@ -293,10 +303,11 @@ const Home = () => {
             <button
               onClick={() => handlePageChange("next")}
               disabled={!hasMorePages || loading}
-              className={`px-4 py-2 rounded-md ${!hasMorePages || loading
+              className={`px-4 py-2 rounded-md ${
+                !hasMorePages || loading
                   ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                   : "bg-[#5e3a1e] text-white hover:bg-[#4a2e15]"
-                }`}
+              }`}
             >
               Tiếp
             </button>
