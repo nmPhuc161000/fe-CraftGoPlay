@@ -1,4 +1,5 @@
-import React, { useContext, useState, useEffect } from "react";
+// /src/pages/Checkout/Checkout.jsx
+import React, { useContext, useState, useEffect, useCallback } from "react";
 import { CartContext } from "../../contexts/CartContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import { FaMapMarkerAlt, FaTicketAlt } from "react-icons/fa";
@@ -13,6 +14,7 @@ import { useNotification } from "../../contexts/NotificationContext";
 import addressService from "../../services/apis/addressApi";
 import locationService from "../../services/apis/locationApi";
 import pointService from "../../services/apis/pointApi";
+import UserAddress from "./components/UserAddress";
 
 const Checkout = () => {
   const { cartItems, removeMultipleItems } = useContext(CartContext);
@@ -65,22 +67,19 @@ const Checkout = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  useEffect(() => {
-    const fetchDefaultAddress = async () => {
-      try {
-        const res = await addressService.getDefaultAddress(realUser.id);
-        const defaultAddress = res?.data?.data;
-        if (defaultAddress) {
-          setAddresses([defaultAddress]);
-          setSelectedAddressId(defaultAddress.id);
-        }
-      } catch (err) {
-        console.error("Lỗi khi lấy địa chỉ mặc định:", err);
+  const fetchDefaultAddress = useCallback(async () => {
+    try {
+      const res = await addressService.getDefaultAddress(realUser.id);
+      const defaultAddress = res?.data?.data;
+      if (defaultAddress) {
+        setAddresses([defaultAddress]);
+        setSelectedAddressId(defaultAddress.id);
       }
-    };
-
-    fetchDefaultAddress();
+    } catch (err) {
+      console.error("Lỗi khi lấy địa chỉ mặc định:", err);
+    }
   }, [realUser?.id]);
+
   useEffect(() => {
     const fetchUserCoins = async () => {
       try {
@@ -342,9 +341,7 @@ const Checkout = () => {
               );
 
               if (maxLength > 200 || maxWidth > 200 || totalHeight > 200) {
-                console.warn(
-                  `Kích thước kiện hàng từ ${name} vượt quá 200cm`
-                );
+                console.warn(`Kích thước kiện hàng từ ${name} vượt quá 200cm`);
               }
               if (totalWeight > 1600000) {
                 console.warn(
@@ -352,7 +349,8 @@ const Checkout = () => {
                 );
               }
 
-              const serviceTypeId =  totalHeight > 200 || totalWeight > 30000 ? 5 : 2;
+              const serviceTypeId =
+                totalHeight > 200 || totalWeight > 30000 ? 5 : 2;
               const feeData = {
                 service_type_id: serviceTypeId,
                 from_district_id: dataAddress.districtId,
@@ -445,6 +443,15 @@ const Checkout = () => {
     }
   }, [selectedAddressId, buyNow, selectedCartItems]);
 
+  useEffect(() => {
+    fetchDefaultAddress();
+  }, [fetchDefaultAddress]);
+
+  const handleDefaultAddressChanged = () => {
+    fetchDefaultAddress(); // Gọi lại API lấy địa chỉ mặc định
+    calculateShippingFee(); // Tính lại phí vận chuyển nếu cần
+  };
+
   return (
     <MainLayout>
       <main className="bg-[#f7f7f7] py-15 text-[#5e3a1e] text-[15px]">
@@ -452,40 +459,12 @@ const Checkout = () => {
 
         <div className="w-[80%] max-w-[1400px] mx-auto space-y-6">
           {/* dia chi */}
-          <section className="bg-white rounded shadow-sm border border-gray-200 p-4 flex justify-between items-start gap-4 transition duration-300 hover:shadow-lg">
-            <div>
-              <h2 className="text-xl font-semibold mb-3 flex items-center gap-2 text-[#5e3a1e]">
-                <FaMapMarkerAlt className="text-[#b28940]" />
-                Địa chỉ nhận hàng
-              </h2>
-              {(() => {
-                const selectedAddress = addresses.find(
-                  (addr) => addr.id === selectedAddressId
-                );
-                if (!selectedAddress)
-                  return (
-                    <p className="text-gray-500">Chưa có địa chỉ được chọn.</p>
-                  );
-                return (
-                  <div className="space-y-1 text-[15px] leading-relaxed">
-                    <p>
-                      <span className="font-medium">
-                        {selectedAddress.fullName}
-                      </span>{" "}
-                      | {selectedAddress.phoneNumber}
-                    </p>
-                    <p>{realUser?.email}</p>
-                    <p className="text-[#5e3a1e]">
-                      {selectedAddress.fullAddress}
-                    </p>
-                  </div>
-                );
-              })()}
-            </div>
-            <button className="text-[15px] text-[#b28940] hover:text-[#a77a2d] font-medium hover:underline transition">
-              Thay đổi
-            </button>
-          </section>
+          <UserAddress
+            addresses={addresses}
+            selectedAddressId={selectedAddressId}
+            realUser={realUser}
+            onDefaultAddressChanged={handleDefaultAddressChanged}
+          />
 
           {/* sp */}
           <section className="bg-white rounded shadow-sm border border-gray-200 p-4">
