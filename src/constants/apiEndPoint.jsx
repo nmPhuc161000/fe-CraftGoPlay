@@ -108,6 +108,8 @@ export const API_ENDPOINTS_ADDRESS = {
     `/api/UserAddress/GetDefaultAddress/${userId}`,
   GET_ADDRESS_BY_ARTISANID: (artisanId) =>
     `/api/UserAddress/GetAddressOfArtisan/${artisanId}`,
+  GET_ADDRESS_BY_ID: (addressId) =>
+    `/api/UserAddress/GetAddressById/${addressId}`,
   ADD_ADDRESS: "/api/UserAddress/AddNewAddress",
   UPDATE_ADDRESS: (addressId) => `/api/UserAddress/UpdateAddress/${addressId}`,
   SET_DEFAULT_ADDRESS: (addressId) =>
@@ -171,10 +173,9 @@ export const API_ENDPOINTS_RATING = {
 
 export const API_ENDPOINTS_POINT = {
   GET_POINT_BY_USER_ID: (userId) => `/api/Point/GetPointsByUserId/${userId}`,
-}
+};
 
 export const API_ENDPOINTS_DAILY_CHECKIN = {
-  
   HASCHECKEDIN: (userId) => `/api/DailyCheckIn/HasCheckedIn/${userId}`,
   GET_CURRENT_STREAK: (userId) => `/api/DailyCheckIn/CurrentStreak/${userId}`,
   CHECK_IN: `/api/DailyCheckIn/CheckIn`,
@@ -183,9 +184,8 @@ export const API_ENDPOINTS_DAILY_CHECKIN = {
 
 export const API_ENDPOINTS_RETURN_REQUEST = {
   CREATE_RETURN_REQUEST: "/api/ReturnRequest/ReturnRequest",
-   GET_RETURN_REQUEST_BY_ARTISAN_ID: (artisanId, pageIndex, pageSize, status) =>
+  GET_RETURN_REQUEST_BY_ARTISAN_ID: (artisanId, pageIndex, pageSize, status) =>
     `/api/ReturnRequest/GetReturnRequestByArtisanId/${artisanId}?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}`,
-   UPDATE_STATUS_RETURN_REQUEST: (returnRequestId, status) =>
+  UPDATE_STATUS_RETURN_REQUEST: (returnRequestId, status) =>
     `/api/ReturnRequest/UpdateStatusReturnRequest/${returnRequestId}?status=${status}`,
-
 };

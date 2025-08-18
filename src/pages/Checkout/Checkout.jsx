@@ -20,12 +20,13 @@ const Checkout = () => {
   const { showNotification } = useNotification();
   const navigate = useNavigate();
   const location = useLocation();
-  const buyNow = location.state?.buyNow;
+  const buyNow = React.useMemo(() => location.state?.buyNow, [location.state]);
 
   const selectedItemIds = location.state?.selectedItems || [];
 
-  const selectedCartItems = cartItems.filter((item) =>
-    selectedItemIds.includes(item.id)
+  const selectedCartItems = React.useMemo(
+    () => cartItems.filter((item) => selectedItemIds.includes(item.id)),
+    [cartItems, selectedItemIds]
   );
 
   const [voucherCode, setVoucherCode] = useState("");
@@ -107,7 +108,7 @@ const Checkout = () => {
     );
   };
 
-  const maxDiscountByPercent = Math.floor((getTotal() * 0.15) / 100) * 100; 
+  const maxDiscountByPercent = Math.floor((getTotal() * 0.15) / 100) * 100;
   const maxDiscountByCoins = userCoins * 100; // 1 xu = 100 VNĐ
 
   let coinDiscount = 0;
@@ -117,7 +118,7 @@ const Checkout = () => {
     coinDiscount = Math.min(
       maxDiscountByPercent,
       maxDiscountByCoins,
-      coinDiscountRounded * 100 
+      coinDiscountRounded * 100
     );
   }
 
@@ -239,24 +240,32 @@ const Checkout = () => {
         (addr) => addr.id === selectedAddressId
       );
       if (!userAddress) {
-        throw new Error("Không lấy được địa chỉ người nhận");
+        console.warn("Không lấy được địa chỉ người nhận");
       }
 
       if (buyNow) {
-        // Xử lý mua ngay (1 sản phẩm)
         const dataAddress = await getCachedArtisanAddress(buyNow.artisanId);
-
         if (!dataAddress) {
-          throw new Error("Không lấy được địa chỉ người gửi");
+          console.warn("Không lấy được địa chỉ người gửi");
         }
 
         const totalWeight = buyNow.weight * buyNow.quantity;
         if (!totalWeight || totalWeight <= 0) {
-          throw new Error("Khối lượng sản phẩm mua ngay không hợp lệ");
+          console.warn("Khối lượng sản phẩm mua ngay không hợp lệ");
         }
 
-        const serviceTypeId = totalWeight > 30000 ? 5 : 2;
+        const length = buyNow.length || 30;
+        const width = buyNow.width || 40;
+        const totalHeight = (buyNow.height || 20) * buyNow.quantity;
 
+        if (length > 200 || width > 200 || totalHeight > 200) {
+          console.warn("Kích thước kiện hàng vượt quá 200cm");
+        }
+        if (totalWeight > 1600000) {
+          console.warn("Khối lượng kiện hàng vượt quá 1,600kg");
+        }
+
+        const serviceTypeId = totalHeight > 200 || totalWeight > 30000 ? 5 : 2;
         const feeData = {
           service_type_id: serviceTypeId,
           from_district_id: dataAddress.districtId,
@@ -264,34 +273,43 @@ const Checkout = () => {
           to_district_id: userAddress.districtId,
           to_ward_code: userAddress.wardCode,
           insurance_value: 0,
-          weight: totalWeight, // Luôn gửi weight để tránh lỗi
+          weight: totalWeight,
         };
 
         if (serviceTypeId === 2) {
-          feeData.length = buyNow.length || 30;
-          feeData.width = buyNow.width || 40;
-          feeData.height = buyNow.height || 20;
+          feeData.length = length;
+          feeData.width = width;
+          feeData.height = totalHeight;
         } else {
           feeData.items = Array.from({ length: buyNow.quantity }, () => ({
             name: buyNow.productName,
-            quantity: 1,
+            quantity: buyNow.quantity,
             weight: buyNow.weight,
-            length: buyNow.length || 30,
-            width: buyNow.width || 40,
+            length: length,
+            width: width,
             height: buyNow.height || 20,
           }));
         }
 
         const feeResult = await locationService.getFeeShip(feeData);
-        setShippingFees([
+        const newShippingFees = [
           {
             artisanName: buyNow.artisanName,
             fee: feeResult.data.total,
           },
-        ]);
-        setTotalShippingFee(feeResult.data.total);
+        ];
+        const newTotalShippingFee = feeResult.data.total;
+
+        // Chỉ cập nhật state nếu giá trị thay đổi
+        setShippingFees((prev) =>
+          JSON.stringify(prev) !== JSON.stringify(newShippingFees)
+            ? newShippingFees
+            : prev
+        );
+        setTotalShippingFee((prev) =>
+          prev !== newTotalShippingFee ? newTotalShippingFee : prev
+        );
       } else {
-        // Xử lý giỏ hàng
         const itemsByArtisan = selectedCartItems.reduce((acc, item) => {
           const artisanId = item.product.artisanId;
           const artisanName = item.user?.userName || "Nghệ nhân";
@@ -306,19 +324,11 @@ const Checkout = () => {
           Object.entries(itemsByArtisan).map(
             async ([artisanId, { name, items }]) => {
               const dataAddress = await getCachedArtisanAddress(artisanId);
+              const totalWeight = items.reduce(
+                (sum, item) => sum + (item.product.weight || 0) * item.quantity,
+                0
+              );
 
-              // Kiểm tra và tính tổng khối lượng
-              const totalWeight = items.reduce((sum, item) => {
-                const weight = item.product.weight || 0;
-                if (!weight || weight <= 0) {
-                  throw new Error(
-                    `Sản phẩm ${item.productName} có khối lượng không hợp lệ`
-                  );
-                }
-                return sum + weight * item.quantity;
-              }, 0);
-
-              // Kiểm tra kích thước
               const maxLength = Math.max(
                 ...items.map((item) => item.product.length || 30)
               );
@@ -332,19 +342,17 @@ const Checkout = () => {
               );
 
               if (maxLength > 200 || maxWidth > 200 || totalHeight > 200) {
-                throw new Error(
+                console.warn(
                   `Kích thước kiện hàng từ ${name} vượt quá 200cm`
                 );
               }
               if (totalWeight > 1600000) {
-                throw new Error(
+                console.warn(
                   `Khối lượng kiện hàng từ ${name} vượt quá 1,600kg`
                 );
               }
 
-              // Chọn service_type_id dựa trên tổng khối lượng
-              const serviceTypeId = totalWeight > 30000 ? 5 : 2;
-
+              const serviceTypeId =  totalHeight > 200 || totalWeight > 30000 ? 5 : 2;
               const feeData = {
                 service_type_id: serviceTypeId,
                 from_district_id: dataAddress.districtId,
@@ -352,7 +360,7 @@ const Checkout = () => {
                 to_district_id: userAddress.districtId,
                 to_ward_code: userAddress.wardCode,
                 insurance_value: 0,
-                weight: totalWeight, // Luôn gửi weight để tránh lỗi
+                weight: totalWeight,
               };
 
               if (serviceTypeId === 2) {
@@ -364,7 +372,7 @@ const Checkout = () => {
                   Array.from({ length: item.quantity }, () => ({
                     name: item.productName,
                     quantity: 1,
-                    weight: item.product.weight || 1000, // Giá trị mặc định nếu weight không hợp lệ
+                    weight: item.product.weight || 1000,
                     length: item.product.length || 30,
                     width: item.product.width || 40,
                     height: item.product.height || 20,
@@ -372,20 +380,16 @@ const Checkout = () => {
                 );
               }
 
-              // console.log(`Request feeData cho ${name}:`, feeData); // Debug
-
               let feeResult;
               try {
                 feeResult = await locationService.getFeeShip(feeData);
               } catch (error) {
-                console.error(`Lỗi API cho ${name}:`, error.response?.data);
                 if (
                   error.response?.data?.message?.includes(
                     "Service not available"
                   ) &&
                   serviceTypeId === 2
                 ) {
-                  // Thử lại với service_type_id = 5
                   feeData.service_type_id = 5;
                   feeData.items = items.flatMap((item) =>
                     Array.from({ length: item.quantity }, () => ({
@@ -400,10 +404,6 @@ const Checkout = () => {
                   delete feeData.length;
                   delete feeData.width;
                   delete feeData.height;
-                  console.log(
-                    `Thử lại feeData cho ${name} với service_type_id = 5:`,
-                    feeData
-                  );
                   feeResult = await locationService.getFeeShip(feeData);
                 } else {
                   throw error;
@@ -415,17 +415,23 @@ const Checkout = () => {
           )
         );
 
-        setShippingFees(feeResults);
-        setTotalShippingFee(feeResults.reduce((sum, { fee }) => sum + fee, 0));
+        // Chỉ cập nhật state nếu giá trị thay đổi
+        setShippingFees((prev) =>
+          JSON.stringify(prev) !== JSON.stringify(feeResults)
+            ? feeResults
+            : prev
+        );
+        setTotalShippingFee((prev) =>
+          prev !== feeResults.reduce((sum, { fee }) => sum + fee, 0)
+            ? feeResults.reduce((sum, { fee }) => sum + fee, 0)
+            : prev
+        );
       }
     } catch (error) {
-      console.error(
-        "Lỗi tính phí vận chuyển:",
-        error.message,
-        error.response?.data
-      );
-      setShippingFees([]);
-      setTotalShippingFee(15000);
+      console.error("Lỗi tính phí vận chuyển:", error.message);
+      // Chỉ cập nhật state khi cần thiết
+      setShippingFees((prev) => (prev.length > 0 ? [] : prev));
+      setTotalShippingFee((prev) => (prev !== 15000 ? 15000 : prev));
       showNotification(
         `Không thể tính phí vận chuyển: ${error.message}. Áp dụng phí mặc định 15.000đ`,
         "warning"
@@ -664,7 +670,8 @@ const Checkout = () => {
                 Dùng {userCoins} xu
                 <br />
                 <span className="text-xs text-gray-500">
-                Giảm tối đa {(coinDiscount || 0).toLocaleString("vi-VN")}₫ ({Math.floor((coinDiscount || 0) / 100)} xu)
+                  Giảm tối đa {(coinDiscount || 0).toLocaleString("vi-VN")}₫ (
+                  {Math.floor((coinDiscount || 0) / 100)} xu)
                 </span>
               </label>
               <label className="relative inline-flex items-center cursor-pointer w-11 h-6">

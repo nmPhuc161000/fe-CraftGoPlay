@@ -11,18 +11,6 @@ export const validateAddressForm = (formData) => {
     errors.phoneNumber = "Số điện thoại không hợp lệ";
   }
 
-  if (!formData.province) {
-    errors.province = "Vui lòng chọn tỉnh/thành phố";
-  }
-
-  if (!formData.district) {
-    errors.district = "Vui lòng chọn quận/huyện";
-  }
-
-  if (!formData.ward) {
-    errors.ward = "Vui lòng chọn phường/xã";
-  }
-
   if (!formData.street?.trim()) {
     errors.street = "Vui lòng nhập địa chỉ cụ thể";
   }
