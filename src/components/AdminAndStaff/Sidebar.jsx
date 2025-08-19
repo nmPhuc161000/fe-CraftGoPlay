@@ -8,7 +8,8 @@ import {
   MdOutlineHolidayVillage,
   MdBolt,
   MdAssignment,
-  MdLogout
+  MdLogout,
+  MdLocalOffer
 } from "react-icons/md";
 import { AuthContext } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -67,6 +68,11 @@ const staffMenu = [
     label: "Lịch sử đơn hàng",
     value: "history",
     icon: <MdHistory size={22} />,
+  },
+  {
+    label: "Quản lý mã giảm giá", // Thêm mục mới
+    value: "voucher",
+    icon: <MdLocalOffer size={22} />,
   },
 ];
 

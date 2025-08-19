@@ -7,6 +7,7 @@ import ArtisanRequestList from './components/ArtisanRequestList';
 import ManageSkill from "./components/ManageSkill";
 import ManageVillage from "./components/ManageVillage";
 import OrderHistory from "./components/OrderHistory";
+import ManageVoucher from "./components/ManageVoucher";
 
 const Staff = () => {
   const [selected, setSelected] = useState("product");
@@ -33,6 +34,7 @@ const Staff = () => {
           {selected === 'skill' && <ManageSkill />}
           {selected === 'craftVilage' && <ManageVillage />}
           {selected === 'history' && <OrderHistory />}
+          {selected === 'voucher' && <ManageVoucher />}
         </main>
       </div>
     </div>
