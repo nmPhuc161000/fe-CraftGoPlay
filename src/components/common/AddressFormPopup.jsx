@@ -152,7 +152,7 @@ const AddressFormPopup = ({
             districtId: initialData.districtId || "",
             ward: initialData.ward || "",
             wardCode: initialData.wardCode || "",
-            street: initialData.street || "",
+            street: initialData.homeNumber || "",
             addressType: initialData.addressType || "Home",
             isDefault: initialData.isDefault || false,
           }
@@ -173,44 +173,59 @@ const AddressFormPopup = ({
   // Fixed function - separate handlers for each location level
   const handleProvinceChange = (e) => {
     const value = e.target.value;
-    const selected = provinces.find((item) => item.ProvinceName === value);
-    
+    const selected = provinces.find((p) => p.ProvinceName === value);
+
     if (selected) {
       setFormData((prev) => ({
         ...prev,
         province: value,
-        provinceId: selected.ProvinceID || "",
-        district: "", // Reset district when province changes
-        districtId: "",
-        ward: "", // Reset ward when province changes  
-        wardCode: "",
+        provinceId: selected.ProvinceID,
+        district: "", // Reset district
+        districtId: "", // Reset districtId
+        ward: "", // Reset ward
+        wardCode: "", // Reset wardCode
       }));
-      onProvinceChange?.(value);
+
+      // Gọi API fetch districts mới bằng ProvinceID
+      onProvinceChange?.(selected.ProvinceID);
     }
-    setErrors((prev) => ({ ...prev, province: "" }));
+
+    setErrors((prev) => ({
+      ...prev,
+      province: "",
+      district: "", // Clear district error
+      ward: "", // Clear ward error
+    }));
   };
 
   const handleDistrictChange = (e) => {
     const value = e.target.value;
     const selected = districts.find((item) => item.DistrictName === value);
-    
+
     if (selected) {
       setFormData((prev) => ({
         ...prev,
         district: value,
         districtId: selected.DistrictID || "",
-        ward: "", // Reset ward when district changes
-        wardCode: "",
+        ward: "", // Reset ward khi district thay đổi
+        wardCode: "", // Reset wardCode khi district thay đổi
       }));
-      onDistrictChange?.(value);
+
+      // Gọi API fetch wards mới
+      onDistrictChange?.(selected.DistrictID); // Truyền DistrictID thay vì tên
     }
-    setErrors((prev) => ({ ...prev, district: "" }));
+
+    setErrors((prev) => ({
+      ...prev,
+      district: "",
+      ward: "", // Clear error của ward khi district thay đổi
+    }));
   };
 
   const handleWardChange = (e) => {
     const value = e.target.value;
     const selected = wards.find((item) => item.WardName === value);
-    
+
     if (selected) {
       setFormData((prev) => ({
         ...prev,
@@ -223,6 +238,8 @@ const AddressFormPopup = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("Submitting address form with data:", formData);
+    
     const { isValid, errors } = validateAddressForm(formData);
     setErrors(errors);
     if (isValid) onSubmit(formData);
