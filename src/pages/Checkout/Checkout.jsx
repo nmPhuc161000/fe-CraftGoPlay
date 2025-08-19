@@ -467,105 +467,109 @@ const Checkout = () => {
           />
 
           {/* sp */}
-          <section className="bg-white rounded shadow-sm border border-gray-200 p-4">
-            <div className="grid grid-cols-12 font-semibold text-[15px] text-gray-600 pb-2 mb-3">
+          <div className="bg-white border border-gray-200 p-4 mb-0 rounded-t-lg">
+            <div className="grid grid-cols-12 font-semibold text-[15px] text-gray-600">
               <div className="col-span-6">Sản phẩm</div>
               <div className="col-span-2 text-center">Đơn giá</div>
               <div className="col-span-2 text-center">Số lượng</div>
               <div className="col-span-2 text-right">Thành tiền</div>
             </div>
+          </div>
 
-            {buyNow ? (
-              <div className="mb-6">
-                <div className="text-[15px] font-semibold mb-3 pb-2">
-                  🛍 Nghệ nhân: {buyNow.artisanName}
+          {buyNow ? (
+            <section className="bg-white rounded shadow-sm border border-gray-200 p-4 mb-6">
+              <div className="text-[15px] font-semibold mb-3 pb-2">
+                🛍 Nghệ nhân: {buyNow.artisanName}
+              </div>
+
+              <div className="grid grid-cols-12 items-center py-3 text-[15px]">
+                <div className="col-span-6 flex items-center gap-4">
+                  <img
+                    src={buyNow.productImage}
+                    alt={buyNow.productName}
+                    className="w-14 h-14 object-cover rounded border"
+                  />
+                  <p className="font-medium max-w-[200px] truncate">
+                    {buyNow.productName}
+                  </p>
                 </div>
-
-                <div className="grid grid-cols-12 items-center py-3 text-[15px]">
-                  <div className="col-span-6 flex items-center gap-4">
-                    <img
-                      src={buyNow.productImage}
-                      alt={buyNow.productName}
-                      className="w-14 h-14 object-cover rounded border"
-                    />
-                    <p className="font-medium max-w-[200px] truncate">
-                      {buyNow.productName}
-                    </p>
-                  </div>
-                  <div className="col-span-2 text-center">
-                    {(buyNow.productPrice || 0).toLocaleString("vi-VN")}₫
-                  </div>
-                  <div className="col-span-2 text-center">
-                    {buyNow.quantity}
-                  </div>
-                  <div className="col-span-2 text-right font-medium">
-                    {(buyNow.productPrice * buyNow.quantity).toLocaleString(
-                      "vi-VN"
-                    )}
-                    ₫
-                  </div>
+                <div className="col-span-2 text-center">
+                  {(buyNow.productPrice || 0).toLocaleString("vi-VN")}₫
                 </div>
-
-                <div className="mt-3 space-y-2 text-[15px]">
-                  {shippingFees.length > 0 && (
-                    <div className="flex justify-between text-gray-700">
-                      <span>Phí vận chuyển:</span>
-                      <span className="text-red-500">
-                        {totalShippingFee.toLocaleString("vi-VN")}₫
-                      </span>
-                    </div>
+                <div className="col-span-2 text-center">
+                  {buyNow.quantity}
+                </div>
+                <div className="col-span-2 text-right font-medium">
+                  {(buyNow.productPrice * buyNow.quantity).toLocaleString(
+                    "vi-VN"
                   )}
-                  <div className="flex justify-between font-semibold border-t border-gray-200 pt-2">
-                    <span>Tổng thanh toán tạm tính:</span>
-                    <span className="text-red-600">
-                      {(
-                        buyNow.productPrice * buyNow.quantity +
-                        totalShippingFee
-                      ).toLocaleString("vi-VN")}
-                      ₫
-                    </span>
-                  </div>
+                  ₫
                 </div>
               </div>
-            ) : (
-              Object.entries(groupedCart).map(([artisanName, items], index) => (
-                <div key={index} className="mb-6">
-                  <div className="text-[15px] font-semibold mb-3 pb-2">
-                    🛍 Nghệ nhân: {artisanName}
+
+              <div className="mt-3 space-y-2 text-[15px]">
+                {shippingFees.length > 0 && (
+                  <div className="flex justify-between text-gray-700">
+                    <span>Phí vận chuyển:</span>
+                    <span className="text-red-500">
+                      {totalShippingFee.toLocaleString("vi-VN")}₫
+                    </span>
                   </div>
+                )}
+                <div className="flex justify-between font-semibold border-t border-gray-200 pt-2">
+                  <span>Tổng thanh toán tạm tính ({buyNow.quantity} sản phẩm):</span>
+                  <span className="text-red-600">
+                    {(
+                      buyNow.productPrice * buyNow.quantity +
+                      totalShippingFee
+                    ).toLocaleString("vi-VN")}
+                    ₫
+                  </span>
+                </div>
+              </div>
+            </section>
+          ) : (
+            Object.entries(groupedCart).map(([artisanName, items], index) => (
+              <section
+                key={artisanName}
+                className="bg-white rounded shadow-sm border border-gray-200 p-4 mb-6"
+              >
+                <div className="text-[15px] font-semibold mb-3 pb-2">
+                  🛍 Nghệ nhân: {artisanName}
+                </div>
 
-                  {items.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="grid grid-cols-12 items-center py-3 text-[15px]"
-                    >
-                      <div className="col-span-6 flex items-center gap-4">
-                        <img
-                          src={item.productImages?.[0]?.imageUrl}
-                          alt={item.productName}
-                          className="w-14 h-14 object-cover rounded border"
-                        />
-                        <p className="font-medium max-w-[200px] truncate">
-                          {item.productName}
-                        </p>
-                      </div>
-                      <div className="col-span-2 text-center">
-                        {(item.unitPrice ?? 0).toLocaleString("vi-VN")}₫
-                      </div>
-                      <div className="col-span-2 text-center">
-                        {item.quantity}
-                      </div>
-                      <div className="col-span-2 text-right font-medium">
-                        {(item.unitPrice * item.quantity).toLocaleString(
-                          "vi-VN"
-                        )}
-                        ₫
-                      </div>
+                {items.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="grid grid-cols-12 items-center py-3 text-[15px]"
+                  >
+                    <div className="col-span-6 flex items-center gap-4">
+                      <img
+                        src={item.productImages?.[0]?.imageUrl}
+                        alt={item.productName}
+                        className="w-14 h-14 object-cover rounded border"
+                      />
+                      <p className="font-medium max-w-[200px] truncate">
+                        {item.productName}
+                      </p>
                     </div>
-                  ))}
+                    <div className="col-span-2 text-center">
+                      {(item.unitPrice ?? 0).toLocaleString("vi-VN")}₫
+                    </div>
+                    <div className="col-span-2 text-center">
+                      {item.quantity}
+                    </div>
+                    <div className="col-span-2 text-right font-medium">
+                      {(item.unitPrice * item.quantity).toLocaleString(
+                        "vi-VN"
+                      )}
+                      ₫
+                    </div>
+                  </div>
+                ))}
 
-                  <div className="mt-3 space-y-2 text-[15px]">
-                    {/* {shippingFees.length > 1 && (
+                <div className="mt-3 space-y-2 text-[15px]">
+                  {/* {shippingFees.length > 1 && (
                       <div className="space-y-1 text-gray-600">
                         {shippingFees
                           .filter((fee) => fee.artisanName === artisanName)
@@ -577,41 +581,40 @@ const Checkout = () => {
                           ))}
                       </div>
                     )} */}
-                    <div className="flex justify-between text-gray-700">
-                      <span>
-                        {shippingFees.length > 1
-                          ? "Tổng phí vận chuyển:"
-                          : "Phí vận chuyển:"}
-                      </span>
-                      <span className="text-red-500">
-                        {shippingFees
+                  <div className="flex justify-between text-gray-700">
+                    <span>
+                      {shippingFees.length > 1
+                        ? "Tổng phí vận chuyển:"
+                        : "Phí vận chuyển:"}
+                    </span>
+                    <span className="text-red-500">
+                      {shippingFees
+                        .filter((fee) => fee.artisanName === artisanName)
+                        .reduce((sum, fee) => sum + fee.fee, 0)
+                        .toLocaleString("vi-VN")}
+                      ₫
+                    </span>
+                  </div>
+                  <div className="flex justify-between font-semibold border-t border-gray-200 pt-2">
+                    <span>Tổng thanh toán tạm tính ({items.reduce((sum, item) => sum + item.quantity, 0)} sản phẩm):</span>
+                    <span className="text-red-600">
+                      {(
+                        items.reduce(
+                          (total, item) =>
+                            total + item.unitPrice * item.quantity,
+                          0
+                        ) +
+                        shippingFees
                           .filter((fee) => fee.artisanName === artisanName)
                           .reduce((sum, fee) => sum + fee.fee, 0)
-                          .toLocaleString("vi-VN")}
-                        ₫
-                      </span>
-                    </div>
-                    <div className="flex justify-between font-semibold border-t border-gray-200 pt-2">
-                      <span>Tổng thanh toán tạm tính:</span>
-                      <span className="text-red-600">
-                        {(
-                          items.reduce(
-                            (total, item) =>
-                              total + item.unitPrice * item.quantity,
-                            0
-                          ) +
-                          shippingFees
-                            .filter((fee) => fee.artisanName === artisanName)
-                            .reduce((sum, fee) => sum + fee.fee, 0)
-                        ).toLocaleString("vi-VN")}
-                        ₫
-                      </span>
-                    </div>
+                      ).toLocaleString("vi-VN")}
+                      ₫
+                    </span>
                   </div>
                 </div>
-              ))
-            )}
-          </section>
+              </section>
+            ))
+          )}
 
           {/* voucher xu */}
           <section className="bg-white rounded shadow-sm border border-gray-200 p-4 space-y-4">
@@ -677,11 +680,10 @@ const Checkout = () => {
                   <button
                     key={method}
                     onClick={() => setPaymentMethod(method)}
-                    className={`px-4 py-2 border rounded ${
-                      paymentMethod === method
-                        ? "border-[#d0011b] text-[#d0011b] font-semibold"
-                        : "border-gray-300 hover:border-[#d0011b]"
-                    }`}
+                    className={`px-4 py-2 border cursor-pointer rounded ${paymentMethod === method
+                      ? "border-[#d0011b] text-[#d0011b] font-semibold"
+                      : "border-gray-300 hover:border-[#d0011b]"
+                      }`}
                   >
                     {method === "vnpay"
                       ? "Thanh toán VNPay"
@@ -741,7 +743,7 @@ const Checkout = () => {
             <p className="text-xs text-gray-500 text-center">
               Nhấn <strong>"Đặt hàng"</strong> đồng nghĩa với việc bạn đồng ý
               tuân theo{" "}
-              <a href="#" className="text-[#5e3a1e] underline">
+              <a href="#" className="text-[#5e3a1e] underline cursor-pointer">
                 Điều khoản CraftGoPlay
               </a>
             </p>
@@ -749,9 +751,8 @@ const Checkout = () => {
             <button
               onClick={handlePlaceOrder}
               disabled={isPlacingOrder}
-              className={`w-full py-3 bg-gradient-to-r from-[#5e3a1e] to-[#8b5e34] hover:opacity-95 text-white rounded font-semibold transition ${
-                isPlacingOrder ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              className={`w-full py-3 bg-gradient-to-r from-[#5e3a1e] to-[#8b5e34] hover:opacity-95 text-white rounded font-semibold  cursor-pointertransition ${isPlacingOrder ? "opacity-50 cursor-not-allowed" : ""
+                }`}
             >
               {isPlacingOrder ? "Đang xử lý..." : "Đặt hàng"}
             </button>

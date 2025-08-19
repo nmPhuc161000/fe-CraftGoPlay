@@ -189,3 +189,10 @@ export const API_ENDPOINTS_RETURN_REQUEST = {
   UPDATE_STATUS_RETURN_REQUEST: (returnRequestId, status) =>
     `/api/ReturnRequest/UpdateStatusReturnRequest/${returnRequestId}?status=${status}`,
 };
+
+export const API_ENDPOINTS_VOUCHER = {
+  GET_VOUCHERS: "/api/Voucher/GetAllVouchers",
+  CREATE_VOUCHER: "/api/Voucher/CreateVoucher",
+  UPDATE_VOUCHER: "/api/Voucher/UpdateVoucher",
+};
+
