@@ -246,10 +246,6 @@ const ManageProduct = () => {
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-2 text-amber-600">
-                      <MdVisibility className="text-lg" />
-                      <span>{row?.views || 0}</span>
-                    </div>
                     <div className="flex items-center gap-2 text-blue-600">
                       <MdShoppingBag className="text-lg" />
                       <span>{row?.orders || 0}</span>

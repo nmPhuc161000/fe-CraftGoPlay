@@ -123,15 +123,6 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    //xoa sau khi thanh toan
-    const removeMultipleItems = async (cartItemIds = []) => {
-        if (!isAuthenticated || !cartItemIds.length) return;
-
-        // Dùng Promise.all để xoá song song các item
-        await Promise.all(cartItemIds.map((id) => removeFromCartApi(id)));
-        await fetchCart();
-    };
-
     // 4. Cập nhật số lượng
     const updateQuantity = async (cartItemId, newQuantity) => {
         if (!isAuthenticated || !cartItemId || newQuantity < 1) return;
@@ -189,7 +180,6 @@ export const CartProvider = ({ children }) => {
                 cartItems,
                 addToCart,
                 removeFromCart,
-                removeMultipleItems,
                 updateQuantity,
                 cartCount,
                 clearCart,

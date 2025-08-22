@@ -17,7 +17,7 @@ import pointService from "../../services/apis/pointApi";
 import UserAddress from "./components/UserAddress";
 
 const Checkout = () => {
-  const { cartItems, removeMultipleItems } = useContext(CartContext);
+  const { cartItems } = useContext(CartContext);
   const { user: realUser } = useContext(AuthContext);
   const { showNotification } = useNotification();
   const navigate = useNavigate();
@@ -219,7 +219,6 @@ const Checkout = () => {
             setIsPlacingOrder(false);
           }
         } else {
-          await removeMultipleItems(selectedItemIds);
           navigate("/order-success");
         }
       } else {
