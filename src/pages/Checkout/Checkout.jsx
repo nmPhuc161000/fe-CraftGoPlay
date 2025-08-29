@@ -2,7 +2,6 @@
 import React, { useContext, useState, useEffect, useCallback } from "react";
 import { CartContext } from "../../contexts/CartContext";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FaMapMarkerAlt, FaTicketAlt } from "react-icons/fa";
 import { AuthContext } from "../../contexts/AuthContext";
 import MainLayout from "../../components/layout/MainLayout";
 import {
@@ -15,6 +14,7 @@ import addressService from "../../services/apis/addressApi";
 import locationService from "../../services/apis/locationApi";
 import pointService from "../../services/apis/pointApi";
 import UserAddress from "./components/UserAddress";
+import VoucherPicker from "./components/VoucherPicker";
 
 const Checkout = () => {
   const { cartItems } = useContext(CartContext);
@@ -128,15 +128,23 @@ const Checkout = () => {
     return acc;
   }, {});
 
-  const handleApplyVoucher = () => {
-    if (voucherCode === "GIAM10") {
-      setDiscount(getTotal() * 0.1);
-      setVoucherError("");
-    } else {
-      setDiscount(0);
-      setVoucherError("Mã không hợp lệ hoặc đã hết hạn");
-    }
-  };
+  const handleApplyVoucher = (voucher) => {
+  const subtotal = getTotal();
+
+  if (!voucher) {
+    setDiscount(0);
+    setVoucherError("Mã không hợp lệ hoặc đã hết hạn");
+    return;
+  }
+
+  if (voucher.discountType === "Percent") {
+    setDiscount(subtotal * (voucher.discountValue / 100));
+  } else if (voucher.discountType === "Amount") {
+    setDiscount(voucher.discountValue);
+  }
+
+  setVoucherError("");
+};
 
   const handlePlaceOrder = async () => {
     if (!paymentMethod) {
@@ -617,34 +625,11 @@ const Checkout = () => {
 
           {/* voucher xu */}
           <section className="bg-white rounded shadow-sm border border-gray-200 p-4 space-y-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2 text-[15px] font-semibold text-[#5e3a1e]">
-                <FaTicketAlt className="text-[#b28940] text-[18px]" />
-                Mã giảm giá
-              </div>
-
-              <div className="flex gap-2 w-[300px]">
-                <input
-                  type="text"
-                  value={voucherCode}
-                  onChange={(e) => setVoucherCode(e.target.value)}
-                  placeholder="Nhập mã"
-                  className="w-48 border border-gray-300 rounded px-3 py-2 text-[15px]"
-                />
-                <button
-                  onClick={handleApplyVoucher}
-                  className="px-4 py-2 bg-[#5e3a1e] hover:bg-[#4a2f15] text-white rounded text-[15px]"
-                >
-                  Áp dụng
-                </button>
-              </div>
-            </div>
-
-            {voucherError && (
-              <p className="text-[14px] text-red-500 mt-1 text-right">
-                {voucherError}
-              </p>
-            )}
+            <VoucherPicker
+              voucherCode={voucherCode}
+              setVoucherCode={setVoucherCode}
+              onApply={handleApplyVoucher}
+            />
 
             <div className="flex items-center justify-between">
               <label className="text-[15px] font-medium">

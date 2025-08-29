@@ -31,9 +31,10 @@ const ProductDetail = () => {
   const totalStock = Number(product?.quantity) || 0;
   //so sanh so luong da ban
   const quantitySold = Number(product?.quantitySold) || 0;
-  const availableStock = totalStock - quantitySold;
+  const availableStock = Math.max(0, totalStock - quantitySold);
   //kiem tra neu vuot qua so luong trong kho
   const isPlusDisabled = (quantity + quantityInCart) >= availableStock;
+  const isOutOfStock = product?.quantity <= 0;
 
 
   useEffect(() => {
@@ -306,18 +307,22 @@ const ProductDetail = () => {
           {/* button */}
           <div className="mt-6 flex flex-wrap gap-4">
             <button
-              className="text-white px-6 py-2 rounded bg-[#5e3a1e] hover:bg-[#4a2f15]"
+              className={`text-white px-6 py-2 rounded transition duration-200 ${!isOutOfStock
+                  ? "bg-[#5e3a1e] hover:bg-[#4a2f15] cursor-pointer"
+                  : "bg-gray-400 cursor-not-allowed opacity-60"
+                }`}
               onClick={() => handleBuyNow(product)}
+              disabled={isOutOfStock}
             >
               Mua ngay
             </button>
             <button
-              className={`text-white px-6 py-2 rounded transition duration-200 ${product.quantity > 0
+              className={`text-white px-6 py-2 rounded transition duration-200 ${!isOutOfStock
                 ? "bg-[#5e3a1e] hover:bg-[#4a2f15] cursor-pointer"
                 : "bg-gray-400 cursor-not-allowed opacity-60"
                 }`}
               onClick={handleAddToCart}
-              disabled={product.quantity <= 0}
+              disabled={isOutOfStock}
             >
               🛒 Thêm vào giỏ hàng
             </button>
