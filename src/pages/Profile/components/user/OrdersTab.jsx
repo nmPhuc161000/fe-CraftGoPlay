@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../contexts/AuthContext";
 import orderService from "../../../../services/apis/orderApi";
+import ratingService from "../../../../services/apis/ratingApi";
 import { useNotification } from "../../../../contexts/NotificationContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -35,6 +36,7 @@ const OrdersTab = () => {
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [expandedOrders, setExpandedOrders] = useState({});
   const { showNotification } = useNotification();
+  const [ratedOrders, setRatedOrders] = useState({});
 
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
@@ -71,6 +73,7 @@ const OrdersTab = () => {
             setOrders(transformed);
           }
           setFilteredOrders(transformed);
+          await checkRatedStatus(transformed);
         }
       } catch (err) {
         console.error("Lỗi khi lấy đơn hàng:", err);
@@ -114,49 +117,49 @@ const OrdersTab = () => {
           break;
         case "returnRequest":
           if (
-          order.orderItems &&
-          Array.isArray(order.orderItems) &&
-          order.orderItems.length > 0
-        ) {
-          // Kiểm tra dữ liệu hợp lệ
-          const validItems = order.orderItems.every(
-            (item) =>
-              item &&
-              item.id &&
-              item.product &&
-              typeof item.product.name === "string" &&
-              item.product.productImages &&
-              typeof item.product.productImages.imageUrl === "string"
-          );
-          if (!validItems) {
-            showNotification("Dữ liệu sản phẩm không hợp lệ", "error");
-            return;
-          }
-
-          if (order.orderItems.length > 1) {
-            const queryParams = new URLSearchParams({
-              orderId: order.id,
-              orderItems: encodeURIComponent(
-                JSON.stringify(
-                  order.orderItems.map((item) => ({
-                    orderItemId: item.id,
-                    name: item.product.name,
-                    imageUrl: item.product.productImages?.imageUrl || "",
-                  }))
-                )
-              ),
-            }).toString();
-            navigate(`/profile-user/returnRequest?${queryParams}`);
-          } else {
-            const item = order.orderItems[0];
-            navigate(
-              `/profile-user/returnRequest?orderItemId=${item.id}&orderId=${order.id}`
+            order.orderItems &&
+            Array.isArray(order.orderItems) &&
+            order.orderItems.length > 0
+          ) {
+            // Kiểm tra dữ liệu hợp lệ
+            const validItems = order.orderItems.every(
+              (item) =>
+                item &&
+                item.id &&
+                item.product &&
+                typeof item.product.name === "string" &&
+                item.product.productImages &&
+                typeof item.product.productImages.imageUrl === "string"
             );
+            if (!validItems) {
+              showNotification("Dữ liệu sản phẩm không hợp lệ", "error");
+              return;
+            }
+
+            if (order.orderItems.length > 1) {
+              const queryParams = new URLSearchParams({
+                orderId: order.id,
+                orderItems: encodeURIComponent(
+                  JSON.stringify(
+                    order.orderItems.map((item) => ({
+                      orderItemId: item.id,
+                      name: item.product.name,
+                      imageUrl: item.product.productImages?.imageUrl || "",
+                    }))
+                  )
+                ),
+              }).toString();
+              navigate(`/profile-user/returnRequest?${queryParams}`);
+            } else {
+              const item = order.orderItems[0];
+              navigate(
+                `/profile-user/returnRequest?orderItemId=${item.id}&orderId=${order.id}`
+              );
+            }
+          } else {
+            showNotification("Không tìm thấy sản phẩm trong đơn hàng", "error");
           }
-        } else {
-          showNotification("Không tìm thấy sản phẩm trong đơn hàng", "error");
-        }
-        return;
+          return;
         case "rating":
           console.log("Order found for rating:", order);
           if (order && order.orderItems && order.orderItems.length > 0) {
@@ -176,7 +179,10 @@ const OrdersTab = () => {
             }).toString();
             navigate(`/profile-user/productRating?${queryParams}`);
           } else {
-            showNotification("Không tìm thấy sản phẩm trong đơn hàng để đánh giá", "error");
+            showNotification(
+              "Không tìm thấy sản phẩm trong đơn hàng để đánh giá",
+              "error"
+            );
           }
           return;
         default:
@@ -187,10 +193,10 @@ const OrdersTab = () => {
         const updatedOrders = orders.map((order) =>
           order.id === orderId
             ? {
-              ...order,
-              status: newStatus,
-              statusKey: convertStatus(newStatus),
-            }
+                ...order,
+                status: newStatus,
+                statusKey: convertStatus(newStatus),
+              }
             : order
         );
         setOrders(updatedOrders);
@@ -241,7 +247,7 @@ const OrdersTab = () => {
     }
   };
 
-  const getAvailableUserActions = (currentStatus) => {
+  const getAvailableUserActions = (currentStatus, orderId) => {
     switch (currentStatus) {
       case "Created":
         return [
@@ -302,14 +308,8 @@ const OrdersTab = () => {
         ];
       case "Completed":
         return [
-          {
-            action: "returnRequest",
-            label: "Yêu cầu trả hàng",
-            color:
-              "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-orange-200",
-            icon: <FiPackage className="w-4 h-4" />,
-          },
-          {
+          // chỉ show rating nếu chưa đánh giá
+          !ratedOrders[orderId] && {
             action: "rating",
             label: "Đánh giá sản phẩm",
             color:
@@ -327,6 +327,30 @@ const OrdersTab = () => {
       ...prev,
       [orderId]: !prev[orderId],
     }));
+  };
+
+  const checkRatedStatus = async (orders) => {
+    const results = {};
+    for (const order of orders) {
+      if (order.status === "Completed" && order.orderItems.length > 0) {
+        try {
+          const firstOrderItemId = order.orderItems[0].id;
+          const checkRating = {
+            userId: user.id,
+            orderItemId: firstOrderItemId,
+          };
+          const res = await ratingService.checkRated(checkRating);
+          results[order.id] = res?.data?.data === true; // true nếu đã đánh giá
+          console.log("data: ", res.data);
+        } catch (err) {
+          console.error("Lỗi checkRated:", err);
+          results[order.id] = false; // fallback
+        }
+      }
+    }
+    console.log("data: ", results);
+
+    setRatedOrders(results);
   };
 
   return (
@@ -354,20 +378,22 @@ const OrdersTab = () => {
                 <button
                   key={filter.value}
                   onClick={() => setSelectedStatus(filter.value)}
-                  className={`group relative flex items-center px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 transform hover:scale-105 ${selectedStatus === filter.value
+                  className={`group relative flex items-center px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
+                    selectedStatus === filter.value
                       ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200"
                       : "bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 hover:border-blue-300"
-                    }`}
+                  }`}
                 >
                   <div className="flex items-center">
                     {filter.icon}
                     <span className="ml-2">{filter.label}</span>
                     {statusCounts[filter.value] > 0 && (
                       <span
-                        className={`ml-3 px-2 py-1 rounded-full text-xs font-bold ${selectedStatus === filter.value
+                        className={`ml-3 px-2 py-1 rounded-full text-xs font-bold ${
+                          selectedStatus === filter.value
                             ? "bg-white text-blue-600"
                             : "bg-blue-100 text-blue-700"
-                          }`}
+                        }`}
                       >
                         {statusCounts[filter.value]}
                       </span>
@@ -445,8 +471,9 @@ const OrdersTab = () => {
                           </div>
                         </div>
                         <div
-                          className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${statusConfig[order.statusKey].color
-                            }`}
+                          className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
+                            statusConfig[order.statusKey].color
+                          }`}
                         >
                           {statusConfig[order.statusKey].icon}
                           <span className="ml-2">
@@ -575,26 +602,28 @@ const OrdersTab = () => {
 
                       {/* Action Buttons */}
                       <div className="flex flex-wrap gap-3">
-                        {getAvailableUserActions(order.status).map((action) => (
-                          <button
-                            key={action.action}
-                            onClick={() => {
-                              if (action.action === "cancel") {
-                                setSelectedOrderId(order.id);
-                                setShowCancelModal(true);
-                              } else if (action.action === "rating") {
-                                setSelectedOrderId(order.id);
-                                handleUserAction(order.id, action.action);
-                              } else {
-                                handleUserAction(order.id, action.action);
-                              }
-                            }}
-                            className={`flex items-center px-6 py-3 rounded-xl text-white text-sm font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg ${action.color}`}
-                          >
-                            {action.icon}
-                            <span className="ml-2">{action.label}</span>
-                          </button>
-                        ))}
+                        {getAvailableUserActions(order.status, order.id).map(
+                          (action) => (
+                            <button
+                              key={action.action}
+                              onClick={() => {
+                                if (action.action === "cancel") {
+                                  setSelectedOrderId(order.id);
+                                  setShowCancelModal(true);
+                                } else if (action.action === "rating") {
+                                  setSelectedOrderId(order.id);
+                                  handleUserAction(order.id, action.action);
+                                } else {
+                                  handleUserAction(order.id, action.action);
+                                }
+                              }}
+                              className={`flex items-center px-6 py-3 rounded-xl text-white text-sm font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg ${action.color}`}
+                            >
+                              {action.icon}
+                              <span className="ml-2">{action.label}</span>
+                            </button>
+                          )
+                        )}
 
                         {/* Modal xác nhận hủy đơn */}
                         {showCancelModal && (

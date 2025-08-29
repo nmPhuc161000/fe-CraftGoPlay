@@ -169,6 +169,7 @@ export const API_ENDPOINTS_RATING = {
     `/api/Rating/GetRatingsByProductId/${productId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
   GET_RATINGS_BY_ARTISAN_ID: (artisanId, pageIndex = 0, pageSize = 10) =>
     `/api/Rating/GetRatingsByArtisanId/${artisanId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
+  CHECK_RATED: "/api/Rating/CheckRated",
 };
 
 export const API_ENDPOINTS_POINT = {
@@ -195,4 +196,3 @@ export const API_ENDPOINTS_VOUCHER = {
   CREATE_VOUCHER: "/api/Voucher/CreateVoucher",
   UPDATE_VOUCHER: "/api/Voucher/UpdateVoucher",
 };
-
