@@ -613,6 +613,7 @@ const ManageVoucher = () => {
                                         onChange={(e) => setForm({ ...form, type: e.target.value })}
                                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
                                     >
+                                        <option value="" disabled>-- Chọn loại voucher --</option>
                                         <option value="Product">Sản phẩm</option>
                                         <option value="Delivery">Vận chuyển</option>
                                     </select>
@@ -626,6 +627,7 @@ const ManageVoucher = () => {
                                         onChange={(e) => setForm({ ...form, discountType: e.target.value })}
                                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
                                     >
+                                        <option value="" disabled>-- Chọn loại giảm giá --</option>
                                         <option value="Percentage">Phần trăm</option>
                                         <option value="FixedAmount">Số tiền cố định</option>
                                     </select>
@@ -639,6 +641,7 @@ const ManageVoucher = () => {
                                         onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
                                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
                                     >
+                                        <option value="" disabled>-- Chọn phương thức thanh toán --</option>
                                         <option value="All">Tất cả</option>
                                         <option value="Cash">Tiền mặt</option>
                                         <option value="Online">Thanh toán trực tuyến</option>
@@ -936,14 +939,14 @@ const ManageVoucher = () => {
                                             <div>
                                                 <span className="text-gray-500">Ngày tạo:</span>
                                                 <span className="ml-2 font-medium">
-                                                    {filtered[viewIdx].creationDate
-                                                        ? new Date(filtered[viewIdx].creationDate).toLocaleDateString("vi-VN")
+                                                    {filtered[viewIdx].startDate
+                                                        ? new Date(filtered[viewIdx].startDate).toLocaleDateString("vi-VN")
                                                         : "Chưa có"}
                                                 </span>
                                             </div>
                                             <div>
                                                 <span className="text-gray-500">Người tạo:</span>
-                                                <span className="ml-2 font-medium">{filtered[viewIdx].createdBy || "Không có thông tin"}</span>
+                                                <span className="ml-2 font-medium">{filtered[viewIdx].createdBy || "Nhân viên"}</span>
                                             </div>
                                         </div>
                                     </div>

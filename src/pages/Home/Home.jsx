@@ -174,11 +174,7 @@ const Home = () => {
               <div
                 key={index}
                 onClick={() =>
-                  navigate(
-                    `/products?category=${encodeURIComponent(
-                      category.categoryName
-                    )}`
-                  )
+                  navigate(`/products?categoryId=${category.categoryId}`)
                 }
                 className="bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md hover:scale-105 transition-transform cursor-pointer overflow-hidden"
               >
