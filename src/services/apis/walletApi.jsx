@@ -11,6 +11,15 @@ const walletService = {
     );
   },
 
+  async getWalletByArtisanId(artisanId) {
+    return performApiRequest(
+      API_ENDPOINTS_WALLET.GET_WALLET_BY_ARTISAN_ID(artisanId),
+      {
+        method: "get",
+      }
+    );
+  },
+
   async getWalletSystem() {
     return performApiRequest(API_ENDPOINTS_WALLET.GET_WALLET_SYSTEM, {
       method: "get",

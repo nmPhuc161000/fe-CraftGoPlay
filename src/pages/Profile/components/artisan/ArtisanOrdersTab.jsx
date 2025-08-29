@@ -376,7 +376,7 @@ const ArtisanOrdersTab = () => {
                           <div>
                             <p className="text-sm text-gray-500">Khách hàng</p>
                             <p className="font-semibold text-gray-900">
-                              {order.user?.userName || "Khách hàng"}
+                              {order.userAddress?.fullName || "Khách hàng"}
                             </p>
                           </div>
                         </div>
@@ -387,23 +387,13 @@ const ArtisanOrdersTab = () => {
                           <div>
                             <p className="text-sm text-gray-500">Điện thoại</p>
                             <p className="font-medium text-gray-700">
-                              {order.user?.phone || "Chưa cập nhật"}
+                              {order.userAddress?.phoneNumber ||
+                                "Chưa cập nhật"}
                             </p>
                           </div>
                         </div>
                       </div>
                       <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-purple-100 rounded-lg">
-                            <FiMail size={16} className="text-purple-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-500">Email</p>
-                            <p className="font-medium text-gray-700 truncate">
-                              {order.user?.email || "Chưa cập nhật"}
-                            </p>
-                          </div>
-                        </div>
                         <div className="flex items-center gap-3">
                           <div className="p-2 bg-orange-100 rounded-lg">
                             <FiMapPin size={16} className="text-orange-600" />
@@ -413,8 +403,21 @@ const ArtisanOrdersTab = () => {
                               Địa chỉ giao hàng
                             </p>
                             <p className="font-medium text-gray-700 text-sm">
-                              {order.userAddresses?.[0]?.address ||
+                              {order.userAddress?.fullAddress ||
                                 "Chưa có địa chỉ"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <FiTruck size={16} className="text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">
+                              Phí vận chuyển
+                            </p>
+                            <p className="font-semibold text-gray-900">
+                              {order.delivery_Amount || 0}
                             </p>
                           </div>
                         </div>
@@ -507,7 +510,7 @@ const ArtisanOrdersTab = () => {
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-3">
+                          {/* <div className="flex items-center gap-3">
                             <div className="p-2 bg-blue-100 rounded-lg">
                               <FiTruck size={16} className="text-blue-600" />
                             </div>
@@ -519,7 +522,7 @@ const ArtisanOrdersTab = () => {
                                 {order.delivery_Amount || 0}
                               </p>
                             </div>
-                          </div>
+                          </div> */}
                         </div>
 
                         {/* Total Price */}
