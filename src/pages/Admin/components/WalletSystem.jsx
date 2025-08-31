@@ -59,7 +59,7 @@ export default function WalletSystem() {
           <div>
             <p className="text-gray-600">Số dư:</p>
             <p className="text-2xl font-bold text-green-600">
-              {formatCurrencyUtils(wallet.balance)}
+              {formatCurrencyUtils(wallet.availableBalance)}
             </p>
           </div>
         </div>

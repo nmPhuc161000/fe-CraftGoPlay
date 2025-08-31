@@ -4,6 +4,7 @@ import { AuthContext } from "../../../contexts/AuthContext";
 
 const RefundWalletTab = () => {
   const [availableBalance, setAvailableBalance] = useState(0);
+  const [pendingBalance, setPendingBalance] = useState(0);
   const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useContext(AuthContext);
@@ -26,6 +27,7 @@ const RefundWalletTab = () => {
 
         if (walletResponse?.error === 0 && walletResponse?.data) {
           setAvailableBalance(walletResponse.data.availableBalance || 0);
+          setPendingBalance(walletResponse.data.pendingBalance || 0);
           setTransactions(walletResponse.data.walletTransactions || []);
         } else {
           console.error(
@@ -59,11 +61,7 @@ const RefundWalletTab = () => {
     });
   };
 
-  const totalRefund = transactions
-    .filter((tx) => tx.type === "Refund")
-    .reduce((sum, tx) => sum + tx.amount, 0);
-
-  const refundTransactions = transactions.filter((tx) => tx.type === "Refund");
+  const refundTransactions = transactions.filter((tx) => tx.type === "Release");
 
   if (isLoading) {
     return (
@@ -103,11 +101,19 @@ const RefundWalletTab = () => {
       </h2>
 
       {/* Thẻ số dư */}
-      <div
-        className="mb-8 rounded-xl p-6 shadow-lg bg-gradient-to-r from-[#be9e7f] to-[#8d6349] text-white"
-      >
+      <div className="mb-8 rounded-xl p-6 shadow-lg bg-gradient-to-r from-[#be9e7f] to-[#8d6349] text-white">
         <p className="text-lg font-medium">Số dư hiện tại</p>
-        <p className="text-3xl font-bold mt-2">{formatCurrency(availableBalance)}</p>
+        <p className="text-3xl font-bold mt-2">
+          {formatCurrency(availableBalance)}
+        </p>
+        {role == "Aritisan" && (
+          <div className="mt-4 pt-4 border-t border-white-400 border-opacity-50">
+            <p className="text-sm font-medium">Số tiền chờ hoàn</p>
+            <p className="text-xl font-semibold">
+              {formatCurrency(pendingBalance)}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Lịch sử giao dịch */}
@@ -154,10 +160,6 @@ const RefundWalletTab = () => {
           ) : (
             <div className="space-y-4">
               {refundTransactions.map((tx) => {
-                const orderId = tx.description
-                  ?.match(/[0-9a-fA-F-]{36}/)?.[0]
-                  ?.split("-")[0]
-                  ?.toUpperCase();
                 return (
                   <div
                     key={tx.id}
@@ -182,8 +184,9 @@ const RefundWalletTab = () => {
                       </div>
                       <div>
                         <p className="font-medium text-gray-800">
-                          Hoàn tiền đơn hàng #{orderId || "N/A"}
+                          {tx.description}
                         </p>
+                        
                         <p className="text-sm text-gray-500 mt-1">
                           {formatDate(tx.dateTransaction)}
                         </p>

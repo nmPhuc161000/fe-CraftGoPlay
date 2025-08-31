@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
+import ScrollToTop from "../components/ScrollToTop/ScrollToTop";
 
 // ==================== Pages ====================
 // Public pages
@@ -32,6 +33,7 @@ import Game from "../pages/Game/Game";
 const AppRouter = () => {
   return (
     <Router>
+      <ScrollToTop />
       <AnimatePresence mode="wait">
         <Routes>
           {/* ========== Public Routes ========== */}
