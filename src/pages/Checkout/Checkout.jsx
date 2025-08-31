@@ -17,7 +17,7 @@ import UserAddress from "./components/UserAddress";
 import VoucherPicker from "./components/VoucherPicker";
 
 const Checkout = () => {
-  const { cartItems } = useContext(CartContext);
+  const { cartItems, fetchCart } = useContext(CartContext);
   const { user: realUser } = useContext(AuthContext);
   const { showNotification } = useNotification();
   const navigate = useNavigate();
@@ -214,6 +214,7 @@ const Checkout = () => {
       console.log("Order result:", result);
 
       if (result.success) {
+        await fetchCart();
         const transactionId = result.data?.data;
         console.log("orderId result:", transactionId);
 

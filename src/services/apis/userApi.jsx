@@ -75,6 +75,11 @@ const userService = {
       data: artisanData,
     });
   },
+  async getCurrentArtisan(artisanId) {
+    return performApiRequest(API_ENDPOINTS_USER.GET_CURRENT_ARTISAN(artisanId), {
+      method: "get",
+    });
+  },
 };
 
 export default userService;
