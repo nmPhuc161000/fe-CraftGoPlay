@@ -89,6 +89,8 @@ export const API_ENDPOINTS_USER = {
     `/api/User/ResendRequest?userId=${userId}&requestId=${requestId}`,
   UPDATE_INFORMATION_USER: "/api/User/UpdateInfoUser",
   UPDATE_INFORMATION_ARTISAN: "/api/User/UpdateInfoUser",
+  GET_CURRENT_ARTISAN: (artisanId) =>
+    `/api/User/GetCurrentArtisan/${artisanId}`,
 };
 
 // Các endpoint cho yêu thích

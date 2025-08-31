@@ -101,9 +101,9 @@ const productService = {
     });
   },
 
-  async getProductsByStatus({ status, pageIndex, pageSize }) {
+  async getProductsByStatus({ productStatus, pageIndex, pageSize }) {
     return performApiRequest(
-      API_ENDPOINTS_PRODUCT.GET_PRODUCTS_BY_STATUS(status, pageIndex, pageSize),
+      API_ENDPOINTS_PRODUCT.GET_PRODUCTS_BY_STATUS(productStatus, pageIndex, pageSize),
       {
         method: "get",
       }
