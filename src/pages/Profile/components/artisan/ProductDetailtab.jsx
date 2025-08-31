@@ -572,7 +572,7 @@ export default function ProductDetailTab() {
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
                   <span className="text-gray-600 font-medium">Đã bán:</span>
                   <span className="font-bold text-blue-600">
-                    {product.soldQuantity || 0}
+                    {product.quantitySold || 0}
                   </span>
                 </div>
 

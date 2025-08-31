@@ -45,34 +45,51 @@ const OrdersTab = () => {
 
   // Fetch orders based on status
   useEffect(() => {
-    const fetchOrders = async (status = "") => {
+    const fetchOrders = async (group = "") => {
       try {
         setLoading(true);
+        // Lấy tất cả đơn hàng
         const res = await orderService.getOrderByUserId(
           user.id,
           1,
           100,
-          status
+          "" // Luôn lấy tất cả, chúng ta sẽ lọc ở client
         );
 
         if (res.data.error === 0 && Array.isArray(res.data.data)) {
           const transformed = res.data.data.map(transformOrderData);
 
-          if (status === "") {
-            const counts = statusFilters.reduce((acc, filter) => {
-              if (filter.value === "all") {
-                acc[filter.value] = transformed.length;
-              } else {
-                acc[filter.value] = transformed.filter(
-                  (order) => order.status === filter.value
-                ).length;
-              }
-              return acc;
-            }, {});
-            setStatusCounts(counts);
-            setOrders(transformed);
+          // Tính counts cho từng group
+          const counts = statusFilters.reduce((acc, filter) => {
+            if (filter.value === "all") {
+              acc[filter.value] = transformed.length;
+            } else {
+              acc[filter.value] = transformed.filter((order) =>
+                filter.includes.includes(order.status)
+              ).length;
+            }
+            return acc;
+          }, {});
+
+          setStatusCounts(counts);
+          setOrders(transformed);
+
+          // Lọc đơn hàng theo group được chọn
+          if (group === "all" || group === "") {
+            setFilteredOrders(transformed);
+          } else {
+            const filter = statusFilters.find((f) => f.value === group);
+            if (filter && filter.includes) {
+              setFilteredOrders(
+                transformed.filter((order) =>
+                  filter.includes.includes(order.status)
+                )
+              );
+            } else {
+              setFilteredOrders([]);
+            }
           }
-          setFilteredOrders(transformed);
+
           await checkRatedStatus(transformed);
         }
       } catch (err) {
@@ -84,7 +101,7 @@ const OrdersTab = () => {
     };
 
     if (user?.id) {
-      fetchOrders(selectedStatus === "all" ? "" : selectedStatus);
+      fetchOrders(selectedStatus);
     }
   }, [user, selectedStatus]);
 
@@ -248,9 +265,9 @@ const OrdersTab = () => {
   };
 
   const getAvailableUserActions = (currentStatus, orderId) => {
-    switch (currentStatus) {
-      case "Created":
-        return [
+    const actions =
+      {
+        Created: [
           {
             action: "cancel",
             label: "Hủy đơn hàng",
@@ -258,12 +275,8 @@ const OrdersTab = () => {
               "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-200",
             icon: <FiX className="w-4 h-4" />,
           },
-        ];
-      case "Confirmed":
-      case "Preparing":
-      case "AwaitingPayment":
-      case "ReadyForShipment":
-        return [
+        ],
+        Confirmed: [
           {
             action: "cancel",
             label: "Hủy đơn hàng",
@@ -278,9 +291,15 @@ const OrdersTab = () => {
               "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
             icon: <FiUser className="w-4 h-4" />,
           },
-        ];
-      case "Shipped":
-        return [
+        ],
+        Preparing: [
+          {
+            action: "cancel",
+            label: "Hủy đơn hàng",
+            color:
+              "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-200",
+            icon: <FiX className="w-4 h-4" />,
+          },
           {
             action: "contact",
             label: "Liên hệ nghệ nhân",
@@ -288,9 +307,49 @@ const OrdersTab = () => {
               "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
             icon: <FiUser className="w-4 h-4" />,
           },
-        ];
-      case "Delivered":
-        return [
+        ],
+        AwaitingPayment: [
+          {
+            action: "cancel",
+            label: "Hủy đơn hàng",
+            color:
+              "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-200",
+            icon: <FiX className="w-4 h-4" />,
+          },
+          {
+            action: "contact",
+            label: "Liên hệ nghệ nhân",
+            color:
+              "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
+            icon: <FiUser className="w-4 h-4" />,
+          },
+        ],
+        ReadyForShipment: [
+          {
+            action: "cancel",
+            label: "Hủy đơn hàng",
+            color:
+              "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-200",
+            icon: <FiX className="w-4 h-4" />,
+          },
+          {
+            action: "contact",
+            label: "Liên hệ nghệ nhân",
+            color:
+              "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
+            icon: <FiUser className="w-4 h-4" />,
+          },
+        ],
+        Shipped: [
+          {
+            action: "contact",
+            label: "Liên hệ nghệ nhân",
+            color:
+              "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
+            icon: <FiUser className="w-4 h-4" />,
+          },
+        ],
+        Delivered: [
           {
             action: "returnRequest",
             label: "Yêu cầu trả hàng",
@@ -305,10 +364,8 @@ const OrdersTab = () => {
               "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-green-200",
             icon: <FiCheck className="w-4 h-4" />,
           },
-        ];
-      case "Completed":
-        return [
-          // chỉ show rating nếu chưa đánh giá
+        ],
+        Completed: [
           !ratedOrders[orderId] && {
             action: "rating",
             label: "Đánh giá sản phẩm",
@@ -316,10 +373,11 @@ const OrdersTab = () => {
               "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 shadow-yellow-200",
             icon: <FiStar className="w-4 h-4" />,
           },
-        ];
-      default:
-        return [];
-    }
+        ],
+      }[currentStatus] || [];
+
+    // Lọc bỏ các phần tử falsy (false, null, undefined)
+    return actions.filter(Boolean);
   };
 
   const toggleOrderExpansion = (orderId) => {

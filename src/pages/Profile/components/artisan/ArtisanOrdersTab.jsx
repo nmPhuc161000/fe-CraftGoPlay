@@ -31,39 +31,49 @@ const ArtisanOrdersTab = () => {
   const [loading, setLoading] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("all");
   const { showNotification } = useNotification();
-  const [searchTerm, setSearchTerm] = useState("");
 
   // Fetch orders based on status
   useEffect(() => {
-    const fetchOrders = async (status = "") => {
+    const fetchOrders = async (group = "") => {
       try {
         setLoading(true);
-        const res = await orderService.getOrderByArtisanId(
-          user.id,
-          1,
-          100,
-          status
-        );
+        // Luôn lấy tất cả đơn hàng, sau đó lọc theo group ở client
+        const res = await orderService.getOrderByArtisanId(user.id, 1, 100, "");
 
         if (res.data.error === 0 && Array.isArray(res.data.data)) {
           const transformed = res.data.data.map(transformOrderData);
           console.log("Transformed Orders:", transformed);
 
-          if (status === "") {
-            const counts = statusFilters.reduce((acc, filter) => {
-              if (filter.value === "all") {
-                acc[filter.value] = transformed.length;
-              } else {
-                acc[filter.value] = transformed.filter(
-                  (order) => order.status === filter.value
-                ).length;
-              }
-              return acc;
-            }, {});
-            setStatusCounts(counts);
-            setOrders(transformed);
+          // Tính counts cho từng group
+          const counts = statusFilters.reduce((acc, filter) => {
+            if (filter.value === "all") {
+              acc[filter.value] = transformed.length;
+            } else {
+              acc[filter.value] = transformed.filter((order) =>
+                filter.includes.includes(order.status)
+              ).length;
+            }
+            return acc;
+          }, {});
+
+          setStatusCounts(counts);
+          setOrders(transformed);
+
+          // Lọc đơn hàng theo group được chọn
+          if (group === "all" || group === "") {
+            setFilteredOrders(transformed);
+          } else {
+            const filter = statusFilters.find((f) => f.value === group);
+            if (filter && filter.includes) {
+              setFilteredOrders(
+                transformed.filter((order) =>
+                  filter.includes.includes(order.status)
+                )
+              );
+            } else {
+              setFilteredOrders([]);
+            }
           }
-          setFilteredOrders(transformed);
         }
       } catch (err) {
         console.error("Lỗi khi lấy đơn hàng:", err);
@@ -73,7 +83,7 @@ const ArtisanOrdersTab = () => {
     };
 
     if (user?.id) {
-      fetchOrders(selectedStatus === "all" ? "" : selectedStatus);
+      fetchOrders(selectedStatus);
     }
   }, [user, selectedStatus]);
 
@@ -249,20 +259,6 @@ const ArtisanOrdersTab = () => {
                 <p className="mt-2 text-gray-600">
                   Theo dõi và xử lý các đơn hàng của bạn
                 </p>
-              </div>
-
-              {/* Search Bar */}
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiSearch className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm đơn hàng..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
               </div>
             </div>
           </div>
