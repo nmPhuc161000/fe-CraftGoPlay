@@ -132,49 +132,48 @@ const OrdersTab = () => {
         case "complete":
           newStatus = "Completed";
           break;
-        case "returnRequest":
-          if (
-            order.orderItems &&
-            Array.isArray(order.orderItems) &&
-            order.orderItems.length > 0
-          ) {
-            // Kiểm tra dữ liệu hợp lệ
-            const validItems = order.orderItems.every(
-              (item) =>
-                item &&
-                item.id &&
-                item.product &&
-                typeof item.product.name === "string" &&
-                item.product.productImages &&
-                typeof item.product.productImages.imageUrl === "string"
-            );
-            if (!validItems) {
-              showNotification("Dữ liệu sản phẩm không hợp lệ", "error");
-              return;
-            }
-
-            if (order.orderItems.length > 1) {
-              const queryParams = new URLSearchParams({
-                orderId: order.id,
-                orderItems: encodeURIComponent(
-                  JSON.stringify(
-                    order.orderItems.map((item) => ({
-                      orderItemId: item.id,
-                      name: item.product.name,
-                      imageUrl: item.product.productImages?.imageUrl || "",
-                    }))
-                  )
-                ),
-              }).toString();
-              navigate(`/profile-user/returnRequest?${queryParams}`);
-            } else {
-              const item = order.orderItems[0];
-              navigate(
-                `/profile-user/returnRequest?orderItemId=${item.id}&orderId=${order.id}`
-              );
-            }
-          } else {
+        case "returnRequest": 
+          const items = order?.orderItems;
+          if (!Array.isArray(items) || items.length === 0) {
             showNotification("Không tìm thấy sản phẩm trong đơn hàng", "error");
+            return;
+          }
+
+          const getImageUrl = (pi) => {
+            if (Array.isArray(pi)) return pi[0]?.imageUrl || "";
+            return pi?.imageUrl || "";
+          };
+
+          const validItems = items.every(
+            (item) =>
+              item &&
+              item.id &&
+              item.product &&
+              typeof item.product.name === "string"
+          );
+
+          if (!validItems) {
+            showNotification("Dữ liệu sản phẩm không hợp lệ", "error");
+            return;
+          }
+
+          if (items.length > 1) {
+            const payload = items.map((item) => ({
+              orderItemId: item.id,
+              name: item.product.name,
+              imageUrl: getImageUrl(item.product.productImages),
+            }));
+
+            const queryParams = new URLSearchParams({
+              orderId: order.id,
+              orderItems: JSON.stringify(payload),
+            }).toString();
+            navigate(`/profile-user/returnRequest?${queryParams}`);
+          } else {
+            const item = order.orderItems[0];
+            navigate(
+              `/profile-user/returnRequest?orderItemId=${item.id}&orderId=${order.id}`
+            );
           }
           return;
         case "rating":
