@@ -19,6 +19,7 @@ import DailyCheckInTab from "../pages/Profile/components/user/DailyCheckInTab";
 import PointTab from "../pages/Profile/components/user/PointTab";
 import ReturnRequestTab from "../pages/Profile/components/user/ReturnRequestTab";
 import ArtisanReturnRequestsTab from "../pages/Profile/components/artisan/ArtisanReturnRequestsTab";
+import VoucherExchange from "../pages/Profile/components/user/VoucherExchange";
 
 const ProfileRoutes = ({ role, user }) => {
   if (!user) return <div>Error: User not found</div>;
@@ -72,6 +73,7 @@ const ProfileRoutes = ({ role, user }) => {
           />
           <Route path="points" element={<PointTab userId={user.id} />} />
           <Route path="vouchers" element={<VoucherTab userId={user.id} />} />
+          <Route path="voucher-exchange" element={<VoucherExchange />} />
           <Route path="productRating" element={<ProductRatingTab />} />
           <Route path="daily-checkin" element={<DailyCheckInTab />} />
           <Route path="returnRequest" element={<ReturnRequestTab />} />
