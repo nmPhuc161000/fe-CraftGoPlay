@@ -8,6 +8,15 @@ export const validateUserName = (userName) => {
   if (userName.length < 6) {
     return "Tên người dùng phải có ít nhất 6 ký tự";
   }
+
+  if (userName.length > 20) {
+    return "Tên người dùng không được vượt quá 20 ký tự";
+  }
+
+  const userNameRegex = /^[a-zA-Z0-9]+$/;
+  if (!userNameRegex.test(userName)) {
+    return "Tên người dùng không được chứa ký tự đặc biệt";
+  }
   // Có thể thêm các validate khác cho userName nếu cần
   return "";
 };
@@ -23,8 +32,11 @@ export const validatePhoneNumber = (phoneNo) => {
 };
 
 export const validatePassword = (password) => {
-  if (password.length < 5) {
-    return "Mật khẩu phải có ít nhất 8 ký tự";
+  // Regex: ít nhất 1 chữ hoa, 1 chữ thường, 1 số, 1 ký tự đặc biệt, tối thiểu 8 ký tự
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+  if (!passwordRegex.test(password)) {
+    return "Mật khẩu phải có ít nhất 8 ký tự, bao gồm 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt";
   }
   // Bạn có thể thêm các validate phức tạp hơn cho password ở đây nếu cần
   return "";
@@ -75,8 +87,7 @@ export const validateRegisterForm = (form, confirmPassword) => {
 // Validate riêng cho Login
 export const validateLoginForm = (form) => {
   const errors = {
-    email: validateUserEmail(form.Email),
-    passwordHash: validatePassword(form.PasswordHash),
+    email: validateUserEmail(form.Email)
   };
   return { errors, isValid: !Object.values(errors).some((error) => error) };
 };

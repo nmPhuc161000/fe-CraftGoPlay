@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Sidebar from "../../components/AdminAndStaff/Sidebar";
 import Dashboard from "./components/Dashboard";
 import ArtisanAccount from "./components/ArtisanAccount";
-import CreateAccount from "./components/CreateAccount";
+import UserAccount from "./components/UserAccount";
 import StaffAccount from "./components/StaffAccount";
 import WalletSystem from "./components/WalletSystem";
 
@@ -27,7 +27,7 @@ const Admin = () => {
         <main className="flex-1 p-4 md:p-8 overflow-y-scroll bg-white max-h-[calc(100vh-68px)]">
           {selected === "dashboard" && <Dashboard />}
           {selected === "artisan" && <ArtisanAccount />}
-          {selected === "customer" && <CreateAccount />}
+          {selected === "customer" && <UserAccount />}
           {selected === "staff" && <StaffAccount />}
           {selected === "walletSystem" && <WalletSystem />}
         </main>

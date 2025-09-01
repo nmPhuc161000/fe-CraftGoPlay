@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/AdminAndStaff/Sidebar";
 import ManageProduct from "./components/ManageProduct";
 import ManageCategory from "./components/ManageCategory";
@@ -9,12 +9,21 @@ import ManageVillage from "./components/ManageVillage";
 import OrderHistory from "./components/OrderHistory";
 import ManageVoucher from "./components/ManageVoucher";
 import AccountStaff from "../../components/AdminAndStaff/AccountStaff";
+import ComplaintManagement from "./components/ComplaintManagement";
 
 const Staff = () => {
-  const [selected, setSelected] = useState("product");
+  const [selected, setSelected] = useState(() => {
+    // lấy từ localStorage nếu có, không thì mặc định account
+    return localStorage.getItem("staff-selected") || "account";
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] =
     useState(false);
+
+  // mỗi khi selected thay đổi thì lưu vào localStorage
+  useEffect(() => {
+    localStorage.setItem("staff-selected", selected);
+  }, [selected]);
 
   return (
     <div className="flex h-screen bg-white overflow-hidden">
@@ -32,6 +41,7 @@ const Staff = () => {
       <div className="flex-1 flex flex-col min-w-0">
         <main className="flex-1 overflow-auto p-4 bg-gray-50">
           {selected === "account" && <AccountStaff />}
+          {selected === "complain" && <ComplaintManagement />}
           {selected === "product" && <ManageProduct />}
           {selected === "category" && <ManageCategory />}
           {selected === "subcategory" && <ManageSubCategory />}
