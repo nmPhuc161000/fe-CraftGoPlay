@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
 import DropdownSection from "./components/DropdownSection";
 import categoryService from "../../services/apis/cateApi";
-import productService from "../../services/apis/productApi"
+import productService from "../../services/apis/productApi";
 
 const Product = () => {
   const [products, setProducts] = useState([]);
@@ -103,16 +103,18 @@ const Product = () => {
   };
 
   const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
-      const matchesSubCategory =
-        selectedSubCategories.length === 0 ||
-        selectedSubCategories.includes(product.subCategoryName);
+    return products
+      .filter(product => product.status === "Active" && (product.quantity ?? 0) > 0)
+      .filter(product => {
+        const matchesSubCategory =
+          selectedSubCategories.length === 0 ||
+          selectedSubCategories.includes(product.subCategoryName);
 
-      const matchesArtisan =
-        !selectedArtisan || product.artisanName === selectedArtisan;
+        const matchesArtisan =
+          !selectedArtisan || product.artisanName === selectedArtisan;
 
-      return matchesSubCategory && matchesArtisan;
-    });
+        return matchesSubCategory && matchesArtisan;
+      });
   }, [products, selectedSubCategories, selectedArtisan]);
 
   return (

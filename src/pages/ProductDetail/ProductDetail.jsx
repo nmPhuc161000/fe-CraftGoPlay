@@ -27,15 +27,11 @@ const ProductDetail = () => {
 
   const cartItem = useContext(CartContext)?.cartItems?.find(item => item.product?.id === product?.id);
   const quantityInCart = cartItem?.quantity || 0;
-  //tong trong kho
-  const totalStock = Number(product?.quantity) || 0;
-  //so sanh so luong da ban
-  const quantitySold = Number(product?.quantitySold) || 0;
-  const availableStock = Math.max(0, totalStock - quantitySold);
-  //kiem tra neu vuot qua so luong trong kho
-  const isPlusDisabled = (quantity + quantityInCart) >= availableStock;
-  const isOutOfStock = product?.quantity <= 0;
+  //ton kho
+  const availableStock = Number(product?.quantity) || 0;
 
+  const isPlusDisabled = (quantity + quantityInCart) >= availableStock;
+  const isOutOfStock = availableStock <= 0;
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -59,6 +55,10 @@ const ProductDetail = () => {
   const handleBuyNow = (product) => {
     if (!isAuthenticated) {
       navigate("/login", { state: { from: location.pathname } });
+      return;
+    }
+    if (quantity > availableStock) {
+      showNotification(`Chỉ còn ${availableStock} sản phẩm trong kho.`, "error");
       return;
     }
 
@@ -286,7 +286,7 @@ const ProductDetail = () => {
               </button>
               <span className="px-5 py-2 text-lg">{quantity}</span>
               <button
-                onClick={() => setQuantity((q) => q + 1)}
+                onClick={() => setQuantity(q => Math.min(q + 1, Math.max(1, availableStock - quantityInCart)))}
                 disabled={isPlusDisabled}
                 className={`px-4 py-2 text-lg font-bold text-[#5e3a1e] hover:bg-[#e6d3bc] transition ${isPlusDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
               >
@@ -308,8 +308,8 @@ const ProductDetail = () => {
           <div className="mt-6 flex flex-wrap gap-4">
             <button
               className={`text-white px-6 py-2 rounded transition duration-200 ${!isOutOfStock
-                  ? "bg-[#5e3a1e] hover:bg-[#4a2f15] cursor-pointer"
-                  : "bg-gray-400 cursor-not-allowed opacity-60"
+                ? "bg-[#5e3a1e] hover:bg-[#4a2f15] cursor-pointer"
+                : "bg-gray-400 cursor-not-allowed opacity-60"
                 }`}
               onClick={() => handleBuyNow(product)}
               disabled={isOutOfStock}

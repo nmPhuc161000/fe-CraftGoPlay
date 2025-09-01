@@ -1,16 +1,17 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { CartContext } from "../../contexts/CartContext";
 import MainLayout from "../../components/layout/MainLayout";
 import { Link, useNavigate } from "react-router-dom";
 import { FaLock } from "react-icons/fa";
 import { FaTrashAlt, FaShoppingCart } from "react-icons/fa";
 import { useNotification } from "../../contexts/NotificationContext";
+import { AuthContext } from "../../contexts/AuthContext";
 
 const Cart = () => {
-    const { cartItems, removeFromCart, updateQuantity, getStock } = useContext(CartContext);
+    const { cartItems, removeFromCart, updateQuantity, getStock, fetchCart } = useContext(CartContext);
     const [selectedItems, setSelectedItems] = useState([]);
     const { showNotification } = useNotification();
-
+    const { user } = useContext(AuthContext);
     const getSelectedTotal = () =>
         cartItems
             .filter((item) => selectedItems.includes(item.id))
@@ -56,6 +57,9 @@ const Cart = () => {
         }
     };
 
+    useEffect(() => {
+        if (user?.id) fetchCart();
+    }, [user?.id]);
 
     return (
         <MainLayout>
