@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, PieChart, Pie, Cell } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 import { FaUserPlus } from "react-icons/fa";
 import { FaShoppingCart } from "react-icons/fa";
 import { FaCommentDots } from "react-icons/fa";
@@ -28,47 +40,47 @@ const FAKE_DATA = {
     0: {
       cards: { users: 58, orders: 159, feedbacks: 144, revenues: 9749900 },
       monthlyData: [
-        { month: 'Tháng 5', Products: 68 + 18 + 16 },
-        { month: 'Tháng 6', Products: 3 + 2 + 1 },
+        { month: "Tháng 5", Products: 68 + 18 + 16 },
+        { month: "Tháng 6", Products: 3 + 2 + 1 },
       ],
       pie: [
-        { name: 'Thành công', value: 37, color: '#0084FF' },
-        { name: 'Đã hủy', value: 6, color: '#00C49F' },
-        { name: 'Phản hồi xấu', value: 16, color: '#FFC233' },
+        { name: "Thành công", value: 37, color: "#0084FF" },
+        { name: "Đã hủy", value: 6, color: "#00C49F" },
+        { name: "Phản hồi xấu", value: 16, color: "#FFC233" },
       ],
     },
     5: {
       cards: { users: 28, orders: 89, feedbacks: 84, revenues: 5749900 },
       dailyData: [
-        { date: '2025-05-01', Products: 10 + 2 + 1 },
-        { date: '2025-05-02', Products: 8 + 3 + 2 },
-        { date: '2025-05-03', Products: 12 + 4 + 3 },
-        { date: '2025-05-04', Products: 9 + 2 + 1 },
-        { date: '2025-05-05', Products: 11 + 3 + 2 },
-        { date: '2025-05-06', Products: 8 + 2 + 3 },
-        { date: '2025-05-07', Products: 10 + 2 + 4 },
+        { date: "2025-05-01", Products: 10 + 2 + 1 },
+        { date: "2025-05-02", Products: 8 + 3 + 2 },
+        { date: "2025-05-03", Products: 12 + 4 + 3 },
+        { date: "2025-05-04", Products: 9 + 2 + 1 },
+        { date: "2025-05-05", Products: 11 + 3 + 2 },
+        { date: "2025-05-06", Products: 8 + 2 + 3 },
+        { date: "2025-05-07", Products: 10 + 2 + 4 },
       ],
       pie: [
-        { name: 'Thành công', value: 27, color: '#0084FF' },
-        { name: 'Đã hủy', value: 4, color: '#00C49F' },
-        { name: 'Phản hồi xấu', value: 11, color: '#FFC233' },
+        { name: "Thành công", value: 27, color: "#0084FF" },
+        { name: "Đã hủy", value: 4, color: "#00C49F" },
+        { name: "Phản hồi xấu", value: 11, color: "#FFC233" },
       ],
     },
     6: {
       cards: { users: 30, orders: 70, feedbacks: 60, revenues: 4000000 },
       dailyData: [
-        { date: '2025-06-01', Products: 1 + 0 + 0 },
-        { date: '2025-06-02', Products: 0 + 1 + 0 },
-        { date: '2025-06-03', Products: 1 + 0 + 1 },
-        { date: '2025-06-04', Products: 0 + 1 + 0 },
-        { date: '2025-06-05', Products: 1 + 0 + 0 },
-        { date: '2025-06-06', Products: 0 + 0 + 0 },
-        { date: '2025-06-07', Products: 0 + 0 + 0 },
+        { date: "2025-06-01", Products: 1 + 0 + 0 },
+        { date: "2025-06-02", Products: 0 + 1 + 0 },
+        { date: "2025-06-03", Products: 1 + 0 + 1 },
+        { date: "2025-06-04", Products: 0 + 1 + 0 },
+        { date: "2025-06-05", Products: 1 + 0 + 0 },
+        { date: "2025-06-06", Products: 0 + 0 + 0 },
+        { date: "2025-06-07", Products: 0 + 0 + 0 },
       ],
       pie: [
-        { name: 'Thành công', value: 10, color: '#0084FF' },
-        { name: 'Đã hủy', value: 2, color: '#00C49F' },
-        { name: 'Phản hồi xấu', value: 5, color: '#FFC233' },
+        { name: "Thành công", value: 10, color: "#0084FF" },
+        { name: "Đã hủy", value: 2, color: "#00C49F" },
+        { name: "Phản hồi xấu", value: 5, color: "#FFC233" },
       ],
     },
   },
@@ -100,8 +112,13 @@ const PieLegend = ({ data }) => (
   <div className="flex flex-wrap justify-center gap-4 mt-4">
     {data.map((entry) => (
       <div key={entry.name} className="flex items-center gap-1 text-sm">
-        <span className="inline-block w-4 h-4 rounded" style={{ background: entry.color }}></span>
-        <span className="font-medium" style={{ color: entry.color }}>{entry.name}</span>
+        <span
+          className="inline-block w-4 h-4 rounded"
+          style={{ background: entry.color }}
+        ></span>
+        <span className="font-medium" style={{ color: entry.color }}>
+          {entry.name}
+        </span>
         : <span className="font-semibold">{entry.value}</span>
       </div>
     ))}
@@ -116,35 +133,38 @@ const Dashboard = () => {
   // Lấy dữ liệu fake cho các mục khác
   const data = getData(year, month);
 
-  // Lấy tổng số người dùng từ API
   useEffect(() => {
     console.log("Dashboard mounted - gọi API");
 
-    adminService.getAccountsByStatus({ pageIndex: 1, pageSize: 1000, status: 1 })
-      .then(res => {
-        console.log("Kết quả API: ", res);
-        if (res?.data?.data && Array.isArray(res.data.data)) {
-          setTotalUsers(res.data.data.length);
+    const fetchUserCount = async () => {
+      try {
+        const res = await adminService.getCountUserByRole();
+        console.log("API Response: ", res);
+
+        if (res.success === true) {
+          const totalCountUsers = res.data.data.User + res.data.data.Artisan;
+          setTotalUsers(totalCountUsers || 0);
         } else {
-          setTotalUsers(null);
-          console.warn("Dữ liệu không đúng định dạng:", res);
+          setTotalUsers(0);
         }
-      })
-      .catch(err => {
-        console.error("API error:", err);
-        setTotalUsers(null);
-      });
+      } catch (error) {
+        console.error("Error fetching user count:", error);
+        setTotalUsers(0);
+      }
+    };
+
+    fetchUserCount();
   }, []);
 
   // Xác định dữ liệu cho BarChart
   let barData = [];
-  let xKey = '';
+  let xKey = "";
   if (month === 0 && data && data.monthlyData) {
     barData = data.monthlyData;
-    xKey = 'month';
+    xKey = "month";
   } else if (month !== 0 && data && data.dailyData) {
     barData = data.dailyData;
-    xKey = 'date';
+    xKey = "date";
   }
 
   return (
@@ -153,7 +173,8 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4">
           {/* Breadcrumb */}
           <div className="mb-2 text-sm text-gray-500">
-            Trang chủ / <span className="text-blue-600 font-semibold">quản trị</span>
+            Trang chủ /{" "}
+            <span className="text-blue-600 font-semibold">quản trị</span>
           </div>
           <h1 className="text-2xl font-bold mb-4">Bảng điều khiển</h1>
           {/* Filter */}
@@ -161,19 +182,23 @@ const Dashboard = () => {
             <select
               className="border rounded px-3 py-2 bg-white w-full sm:w-auto"
               value={year}
-              onChange={e => setYear(Number(e.target.value))}
+              onChange={(e) => setYear(Number(e.target.value))}
             >
-              {YEARS.map(y => (
-                <option key={y} value={y}>{y}</option>
+              {YEARS.map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
               ))}
             </select>
             <select
               className="border rounded px-3 py-2 bg-white w-full sm:w-auto"
               value={month}
-              onChange={e => setMonth(Number(e.target.value))}
+              onChange={(e) => setMonth(Number(e.target.value))}
             >
-              {MONTHS.map(m => (
-                <option key={m.value} value={m.value}>{m.label}</option>
+              {MONTHS.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
               ))}
             </select>
           </div>
@@ -181,33 +206,55 @@ const Dashboard = () => {
           {data ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6">
               <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
-                <div className="bg-blue-100 text-blue-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl"><FaUserPlus /></div>
+                <div className="bg-blue-100 text-blue-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl">
+                  <FaUserPlus />
+                </div>
                 <div>
-                  <div className="text-gray-500 text-xs sm:text-sm">Tổng người dùng</div>
+                  <div className="text-gray-500 text-xs sm:text-sm">
+                    Tổng người dùng
+                  </div>
                   <div className="text-xl sm:text-2xl font-bold">
-                    {totalUsers !== null ? totalUsers : '...'}
+                    {totalUsers !== null ? totalUsers : "..."}
                   </div>
                 </div>
               </div>
               <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
-                <div className="bg-green-100 text-green-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl"><FaShoppingCart /></div>
+                <div className="bg-green-100 text-green-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl">
+                  <FaShoppingCart />
+                </div>
                 <div>
-                  <div className="text-gray-500 text-xs sm:text-sm">Tổng đơn hàng</div>
-                  <div className="text-xl sm:text-2xl font-bold">{data.cards.orders}</div>
+                  <div className="text-gray-500 text-xs sm:text-sm">
+                    Tổng đơn hàng
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold">
+                    {data.cards.orders}
+                  </div>
                 </div>
               </div>
               <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
-                <div className="bg-purple-100 text-purple-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl"><FaCommentDots /></div>
+                <div className="bg-purple-100 text-purple-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl">
+                  <FaCommentDots />
+                </div>
                 <div>
-                  <div className="text-gray-500 text-xs sm:text-sm">Tổng phản hồi</div>
-                  <div className="text-xl sm:text-2xl font-bold">{data.cards.feedbacks}</div>
+                  <div className="text-gray-500 text-xs sm:text-sm">
+                    Tổng phản hồi
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold">
+                    {data.cards.feedbacks}
+                  </div>
                 </div>
               </div>
               <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
-                <div className="bg-yellow-100 text-yellow-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl"><FaCoins /></div>
+                <div className="bg-yellow-100 text-yellow-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl">
+                  <FaCoins />
+                </div>
                 <div>
-                  <div className="text-gray-500 text-xs sm:text-sm">Tổng doanh thu</div>
-                  <div className="text-xl sm:text-2xl font-bold">{data.cards.revenues.toLocaleString()} đ</div>
+                  <div className="text-gray-500 text-xs sm:text-sm">
+                    Tổng doanh thu
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold">
+                    {data.cards.revenues.toLocaleString()} đ
+                  </div>
                 </div>
               </div>
             </div>
@@ -224,11 +271,19 @@ const Dashboard = () => {
                     <YAxis allowDecimals={false} />
                     <Tooltip />
                     <Legend />
-                    <Bar dataKey="Products" fill="#8884d8" name="Sản phẩm" isAnimationActive animationDuration={700} />
+                    <Bar
+                      dataKey="Products"
+                      fill="#8884d8"
+                      name="Sản phẩm"
+                      isAnimationActive
+                      animationDuration={700}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="text-center text-red-500 font-semibold py-8 sm:py-12">Không có dữ liệu</div>
+                <div className="text-center text-red-500 font-semibold py-8 sm:py-12">
+                  Không có dữ liệu
+                </div>
               )}
             </div>
             <div className="bg-amber-25 rounded-xl shadow p-3 sm:p-6 flex flex-col items-center transition-all duration-300 hover:shadow-2xl">
@@ -253,13 +308,17 @@ const Dashboard = () => {
                           <Cell key={entry.name} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip formatter={(value, name) => [`${value} đơn`, name]} />
+                      <Tooltip
+                        formatter={(value, name) => [`${value} đơn`, name]}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                   <PieLegend data={data.pie} />
                 </>
               ) : (
-                <div className="text-center text-red-500 font-semibold py-8 sm:py-12">Không có dữ liệu</div>
+                <div className="text-center text-red-500 font-semibold py-8 sm:py-12">
+                  Không có dữ liệu
+                </div>
               )}
             </div>
           </div>
@@ -269,4 +328,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

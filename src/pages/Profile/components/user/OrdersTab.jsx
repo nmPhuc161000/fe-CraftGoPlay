@@ -560,57 +560,96 @@ const OrdersTab = () => {
                           Sản phẩm đã đặt
                         </h4>
                         <div className="space-y-4">
-                          {order.orderItems.map((item) => (
-                            <div
-                              key={item.id}
-                              className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200"
-                            >
-                              <div className="flex items-center space-x-4">
-                                <div className="relative">
-                                  <img
-                                    src={item.product.productImages.imageUrl}
-                                    alt={item.product.name}
-                                    className="w-20 h-20 object-cover rounded-xl shadow-sm"
-                                  />
-                                  <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                                    {item.quantity}
+                          {order.orderItems.map((item) => {
+                            console.log("item.status:", item.status); // Debug
+                            console.log(
+                              "item.statusKey:",
+                              convertStatus(item.status)
+                            ); // Debug
+                            return (
+                              <div
+                                key={item.id}
+                                className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200"
+                              >
+                                <div className="flex items-center space-x-4">
+                                  <div className="relative">
+                                    <img
+                                      src={item.product.productImages.imageUrl}
+                                      alt={item.product.name}
+                                      className="w-20 h-20 object-cover rounded-xl shadow-sm"
+                                    />
+                                    <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                                      {item.quantity}
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="flex-1">
-                                  <h5 className="font-semibold text-gray-900 mb-2">
-                                    {item.product.name}
-                                  </h5>
-                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
-                                    <div className="flex items-center">
-                                      <FiUser className="mr-1 text-gray-400" />
-                                      <span className="font-medium">
-                                        Nghệ nhân:
-                                      </span>
-                                      <span className="ml-1">
-                                        {item.artisanName}
-                                      </span>
+                                  <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center space-x-3">
+                                        <h5 className="font-semibold text-gray-900">
+                                          {item.product.name}
+                                        </h5>
+                                        {/* Display item status next to product name */}
+                                        <div
+                                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                                            statusConfig[convertStatus(item.status)]
+                                              ? statusConfig[convertStatus(item.status)]
+                                                  .color
+                                              : "bg-gray-100 text-gray-700"
+                                          }`}
+                                        >
+                                          {statusConfig[convertStatus(item.status)] ? (
+                                            <>
+                                              {
+                                                statusConfig[convertStatus(item.status)]
+                                                  .icon
+                                              }
+                                              <span className="ml-1">
+                                                {
+                                                  statusConfig[convertStatus(item.status)]
+                                                    .text
+                                                }
+                                              </span>
+                                            </>
+                                          ) : (
+                                            <span>Unknown Status</span> // Fallback for undefined status
+                                          )}
+                                        </div>
+                                      </div>
                                     </div>
-                                    <div className="flex items-center">
-                                      <FiPackage className="mr-1 text-gray-400" />
-                                      <span className="font-medium">
-                                        Số lượng:
-                                      </span>
-                                      <span className="ml-1">
-                                        {item.quantity}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center">
-                                      <FiDollarSign className="mr-1 text-gray-400" />
-                                      <span className="font-medium">Giá:</span>
-                                      <span className="ml-1 font-semibold text-blue-600">
-                                        {formatPrice(item.unitPrice)}
-                                      </span>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
+                                      <div className="flex items-center">
+                                        <FiUser className="mr-1 text-gray-400" />
+                                        <span className="font-medium">
+                                          Nghệ nhân:
+                                        </span>
+                                        <span className="ml-1">
+                                          {item.artisanName}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center">
+                                        <FiPackage className="mr-1 text-gray-400" />
+                                        <span className="font-medium">
+                                          Số lượng:
+                                        </span>
+                                        <span className="ml-1">
+                                          {item.quantity}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center">
+                                        <FiDollarSign className="mr-1 text-gray-400" />
+                                        <span className="font-medium">
+                                          Giá:
+                                        </span>
+                                        <span className="ml-1 font-semibold text-blue-600">
+                                          {formatPrice(item.unitPrice)}
+                                        </span>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
 

@@ -11,6 +11,7 @@ import {
   MdLogout,
   MdLocalOffer,
   MdAccountCircle,
+  MdAssignmentLate,
 } from "react-icons/md";
 import { AuthContext } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -82,6 +83,11 @@ const staffMenu = [
     label: "Tài khoản",
     value: "account",
     icon: <MdAccountCircle size={22} />,
+  },
+  {
+    label: "Xử lý khiếu nại",
+    value: "complain",
+    icon: <MdAssignmentLate size={22} />,
   },
   {
     label: "Quản lý sản phẩm",
