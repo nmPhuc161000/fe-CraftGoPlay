@@ -9,22 +9,24 @@ import WalletSystem from "./components/WalletSystem";
 const Admin = () => {
   const [selected, setSelected] = useState("dashboard");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false); // For mobile
-  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false); // For desktop
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] =
+    useState(false); // For desktop
 
   return (
-    <div className="flex min-h-screen bg-white">
-      {/* Sidebar bên trái */}
+    <div className="flex h-screen bg-white overflow-hidden">
+      {/* Sidebar takes full viewport height */}
       <Sidebar
         selected={selected}
         setSelected={setSelected}
         isMobileOpen={isSidebarOpen}
         onCloseMobile={() => setIsSidebarOpen(false)}
         isDesktopCollapsed={isDesktopSidebarCollapsed}
-        onToggleDesktop={() => setIsDesktopSidebarCollapsed(v => !v)}
+        onToggleDesktop={() => setIsDesktopSidebarCollapsed((v) => !v)}
         userRole="admin"
       />
-      <div className="flex flex-col flex-1 min-h-0">
-        <main className="flex-1 p-4 md:p-8 overflow-y-scroll bg-white max-h-[calc(100vh-68px)]">
+      {/* Main content takes remaining width and full height */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <main className="flex-1 overflow-auto bg-white">
           {selected === "dashboard" && <Dashboard />}
           {selected === "artisan" && <ArtisanAccount />}
           {selected === "customer" && <UserAccount />}

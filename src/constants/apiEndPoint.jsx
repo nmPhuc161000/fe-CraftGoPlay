@@ -180,10 +180,16 @@ export const API_ENDPOINTS_RETURN_REQUEST = {
   GET_RETURN_REQUEST_BY_ARTISAN_ID: (artisanId, pageIndex, pageSize, status) =>
     `/api/ReturnRequest/GetReturnRequestByArtisanId/${artisanId}?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}`,
   CREATE_RETURN_REQUEST: "/api/ReturnRequest/ReturnRequest",
-  UPDATE_STATUS_RETURN_REQUEST: (returnRequestId, status, rejectReturnReasonEnum) =>
+  UPDATE_STATUS_RETURN_REQUEST: (
+    returnRequestId,
+    status,
+    rejectReturnReasonEnum
+  ) =>
     `/api/ReturnRequest/UpdateStatusReturnRequest/${returnRequestId}?status=${status}${
-    status === "Rejected" && rejectReturnReasonEnum ? `&rejectReturnReasonEnum=${rejectReturnReasonEnum}` : ""
-  }`,
+      status === "Rejected" && rejectReturnReasonEnum
+        ? `&rejectReturnReasonEnum=${rejectReturnReasonEnum}`
+        : ""
+    }`,
   ESCALATED_RETURN_REQUEST: (returnRequestId, reason) =>
     `/api/ReturnRequest/EscalatedReturnRequest/${returnRequestId}?reason=${reason}`,
   RESOLVE_ESCALATED_REQUEST: (returnRequestId, acceptRefund) =>
@@ -200,12 +206,27 @@ export const API_ENDPOINTS_ADMIN = {
   GET_ALL_ACCOUNT: (pageIndex, pageSize, status, role) =>
     `/api/Admin/GetAllAccount?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}&role=${role}`,
   CREATE_NEW_ACCOUNT_STAFF: "/api/Admin/CreateStaffAccount",
-  COUNT_USER_BY_ROLE: "/api/Admin/CountUsersByRole"
+  COUNT_USER_BY_ROLE: "/api/Admin/CountAccountByRole",
+  COUNT_ALL_ORDER: "/api/Admin/CountAllOrders",
 };
 
 export const API_ENDPOINTS_DASHBOARD = {
-  GET_DASHBOARD_FOR_ADMIN: (type, from, to) =>
-    `/api/Dashboard/DashboardForAdmin?Type=${type}&From=${from}&To=${to}`,
-  GET_DASHBOARD_FOR_ARTISAN: (artisanId, type, from, to) =>
-    `/api/Dashboard/DashboardForArtisan?ArtisanId=${artisanId}&Type=${type}&From=${from}&To=${to}`,
+  GET_DASHBOARD_FOR_ADMIN: (type, from, to) => {
+    let url = `/api/Dashboard/DashboardForAdmin?Type=${type}`;
+    if (type === "Custom" && from && to) {
+      url += `&From=${from}&To=${to}`;
+    }
+    return url;
+  },
+
+  GET_DASHBOARD_FOR_ARTISAN: (artisanId, type, from, to) => {
+    let url = `/api/Dashboard/DashboardForArtisan?ArtisanId=${artisanId}&Type=${type}`;
+    if (type === "Custom" && from && to) {
+      url += `&From=${from}&To=${to}`;
+    }
+    return url;
+  },
+
+  GET_PRODUCT_COUNT_BY_MONTHS: (year) =>
+    `/api/Dashboard/ProductCountsByMonth?year=${year}`,
 };
