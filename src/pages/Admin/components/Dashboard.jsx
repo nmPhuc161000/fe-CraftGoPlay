@@ -17,22 +17,7 @@ import { FaShoppingCart } from "react-icons/fa";
 import { FaCommentDots } from "react-icons/fa";
 import { FaCoins } from "react-icons/fa";
 import adminService from "../../../services/apis/adminApi";
-const YEARS = [2023, 2024, 2025];
-const MONTHS = [
-  { value: 0, label: "Tất cả các tháng" },
-  { value: 1, label: "Tháng 1" },
-  { value: 2, label: "Tháng 2" },
-  { value: 3, label: "Tháng 3" },
-  { value: 4, label: "Tháng 4" },
-  { value: 5, label: "Tháng 5" },
-  { value: 6, label: "Tháng 6" },
-  { value: 7, label: "Tháng 7" },
-  { value: 8, label: "Tháng 8" },
-  { value: 9, label: "Tháng 9" },
-  { value: 10, label: "Tháng 10" },
-  { value: 11, label: "Tháng 11" },
-  { value: 12, label: "Tháng 12" },
-];
+import dashBoardService from "../../../services/apis/dashboardApi";
 
 // Cập nhật FAKE_DATA: chỉ còn 1 loại duy nhất là 'Sản phẩm' (Products)
 const FAKE_DATA = {
@@ -128,33 +113,73 @@ const PieLegend = ({ data }) => (
 const Dashboard = () => {
   const [year, setYear] = useState(2025);
   const [month, setMonth] = useState(0);
-  const [totalUsers, setTotalUsers] = useState(null);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [timeRange, setTimeRange] = useState({
+    type: "Year", // Mặc định là tháng
+    from: "",
+    to: "",
+  });
 
   // Lấy dữ liệu fake cho các mục khác
   const data = getData(year, month);
 
-  useEffect(() => {
-    console.log("Dashboard mounted - gọi API");
+  // Thêm mapping trạng thái đơn hàng
+  const ORDER_STATUS_LABELS = {
+    Completed: "Hoàn thành",
+    ReturnRequested: "Yêu cầu trả hàng",
+    Cancel: "Bị hủy",
+    Reject: "Đã từ chối",
+    Refunded: "Đã hoàn tiền",
+  };
 
-    const fetchUserCount = async () => {
-      try {
-        const res = await adminService.getCountUserByRole();
-        console.log("API Response: ", res);
+  // Gán màu sắc cho từng trạng thái
+  const ORDER_STATUS_COLORS = {
+    Completed: "#0084FF",
+    ReturnRequested: "#FFC233",
+    Cancel: "#FF4D4F",
+    Reject: "#FF8042",
+    Refunded: "#00C49F",
+  };
 
-        if (res.success === true) {
-          const totalCountUsers = res.data.data.User + res.data.data.Artisan;
-          setTotalUsers(totalCountUsers || 0);
-        } else {
-          setTotalUsers(0);
-        }
-      } catch (error) {
-        console.error("Error fetching user count:", error);
-        setTotalUsers(0);
+  // Xử lý thay đổi loại thời gian
+  const handleTypeChange = (e) => {
+    const newType = e.target.value;
+    setTimeRange({
+      type: newType,
+      from:
+        newType === "Custom" ? new Date().toISOString().split("T")[0] : null,
+      to: newType === "Custom" ? new Date().toISOString().split("T")[0] : null,
+    });
+  };
+
+  // Xử lý thay đổi ngày bắt đầu
+  const handleFromChange = (e) => {
+    setTimeRange({ ...timeRange, from: e.target.value });
+  };
+
+  // Xử lý thay đổi ngày kết thúc
+  const handleToChange = (e) => {
+    setTimeRange({ ...timeRange, to: e.target.value });
+  };
+
+  const fetchDashboardForAdmin = async () => {
+    try {
+      const { type, from, to } = timeRange;
+      const res = await dashBoardService.getDashBoardForAdmin(type, from, to);
+      console.log("API Response: ", res);
+      if (res.success === true) {
+        setDashboardData(res.data.data || null);
+      } else {
+        setDashboardData(null);
       }
-    };
-
-    fetchUserCount();
-  }, []);
+    } catch (error) {
+      console.error("Error fetching user count:", error);
+      setDashboardData(null);
+    }
+  };
+  useEffect(() => {
+    fetchDashboardForAdmin();
+  }, [timeRange.type, timeRange.from, timeRange.to]);
 
   // Xác định dữ liệu cho BarChart
   let barData = [];
@@ -172,52 +197,51 @@ const Dashboard = () => {
       <main className="bg-amber-25 min-h-screen w-full">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4">
           {/* Breadcrumb */}
-          <div className="mb-2 text-sm text-gray-500">
-            Trang chủ /{" "}
-            <span className="text-blue-600 font-semibold">quản trị</span>
-          </div>
-          <h1 className="text-2xl font-bold mb-4">Bảng điều khiển</h1>
+          <h1 className="text-2xl font-bold mb-4">Bảng doanh thu</h1>
           {/* Filter */}
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-6">
             <select
               className="border rounded px-3 py-2 bg-white w-full sm:w-auto"
-              value={year}
-              onChange={(e) => setYear(Number(e.target.value))}
+              value={timeRange.type}
+              onChange={handleTypeChange}
             >
-              {YEARS.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
+              <option value="Day">Hôm nay</option>
+              <option value="Week">Tuần này</option>
+              <option value="Month">Tháng này</option>
+              <option value="Year">Năm nay</option>
+              <option value="Custom">Tùy chỉnh</option>
             </select>
-            <select
-              className="border rounded px-3 py-2 bg-white w-full sm:w-auto"
-              value={month}
-              onChange={(e) => setMonth(Number(e.target.value))}
-            >
-              {MONTHS.map((m) => (
-                <option key={m.value} value={m.value}>
-                  {m.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          {/* Cards */}
-          {data ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-6">
-              <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
-                <div className="bg-blue-100 text-blue-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl">
-                  <FaUserPlus />
+            {timeRange.type === "Custom" && (
+              <div className="flex flex-wrap gap-4">
+                <div className="flex flex-col">
+                  <label className="font-medium text-gray-700 mb-1">
+                    Từ ngày:
+                  </label>
+                  <input
+                    type="date"
+                    value={timeRange.from || ""}
+                    onChange={handleFromChange}
+                    className="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
                 </div>
-                <div>
-                  <div className="text-gray-500 text-xs sm:text-sm">
-                    Tổng người dùng
-                  </div>
-                  <div className="text-xl sm:text-2xl font-bold">
-                    {totalUsers !== null ? totalUsers : "..."}
-                  </div>
+                <div className="flex flex-col">
+                  <label className="font-medium text-gray-700 mb-1">
+                    Đến ngày:
+                  </label>
+                  <input
+                    type="date"
+                    value={timeRange.to || ""}
+                    onChange={handleToChange}
+                    className="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  />
                 </div>
               </div>
+            )}
+          </div>
+          {/* Cards */}
+          {dashboardData ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 mb-6">
+              {/* Tổng đơn hàng */}
               <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
                 <div className="bg-green-100 text-green-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl">
                   <FaShoppingCart />
@@ -227,38 +251,47 @@ const Dashboard = () => {
                     Tổng đơn hàng
                   </div>
                   <div className="text-xl sm:text-2xl font-bold">
-                    {data.cards.orders}
+                    {dashboardData.totalOrders ?? "0"}
                   </div>
                 </div>
               </div>
-              <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
-                <div className="bg-purple-100 text-purple-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl">
-                  <FaCommentDots />
-                </div>
-                <div>
-                  <div className="text-gray-500 text-xs sm:text-sm">
-                    Tổng phản hồi
-                  </div>
-                  <div className="text-xl sm:text-2xl font-bold">
-                    {data.cards.feedbacks}
-                  </div>
-                </div>
-              </div>
+
+              {/* Tổng doanh thu trước phí */}
               <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
                 <div className="bg-yellow-100 text-yellow-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl">
                   <FaCoins />
                 </div>
                 <div>
                   <div className="text-gray-500 text-xs sm:text-sm">
-                    Tổng doanh thu
+                    Tổng doanh thu trước phí
                   </div>
                   <div className="text-xl sm:text-2xl font-bold">
-                    {data.cards.revenues.toLocaleString()} đ
+                    {dashboardData.totalRevenueBeforeFee?.toLocaleString() ||
+                      "0"}{" "}
+                    VNĐ
+                  </div>
+                </div>
+              </div>
+
+              {/* Tổng doanh thu sau phí */}
+              <div className="bg-amber-25 rounded-xl shadow p-4 sm:p-6 flex items-center gap-3 sm:gap-4 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl cursor-pointer">
+                <div className="bg-yellow-100 text-yellow-500 rounded-full p-2 sm:p-3 text-xl sm:text-2xl">
+                  <FaCoins />
+                </div>
+                <div>
+                  <div className="text-gray-500 text-xs sm:text-sm">
+                    Tổng doanh thu sau phí
+                  </div>
+                  <div className="text-xl sm:text-2xl font-bold">
+                    {dashboardData.totalRevenueAfterFee?.toLocaleString() ||
+                      "0"}{" "}
+                    VNĐ
                   </div>
                 </div>
               </div>
             </div>
           ) : null}
+
           {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 sm:gap-6">
             <div className="col-span-1 lg:col-span-2 bg-amber-25 rounded-xl shadow p-3 sm:p-6 transition-all duration-300 hover:shadow-2xl">
@@ -288,33 +321,52 @@ const Dashboard = () => {
             </div>
             <div className="bg-amber-25 rounded-xl shadow p-3 sm:p-6 flex flex-col items-center transition-all duration-300 hover:shadow-2xl">
               <div className="font-semibold mb-2">Phân bố đơn hàng</div>
-              {data && data.pie && data.pie.length > 0 ? (
-                <>
-                  <ResponsiveContainer width="100%" height={220}>
-                    <PieChart>
-                      <Pie
-                        data={data.pie}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={50}
-                        outerRadius={80}
-                        label={false}
-                        isAnimationActive
-                        animationDuration={700}
-                      >
-                        {data.pie.map((entry, idx) => (
-                          <Cell key={entry.name} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        formatter={(value, name) => [`${value} đơn`, name]}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <PieLegend data={data.pie} />
-                </>
+              {dashboardData && dashboardData.orderStatusCounts ? (
+                (() => {
+                  const pieData = Object.keys(ORDER_STATUS_LABELS).map(
+                    (key) => ({
+                      name: ORDER_STATUS_LABELS[key],
+                      value: dashboardData.orderStatusCounts[key] || 0,
+                      color: ORDER_STATUS_COLORS[key],
+                    })
+                  );
+
+                  // Kiểm tra nếu tất cả value = 0 thì không render chart
+                  const hasData = pieData.some((item) => item.value > 0);
+
+                  return hasData ? (
+                    <>
+                      <ResponsiveContainer width="100%" height={220}>
+                        <PieChart>
+                          <Pie
+                            data={pieData}
+                            dataKey="value"
+                            nameKey="name"
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={50}
+                            outerRadius={80}
+                            label={false}
+                            isAnimationActive
+                            animationDuration={700}
+                          >
+                            {pieData.map((entry) => (
+                              <Cell key={entry.name} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            formatter={(value, name) => [`${value} đơn`, name]}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                      <PieLegend data={pieData} />
+                    </>
+                  ) : (
+                    <div className="text-center text-red-500 font-semibold py-8 sm:py-12">
+                      Không có dữ liệu
+                    </div>
+                  );
+                })()
               ) : (
                 <div className="text-center text-red-500 font-semibold py-8 sm:py-12">
                   Không có dữ liệu

@@ -13,18 +13,21 @@ const Admin = () => {
 
   return (
     <div className="flex min-h-screen bg-white">
-      {/* Sidebar bên trái */}
-      <Sidebar
-        selected={selected}
-        setSelected={setSelected}
-        isMobileOpen={isSidebarOpen}
-        onCloseMobile={() => setIsSidebarOpen(false)}
-        isDesktopCollapsed={isDesktopSidebarCollapsed}
-        onToggleDesktop={() => setIsDesktopSidebarCollapsed(v => !v)}
-        userRole="admin"
-      />
-      <div className="flex flex-col flex-1 min-h-0">
-        <main className="flex-1 p-4 md:p-8 overflow-y-scroll bg-white max-h-[calc(100vh-68px)]">
+      {/* Sidebar takes full viewport height */}
+      <div className="h-screen">
+        <Sidebar
+          selected={selected}
+          setSelected={setSelected}
+          isMobileOpen={isSidebarOpen}
+          onCloseMobile={() => setIsSidebarOpen(false)}
+          isDesktopCollapsed={isDesktopSidebarCollapsed}
+          onToggleDesktop={() => setIsDesktopSidebarCollapsed((v) => !v)}
+          userRole="admin"
+        />
+      </div>
+      {/* Main content takes remaining width and full height */}
+      <div className="flex-1 flex flex-col">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-white">
           {selected === "dashboard" && <Dashboard />}
           {selected === "artisan" && <ArtisanAccount />}
           {selected === "customer" && <UserAccount />}

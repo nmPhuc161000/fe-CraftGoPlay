@@ -19,6 +19,13 @@ const adminService = {
     )
   },
 
+  async getCountAllOrder() {
+    return performApiRequest(API_ENDPOINTS_ADMIN.COUNT_ALL_ORDER, {
+        method: "get",
+        }
+    )
+  },
+
   async createStaff(staffData) {
     return performApiRequest(API_ENDPOINTS_ADMIN.CREATE_NEW_ACCOUNT_STAFF, {
       method: "post",
