@@ -35,15 +35,14 @@ const returnRequestService = {
     );
   },
 
-  async updateStatusReturnRequest(returnRequestId, status) {
+  async updateStatusReturnRequest(returnRequestId, status, rejectReturnReasonEnum) {
     return performApiRequest(
       API_ENDPOINTS_RETURN_REQUEST.UPDATE_STATUS_RETURN_REQUEST(
         returnRequestId,
-        status
+        status,
+        rejectReturnReasonEnum
       ),
-      {
-        method: "put",
-      }
+      { method: "put" }
     );
   },
 
