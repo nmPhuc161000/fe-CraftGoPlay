@@ -180,10 +180,16 @@ export const API_ENDPOINTS_RETURN_REQUEST = {
   GET_RETURN_REQUEST_BY_ARTISAN_ID: (artisanId, pageIndex, pageSize, status) =>
     `/api/ReturnRequest/GetReturnRequestByArtisanId/${artisanId}?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}`,
   CREATE_RETURN_REQUEST: "/api/ReturnRequest/ReturnRequest",
-  UPDATE_STATUS_RETURN_REQUEST: (returnRequestId, status, rejectReturnReasonEnum) =>
+  UPDATE_STATUS_RETURN_REQUEST: (
+    returnRequestId,
+    status,
+    rejectReturnReasonEnum
+  ) =>
     `/api/ReturnRequest/UpdateStatusReturnRequest/${returnRequestId}?status=${status}${
-    status === "Rejected" && rejectReturnReasonEnum ? `&rejectReturnReasonEnum=${rejectReturnReasonEnum}` : ""
-  }`,
+      status === "Rejected" && rejectReturnReasonEnum
+        ? `&rejectReturnReasonEnum=${rejectReturnReasonEnum}`
+        : ""
+    }`,
   ESCALATED_RETURN_REQUEST: (returnRequestId, reason) =>
     `/api/ReturnRequest/EscalatedReturnRequest/${returnRequestId}?reason=${reason}`,
   RESOLVE_ESCALATED_REQUEST: (returnRequestId, acceptRefund) =>
@@ -220,5 +226,7 @@ export const API_ENDPOINTS_DASHBOARD = {
     }
     return url;
   },
-};
 
+  GET_PRODUCT_COUNT_BY_MONTHS: (year) =>
+    `/api/Dashboard/ProductCountsByMonth?year=${year}`,
+};

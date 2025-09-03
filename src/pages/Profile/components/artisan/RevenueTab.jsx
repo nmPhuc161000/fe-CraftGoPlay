@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../../../../contexts/AuthContext.jsx";
 import dashBoardService from "../../../../services/apis/dashboardApi";
+import { statusLabels } from "../../../../utils/orderUtils.jsx";
 
 export default function RevenueTab() {
   const { user } = useContext(AuthContext);
@@ -8,18 +9,10 @@ export default function RevenueTab() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [timeRange, setTimeRange] = useState({
-    type: "Month", // Mặc định là tháng
+    type: "year", // Mặc định là tháng
     from: "",
     to: "",
   });
-
-  const statusLabels = {
-    Completed: "Hoàn thành",
-    ReturnRequested: "Yêu cầu trả hàng",
-    Cancel: "Bị hủy",
-    Reject: "Đã từ chối",
-    Refunded: "Đã hoàn tiền",
-  };
 
   // Hàm lấy dữ liệu dashboard
   const fetchDashboardData = async () => {
@@ -87,9 +80,7 @@ export default function RevenueTab() {
 
   return (
     <div className="p-5 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">
-        Bảng Doanh Thu
-      </h2>
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">Bảng Doanh Thu</h2>
 
       {/* Bộ lọc thời gian */}
       <div className="flex flex-wrap items-end gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
