@@ -107,19 +107,12 @@ const Checkout = () => {
     );
   };
 
-  const maxDiscountByPercent = Math.floor((getTotal() * 0.15) / 100) * 100;
-  const maxDiscountByCoins = userCoins * 100; // 1 xu = 100 VNĐ
+  const maxDiscountByPercent = Math.floor((getTotal() * 0.15) / 100) * 100; //15% va lam tron xuong boi cua 100
+  const maxDiscountByCoins = (Number(userCoins) || 0) * 100; // 1 xu = 100 VNĐ
 
-  let coinDiscount = 0;
-  if (useCoins) {
-    const coinDiscountRaw = maxDiscountByPercent / 100;
-    const coinDiscountRounded = Math.floor(coinDiscountRaw); // làm tròn số nguyên
-    coinDiscount = Math.min(
-      maxDiscountByPercent,
-      maxDiscountByCoins,
-      coinDiscountRounded * 100
-    );
-  }
+  const coinDiscount = useCoins
+    ? Math.min(maxDiscountByPercent, maxDiscountByCoins)
+    : 0;
 
   const groupedCart = selectedCartItems.reduce((acc, item) => {
     const artisan = item.user?.userName || "Không rõ nghệ nhân";
@@ -129,22 +122,37 @@ const Checkout = () => {
   }, {});
 
   const handleApplyVoucher = (voucher) => {
-  const subtotal = getTotal();
+    const subtotal = getTotal();
 
-  if (!voucher) {
-    setDiscount(0);
-    setVoucherError("Mã không hợp lệ hoặc đã hết hạn");
-    return;
-  }
+    // huy voucher
+    if (!voucher) {
+      setDiscount(0);
+      setVoucherError(""); 
+      return;
+    }
 
-  if (voucher.discountType === "Percent") {
-    setDiscount(subtotal * (voucher.discountValue / 100));
-  } else if (voucher.discountType === "Amount") {
-    setDiscount(voucher.discountValue);
-  }
+    if (subtotal < (voucher.minOrder || 0)) {
+      setDiscount(0);
+      setVoucherError(
+        `Đơn tối thiểu ${Number(voucher.minOrder || 0).toLocaleString("vi-VN")}₫.`
+      );
+      return;
+    }
 
-  setVoucherError("");
-};
+    let value = 0;
+    if (voucher.discountType === "Percent") {
+      value = Math.floor(subtotal * (voucher.discountValue / 100));
+    } else if (voucher.discountType === "Amount") {
+      value = Number(voucher.discountValue || 0);
+    }
+
+    const capped = voucher.maxDiscountAmount > 0
+      ? Math.min(value, voucher.maxDiscountAmount)
+      : value;
+
+    setDiscount(capped);
+    setVoucherError("");
+  };
 
   const handlePlaceOrder = async () => {
     if (!paymentMethod) {
@@ -630,6 +638,7 @@ const Checkout = () => {
               voucherCode={voucherCode}
               setVoucherCode={setVoucherCode}
               onApply={handleApplyVoucher}
+              subtotal={getTotal()}
             />
 
             <div className="flex items-center justify-between">
@@ -639,6 +648,10 @@ const Checkout = () => {
                 <span className="text-xs text-gray-500">
                   Giảm tối đa {(coinDiscount || 0).toLocaleString("vi-VN")}₫ (
                   {Math.floor((coinDiscount || 0) / 100)} xu)
+                </span>
+                <br />
+                <span className="text-[11px] text-gray-400 italic">
+                  (* Chỉ được giảm tối đa 15% tổng tiền hàng)
                 </span>
               </label>
               <label className="relative inline-flex items-center cursor-pointer w-11 h-6">

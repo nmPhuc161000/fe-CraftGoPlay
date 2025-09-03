@@ -3,14 +3,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../../../../contexts/AuthContext";
 import { useNotification } from "../../../../contexts/NotificationContext";
 import returnRequestService from "../../../../services/apis/returnrequestApi";
-import orderService from "../../../../services/apis/orderApi"; 
+import orderService from "../../../../services/apis/orderApi";
 import { FiPackage, FiArrowLeft } from "react-icons/fi";
+import {
+  reasonMap as reasonMapFull,
+  formatCurrency,
+} from "../../../../utils/returnRequestUtils";
 
-const RETURN_BLOCKED = new Set([
-  "returnrequested",
-  "returnapproved",
-  "returned",
-]);
+const RETURN_BLOCKED = new Set(["returnrequested", "returnapproved", "returned"]);
 
 const parseQS = (search, key) => new URLSearchParams(search).get(key) || "";
 
@@ -52,6 +52,15 @@ const ReturnRequestTab = () => {
 
   const productsFromQS = useMemo(() => parseOrderItemsFromQS(location.search), [location.search]);
 
+  const REASON_OPTIONS = useMemo(
+    () =>
+      Object.entries(reasonMapFull).map(([value, label]) => ({
+        value,
+        label,
+      })),
+    []
+  );
+
   const [eligibleItems, setEligibleItems] = useState(productsFromQS);
   const [loadingOrder, setLoadingOrder] = useState(false);
 
@@ -72,7 +81,7 @@ const ReturnRequestTab = () => {
               ? it.product?.productImages?.[0]?.imageUrl
               : it.product?.productImages?.imageUrl;
             return {
-              id: it.id, 
+              id: it.id,
               name: it.product?.name || "",
               imageUrl: img || "",
               price: it.unitPrice ?? it.product?.price ?? 0,
@@ -88,6 +97,7 @@ const ReturnRequestTab = () => {
       }
     };
     fetchOrder();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId]);
 
   const [selectedIds, setSelectedIds] = useState(orderItemIdQS ? [orderItemIdQS] : []);
@@ -345,6 +355,7 @@ const ReturnRequestTab = () => {
                     <div className="flex-1 min-w-0">
                       <h4 className="text-lg font-semibold text-gray-800">{p.name}</h4>
                       <p className="text-sm text-gray-500 mt-1">Mã sản phẩm: {formatProductCode(p.id)}</p>
+                      <p className="text-sm text-gray-700 mt-1">Giá: {formatCurrency(p.price)}</p>
                     </div>
                   </div>
 
@@ -364,15 +375,11 @@ const ReturnRequestTab = () => {
                           required
                         >
                           <option value="">Chọn lý do</option>
-                          <option value="ChangedMind">Đổi ý</option>
-                          <option value="WrongItemDelivered">Giao sai sản phẩm</option>
-                          <option value="DamagedOrDefective">Hư hỏng hoặc lỗi</option>
-                          <option value="NotAsDescribed">Không như mô tả</option>
-                          <option value="LateDelivery">Giao hàng muộn</option>
-                          <option value="NoLongerNeeded">Không còn cần</option>
-                          <option value="MissingPartsOrAccessories">Thiếu bộ phận/phụ kiện</option>
-                          <option value="OrderedByMistake">Đặt hàng nhầm</option>
-                          <option value="Other">Khác</option>
+                          {REASON_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
                         </select>
                         {err.reason && <p className="text-sm text-red-500 mt-1">{err.reason}</p>}
                       </div>
@@ -415,7 +422,9 @@ const ReturnRequestTab = () => {
                         <input
                           type="file"
                           accept="image/*"
-                          onChange={(e) => handleItemFormChange(p.id, "image", e.target.files?.[0] || null)}
+                          onChange={(e) =>
+                            handleItemFormChange(p.id, "image", e.target.files?.[0] || null)
+                          }
                           className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 text-gray-700 bg-white shadow-sm transition file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
                         />
                       </div>
