@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useContext } from "react";
 import { FaTicketAlt } from "react-icons/fa";
 import { AuthContext } from "../../../contexts/AuthContext";
-import userVoucherService from "../../../services/apis/userVoucherAPI";
+import userVoucherService from "../../../services/apis/userVoucherApi";
 
 const VoucherPicker = ({
   productCode = "",

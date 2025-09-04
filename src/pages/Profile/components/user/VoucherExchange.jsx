@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import { AuthContext } from "../../../../contexts/AuthContext";
 import pointService from "../../../../services/apis/pointApi";
-import userVoucherService from "../../../../services/apis/userVoucherAPI";
+import userVoucherService from "../../../../services/apis/userVoucherApi";
 import voucherService from "../../../../services/apis/voucherApi";
 import Notification from "../../../../components/Notification/Notification";
 

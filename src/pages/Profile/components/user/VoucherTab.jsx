@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import "dayjs/locale/vi";
 import { AuthContext } from "../../../../contexts/AuthContext";
-import userVoucherService from "../../../../services/apis/userVoucherAPI";
+import userVoucherService from "../../../../services/apis/userVoucherApi";
 import pointService from "../../../../services/apis/pointApi";
 
 dayjs.locale("vi");
