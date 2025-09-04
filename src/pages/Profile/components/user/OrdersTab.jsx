@@ -671,43 +671,116 @@ const OrdersTab = () => {
                       </div>
 
                       {/* Order Information */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                          <h5 className="font-semibold text-gray-900 mb-3 flex items-center">
-                            <FiCreditCard className="mr-2 text-green-600" />
-                            Thông tin thanh toán
-                          </h5>
-                          <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">
-                                Phương thức:
-                              </span>
-                              <span className="font-medium">
-                                {order.paymentMethod}
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Trạng thái:</span>
-                              <span className="font-medium">
-                                {order.paymentStatus}
-                              </span>
+                      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                          <FiDollarSign className="mr-2 text-green-600" />
+                          Chi tiết thanh toán & vận chuyển
+                        </h4>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Left Column - Payment Method Only */}
+                          <div className="space-y-4">
+                            <h5 className="font-semibold text-gray-800 flex items-center">
+                              <FiCreditCard className="mr-2 text-green-500" />
+                              Chi tiết thanh toán
+                            </h5>
+
+                            <div className="space-y-2 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">
+                                  Phương thức:
+                                </span>
+                                <span className="font-medium">
+                                  {order.paymentMethod}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">
+                                  Trạng thái:
+                                </span>
+                                <span className="font-medium">
+                                  {order.paymentStatus}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
 
-                        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                          <h5 className="font-semibold text-gray-900 mb-3 flex items-center">
-                            <FiTruck className="mr-2 text-orange-600" />
-                            Thông tin vận chuyển
-                          </h5>
-                          <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">
-                                Phí vận chuyển:
-                              </span>
-                              <span className="font-medium text-orange-600">
-                                {order.delivery_Amount}
-                              </span>
+                          {/* Right Column - Price Details and Shipping */}
+                          <div className="space-y-4">
+                            <h5 className="font-semibold text-gray-800 flex items-center">
+                              <FiDollarSign className="mr-2 text-orange-500" />
+                              Chi tiết đơn hàng
+                            </h5>
+
+                            <div className="space-y-2 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">
+                                  Tổng tiền hàng:
+                                </span>
+                                <span className="font-medium">
+                                  {formatPrice(order.product_Amount)}
+                                </span>
+                              </div>
+
+                              {/* Discounts Section */}
+                              {(order.productDiscount > 0 ||
+                                order.deliveryDiscount > 0 ||
+                                order.pointDiscount > 0) && (
+                                <div className="pt-2 border-t border-gray-100">
+                                  <div className="text-gray-600 font-medium mb-1">
+                                    Giảm giá:
+                                  </div>
+                                  {order.productDiscount > 0 && (
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-gray-500 pl-2">
+                                        - Giảm giá sản phẩm:
+                                      </span>
+                                      <span className="text-green-600">
+                                        -{formatPrice(order.productDiscount)}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {order.deliveryDiscount > 0 && (
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-gray-500 pl-2">
+                                        - Giảm giá vận chuyển:
+                                      </span>
+                                      <span className="text-green-600">
+                                        -{formatPrice(order.deliveryDiscount)}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {order.pointDiscount > 0 && (
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-gray-500 pl-2">
+                                        - Giảm giá từ xu:
+                                      </span>
+                                      <span className="text-green-600">
+                                        -{formatPrice(order.pointDiscount)}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              <div className="flex justify-between pt-2 border-t border-gray-100">
+                                <span className="text-gray-600">
+                                  Phí vận chuyển:
+                                </span>
+                                <span className="font-medium text-orange-600">
+                                  {order.delivery_Amount}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Total Summary */}
+                            <div className="pt-3 border-t border-gray-200 mt-4">
+                              <div className="flex justify-between font-semibold text-lg">
+                                <span>Tổng cộng:</span>
+                                <span className="text-blue-600">
+                                  {formatPrice(order.totalPrice)}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
