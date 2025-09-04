@@ -31,14 +31,15 @@ const Checkout = () => {
     [cartItems, selectedItemIds]
   );
 
-  const [voucherCode, setVoucherCode] = useState("");
+  const [productCode, setProductCode] = useState("");
+  const [deliveryCode, setDeliveryCode] = useState("");
   const [appliedProductVoucher, setAppliedProductVoucher] = useState(null);
   const [appliedDeliveryVoucher, setAppliedDeliveryVoucher] = useState(null);
   const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [voucherError, setVoucherError] = useState("");
   const [useCoins, setUseCoins] = useState(false);
   const [userCoins, setUserCoins] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState(""); // "vnpay" | "cod"
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
@@ -63,7 +64,7 @@ const Checkout = () => {
     if (!isPlacingOrder && !buyNow && selectedCartItems.length === 0) {
       navigate("/cart");
     }
-  }, [selectedCartItems, isPlacingOrder, buyNow]);
+  }, [selectedCartItems, isPlacingOrder, buyNow, navigate]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -87,7 +88,7 @@ const Checkout = () => {
       try {
         if (realUser?.id) {
           const response = await pointService.getPointByUserId(realUser.id);
-          if (response.data?.data?.amount) {
+          if (response.data?.data?.amount != null) {
             setUserCoins(response.data.data.amount);
           }
         }
@@ -97,25 +98,25 @@ const Checkout = () => {
       }
     };
     fetchUserCoins();
-  }, [realUser?.id]);
+  }, [realUser?.id, showNotification]);
 
   const getTotal = () => {
     if (buyNow) {
-      return buyNow.productPrice * buyNow.quantity;
+      return (buyNow.productPrice || 0) * (buyNow.quantity || 0);
     }
     return selectedCartItems.reduce(
-      (sum, item) => sum + item.unitPrice * item.quantity,
+      (sum, item) => sum + (item.unitPrice || 0) * (item.quantity || 0),
       0
     );
   };
 
   const maxDiscountByPercent = Math.floor((getTotal() * 0.15) / 100) * 100; //15% va lam tron xuong boi cua 100
   const maxDiscountByCoins = (Number(userCoins) || 0) * 100; // 1 xu = 100 VNĐ
-  const userCoinsToUse = Math.floor(maxDiscountByPercent / 100); // So xu co the dung
 
   const coinDiscount = useCoins
     ? Math.min(maxDiscountByPercent, maxDiscountByCoins)
     : 0;
+  const userCoinsToUse = Math.floor(coinDiscount / 100);
 
   const groupedCart = selectedCartItems.reduce((acc, item) => {
     const artisan = item.user?.userName || "Không rõ nghệ nhân";
@@ -128,52 +129,79 @@ const Checkout = () => {
     if (!voucher) {
       setAppliedProductVoucher(null);
       setAppliedDeliveryVoucher(null);
-      setVoucherDiscount(0);
       setVoucherError("");
       return;
     }
 
-    if (voucher.type === "Delivery") {
+    if ((voucher.type || "") === "Delivery") {
       setAppliedDeliveryVoucher(voucher);
     } else {
       setAppliedProductVoucher(voucher);
     }
-
-    const baseProduct = getTotal();
-    const baseDelivery = totalShippingFee || 0;
-
-    const calc = (v, base) => {
-      if (!v) return 0;
-      if (base < (v.minOrder || 0)) return 0;
-      let val = 0;
-      if (v.discountType === "Percent") {
-        val = Math.floor((Number(v.discountValue || 0) / 100) * base);
-      } else { // Amount
-        val = Math.floor(Number(v.discountValue || 0));
-      }
-      const cap = Number(v.maxDiscountAmount || 0);
-      if (cap > 0) val = Math.min(val, cap);
-      return Math.max(0, Math.min(val, base));
-    };
-
-    // Sau khi set state ở trên, dùng object hiện có để tính tổng giảm
-    const nextProductVoucher = voucher.type === "Product" ? voucher : appliedProductVoucher;
-    const nextDeliveryVoucher = voucher.type === "Delivery" ? voucher : appliedDeliveryVoucher;
-
-    const d1 = calc(nextProductVoucher, baseProduct);
-    const d2 = calc(nextDeliveryVoucher, baseDelivery);
-    setVoucherDiscount(d1 + d2);
     setVoucherError("");
   };
-function allowsPayment(voucher, method /* 'vnpay' | 'cod' */) {
-  if (!voucher) return true;
-  const pm = (voucher.paymentMethod || "All").toString().toLowerCase(); // "all" | "online" | "cash"
-  if (pm === "all") return true;
-  if (pm === "online") return method === "vnpay";
-  if (pm === "cash") return method !== "vnpay";
-  // fallback an toàn: coi như chỉ cash nếu BE lạ
-  return method !== "vnpay";
-}
+
+  function allowsPayment(voucher, method /* 'vnpay' | 'cod' */) {
+    if (!voucher) return true;
+    const pm = (voucher.paymentMethod || "All").toString().toLowerCase(); 
+    if (pm === "all") return true;
+    if (pm === "online") return method === "vnpay";
+    if (pm === "cash") return method !== "vnpay";
+    return method !== "vnpay";
+  }
+
+  const calcDiscount = (v, base, orderSubtotal, method) => {
+    if (!v) return 0;
+
+    if (method && !allowsPayment(v, method)) return 0;
+
+    if (orderSubtotal < (v.minOrder || 0)) return 0;
+
+    let val = 0;
+    if (v.discountType === "Percent") {
+      val = Math.floor((Number(v.discountValue || 0) / 100) * base);
+    } else {
+      val = Math.floor(Number(v.discountValue || 0));
+    }
+
+    const cap = Number(v.maxDiscountAmount || 0);
+    if (cap > 0) val = Math.min(val, cap);
+
+    // Không vượt quá base
+    return Math.max(0, Math.min(val, base));
+  };
+
+  const recomputeVoucherDiscount = React.useCallback(() => {
+    const orderSubtotal = getTotal();              
+    const baseProduct = orderSubtotal;              
+    const baseDelivery = totalShippingFee || 0;     
+
+    const d1 = calcDiscount(
+      appliedProductVoucher,
+      baseProduct,
+      orderSubtotal,
+      paymentMethod
+    );
+    const d2 = calcDiscount(
+      appliedDeliveryVoucher,
+      baseDelivery,
+      orderSubtotal,
+      paymentMethod
+    );
+
+    setVoucherDiscount(d1 + d2);
+  }, [
+    appliedProductVoucher,
+    appliedDeliveryVoucher,
+    totalShippingFee,
+    paymentMethod,          
+    selectedCartItems,      
+    buyNow                   
+  ]);
+
+  useEffect(() => {
+    recomputeVoucherDiscount();
+  }, [recomputeVoucherDiscount]);
 
   const handlePlaceOrder = async () => {
     if (!paymentMethod) {
@@ -182,16 +210,13 @@ function allowsPayment(voucher, method /* 'vnpay' | 'cod' */) {
     }
     setIsPlacingOrder(true);
 
-    const isOnline = paymentMethod === "vnpay";
-
     // Nếu đang có Product voucher mà không cho phép theo phương thức hiện tại -> báo lỗi
     if (appliedProductVoucher && !allowsPayment(appliedProductVoucher, paymentMethod)) {
       showNotification(
         `Mã giảm giá ${appliedProductVoucher.code} chỉ áp dụng cho ` +
-        ((appliedProductVoucher.paymentMethod || "Cash").toLowerCase() === "cash"
-          ? "thanh toán khi nhận hàng."
-          : "thanh toán VNPay."
-        ),
+          ((appliedProductVoucher.paymentMethod || "Cash").toLowerCase() === "cash"
+            ? "thanh toán khi nhận hàng."
+            : "thanh toán VNPay."),
         "error"
       );
       setIsPlacingOrder(false);
@@ -235,7 +260,6 @@ function allowsPayment(voucher, method /* 'vnpay' | 'cod' */) {
 
       if (result.success) {
         const orderId = result.data?.data;
-
         if (paymentMethod === "vnpay") {
           const vnpayResult = await getVnpayUrl(orderId);
           if (vnpayResult.success && vnpayResult.data) {
@@ -608,7 +632,7 @@ function allowsPayment(voucher, method /* 'vnpay' | 'cod' */) {
               </div>
             </section>
           ) : (
-            Object.entries(groupedCart).map(([artisanName, items], index) => (
+            Object.entries(groupedCart).map(([artisanName, items]) => (
               <section
                 key={artisanName}
                 className="bg-white rounded shadow-sm border border-gray-200 p-4 mb-6"
@@ -698,9 +722,12 @@ function allowsPayment(voucher, method /* 'vnpay' | 'cod' */) {
           {/* voucher xu */}
           <section className="bg-white rounded shadow-sm border border-gray-200 p-4 space-y-4">
             <VoucherPicker
-              voucherCode={voucherCode}
-              setVoucherCode={setVoucherCode}
-              onApply={handleApplyVoucher}
+              productCode={productCode}
+              setProductCode={setProductCode}
+              deliveryCode={deliveryCode}
+              setDeliveryCode={setDeliveryCode}
+              onApplyProduct={handleApplyVoucher}
+              onApplyDelivery={handleApplyVoucher}
               subtotal={getTotal()}
             />
 
