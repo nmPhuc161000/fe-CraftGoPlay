@@ -71,6 +71,15 @@ const orderService = {
     });
   },
 
+  async countOrderByUserId(userId) {
+    return performApiRequest(
+      API_ENDPOINTS_ORDER.COUNT_ORDER_BY_USER(userId),
+      {
+        method: "get",
+      }
+    );
+  },
+
   async countOrderByArtisanId(artisanId) {
     return performApiRequest(
       API_ENDPOINTS_ORDER.COUNT_ORDER_BY_ARTISAN(artisanId),

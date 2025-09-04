@@ -15,7 +15,7 @@ const DailyCheckInTab = () => {
     false,
   ]);
   const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
-  const rewards = [100, 100, 100, 200, 100, 100, 200];
+  const rewards = [20, 20, 20, 40, 20, 20, 40];
   const dayNames = [
     "Ngày 1",
     "Ngày 2",

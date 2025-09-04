@@ -230,13 +230,6 @@ const ArtisanOrdersTab = () => {
           color: "bg-red-600 hover:bg-red-700",
         },
       ],
-      Delivered: [
-        {
-          status: "DeliveryFailed",
-          label: "Giao hàng thất bại",
-          color: "bg-red-600 hover:bg-red-700",
-        },
-      ],
       DeliveryAttemptFailed: [
         {
           status: "DeliveryFailed",

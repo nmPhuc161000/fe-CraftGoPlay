@@ -14,7 +14,7 @@ const RefundWalletTab = () => {
     const fetchWallet = async () => {
       try {
         setIsLoading(true);
-        let response; // 👈 khai báo trước
+        let response;
 
         if (role === "User") {
           response = await walletService.getWalletByUserId(user?.id);
@@ -61,7 +61,149 @@ const RefundWalletTab = () => {
     });
   };
 
-  const refundTransactions = transactions.filter((tx) => tx.type === "Release");
+  // Map transaction status to icon, color, and label
+  const getTransactionStatusProps = (status, amount) => {
+    switch (status) {
+      case "Pending":
+        return {
+          icon: (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-yellow-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          ),
+          bgColor: "bg-yellow-100",
+          textColor: "text-yellow-600",
+          label: "Xử lý chờ thanh toán",
+          amountPrefix: "",
+        };
+      case "Release":
+        return {
+          icon: (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-green-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          ),
+          bgColor: "bg-green-100",
+          textColor: "text-green-600",
+          label: "Đã thanh toán",
+          amountPrefix: "+",
+        };
+      case "Purchase":
+        return {
+          icon: (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-red-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+              />
+            </svg>
+          ),
+          bgColor: "bg-red-100",
+          textColor: "text-red-600",
+          label: "Thanh toán",
+          amountPrefix: "-",
+        };
+      case "Refund":
+        return {
+          icon: (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-green-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
+              />
+            </svg>
+          ),
+          bgColor: "bg-green-100",
+          textColor: "text-green-600",
+          label: "Hoàn tiền",
+          amountPrefix: "+",
+        };
+      case "Withdrawal":
+        return {
+          icon: (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-red-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
+            </svg>
+          ),
+          bgColor: "bg-red-100",
+          textColor: "text-red-600",
+          label: "Rút tiền",
+          amountPrefix: "-",
+        };
+      default:
+        return {
+          icon: (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-gray-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          ),
+          bgColor: "bg-gray-100",
+          textColor: "text-gray-600",
+          label: "Không xác định",
+          amountPrefix: "",
+        };
+    }
+  };
 
   if (isLoading) {
     return (
@@ -106,7 +248,7 @@ const RefundWalletTab = () => {
         <p className="text-3xl font-bold mt-2">
           {formatCurrency(availableBalance)}
         </p>
-        {role == "Aritisan" && (
+        {role === "Artisan" && (
           <div className="mt-4 pt-4 border-t border-white-400 border-opacity-50">
             <p className="text-sm font-medium">Số tiền chờ hoàn</p>
             <p className="text-xl font-semibold">
@@ -139,7 +281,7 @@ const RefundWalletTab = () => {
         </div>
 
         <div className="p-6">
-          {refundTransactions.length === 0 ? (
+          {transactions.length === 0 ? (
             <div className="text-center py-8">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -155,48 +297,37 @@ const RefundWalletTab = () => {
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                 />
               </svg>
-              <p className="text-gray-500">Chưa có giao dịch hoàn tiền nào</p>
+              <p className="text-gray-500">Chưa có giao dịch nào</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {refundTransactions.map((tx) => {
+              {transactions.map((tx) => {
+                const { icon, bgColor, textColor, label, amountPrefix } =
+                  getTransactionStatusProps(tx.type, tx.amount);
                 return (
                   <div
                     key={tx.id}
                     className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     <div className="flex items-start">
-                      <div className="bg-green-100 p-3 rounded-full mr-4">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-5 w-5 text-green-600"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
+                      <div className={`${bgColor} p-3 rounded-full mr-4`}>
+                        {icon}
                       </div>
                       <div>
                         <p className="font-medium text-gray-800">
                           {tx.description}
                         </p>
-                        
                         <p className="text-sm text-gray-500 mt-1">
                           {formatDate(tx.dateTransaction)}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-green-600">
-                        +{formatCurrency(tx.amount)}
+                      <p className={`font-semibold ${textColor}`}>
+                        {amountPrefix}
+                        {formatCurrency(Math.abs(tx.amount))}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">Thành công</p>
+                      <p className="text-xs text-gray-500 mt-1">{label}</p>
                     </div>
                   </div>
                 );

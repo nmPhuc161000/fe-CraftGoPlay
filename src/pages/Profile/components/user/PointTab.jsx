@@ -102,16 +102,10 @@ const PointTab = () => {
       {/* Additional Actions - MOVED UP */}
       <div className="mb-6 flex flex-wrap gap-3">
         <Link
-          to="/voucher-exchange"
+          to="/profile-user/voucher-exchange"
           className="px-4 py-2 bg-white border border-orange-300 text-orange-500 rounded-full text-sm font-medium hover:bg-orange-50 transition"
         >
-          Đổi ưu đãi
-        </Link>
-        <Link
-          to="/how-to-earn"
-          className="px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-full text-sm font-medium hover:bg-gray-50 transition"
-        >
-          Cách kiếm thêm xu
+          Đổi voucher
         </Link>
       </div>
 
