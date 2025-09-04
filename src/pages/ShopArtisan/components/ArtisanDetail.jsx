@@ -41,7 +41,9 @@ const ArtisanDetail = ({ artisanId }) => {
     };
 
     if (artisanId) fetchData();
-    return () => { cancel = true; };
+    return () => {
+      cancel = true;
+    };
   }, [artisanId]);
 
   if (loading) return <div className="p-6 text-gray-600">Đang tải...</div>;
@@ -53,7 +55,6 @@ const ArtisanDetail = ({ artisanId }) => {
   return (
     <div className="bg-gradient-to-br from-[#f5ede6] via-[#f5f5f5] to-[#f7f3ef] w-full pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
-
         {/* Banner */}
         <div className="relative">
           <div
@@ -81,10 +82,12 @@ const ArtisanDetail = ({ artisanId }) => {
                     {craftVillage.location}
                   </span>
                 )}
-                {craftVillage?.establishedDate && (
+                {craftVillage?.artisanRequest?.modificationDate && (
                   <span className="inline-flex items-center gap-1 bg-[#eef9f2] px-3 py-1 rounded-full text-gray-700">
                     <FaCalendarAlt className="text-green-600" />
-                    {formatDateVi(craftVillage.establishedDate)}
+                    {formatDateVi(
+                      craftVillage.artisanRequest?.modificationDate
+                    ) || "N/A"}
                   </span>
                 )}
                 {dateOfBirth && (
@@ -106,9 +109,16 @@ const ArtisanDetail = ({ artisanId }) => {
             <h2 className="text-lg font-semibold mb-2 text-[#5e3a1e]">
               Làng nghề: {craftVillage.village_Name}
             </h2>
+            <p className="text-gray-700 leading-relaxed">
+              Ngày thành lập:{" "}
+              {formatDateVi(craftVillage.establishedDate) || "N/A"}
+            </p>
+            <p className="text-gray-700 leading-relaxed">
+              Địa chỉ: {craftVillage.location}
+            </p>
             {craftVillage.description && (
               <p className="text-gray-700 leading-relaxed">
-                {craftVillage.description}
+                Mô tả: {craftVillage.description}
               </p>
             )}
           </div>

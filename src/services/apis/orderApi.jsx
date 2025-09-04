@@ -61,7 +61,7 @@ const orderService = {
       method: "get",
     });
   },
-  
+
   async updateStatusOrder(orderId, status) {
     const formData = new FormData();
     formData.append("statusDto", status);
@@ -69,6 +69,15 @@ const orderService = {
       method: "put",
       data: formData,
     });
+  },
+
+  async countOrderByArtisanId(artisanId) {
+    return performApiRequest(
+      API_ENDPOINTS_ORDER.COUNT_ORDER_BY_ARTISAN(artisanId),
+      {
+        method: "get",
+      }
+    );
   },
 };
 export default orderService;

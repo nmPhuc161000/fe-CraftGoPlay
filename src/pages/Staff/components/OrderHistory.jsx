@@ -78,10 +78,6 @@ const OrderHistory = () => {
     <div className="w-full min-h-screen bg-amber-25 flex justify-center items-start py-8 px-2">
       <div className="w-full bg-amber-25 rounded-3xl shadow-xl p-4 sm:p-6 md:p-10 mx-auto">
         {/* Breadcrumb */}
-        <div className="mb-2 text-sm text-gray-500">
-          Trang chủ / Quản trị /{" "}
-          <span className="text-blue-600 font-semibold">quản lý đơn hàng</span>
-        </div>
         <h1 className="text-2xl font-bold mb-6">Lịch sử đơn hàng</h1>
         {/* Tabs */}
         <div className="flex flex-wrap gap-3 mb-6 items-center">

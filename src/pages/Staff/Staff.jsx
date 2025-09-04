@@ -46,7 +46,6 @@ const Staff = () => {
           {selected === "category" && <ManageCategory />}
           {selected === "subcategory" && <ManageSubCategory />}
           {selected === "request" && <ArtisanRequestList />}
-          {selected === "skill" && <ManageSkill />}
           {selected === "craftVilage" && <ManageVillage />}
           {selected === "history" && <OrderHistory />}
           {selected === "voucher" && <ManageVoucher />}
