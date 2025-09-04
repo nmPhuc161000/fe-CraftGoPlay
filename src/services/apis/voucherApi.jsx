@@ -5,6 +5,10 @@ import { API_ENDPOINTS_VOUCHER } from "../../constants/apiEndPoint";
 const validateStatus = (status) => {
     return typeof status === "boolean" ? status : true;
 };
+const toNumberOrNull = (v) => {
+    if (v === "" || v === null || v === undefined) return null;
+    return Number(v);
+};
 
 const voucherService = {
     async getAllVouchers() {
@@ -13,7 +17,7 @@ const voucherService = {
         });
     },
 
-    async createVoucher({ code, name, description, type, discountType, paymentMethod, minOrderValue, maxDiscountAmount, quantity, discount, startDate, endDate, isActive }) {
+    async createVoucher({ code, name, description, type, discountType, paymentMethod, minOrderValue, maxDiscountAmount, pointChangeAmount, quantity, discount, startDate, endDate, isActive }) {
         if (!code?.trim()) {
             throw new Error("Code là bắt buộc");
         }
@@ -53,6 +57,14 @@ const voucherService = {
         if (quantity && (isNaN(quantity) || Number(quantity) < 0)) {
             throw new Error("Quantity phải là số không âm");
         }
+        if (
+            pointChangeAmount !== "" &&
+            pointChangeAmount !== null &&
+            pointChangeAmount !== undefined &&
+            (isNaN(pointChangeAmount) || Number(pointChangeAmount) < 0)
+        ) {
+            throw new Error("PointChangeAmount phải là số không âm");
+        }
 
         const formData = new FormData();
         formData.append("Code", code.trim());
@@ -63,6 +75,10 @@ const voucherService = {
         formData.append("PaymentMethod", paymentMethod);
         formData.append("MinOrderValue", minOrderValue || "");
         formData.append("MaxDiscountAmount", maxDiscountAmount || "");
+        formData.append(
+            "PointChangeAmount",
+            toNumberOrNull(pointChangeAmount) ?? ""
+        );
         formData.append("Quantity", quantity || "");
         formData.append("Discount", discount);
         formData.append("StartDate", startDate);
@@ -78,6 +94,7 @@ const voucherService = {
             PaymentMethod: paymentMethod,
             MinOrderValue: minOrderValue || "",
             MaxDiscountAmount: maxDiscountAmount || "",
+            PointChangeAmount: toNumberOrNull(pointChangeAmount) ?? "",
             Quantity: quantity || "",
             Discount: discount,
             StartDate: startDate,
@@ -94,7 +111,7 @@ const voucherService = {
         });
     },
 
-    async updateVoucher(id, { code, name, description, type, discountType, paymentMethod, minOrderValue, maxDiscountAmount, usedCount, quantity, discount, startDate, endDate, isActive }) {
+    async updateVoucher(id, { code, name, description, type, discountType, paymentMethod, minOrderValue, maxDiscountAmount, usedCount, pointChangeAmount, quantity, discount, startDate, endDate, isActive }) {
         if (!id) {
             throw new Error("Id là bắt buộc");
         }
@@ -137,6 +154,14 @@ const voucherService = {
         if (quantity && (isNaN(quantity) || Number(quantity) < 0)) {
             throw new Error("Quantity phải là số không âm");
         }
+        if (
+            pointChangeAmount !== "" &&
+            pointChangeAmount !== null &&
+            pointChangeAmount !== undefined &&
+            (isNaN(pointChangeAmount) || Number(pointChangeAmount) < 0)
+        ) {
+            throw new Error("PointChangeAmount phải là số không âm");
+        }
 
         const formData = new FormData();
         formData.append("Id", id);
@@ -148,6 +173,10 @@ const voucherService = {
         formData.append("PaymentMethod", paymentMethod);
         formData.append("MinOrderValue", minOrderValue || "");
         formData.append("MaxDiscountAmount", maxDiscountAmount || "");
+        formData.append(
+            "PointChangeAmount",
+            toNumberOrNull(pointChangeAmount) ?? ""
+        );
         formData.append("UsedCount", usedCount || "0");
         formData.append("Quantity", quantity || "");
         formData.append("Discount", discount);
@@ -165,6 +194,7 @@ const voucherService = {
             PaymentMethod: paymentMethod,
             MinOrderValue: minOrderValue || "",
             MaxDiscountAmount: maxDiscountAmount || "",
+            PointChangeAmount: toNumberOrNull(pointChangeAmount) ?? "",
             UsedCount: usedCount || "0",
             Quantity: quantity || "",
             Discount: discount,

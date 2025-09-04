@@ -209,3 +209,11 @@ export const API_ENDPOINTS_DASHBOARD = {
   GET_DASHBOARD_FOR_ARTISAN: (artisanId, type, from, to) =>
     `/api/Dashboard/DashboardForArtisan?ArtisanId=${artisanId}&Type=${type}&From=${from}&To=${to}`,
 };
+
+export const API_ENDPOINTS_USER_VOUCHER = {
+  GET_ALL_VOUCHERS_BY_USER_ID: (userId, voucherType = "") =>
+    `/api/UserVoucher/GetAllVouchersByUserId?UserId=${userId}${
+      voucherType ? `&VoucherType=${voucherType}` : ""
+    }`,
+  SWAP_VOUCHER: "/api/UserVoucher/SwapVoucher",
+};
