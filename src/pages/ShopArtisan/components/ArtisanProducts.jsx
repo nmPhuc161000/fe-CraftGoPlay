@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaSearch, FaStar, FaShoppingCart } from "react-icons/fa";
 import productService from "../../../services/apis/productApi";
+import { useNavigate } from "react-router-dom"; 
 
 const formatVND = (value) =>
     (Number(value) || 0).toLocaleString("vi-VN") + "₫";
@@ -23,6 +24,7 @@ const ArtisanProducts = ({ artisanId }) => {
     const [loading, setLoading] = useState(true);
     const [filterText, setFilterText] = useState("");
     const [products, setProducts] = useState([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchProducts = async (pageIndex = 1) => {
@@ -87,6 +89,7 @@ const ArtisanProducts = ({ artisanId }) => {
                 <AnimatePresence>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-7">
                         {filtered.map((item, idx) => {
+                            const id = item?.id;
                             const name = item?.name ?? "Sản phẩm";
                             const price = item?.price ?? 0;
                             const sold = item?.sold ?? item?.quantitySold ?? 0;
@@ -168,6 +171,7 @@ const ArtisanProducts = ({ artisanId }) => {
                                         <motion.button
                                             whileHover={{ scale: 1.06, backgroundColor: "#7a4a22" }}
                                             whileTap={{ scale: 0.97 }}
+                                            onClick={() => navigate(`/product/${id}`)}
                                             className="mt-auto flex items-center justify-center gap-2 py-2 px-4 rounded-full bg-gradient-to-r from-[#8b5e3c] to-[#c7903f] text-white font-semibold shadow transition-all"
                                         >
                                             <FaShoppingCart className="text-base" />

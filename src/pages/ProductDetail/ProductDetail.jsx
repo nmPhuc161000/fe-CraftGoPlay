@@ -237,7 +237,7 @@ const ProductDetail = () => {
 
           {/* gioi thieu them */}
           <div className="mt-6">
-            <details className="mb-4 border-b pb-2">
+            {/* <details className="mb-4 border-b pb-2">
               <summary className="cursor-pointer font-bold">
                 Chất Liệu Tạo Nên Sự Khác Biệt
               </summary>
@@ -250,7 +250,7 @@ const ProductDetail = () => {
                   <p>Không có thông tin chất liệu.</p>
                 )}
               </div>
-            </details>
+            </details> */}
             <details className="mb-4 border-b pb-2">
               <summary className="cursor-pointer font-bold">
                 Nghệ Nhân Chế Tác Thủ Công
