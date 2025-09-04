@@ -132,7 +132,7 @@ const OrdersTab = () => {
         case "complete":
           newStatus = "Completed";
           break;
-        case "returnRequest": 
+        case "returnRequest": {
           const items = order?.orderItems;
           if (!Array.isArray(items) || items.length === 0) {
             showNotification("Không tìm thấy sản phẩm trong đơn hàng", "error");
@@ -176,6 +176,7 @@ const OrdersTab = () => {
             );
           }
           return;
+        }
         case "rating":
           console.log("Order found for rating:", order);
           if (order && order.orderItems && order.orderItems.length > 0) {
@@ -362,6 +363,15 @@ const OrdersTab = () => {
             color:
               "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-green-200",
             icon: <FiCheck className="w-4 h-4" />,
+          },
+        ],
+        PartialReturn: [
+          {
+            action: "returnRequest",
+            label: "Yêu cầu trả hàng",
+            color:
+              "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-orange-200",
+            icon: <FiPackage className="w-4 h-4" />,
           },
         ],
         Completed: [
@@ -591,22 +601,29 @@ const OrdersTab = () => {
                                         {/* Display item status next to product name */}
                                         <div
                                           className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                                            statusConfig[convertStatus(item.status)]
-                                              ? statusConfig[convertStatus(item.status)]
-                                                  .color
+                                            statusConfig[
+                                              convertStatus(item.status)
+                                            ]
+                                              ? statusConfig[
+                                                  convertStatus(item.status)
+                                                ].color
                                               : "bg-gray-100 text-gray-700"
                                           }`}
                                         >
-                                          {statusConfig[convertStatus(item.status)] ? (
+                                          {statusConfig[
+                                            convertStatus(item.status)
+                                          ] ? (
                                             <>
                                               {
-                                                statusConfig[convertStatus(item.status)]
-                                                  .icon
+                                                statusConfig[
+                                                  convertStatus(item.status)
+                                                ].icon
                                               }
                                               <span className="ml-1">
                                                 {
-                                                  statusConfig[convertStatus(item.status)]
-                                                    .text
+                                                  statusConfig[
+                                                    convertStatus(item.status)
+                                                  ].text
                                                 }
                                               </span>
                                             </>

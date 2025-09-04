@@ -30,19 +30,46 @@ const ArtisanOrdersTab = () => {
   const [statusCounts, setStatusCounts] = useState({});
   const [loading, setLoading] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("all");
+
+  // state phân trang
+  const [pageIndex, setPageIndex] = useState(1); // Trang hiện tại (tiếng Việt: trang)
+  const [pageSize] = useState(10); // Số đơn hàng mỗi trang
+  const [totalOrders, setTotalOrders] = useState(0);
+
   const { showNotification } = useNotification();
 
-  // Fetch orders based on status
+  // Lấy số lượng đơn hàng
+  useEffect(() => {
+    const fetchTotalOrders = async () => {
+      try {
+        const res = await orderService.countOrderByArtisanId(user.id);
+        if (res.data.error === 0) {
+          console.log("abc: ", res.data.data.totalOrders);
+
+          setTotalOrders(res.data.data.totalOrders);
+        }
+      } catch (err) {
+        console.error("Lỗi khi lấy tổng số đơn hàng:", err);
+      }
+    };
+
+    if (user?.id) fetchTotalOrders();
+  }, [user]);
+
+  // Lấy danh sách đơn hàng theo trang và trạng thái
   useEffect(() => {
     const fetchOrders = async (group = "") => {
       try {
         setLoading(true);
-        // Luôn lấy tất cả đơn hàng, sau đó lọc theo group ở client
-        const res = await orderService.getOrderByArtisanId(user.id, 1, 100, "");
+        const res = await orderService.getOrderByArtisanId(
+          user.id,
+          pageIndex,
+          pageSize,
+          "" // bạn có thể truyền status filter vào đây nếu API hỗ trợ
+        );
 
         if (res.data.error === 0 && Array.isArray(res.data.data)) {
           const transformed = res.data.data.map(transformOrderData);
-          console.log("Transformed Orders:", transformed);
 
           // Tính counts cho từng group
           const counts = statusFilters.reduce((acc, filter) => {
@@ -59,20 +86,18 @@ const ArtisanOrdersTab = () => {
           setStatusCounts(counts);
           setOrders(transformed);
 
-          // Lọc đơn hàng theo group được chọn
+          // Lọc theo group đã chọn
           if (group === "all" || group === "") {
             setFilteredOrders(transformed);
           } else {
             const filter = statusFilters.find((f) => f.value === group);
-            if (filter && filter.includes) {
-              setFilteredOrders(
-                transformed.filter((order) =>
-                  filter.includes.includes(order.status)
-                )
-              );
-            } else {
-              setFilteredOrders([]);
-            }
+            setFilteredOrders(
+              filter
+                ? transformed.filter((order) =>
+                    filter.includes.includes(order.status)
+                  )
+                : []
+            );
           }
         }
       } catch (err) {
@@ -85,7 +110,17 @@ const ArtisanOrdersTab = () => {
     if (user?.id) {
       fetchOrders(selectedStatus);
     }
-  }, [user, selectedStatus]);
+  }, [user, selectedStatus, pageIndex, pageSize]);
+
+  // Tính số trang
+  const totalPages = Math.ceil(totalOrders / pageSize);
+
+  // Hàm đổi trang
+  const handleChangePage = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPageIndex(newPage);
+    }
+  };
 
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
@@ -190,8 +225,8 @@ const ArtisanOrdersTab = () => {
           color: "bg-green-600 hover:bg-green-700",
         },
         {
-          status: "DeliveryFailed",
-          label: "Giao hàng thất bại",
+          status: "DeliveryAttemptFailed",
+          label: "Giao hàng không thành công",
           color: "bg-red-600 hover:bg-red-700",
         },
       ],
@@ -202,11 +237,11 @@ const ArtisanOrdersTab = () => {
           color: "bg-red-600 hover:bg-red-700",
         },
       ],
-      ReturnRequested: [
+      DeliveryAttemptFailed: [
         {
-          status: "Returned",
-          label: "Xác nhận đã trả hàng",
-          color: "bg-pink-600 hover:bg-pink-700",
+          status: "DeliveryFailed",
+          label: "Giao hàng thất bại",
+          color: "bg-red-600 hover:bg-red-700",
         },
       ],
     };
@@ -448,6 +483,13 @@ const ArtisanOrdersTab = () => {
                               {item.product?.name || "Sản phẩm"}
                             </h5>
                             <p className="text-sm text-gray-600 mt-1">
+                              Trạng thái:{" "}
+                              <span className="font-medium">
+                                {statusConfig[convertStatus(item.status)]
+                                  ?.text || item.status}
+                              </span>
+                            </p>
+                            <p className="text-sm text-gray-600 mt-1">
                               Số lượng:{" "}
                               <span className="font-medium">
                                 {item.quantity}
@@ -559,6 +601,27 @@ const ArtisanOrdersTab = () => {
             })}
           </div>
         )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center gap-2 mt-6">
+        <button
+          onClick={() => handleChangePage(pageIndex - 1)}
+          disabled={pageIndex === 1}
+          className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+        >
+          Trang trước
+        </button>
+        <span>
+          Trang {pageIndex} / {totalPages}
+        </span>
+        <button
+          onClick={() => handleChangePage(pageIndex + 1)}
+          disabled={pageIndex === totalPages}
+          className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+        >
+          Trang sau
+        </button>
       </div>
     </div>
   );

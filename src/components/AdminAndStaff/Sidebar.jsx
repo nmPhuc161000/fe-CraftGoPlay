@@ -26,7 +26,7 @@ const MAIN_SHADOW = "shadow-[0_4px_24px_0_rgba(62,38,18,0.2)]";
 // Menu configurations
 const adminMenu = [
   {
-    label: "Bảng điều khiển",
+    label: "Bảng doanh thu",
     icon: (
       <svg
         width="22"
@@ -114,7 +114,6 @@ const staffMenu = [
     value: "craftVilage",
     icon: <MdOutlineHolidayVillage size={22} />,
   },
-  { label: "Quản lý kĩ năng", value: "skill", icon: <MdBolt size={22} /> },
   {
     label: "Lịch sử đơn hàng",
     value: "history",
@@ -267,7 +266,7 @@ const Sidebar = ({
                 </div>
                 {isOpen && (
                   <span className="relative z-10 transition-all duration-200 group-hover:translate-x-1">
-                    Bảng điều khiển
+                    Bảng doanh thu
                   </span>
                 )}
                 {selected === "dashboard" && (
