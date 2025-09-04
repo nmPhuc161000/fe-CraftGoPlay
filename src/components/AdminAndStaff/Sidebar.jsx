@@ -114,7 +114,6 @@ const staffMenu = [
     value: "craftVilage",
     icon: <MdOutlineHolidayVillage size={22} />,
   },
-  { label: "Quản lý kĩ năng", value: "skill", icon: <MdBolt size={22} /> },
   {
     label: "Lịch sử đơn hàng",
     value: "history",

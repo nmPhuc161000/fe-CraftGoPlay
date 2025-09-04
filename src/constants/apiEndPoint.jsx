@@ -130,6 +130,8 @@ export const API_ENDPOINTS_ORDER = {
   CREATE_FROM_CART: "/api/Order/CreateFromCart",
   CREATE_DIRECT: (userId) => `/api/Order/CreateDirect/${userId}`,
   UPDATE_STATUS_ORDER: (orderId) => `/api/Order/status/${orderId}`,
+  COUNT_ORDER_BY_ARTISAN: (artisanId) =>
+    `/api/Order/CountOrdersByArtisanId/${artisanId}`,
 };
 
 export const API_ENDPOINTS_ARTISANREQUEST = {

@@ -19,7 +19,6 @@ const ProfileTab = () => {
     gender: user.gender || "other",
     birthday: user.dateOfBirth || "Chưa cập nhật",
     workshopName: user.workshopName || "Hội An",
-    craftSkills: user.craftSkills || ["Gốm", "Thêu", "Mây tre"],
     yearsOfExperience: user.yearsOfExperience || 5,
     preferences: user.preferences || ["Đồ gốm", "Thủ công truyền thống"],
     bio: user.bio || "Đam mê nghệ thuật truyền thống và chế tác thủ công",
@@ -260,7 +259,7 @@ const ProfileTab = () => {
       {/* Profile Content */}
       {!isEditing ? (
         // Display Mode
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {/* Thông tin cơ bản */}
           <div className="bg-white rounded-xl shadow-sm p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
@@ -282,50 +281,13 @@ const ProfileTab = () => {
                 value={formatBirthdayForDisplay(formData.birthday)}
               />
               {role === "Artisan" && (
-                <InfoField label="Làng nghề" value={formData.craftVillage.village_Name} />
-              )}
-            </dl>
-          </div>
-
-          {/* Thông tin chuyên môn */}
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-              <span className="w-2 h-2 bg-[#5e3a1e] rounded-full mr-3"></span>
-              {role === "Artisan" ? "Thông tin nghề nghiệp" : "Sở thích"}
-            </h3>
-            <dl className="space-y-1">
-              {role === "Artisan" ? (
-                <>
-                  <InfoField
-                    label="Kỹ năng chế tác"
-                    value={formData.craftSkills}
-                    isArray={true}
-                  />
-                  <InfoField
-                    label="Số năm kinh nghiệm"
-                    value={`${formData.yearsOfExperience} năm`}
-                  />
-                </>
-              ) : (
                 <InfoField
-                  label="Sở thích"
-                  value={formData.preferences}
-                  isArray={true}
+                  label="Làng nghề"
+                  value={formData.craftVillage.village_Name}
                 />
               )}
             </dl>
           </div>
-
-          {/* Giới thiệu */}
-          {role === "Artisan" && (
-            <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                <span className="w-2 h-2 bg-[#5e3a1e] rounded-full mr-3"></span>
-                Giới thiệu
-              </h3>
-              <p className="text-gray-700 leading-relaxed">{formData.bio}</p>
-            </div>
-          )}
         </div>
       ) : (
         // Edit Mode
@@ -412,73 +374,6 @@ const ProfileTab = () => {
                   className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
                 />
               </div>
-            </div>
-
-            {/* Phần mở rộng */}
-            <div className="md:col-span-2 space-y-4">
-              {role === "Artisan" && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Giới thiệu
-                  </label>
-                  <textarea
-                    name="bio"
-                    value={formData.bio || ""}
-                    onChange={handleChange}
-                    rows="3"
-                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
-                    placeholder="Giới thiệu về phong cách làm nghề, chất liệu yêu thích..."
-                  />
-                </div>
-              )}
-
-              {role === "Artisan" && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Kỹ năng chế tác (cách nhau bằng dấu phẩy)
-                    </label>
-                    <input
-                      type="text"
-                      name="craftSkills"
-                      value={formData.craftSkills.join(", ")}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
-                      placeholder="Gốm, mây tre, thêu, ..."
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Số năm kinh nghiệm
-                    </label>
-                    <input
-                      type="number"
-                      name="yearsOfExperience"
-                      value={formData.yearsOfExperience || 0}
-                      onChange={handleChange}
-                      min="0"
-                      className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
-                    />
-                  </div>
-                </>
-              )}
-
-              {role === "Customer" && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Sở thích (cách nhau bằng dấu phẩy)
-                  </label>
-                  <input
-                    type="text"
-                    name="preferences"
-                    value={formData.preferences.join(", ")}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
-                    placeholder="Đồ gốm, thủ công truyền thống, ..."
-                  />
-                </div>
-              )}
             </div>
 
             {/* Buttons */}

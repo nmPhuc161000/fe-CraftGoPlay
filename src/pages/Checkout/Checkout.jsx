@@ -111,6 +111,7 @@ const Checkout = () => {
 
   const maxDiscountByPercent = Math.floor((getTotal() * 0.15) / 100) * 100; //15% va lam tron xuong boi cua 100
   const maxDiscountByCoins = (Number(userCoins) || 0) * 100; // 1 xu = 100 VNĐ
+  const userCoinsToUse = Math.floor(maxDiscountByPercent / 100); // So xu co the dung
 
   const coinDiscount = useCoins
     ? Math.min(maxDiscountByPercent, maxDiscountByCoins)
@@ -223,6 +224,7 @@ function allowsPayment(voucher, method /* 'vnpay' | 'cod' */) {
         "VoucherProductCode",
         allowsPayment(appliedProductVoucher, paymentMethod) ? (appliedProductVoucher?.code || "") : ""
       );
+      formData.append("Point", userCoinsToUse);
       formData.append(
         "VoucherDeliveryCode",
         allowsPayment(appliedDeliveryVoucher, paymentMethod) ? (appliedDeliveryVoucher?.code || "") : ""
@@ -277,6 +279,7 @@ function allowsPayment(voucher, method /* 'vnpay' | 'cod' */) {
         "VoucherDeliveryCode",
         allowsPayment(appliedDeliveryVoucher, paymentMethod) ? (appliedDeliveryVoucher?.code || "") : ""
       );
+      formData.append("Point", userCoinsToUse);
 
       const result = await createOrderFromCart(formData);
       console.log("Order result:", result);
@@ -703,11 +706,11 @@ function allowsPayment(voucher, method /* 'vnpay' | 'cod' */) {
 
             <div className="flex items-center justify-between">
               <label className="text-[15px] font-medium">
-                Dùng {userCoins} xu
+                Dùng {userCoins} xu (1 xu = 100đ)
                 <br />
                 <span className="text-xs text-gray-500">
                   Giảm tối đa {(coinDiscount || 0).toLocaleString("vi-VN")}₫ (
-                  {Math.floor((coinDiscount || 0) / 100)} xu)
+                  {userCoinsToUse} xu)
                 </span>
                 <br />
                 <span className="text-[11px] text-gray-400 italic">
