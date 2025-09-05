@@ -20,6 +20,7 @@ import PointTab from "../pages/Profile/components/user/PointTab";
 import ReturnRequestTab from "../pages/Profile/components/user/ReturnRequestTab";
 import ArtisanReturnRequestsTab from "../pages/Profile/components/artisan/ArtisanReturnRequestsTab";
 import VoucherExchange from "../pages/Profile/components/user/VoucherExchange";
+import Withdrawal from "../pages/Profile/components/Withdrawal";
 
 const ProfileRoutes = ({ role, user }) => {
   if (!user) return <div>Error: User not found</div>;
@@ -29,6 +30,8 @@ const ProfileRoutes = ({ role, user }) => {
       {/* Route chung */}
       <Route path="profile" element={<ProfileTab role={role} user={user} />} />
       <Route path="refundWallet" element={<RefundWalletTab />} />
+      <Route path="returnRequests" element={<ArtisanReturnRequestsTab />} />
+      <Route path="withdrawal" element={<Withdrawal />} />
       {/* Route chỉ dành cho Artisan */}
       {role === "Artisan" && (
         <>
@@ -53,7 +56,6 @@ const ProfileRoutes = ({ role, user }) => {
             }
           />
           <Route path="artisanOrders" element={<ArtisanOrdersTab />} />
-          <Route path="returnRequests" element={<ArtisanReturnRequestsTab />} />
         </>
       )}
 

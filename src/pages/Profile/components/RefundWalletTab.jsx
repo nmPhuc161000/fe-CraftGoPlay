@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import walletService from "../../../services/apis/walletApi";
 import { AuthContext } from "../../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const RefundWalletTab = () => {
   const [availableBalance, setAvailableBalance] = useState(0);
@@ -9,6 +10,7 @@ const RefundWalletTab = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useContext(AuthContext);
   const role = localStorage.getItem("role");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchWallet = async () => {
@@ -18,10 +20,8 @@ const RefundWalletTab = () => {
 
         if (role === "User") {
           response = await walletService.getWalletByUserId(user?.id);
-          console.log("Wallet API response (User):", response);
         } else if (role === "Artisan") {
           response = await walletService.getWalletByArtisanId(user?.id);
-          console.log("Wallet API response (Artisan):", response);
         }
         const walletResponse = response?.data;
 
@@ -59,6 +59,10 @@ const RefundWalletTab = () => {
       hour: "2-digit",
       minute: "2-digit",
     });
+  };
+
+  const handleWithdrawClick = () => {
+    navigate("/profile-user/withdrawal");
   };
 
   // Map transaction status to icon, color, and label
@@ -224,23 +228,47 @@ const RefundWalletTab = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6 mr-2 text-[#8d6349]"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6 mr-2 text-[#8d6349]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
+            />
+          </svg>
+          Số dư tài khoản
+        </h2>
+
+        {/* Nút rút tiền */}
+        <button
+          onClick={handleWithdrawClick}
+          className="flex items-center px-4 py-2 bg-[#8d6349] text-white rounded-lg hover:bg-[#7a5540] transition-colors"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"
-          />
-        </svg>
-        Số dư tài khoản
-      </h2>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+            />
+          </svg>
+          Rút tiền
+        </button>
+      </div>
 
       {/* Thẻ số dư */}
       <div className="mb-8 rounded-xl p-6 shadow-lg bg-gradient-to-r from-[#be9e7f] to-[#8d6349] text-white">

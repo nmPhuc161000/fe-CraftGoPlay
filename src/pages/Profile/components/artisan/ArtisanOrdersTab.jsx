@@ -232,9 +232,9 @@ const ArtisanOrdersTab = () => {
       ],
       DeliveryAttemptFailed: [
         {
-          status: "DeliveryFailed",
-          label: "Giao hàng thất bại",
-          color: "bg-red-600 hover:bg-red-700",
+          status: "Shipped",
+          label: "Giao Hàng lại",
+          color: "bg-purple-600 hover:bg-purple-700",
         },
       ],
     };

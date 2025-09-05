@@ -25,6 +25,16 @@ const walletService = {
       method: "get",
     });
   },
+
+  async withdrawal(amount) {
+    return performApiRequest(API_ENDPOINTS_WALLET.WITHDRAWAL, {
+      method: "post",
+      data: amount,
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
 };
 
 export default walletService;
