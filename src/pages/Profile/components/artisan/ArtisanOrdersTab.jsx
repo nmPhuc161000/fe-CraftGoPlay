@@ -491,6 +491,7 @@ const ArtisanOrdersTab = () => {
                               }
                               alt={item.product?.name}
                               className="w-full h-full object-cover"
+                              crossorigin="anonymous"
                             />
                           </div>
                           <div className="flex-1 min-w-0">

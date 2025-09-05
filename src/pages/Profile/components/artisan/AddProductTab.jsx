@@ -248,6 +248,7 @@ export default function AddProductTab() {
                     src={img}
                     alt={`Preview ${index + 1}`}
                     className="w-full h-32 object-cover rounded-md"
+                    crossorigin="anonymous"
                   />
                   <button
                     type="button"

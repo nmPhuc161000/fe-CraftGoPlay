@@ -70,6 +70,7 @@ const ForgetPassword = () => {
                 src={backgroundImg}
                 alt="background"
                 className="absolute inset-0 w-full h-full object-cover blur-md brightness-75 z-[-1]"
+                crossorigin="anonymous"
             />
             <div className="bg-[#fffdf8] shadow-2xl rounded-2xl max-w-4xl w-full grid grid-cols-1 md:grid-cols-2 overflow-hidden">
                 <div className="bg-[#f2e8dc] text-[#5e3a1e] flex flex-col justify-center items-center p-8 space-y-4">
@@ -78,6 +79,7 @@ const ForgetPassword = () => {
                             src={loginImg}
                             alt="CraftGoPlay Logo"
                             className="w-40 h-40 object-contain rounded-full shadow-md"
+                            crossorigin="anonymous"
                         />
                     </Link>
                     <h2 className="text-2xl font-bold text-center">

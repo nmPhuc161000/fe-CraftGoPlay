@@ -97,6 +97,7 @@ const ProductReviews = ({ productId }) => {
                                             src={review.avatar}
                                             alt={review.name}
                                             className="w-16 h-16 rounded-full object-cover shadow-md ring-2 ring-[#d4a373]/50"
+                                            crossorigin="anonymous"
                                         />
                                     ) : (
                                         <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#f3e7db] to-[#d4a373]/50 flex items-center justify-center text-2xl font-bold text-[#8b5e3c] shadow-md ring-2 ring-[#d4a373]/30">

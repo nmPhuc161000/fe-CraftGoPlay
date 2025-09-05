@@ -345,6 +345,7 @@ const ReturnRequestTab = () => {
                           alt={p.name}
                           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                           onError={(e) => (e.currentTarget.src = "/placeholder.svg")}
+                          crossorigin="anonymous"
                         />
                       ) : (
                         <div className="w-full h-full bg-gray-100 flex items-center justify-center">

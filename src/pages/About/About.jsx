@@ -11,6 +11,7 @@ const About = () => {
           src={loginImg}
           alt="CraftGoPlay Banner Giới thiệu"
           className="w-full h-full object-cover object-center"
+          crossorigin="anonymous"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-center justify-center">
           <div className="text-center text-white">
@@ -34,10 +35,19 @@ const About = () => {
             {/* Phần văn bản */}
             <div className="space-y-6">
               <p className="text-gray-700 text-lg leading-relaxed">
-                CraftGoPlay ra đời từ niềm đam mê kết nối nghệ thuật thủ công truyền thống với thế giới trò chơi hiện đại. Với tầm nhìn trao quyền cho các nghệ nhân, chúng tôi đã xây dựng một nền tảng nơi sự sáng tạo được nuôi dưỡng. Hành trình bắt đầu từ một cộng đồng nhỏ các nghệ nhân tại Việt Nam, và giờ đây, chúng tôi kết nối hàng nghìn nhà sáng tạo với khách hàng trên toàn cầu.
+                CraftGoPlay ra đời từ niềm đam mê kết nối nghệ thuật thủ công
+                truyền thống với thế giới trò chơi hiện đại. Với tầm nhìn trao
+                quyền cho các nghệ nhân, chúng tôi đã xây dựng một nền tảng nơi
+                sự sáng tạo được nuôi dưỡng. Hành trình bắt đầu từ một cộng đồng
+                nhỏ các nghệ nhân tại Việt Nam, và giờ đây, chúng tôi kết nối
+                hàng nghìn nhà sáng tạo với khách hàng trên toàn cầu.
               </p>
               <p className="text-gray-700 text-lg leading-relaxed">
-                Tại CraftGoPlay, chúng tôi tôn vinh sự tinh xảo thủ công, mang đến những sản phẩm độc đáo, mỗi món đồ đều kể một câu chuyện văn hóa. Kết hợp với các trò chơi mini hấp dẫn, nền tảng của chúng tôi tạo ra trải nghiệm độc đáo, hòa quyện giữa nghệ thuật, văn hóa và niềm vui.
+                Tại CraftGoPlay, chúng tôi tôn vinh sự tinh xảo thủ công, mang
+                đến những sản phẩm độc đáo, mỗi món đồ đều kể một câu chuyện văn
+                hóa. Kết hợp với các trò chơi mini hấp dẫn, nền tảng của chúng
+                tôi tạo ra trải nghiệm độc đáo, hòa quyện giữa nghệ thuật, văn
+                hóa và niềm vui.
               </p>
             </div>
 
@@ -50,6 +60,7 @@ const About = () => {
                     src={loginImg}
                     alt="About CraftGoPlay"
                     className="absolute inset-0 w-[80%] h-[80%] object-cover opacity-50 rounded-lg mx-auto my-auto transition-transform duration-300 hover:scale-105"
+                    crossorigin="anonymous"
                   />
                   {/* Văn bản trên hình ảnh */}
                   <p className="text-[#5e3a1e] text-center text-xl md:text-2xl font-semibold relative z-10 px-4 py-2 bg-white/80 rounded-md shadow-lg">
@@ -74,10 +85,14 @@ const About = () => {
               <div className="w-10 h-10 bg-[#5e3a1e]/20 rounded-full flex items-center justify-center mr-3">
                 <span className="text-[#5e3a1e] text-lg">✨</span>
               </div>
-              <h3 className="text-xl font-semibold text-[#5e3a1e] mb-0">Sứ Mệnh</h3>
+              <h3 className="text-xl font-semibold text-[#5e3a1e] mb-0">
+                Sứ Mệnh
+              </h3>
             </div>
             <p className="text-gray-600 text-base leading-relaxed">
-              Trao quyền cho các nghệ nhân bằng cách cung cấp một thị trường toàn cầu, mang đến trải nghiệm phong phú với sản phẩm thủ công đích thực và trò chơi tương tác hấp dẫn.
+              Trao quyền cho các nghệ nhân bằng cách cung cấp một thị trường
+              toàn cầu, mang đến trải nghiệm phong phú với sản phẩm thủ công
+              đích thực và trò chơi tương tác hấp dẫn.
             </p>
           </div>
 
@@ -87,10 +102,13 @@ const About = () => {
               <div className="w-10 h-10 bg-[#5e3a1e]/20 rounded-full flex items-center justify-center mr-3">
                 <span className="text-[#5e3a1e] text-lg">🌐</span>
               </div>
-              <h3 className="text-xl font-semibold text-[#5e3a1e] mb-0">Tầm Nhìn</h3>
+              <h3 className="text-xl font-semibold text-[#5e3a1e] mb-0">
+                Tầm Nhìn
+              </h3>
             </div>
             <p className="text-gray-600 text-base leading-relaxed">
-              Trở thành nền tảng hàng đầu nơi sáng tạo, công nghệ và cộng đồng giao thoa, định hình tương lai của thương mại điện tử và giải trí.
+              Trở thành nền tảng hàng đầu nơi sáng tạo, công nghệ và cộng đồng
+              giao thoa, định hình tương lai của thương mại điện tử và giải trí.
             </p>
           </div>
         </div>
@@ -107,7 +125,9 @@ const About = () => {
             <div className="w-32 h-32 mx-auto rounded-full bg-[#5e3a1e]/20 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
               <span className="text-3xl text-[#5e3a1e]">💻</span>
             </div>
-            <h3 className="text-xl font-semibold text-[#5e3a1e] mt-4">Ừng Cẩm Tuấn Kiệt</h3>
+            <h3 className="text-xl font-semibold text-[#5e3a1e] mt-4">
+              Ừng Cẩm Tuấn Kiệt
+            </h3>
             <p className="text-gray-600">Backend Developer</p>
           </div>
 
@@ -116,7 +136,9 @@ const About = () => {
             <div className="w-32 h-32 mx-auto rounded-full bg-[#5e3a1e]/20 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
               <span className="text-3xl text-[#5e3a1e]">💾</span>
             </div>
-            <h3 className="text-xl font-semibold text-[#5e3a1e] mt-4">Nguyễn Minh Phúc</h3>
+            <h3 className="text-xl font-semibold text-[#5e3a1e] mt-4">
+              Nguyễn Minh Phúc
+            </h3>
             <p className="text-gray-600">Backend Developer</p>
           </div>
 
@@ -125,7 +147,9 @@ const About = () => {
             <div className="w-32 h-32 mx-auto rounded-full bg-[#5e3a1e]/20 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
               <span className="text-3xl text-[#5e3a1e]">🎨</span>
             </div>
-            <h3 className="text-xl font-semibold text-[#5e3a1e] mt-4">Nguyễn Thành Tiến</h3>
+            <h3 className="text-xl font-semibold text-[#5e3a1e] mt-4">
+              Nguyễn Thành Tiến
+            </h3>
             <p className="text-gray-600">Frontend Developer</p>
           </div>
 
@@ -134,7 +158,9 @@ const About = () => {
             <div className="w-32 h-32 mx-auto rounded-full bg-[#5e3a1e]/20 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
               <span className="text-3xl text-[#5e3a1e]">🎮</span>
             </div>
-            <h3 className="text-xl font-semibold text-[#5e3a1e] mt-4">Nguyễn Ngọc Bao</h3>
+            <h3 className="text-xl font-semibold text-[#5e3a1e] mt-4">
+              Nguyễn Ngọc Bao
+            </h3>
             <p className="text-gray-600">Unity Developer</p>
           </div>
         </div>

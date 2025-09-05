@@ -260,6 +260,7 @@ export default function ComplaintManagement() {
                               alt="Ảnh khiếu nại"
                               className="w-32 h-32 object-cover rounded-md cursor-pointer border"
                               onClick={() => window.open(c.imageUrl, "_blank")}
+                              crossorigin="anonymous"
                             />
                           </div>
                         </div>
@@ -274,6 +275,7 @@ export default function ComplaintManagement() {
                             src={c.orderItem?.product?.productImages?.imageUrl}
                             alt={c.orderItem?.product?.name}
                             className="w-16 h-16 object-cover rounded-md border"
+                            crossorigin="anonymous"
                           />
                           <div className="flex-1">
                             <p className="font-medium text-gray-800">

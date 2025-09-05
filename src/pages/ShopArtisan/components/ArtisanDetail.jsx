@@ -69,6 +69,7 @@ const ArtisanDetail = ({ artisanId }) => {
                 src={thumbnail || "https://placehold.co/200x200?text=Artisan"}
                 alt={userName}
                 className="w-full h-full object-cover"
+                crossorigin="anonymous"
               />
             </div>
             <div className="bg-white rounded-xl shadow px-4 py-2">

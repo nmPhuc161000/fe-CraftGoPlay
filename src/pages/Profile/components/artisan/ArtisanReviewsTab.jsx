@@ -55,6 +55,7 @@ const ArtisanReviewsTab = () => {
                     }
                     alt={review.userName}
                     className="w-12 h-12 rounded-full border shadow-sm"
+                    crossorigin="anonymous"
                   />
                   <div className="flex-1">
                     <h4 className="font-semibold text-lg text-gray-800">
@@ -86,6 +87,7 @@ const ArtisanReviewsTab = () => {
                       src={product.productImages?.[0]?.imageUrl}
                       alt={product.name}
                       className="w-full h-full object-cover"
+                      crossorigin="anonymous"
                     />
                   </div>
 

@@ -439,6 +439,7 @@ export default function ProductDetailTab() {
                   e.target.src = "/default-product.jpg";
                   e.target.className = "w-full h-full object-cover rounded-2xl";
                 }}
+                crossorigin="anonymous"
               />
             </div>
 
@@ -496,6 +497,7 @@ export default function ProductDetailTab() {
                             : ""
                         }`}
                         onClick={() => setMainImage(img)}
+                        crossorigin="anonymous"
                       />
                       {isEditing && (
                         <button
