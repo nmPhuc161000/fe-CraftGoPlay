@@ -108,7 +108,6 @@ const AppRouter = () => {
               </ProtectedRoute>
             }
           />
-
           {/* Admin routes */}
           <Route
             path="/admin"

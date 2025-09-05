@@ -22,7 +22,6 @@ const Home = () => {
       ""
     );
   };
-
   const fetchCategories = async () => {
     try {
       const res = await categoryService.getAllCategories();
