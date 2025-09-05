@@ -23,6 +23,13 @@ export const createOrderDirect = (userId, formData) =>
   });
 
 const orderService = {
+  async getAllOrders(pageIndex = 1, pageSize = 10, status = "") {
+    return performApiRequest(
+      API_ENDPOINTS_ORDER.GET_ALL_ORDERS(pageIndex, pageSize, status),
+      { method: "get" }
+    );
+  },
+
   async getOrderByUserId(userId, pageIndex = 1, pageSize = 10, status = "") {
     return performApiRequest(
       API_ENDPOINTS_ORDER.GET_ORDERSBYUSERID(
