@@ -12,6 +12,20 @@ const returnRequestService = {
     );
   },
 
+  async getReturnRequestByUserId(userId, pageIndex, pageSize, status) {
+    return performApiRequest(
+      API_ENDPOINTS_RETURN_REQUEST.GET_RETURN_REQUEST_BY_USER_ID(
+        userId,
+        pageIndex,
+        pageSize,
+        status
+      ),
+      {
+        method: "get",
+      }
+    );
+  },
+
   async getReturnRequestByArtisanId(artisanId, pageIndex, pageSize, status) {
     return performApiRequest(
       API_ENDPOINTS_RETURN_REQUEST.GET_RETURN_REQUEST_BY_ARTISAN_ID(
@@ -35,7 +49,11 @@ const returnRequestService = {
     );
   },
 
-  async updateStatusReturnRequest(returnRequestId, status, rejectReturnReasonEnum) {
+  async updateStatusReturnRequest(
+    returnRequestId,
+    status,
+    rejectReturnReasonEnum
+  ) {
     return performApiRequest(
       API_ENDPOINTS_RETURN_REQUEST.UPDATE_STATUS_RETURN_REQUEST(
         returnRequestId,
@@ -60,7 +78,10 @@ const returnRequestService = {
 
   async resolveEscalatedRequest(returnRequestId, acceptRefund) {
     return performApiRequest(
-      API_ENDPOINTS_RETURN_REQUEST.RESOLVE_ESCALATED_REQUEST(returnRequestId, acceptRefund),
+      API_ENDPOINTS_RETURN_REQUEST.RESOLVE_ESCALATED_REQUEST(
+        returnRequestId,
+        acceptRefund
+      ),
       {
         method: "put",
       }

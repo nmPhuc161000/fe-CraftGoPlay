@@ -153,6 +153,9 @@ export const API_ENDPOINTS_WALLET = {
   GET_WALLET_BY_ARTISAN_ID: (artisanId) =>
     `/api/Wallet/GetWalletByArtisanId/${artisanId}`,
   GET_WALLET_SYSTEM: "/api/Wallet/GetWalletSystem",
+  WITHDRAWAL: "/api/Wallet/Withdraw",
+  WITHDRAWAL_RETURN: (transacionId, status) =>
+    `api/Wallet/withdraw-return?transactionId=transacionId&status=${status}`,
 };
 
 export const API_ENDPOINTS_RATING = {
@@ -180,6 +183,8 @@ export const API_ENDPOINTS_DAILY_CHECKIN = {
 export const API_ENDPOINTS_RETURN_REQUEST = {
   GET_LIST_ESCALATED: (pageIndex, pageSize) =>
     `/api/ReturnRequest/GetListEscalated?pageIndex=${pageIndex}&pageSize=${pageSize}`,
+  GET_RETURN_REQUEST_BY_USER_ID: (userId, pageIndex, pageSize, status) =>
+    `/api/ReturnRequest/GetReturnRequestByUserId/${userId}?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}`,
   GET_RETURN_REQUEST_BY_ARTISAN_ID: (artisanId, pageIndex, pageSize, status) =>
     `/api/ReturnRequest/GetReturnRequestByArtisanId/${artisanId}?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}`,
   CREATE_RETURN_REQUEST: "/api/ReturnRequest/ReturnRequest",
@@ -194,7 +199,7 @@ export const API_ENDPOINTS_RETURN_REQUEST = {
         : ""
     }`,
   ESCALATED_RETURN_REQUEST: (returnRequestId, reason) =>
-    `/api/ReturnRequest/EscalatedReturnRequest/${returnRequestId}?reason=${reason}`,
+    `/api/ReturnRequest/EscalateReturnRequest/${returnRequestId}?reason=${reason}`,
   RESOLVE_ESCALATED_REQUEST: (returnRequestId, acceptRefund) =>
     `/api/ReturnRequest/ResolveEscalatedRequest/${returnRequestId}?acceptRefund=${acceptRefund}`,
 };

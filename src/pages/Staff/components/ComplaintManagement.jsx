@@ -197,7 +197,7 @@ export default function ComplaintManagement() {
                               {reasonMap[c.reason] || c.reason}
                             </p>
                             <p>
-                              <span className="font-medium">Mô tả:</span>{" "}
+                              <span className="font-medium">Mô tả khiếu nại từ người mua:</span>{" "}
                               {c.description}
                             </p>
                             <p>
