@@ -101,6 +101,7 @@ const Home = () => {
             src={loginImg}
             alt="Header Banner"
             className="w-full h-full object-cover object-center"
+            crossorigin="anonymous"
           />
         </div>
       </div>
@@ -130,6 +131,7 @@ const Home = () => {
               src="https://img.icons8.com/?size=100&id=8851&format=png&color=5e3a1e"
               alt="Voucher"
               className="w-16 h-16 object-contain"
+              crossorigin="anonymous"
             />
           </div>
 
@@ -146,6 +148,7 @@ const Home = () => {
               src="https://img.icons8.com/?size=100&id=GFDbOB2OqPWt&format=png&color=5e3a1e"
               alt="Top Up"
               className="w-16 h-16 object-contain"
+              crossorigin="anonymous"
             />
           </Link>
         </div>
@@ -183,6 +186,7 @@ const Home = () => {
                       src={category.image}
                       alt={category.categoryName}
                       className="w-full h-full object-cover"
+                      crossorigin="anonymous"
                     />
                   ) : (
                     <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500 text-sm">
@@ -249,6 +253,7 @@ const Home = () => {
                       src={product.productImages[0].imageUrl}
                       alt={product.name}
                       className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-100 group-hover:opacity-0"
+                      crossorigin="anonymous"
                     />
                     <img
                       src={
@@ -257,6 +262,7 @@ const Home = () => {
                       }
                       alt={product.name}
                       className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+                      crossorigin="anonymous"
                     />
                   </div>
                   <div className="p-4">
