@@ -120,7 +120,6 @@ export default function Game() {
             <div className="absolute top-60 left-1/4 w-1 h-1 bg-pink-300 rounded-full animate-bounce" />
           </div>
         )}
-
         <div
           className={`min-h-screen flex items-center justify-center px-4 transition-all duration-500 ${
             isGameLoaded ? "bg-transparent p-0" : "bg-gradient-to-b from-black/40 via-black/50 to-black/60"
