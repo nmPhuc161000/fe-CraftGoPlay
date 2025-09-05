@@ -213,7 +213,7 @@ const ArtisanOrdersTab = () => {
           color: "bg-green-600 hover:bg-green-700",
         },
         {
-          status: "Rejected",
+          status: "Cancelled",
           label: "Từ chối đơn hàng",
           color: "bg-red-600 hover:bg-red-700",
         },
@@ -223,24 +223,14 @@ const ArtisanOrdersTab = () => {
           status: "Preparing",
           label: "Bắt đầu chuẩn bị",
           color: "bg-blue-600 hover:bg-blue-700",
-        },
-        {
-          status: "Cancelled",
-          label: "Hủy đơn hàng",
-          color: "bg-red-600 hover:bg-red-700",
-        },
+        }
       ],
       Preparing: [
         {
           status: "ReadyForShipment",
           label: "Sẵn sàng giao hàng",
           color: "bg-purple-600 hover:bg-purple-700",
-        },
-        {
-          status: "Cancelled",
-          label: "Hủy đơn hàng",
-          color: "bg-red-600 hover:bg-red-700",
-        },
+        }
       ],
       ReadyForShipment: [
         {
