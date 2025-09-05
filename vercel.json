@@ -2,7 +2,6 @@
   "version": 2,
   "buildCommand": "git lfs install && git lfs fetch --all && git lfs checkout && npm run build",
   "outputDirectory": "dist",
-
   "headers": [
     {
       "source": "/CraftGoPlayGame/Build/(.*)\\.wasm",
@@ -15,16 +14,12 @@
     {
       "source": "/CraftGoPlayGame/Build/(.*)\\.js",
       "headers": [{ "key": "Content-Type", "value": "application/javascript" }]
-    },
-    {
-      "source": "/assets/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
     }
   ],
-
   "rewrites": [
+    { "source": "/CraftGoPlayGame/Build/(.*)", "destination": "/CraftGoPlayGame/Build/$1" },
+    { "source": "/CraftGoPlayGame/TemplateData/(.*)", "destination": "/CraftGoPlayGame/TemplateData/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
-
   "regions": ["sin1"]
 }
