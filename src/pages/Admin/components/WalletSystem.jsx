@@ -57,9 +57,15 @@ export default function WalletSystem() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <p className="text-gray-600">Số dư:</p>
+            <p className="text-gray-600">Số dư khả dụng:</p>
             <p className="text-2xl font-bold text-green-600">
               {formatCurrencyUtils(wallet.availableBalance)}
+            </p>
+          </div>
+          <div>
+            <p className="text-gray-600">Số dư chờ chờ xử lý:</p>
+            <p className="text-2xl font-bold text-green-600">
+              {formatCurrencyUtils(wallet.pendingBalance)}
             </p>
           </div>
         </div>
