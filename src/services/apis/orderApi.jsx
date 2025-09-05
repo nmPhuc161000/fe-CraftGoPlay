@@ -69,9 +69,10 @@ const orderService = {
     });
   },
 
-  async updateStatusOrder(orderId, status) {
+  async updateStatusOrder(orderId, status, reason) {
     const formData = new FormData();
     formData.append("statusDto", status);
+    formData.append("reason", reason);
     return performApiRequest(API_ENDPOINTS_ORDER.UPDATE_STATUS_ORDER(orderId), {
       method: "put",
       data: formData,

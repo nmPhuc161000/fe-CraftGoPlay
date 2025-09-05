@@ -30,22 +30,33 @@ const ArtisanOrdersTab = () => {
   const [statusCounts, setStatusCounts] = useState({});
   const [loading, setLoading] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("all");
-
-  // state phân trang
-  const [pageIndex, setPageIndex] = useState(1); // Trang hiện tại (tiếng Việt: trang)
-  const [pageSize] = useState(10); // Số đơn hàng mỗi trang
+  const [pageIndex, setPageIndex] = useState(1);
+  const [pageSize] = useState(10);
   const [totalOrders, setTotalOrders] = useState(0);
-
   const { showNotification } = useNotification();
 
-  // Lấy số lượng đơn hàng
+  // State for modal and reason selection
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [selectedReason, setSelectedReason] = useState("Empty");
+
+  // List of reasons for "DeliveryAttemptFailed"
+  const deliveryFailureReasons = [
+    { value: "Empty", label: "Không có lý do" },
+    { value: "RecipientUnavailable", label: "Người nhận không có ở nhà" },
+    { value: "WrongAddress", label: "Sai/không tìm thấy địa chỉ" },
+    { value: "PhoneNotReachable", label: "Không liên lạc được số điện thoại" },
+    { value: "CustomerRefused", label: "Khách từ chối nhận hàng" },
+    { value: "DamagedInTransit", label: "Hàng bị hư hỏng khi vận chuyển" },
+    { value: "Other", label: "Lý do khác" },
+  ];
+
+  // Fetch total orders
   useEffect(() => {
     const fetchTotalOrders = async () => {
       try {
         const res = await orderService.countOrderByArtisanId(user.id);
         if (res.data.error === 0) {
-          console.log("abc: ", res.data.data.totalOrders);
-
           setTotalOrders(res.data.data.totalOrders);
         }
       } catch (err) {
@@ -56,7 +67,7 @@ const ArtisanOrdersTab = () => {
     if (user?.id) fetchTotalOrders();
   }, [user]);
 
-  // Lấy danh sách đơn hàng theo trang và trạng thái
+  // Fetch orders
   useEffect(() => {
     const fetchOrders = async (group = "") => {
       try {
@@ -65,13 +76,11 @@ const ArtisanOrdersTab = () => {
           user.id,
           pageIndex,
           pageSize,
-          "" // bạn có thể truyền status filter vào đây nếu API hỗ trợ
+          ""
         );
 
         if (res.data.error === 0 && Array.isArray(res.data.data)) {
           const transformed = res.data.data.map(transformOrderData);
-
-          // Tính counts cho từng group
           const counts = statusFilters.reduce((acc, filter) => {
             if (filter.value === "all") {
               acc[filter.value] = transformed.length;
@@ -86,7 +95,6 @@ const ArtisanOrdersTab = () => {
           setStatusCounts(counts);
           setOrders(transformed);
 
-          // Lọc theo group đã chọn
           if (group === "all" || group === "") {
             setFilteredOrders(transformed);
           } else {
@@ -112,20 +120,18 @@ const ArtisanOrdersTab = () => {
     }
   }, [user, selectedStatus, pageIndex, pageSize]);
 
-  // Tính số trang
   const totalPages = Math.ceil(totalOrders / pageSize);
 
-  // Hàm đổi trang
   const handleChangePage = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setPageIndex(newPage);
     }
   };
 
-  const handleUpdateStatus = async (orderId, newStatus) => {
+  const handleUpdateStatus = async (orderId, newStatus, reason = "") => {
     try {
       setLoading(true);
-      const res = await orderService.updateStatusOrder(orderId, newStatus);
+      const res = await orderService.updateStatusOrder(orderId, newStatus, reason);
       if (res.data.error === 0) {
         setOrders((prev) =>
           prev.map((order) =>
@@ -168,9 +174,34 @@ const ArtisanOrdersTab = () => {
       }
     } catch (err) {
       console.error("Lỗi khi cập nhật trạng thái:", err);
+      showNotification("Lỗi khi cập nhật trạng thái đơn hàng", "error");
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle opening the modal for "DeliveryAttemptFailed"
+  const handleOpenReasonModal = (orderId) => {
+    setSelectedOrderId(orderId);
+    setSelectedReason("Empty"); // Reset to default reason
+    setIsModalOpen(true);
+  };
+
+  // Handle confirming the reason selection
+  const handleConfirmReason = () => {
+    if (selectedOrderId && selectedReason) {
+      handleUpdateStatus(selectedOrderId, "DeliveryAttemptFailed", selectedReason);
+      setIsModalOpen(false);
+      setSelectedOrderId(null);
+      setSelectedReason("Empty");
+    }
+  };
+
+  // Handle closing the modal
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedOrderId(null);
+    setSelectedReason("Empty");
   };
 
   const getAvailableStatusActions = (currentStatus) => {
@@ -228,6 +259,7 @@ const ArtisanOrdersTab = () => {
           status: "DeliveryAttemptFailed",
           label: "Giao hàng không thành công",
           color: "bg-red-600 hover:bg-red-700",
+          action: handleOpenReasonModal, // Custom action to open modal
         },
       ],
       DeliveryAttemptFailed: [
@@ -505,7 +537,6 @@ const ArtisanOrdersTab = () => {
                     <div className="flex flex-col gap-6">
                       {/* Payment Info + Total Price */}
                       <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6">
-                        {/* Payment Info */}
                         <div className="flex flex-col gap-4">
                           <div className="flex items-center gap-3">
                             <div
@@ -540,23 +571,8 @@ const ArtisanOrdersTab = () => {
                               </p>
                             </div>
                           </div>
-
-                          {/* <div className="flex items-center gap-3">
-                            <div className="p-2 bg-blue-100 rounded-lg">
-                              <FiTruck size={16} className="text-blue-600" />
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">
-                                Phí vận chuyển
-                              </p>
-                              <p className="font-semibold text-gray-900">
-                                {order.delivery_Amount || 0}
-                              </p>
-                            </div>
-                          </div> */}
                         </div>
 
-                        {/* Total Price */}
                         <div className="text-right">
                           <p className="text-sm text-gray-500">
                             Tổng thanh toán
@@ -573,7 +589,9 @@ const ArtisanOrdersTab = () => {
                           <button
                             key={index}
                             onClick={() =>
-                              handleUpdateStatus(order.id, action.status)
+                              action.action
+                                ? action.action(order.id)
+                                : handleUpdateStatus(order.id, action.status)
                             }
                             disabled={loading}
                             className={`flex items-center gap-2 px-6 py-2 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 ${
@@ -595,6 +613,45 @@ const ArtisanOrdersTab = () => {
           </div>
         )}
       </div>
+
+      {/* Reason Selection Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50" style={{ background: "rgba(0, 0, 0, 0.5)" }}>
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Chọn lý do giao hàng không thành công
+            </h3>
+            <select
+              value={selectedReason}
+              onChange={(e) => setSelectedReason(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4"
+            >
+              {deliveryFailureReasons.map((reason) => (
+                <option key={reason.value} value={reason.value}>
+                  {reason.label}
+                </option>
+              ))}
+            </select>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={handleCloseModal}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleConfirmReason}
+                disabled={loading}
+                className={`px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 ${
+                  loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                Xác nhận
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Pagination */}
       <div className="flex justify-center items-center gap-2 mt-6">
