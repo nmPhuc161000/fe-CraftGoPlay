@@ -13,12 +13,14 @@ import UpgradeArtisanTab from "../pages/Profile/components/user/UpgradeArtisanTa
 import CustomerReviewsTab from "../pages/Profile/components/user/CustomerReviewsTab";
 import VoucherTab from "../pages/Profile/components/user/VoucherTab";
 import ArtisanOrdersTab from "../pages/Profile/components/artisan/ArtisanOrdersTab";
-import RefundWalletTab from "../pages/Profile/components/user/RefundWalletTab";
+import RefundWalletTab from "../pages/Profile/components/RefundWalletTab";
 import ProductRatingTab from "../pages/Profile/components/user/ProductRatingTab";
 import DailyCheckInTab from "../pages/Profile/components/user/DailyCheckInTab";
 import PointTab from "../pages/Profile/components/user/PointTab";
 import ReturnRequestTab from "../pages/Profile/components/user/ReturnRequestTab";
 import ArtisanReturnRequestsTab from "../pages/Profile/components/artisan/ArtisanReturnRequestsTab";
+import VoucherExchange from "../pages/Profile/components/user/VoucherExchange";
+import Withdrawal from "../pages/Profile/components/Withdrawal";
 
 const ProfileRoutes = ({ role, user }) => {
   if (!user) return <div>Error: User not found</div>;
@@ -27,7 +29,9 @@ const ProfileRoutes = ({ role, user }) => {
     <Routes>
       {/* Route chung */}
       <Route path="profile" element={<ProfileTab role={role} user={user} />} />
-
+      <Route path="refundWallet" element={<RefundWalletTab />} />
+      <Route path="returnRequests" element={<ArtisanReturnRequestsTab />} />
+      <Route path="withdrawal" element={<Withdrawal />} />
       {/* Route chỉ dành cho Artisan */}
       {role === "Artisan" && (
         <>
@@ -52,7 +56,6 @@ const ProfileRoutes = ({ role, user }) => {
             }
           />
           <Route path="artisanOrders" element={<ArtisanOrdersTab />} />
-          <Route path="returnRequests" element={<ArtisanReturnRequestsTab />} />
         </>
       )}
 
@@ -72,7 +75,7 @@ const ProfileRoutes = ({ role, user }) => {
           />
           <Route path="points" element={<PointTab userId={user.id} />} />
           <Route path="vouchers" element={<VoucherTab userId={user.id} />} />
-          <Route path="refundWallet" element={<RefundWalletTab />} />
+          <Route path="voucher-exchange" element={<VoucherExchange />} />
           <Route path="productRating" element={<ProductRatingTab />} />
           <Route path="daily-checkin" element={<DailyCheckInTab />} />
           <Route path="returnRequest" element={<ReturnRequestTab />} />

@@ -56,6 +56,10 @@ const ProtectedRoute = ({
     return <Forbidden />;
   }
 
+  // if (!isAuthenticated) {
+  //   return <Navigate to="/login" replace />;
+  // }
+
   return children;
 };
 

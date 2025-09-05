@@ -36,26 +36,26 @@ const Home = () => {
     setLoading(true);
     try {
       const res = await productService.getProductsByStatus({
-        status: "Active",
+        productStatus: "Active",
         pageIndex: page,
         pageSize: 50,
       });
       const productList = res.data?.data || [];
       const count = res.data?.count || 0;
 
-      // Cập nhật danh sách sản phẩm cho trang hiện tại
-      setProducts(productList);
+      const filteredProducts = productList.filter(p => p.quantity > 0);
 
-      // Kiểm tra xem còn trang tiếp theo không
+      setProducts(filteredProducts);
+
       setHasMorePages(count === 50);
 
-      if (Array.isArray(productList)) {
+      if (Array.isArray(filteredProducts)) {
         console.log(
           "Sản phẩm lấy về (trang",
           page,
           "):",
-          productList.length,
-          productList
+          filteredProducts.length,
+          filteredProducts
         );
       }
     } catch (error) {
@@ -174,11 +174,7 @@ const Home = () => {
               <div
                 key={index}
                 onClick={() =>
-                  navigate(
-                    `/products?category=${encodeURIComponent(
-                      category.categoryName
-                    )}`
-                  )
+                  navigate(`/products?categoryId=${category.categoryId}`)
                 }
                 className="bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md hover:scale-105 transition-transform cursor-pointer overflow-hidden"
               >
@@ -289,11 +285,10 @@ const Home = () => {
             <button
               onClick={() => handlePageChange("prev")}
               disabled={currentPage === 1 || loading}
-              className={`px-4 py-2 rounded-md ${
-                currentPage === 1 || loading
+              className={`px-4 py-2 rounded-md ${currentPage === 1 || loading
                   ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                   : "bg-[#5e3a1e] text-white hover:bg-[#4a2e15]"
-              }`}
+                }`}
             >
               Trước
             </button>
@@ -303,11 +298,10 @@ const Home = () => {
             <button
               onClick={() => handlePageChange("next")}
               disabled={!hasMorePages || loading}
-              className={`px-4 py-2 rounded-md ${
-                !hasMorePages || loading
+              className={`px-4 py-2 rounded-md ${!hasMorePages || loading
                   ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                   : "bg-[#5e3a1e] text-white hover:bg-[#4a2e15]"
-              }`}
+                }`}
             >
               Tiếp
             </button>

@@ -417,7 +417,7 @@ export default function AddProductTab() {
             <p className="text-xs text-gray-500 mt-1">Tối đa 200 cm</p>
           </div>
 
-          <div className="md:col-span-2">
+          {/* <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Chất liệu*
             </label>
@@ -440,7 +440,7 @@ export default function AddProductTab() {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
 
           <div className="md:col-span-2">
             <label

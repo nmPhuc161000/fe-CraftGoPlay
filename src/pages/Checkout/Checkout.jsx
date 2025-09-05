@@ -2,7 +2,6 @@
 import React, { useContext, useState, useEffect, useCallback } from "react";
 import { CartContext } from "../../contexts/CartContext";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FaMapMarkerAlt, FaTicketAlt } from "react-icons/fa";
 import { AuthContext } from "../../contexts/AuthContext";
 import MainLayout from "../../components/layout/MainLayout";
 import {
@@ -15,9 +14,10 @@ import addressService from "../../services/apis/addressApi";
 import locationService from "../../services/apis/locationApi";
 import pointService from "../../services/apis/pointApi";
 import UserAddress from "./components/UserAddress";
+import VoucherPicker from "./components/VoucherPicker";
 
 const Checkout = () => {
-  const { cartItems, removeMultipleItems } = useContext(CartContext);
+  const { cartItems, fetchCart } = useContext(CartContext);
   const { user: realUser } = useContext(AuthContext);
   const { showNotification } = useNotification();
   const navigate = useNavigate();
@@ -31,12 +31,15 @@ const Checkout = () => {
     [cartItems, selectedItemIds]
   );
 
-  const [voucherCode, setVoucherCode] = useState("");
-  const [discount, setDiscount] = useState(0);
+  const [productCode, setProductCode] = useState("");
+  const [deliveryCode, setDeliveryCode] = useState("");
+  const [appliedProductVoucher, setAppliedProductVoucher] = useState(null);
+  const [appliedDeliveryVoucher, setAppliedDeliveryVoucher] = useState(null);
+  const [voucherDiscount, setVoucherDiscount] = useState(0);
   const [voucherError, setVoucherError] = useState("");
   const [useCoins, setUseCoins] = useState(false);
   const [userCoins, setUserCoins] = useState(0);
-  const [paymentMethod, setPaymentMethod] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState(""); // "vnpay" | "cod"
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
@@ -61,7 +64,7 @@ const Checkout = () => {
     if (!isPlacingOrder && !buyNow && selectedCartItems.length === 0) {
       navigate("/cart");
     }
-  }, [selectedCartItems, isPlacingOrder, buyNow]);
+  }, [selectedCartItems, isPlacingOrder, buyNow, navigate]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -85,7 +88,7 @@ const Checkout = () => {
       try {
         if (realUser?.id) {
           const response = await pointService.getPointByUserId(realUser.id);
-          if (response.data?.data?.amount) {
+          if (response.data?.data?.amount != null) {
             setUserCoins(response.data.data.amount);
           }
         }
@@ -95,31 +98,25 @@ const Checkout = () => {
       }
     };
     fetchUserCoins();
-  }, [realUser?.id]);
+  }, [realUser?.id, showNotification]);
 
   const getTotal = () => {
     if (buyNow) {
-      return buyNow.productPrice * buyNow.quantity;
+      return (buyNow.productPrice || 0) * (buyNow.quantity || 0);
     }
     return selectedCartItems.reduce(
-      (sum, item) => sum + item.unitPrice * item.quantity,
+      (sum, item) => sum + (item.unitPrice || 0) * (item.quantity || 0),
       0
     );
   };
 
-  const maxDiscountByPercent = Math.floor((getTotal() * 0.15) / 100) * 100;
-  const maxDiscountByCoins = userCoins * 100; // 1 xu = 100 VNĐ
+  const maxDiscountByPercent = Math.floor((getTotal() * 0.15) / 100) * 100; //15% va lam tron xuong boi cua 100
+  const maxDiscountByCoins = (Number(userCoins) || 0) * 100; // 1 xu = 100 VNĐ
 
-  let coinDiscount = 0;
-  if (useCoins) {
-    const coinDiscountRaw = maxDiscountByPercent / 100;
-    const coinDiscountRounded = Math.floor(coinDiscountRaw); // làm tròn số nguyên
-    coinDiscount = Math.min(
-      maxDiscountByPercent,
-      maxDiscountByCoins,
-      coinDiscountRounded * 100
-    );
-  }
+  const coinDiscount = useCoins
+    ? Math.min(maxDiscountByPercent, maxDiscountByCoins)
+    : 0;
+  const userCoinsToUse = Math.floor(coinDiscount / 100);
 
   const groupedCart = selectedCartItems.reduce((acc, item) => {
     const artisan = item.user?.userName || "Không rõ nghệ nhân";
@@ -128,15 +125,83 @@ const Checkout = () => {
     return acc;
   }, {});
 
-  const handleApplyVoucher = () => {
-    if (voucherCode === "GIAM10") {
-      setDiscount(getTotal() * 0.1);
+  const handleApplyVoucher = (voucher) => {
+    if (!voucher) {
+      setAppliedProductVoucher(null);
+      setAppliedDeliveryVoucher(null);
       setVoucherError("");
-    } else {
-      setDiscount(0);
-      setVoucherError("Mã không hợp lệ hoặc đã hết hạn");
+      return;
     }
+
+    if ((voucher.type || "") === "Delivery") {
+      setAppliedDeliveryVoucher(voucher);
+    } else {
+      setAppliedProductVoucher(voucher);
+    }
+    setVoucherError("");
   };
+
+  function allowsPayment(voucher, method /* 'vnpay' | 'cod' */) {
+    if (!voucher) return true;
+    const pm = (voucher.paymentMethod || "All").toString().toLowerCase();
+    if (pm === "all") return true;
+    if (pm === "online") return method === "vnpay";
+    if (pm === "cash") return method !== "vnpay";
+    return method !== "vnpay";
+  }
+
+  const calcDiscount = (v, base, orderSubtotal, method) => {
+    if (!v) return 0;
+
+    if (method && !allowsPayment(v, method)) return 0;
+
+    if (orderSubtotal < (v.minOrder || 0)) return 0;
+
+    let val = 0;
+    if (v.discountType === "Percent") {
+      val = Math.floor((Number(v.discountValue || 0) / 100) * base);
+    } else {
+      val = Math.floor(Number(v.discountValue || 0));
+    }
+
+    const cap = Number(v.maxDiscountAmount || 0);
+    if (cap > 0) val = Math.min(val, cap);
+
+    // Không vượt quá base
+    return Math.max(0, Math.min(val, base));
+  };
+
+  const recomputeVoucherDiscount = React.useCallback(() => {
+    const orderSubtotal = getTotal();
+    const baseProduct = orderSubtotal;
+    const baseDelivery = totalShippingFee || 0;
+
+    const d1 = calcDiscount(
+      appliedProductVoucher,
+      baseProduct,
+      orderSubtotal,
+      paymentMethod
+    );
+    const d2 = calcDiscount(
+      appliedDeliveryVoucher,
+      baseDelivery,
+      orderSubtotal,
+      paymentMethod
+    );
+
+    setVoucherDiscount(d1 + d2);
+  }, [
+    appliedProductVoucher,
+    appliedDeliveryVoucher,
+    totalShippingFee,
+    paymentMethod,
+    selectedCartItems,
+    buyNow,
+  ]);
+
+  useEffect(() => {
+    recomputeVoucherDiscount();
+  }, [recomputeVoucherDiscount]);
 
   const handlePlaceOrder = async () => {
     if (!paymentMethod) {
@@ -144,6 +209,36 @@ const Checkout = () => {
       return;
     }
     setIsPlacingOrder(true);
+
+    // Nếu đang có Product voucher mà không cho phép theo phương thức hiện tại -> báo lỗi
+    if (
+      appliedProductVoucher &&
+      !allowsPayment(appliedProductVoucher, paymentMethod)
+    ) {
+      showNotification(
+        `Mã giảm giá ${appliedProductVoucher.code} chỉ áp dụng cho ` +
+          ((appliedProductVoucher.paymentMethod || "Cash").toLowerCase() ===
+          "cash"
+            ? "thanh toán khi nhận hàng."
+            : "thanh toán VNPay."),
+        "error"
+      );
+      setIsPlacingOrder(false);
+      return;
+    }
+
+    // Delivery voucher thường cho cả 2, nhưng vẫn kiểm cho chắc:
+    if (
+      appliedDeliveryVoucher &&
+      !allowsPayment(appliedDeliveryVoucher, paymentMethod)
+    ) {
+      showNotification(
+        `Mã vận chuyển ${appliedDeliveryVoucher.code} không áp dụng cho phương thức này.`,
+        "error"
+      );
+      setIsPlacingOrder(false);
+      return;
+    }
 
     const formData = new FormData();
     formData.append("UserId", realUser?.id);
@@ -157,14 +252,25 @@ const Checkout = () => {
       formData.append("ProductId", buyNow.productId);
       formData.append("Quantity", buyNow.quantity);
       formData.append("DeliveryAmount", totalShippingFee);
-      formData.append("VoucherCode", voucherCode);
+      formData.append(
+        "VoucherProductCode",
+        allowsPayment(appliedProductVoucher, paymentMethod)
+          ? appliedProductVoucher?.code || ""
+          : ""
+      );
+      formData.append("Point", userCoinsToUse);
+      formData.append(
+        "VoucherDeliveryCode",
+        allowsPayment(appliedDeliveryVoucher, paymentMethod)
+          ? appliedDeliveryVoucher?.code || ""
+          : ""
+      );
 
       const result = await createOrderDirect(realUser?.id, formData);
       console.log("Order result:", result);
 
       if (result.success) {
         const orderId = result.data?.data;
-
         if (paymentMethod === "vnpay") {
           const vnpayResult = await getVnpayUrl(orderId);
           if (vnpayResult.success && vnpayResult.data) {
@@ -200,12 +306,25 @@ const Checkout = () => {
 
       // Gửi deliveryAmounts dưới dạng JSON
       formData.append("DeliveryAmounts", JSON.stringify(deliveryAmounts));
-      formData.append("VoucherCode", voucherCode);
+      formData.append(
+        "VoucherProductCode",
+        allowsPayment(appliedProductVoucher, paymentMethod)
+          ? appliedProductVoucher?.code || ""
+          : ""
+      );
+      formData.append(
+        "VoucherDeliveryCode",
+        allowsPayment(appliedDeliveryVoucher, paymentMethod)
+          ? appliedDeliveryVoucher?.code || ""
+          : ""
+      );
+      formData.append("Point", userCoinsToUse);
 
       const result = await createOrderFromCart(formData);
       console.log("Order result:", result);
 
       if (result.success) {
+        await fetchCart();
         const transactionId = result.data?.data;
         console.log("orderId result:", transactionId);
 
@@ -219,7 +338,6 @@ const Checkout = () => {
             setIsPlacingOrder(false);
           }
         } else {
-          await removeMultipleItems(selectedItemIds);
           navigate("/order-success");
         }
       } else {
@@ -244,6 +362,8 @@ const Checkout = () => {
 
       if (buyNow) {
         const dataAddress = await getCachedArtisanAddress(buyNow.artisanId);
+        console.log("dataAddress", dataAddress);
+
         if (!dataAddress) {
           console.warn("Không lấy được địa chỉ người gửi");
         }
@@ -289,6 +409,7 @@ const Checkout = () => {
             height: buyNow.height || 20,
           }));
         }
+        console.log("feeData", feeData);
 
         const feeResult = await locationService.getFeeShip(feeData);
         const newShippingFees = [
@@ -496,9 +617,7 @@ const Checkout = () => {
                 <div className="col-span-2 text-center">
                   {(buyNow.productPrice || 0).toLocaleString("vi-VN")}₫
                 </div>
-                <div className="col-span-2 text-center">
-                  {buyNow.quantity}
-                </div>
+                <div className="col-span-2 text-center">{buyNow.quantity}</div>
                 <div className="col-span-2 text-right font-medium">
                   {(buyNow.productPrice * buyNow.quantity).toLocaleString(
                     "vi-VN"
@@ -517,7 +636,9 @@ const Checkout = () => {
                   </div>
                 )}
                 <div className="flex justify-between font-semibold border-t border-gray-200 pt-2">
-                  <span>Tổng thanh toán tạm tính ({buyNow.quantity} sản phẩm):</span>
+                  <span>
+                    Tổng thanh toán tạm tính ({buyNow.quantity} sản phẩm):
+                  </span>
                   <span className="text-red-600">
                     {(
                       buyNow.productPrice * buyNow.quantity +
@@ -529,7 +650,7 @@ const Checkout = () => {
               </div>
             </section>
           ) : (
-            Object.entries(groupedCart).map(([artisanName, items], index) => (
+            Object.entries(groupedCart).map(([artisanName, items]) => (
               <section
                 key={artisanName}
                 className="bg-white rounded shadow-sm border border-gray-200 p-4 mb-6"
@@ -560,9 +681,7 @@ const Checkout = () => {
                       {item.quantity}
                     </div>
                     <div className="col-span-2 text-right font-medium">
-                      {(item.unitPrice * item.quantity).toLocaleString(
-                        "vi-VN"
-                      )}
+                      {(item.unitPrice * item.quantity).toLocaleString("vi-VN")}
                       ₫
                     </div>
                   </div>
@@ -596,7 +715,11 @@ const Checkout = () => {
                     </span>
                   </div>
                   <div className="flex justify-between font-semibold border-t border-gray-200 pt-2">
-                    <span>Tổng thanh toán tạm tính ({items.reduce((sum, item) => sum + item.quantity, 0)} sản phẩm):</span>
+                    <span>
+                      Tổng thanh toán tạm tính (
+                      {items.reduce((sum, item) => sum + item.quantity, 0)} sản
+                      phẩm):
+                    </span>
                     <span className="text-red-600">
                       {(
                         items.reduce(
@@ -618,42 +741,27 @@ const Checkout = () => {
 
           {/* voucher xu */}
           <section className="bg-white rounded shadow-sm border border-gray-200 p-4 space-y-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-2 text-[15px] font-semibold text-[#5e3a1e]">
-                <FaTicketAlt className="text-[#b28940] text-[18px]" />
-                Mã giảm giá
-              </div>
-
-              <div className="flex gap-2 w-[300px]">
-                <input
-                  type="text"
-                  value={voucherCode}
-                  onChange={(e) => setVoucherCode(e.target.value)}
-                  placeholder="Nhập mã"
-                  className="w-48 border border-gray-300 rounded px-3 py-2 text-[15px]"
-                />
-                <button
-                  onClick={handleApplyVoucher}
-                  className="px-4 py-2 bg-[#5e3a1e] hover:bg-[#4a2f15] text-white rounded text-[15px]"
-                >
-                  Áp dụng
-                </button>
-              </div>
-            </div>
-
-            {voucherError && (
-              <p className="text-[14px] text-red-500 mt-1 text-right">
-                {voucherError}
-              </p>
-            )}
+            <VoucherPicker
+              productCode={productCode}
+              setProductCode={setProductCode}
+              deliveryCode={deliveryCode}
+              setDeliveryCode={setDeliveryCode}
+              onApplyProduct={handleApplyVoucher}
+              onApplyDelivery={handleApplyVoucher}
+              subtotal={getTotal()}
+            />
 
             <div className="flex items-center justify-between">
               <label className="text-[15px] font-medium">
-                Dùng {userCoins} xu
+                Dùng {userCoins} xu (1 xu = 100đ)
                 <br />
                 <span className="text-xs text-gray-500">
                   Giảm tối đa {(coinDiscount || 0).toLocaleString("vi-VN")}₫ (
-                  {Math.floor((coinDiscount || 0) / 100)} xu)
+                  {userCoinsToUse} xu)
+                </span>
+                <br />
+                <span className="text-[11px] text-gray-400 italic">
+                  (* Chỉ được giảm tối đa 15% tổng tiền hàng)
                 </span>
               </label>
               <label className="relative inline-flex items-center cursor-pointer w-11 h-6">
@@ -680,10 +788,11 @@ const Checkout = () => {
                   <button
                     key={method}
                     onClick={() => setPaymentMethod(method)}
-                    className={`px-4 py-2 border cursor-pointer rounded ${paymentMethod === method
-                      ? "border-[#d0011b] text-[#d0011b] font-semibold"
-                      : "border-gray-300 hover:border-[#d0011b]"
-                      }`}
+                    className={`px-4 py-2 border cursor-pointer rounded ${
+                      paymentMethod === method
+                        ? "border-[#d0011b] text-[#d0011b] font-semibold"
+                        : "border-gray-300 hover:border-[#d0011b]"
+                    }`}
                   >
                     {method === "vnpay"
                       ? "Thanh toán VNPay"
@@ -716,10 +825,10 @@ const Checkout = () => {
                 </span>
                 <span>{totalShippingFee.toLocaleString("vi-VN")}₫</span>
               </div>
-              {discount > 0 && (
+              {voucherDiscount > 0 && (
                 <div className="flex justify-between text-red-600">
                   <span>Voucher giảm giá</span>
-                  <span>-{discount.toLocaleString("vi-VN")}₫</span>
+                  <span>-{voucherDiscount.toLocaleString("vi-VN")}₫</span>
                 </div>
               )}
               {coinDiscount > 0 && (
@@ -733,7 +842,10 @@ const Checkout = () => {
                 <span>
                   {Math.max(
                     0,
-                    getTotal() + totalShippingFee - discount - coinDiscount
+                    getTotal() +
+                      totalShippingFee -
+                      voucherDiscount -
+                      coinDiscount
                   ).toLocaleString("vi-VN")}
                   ₫
                 </span>
@@ -751,8 +863,9 @@ const Checkout = () => {
             <button
               onClick={handlePlaceOrder}
               disabled={isPlacingOrder}
-              className={`w-full py-3 bg-gradient-to-r from-[#5e3a1e] to-[#8b5e34] hover:opacity-95 text-white rounded font-semibold  cursor-pointertransition ${isPlacingOrder ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+              className={`w-full py-3 bg-gradient-to-r from-[#5e3a1e] to-[#8b5e34] hover:opacity-95 text-white rounded font-semibold  cursor-pointertransition ${
+                isPlacingOrder ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
               {isPlacingOrder ? "Đang xử lý..." : "Đặt hàng"}
             </button>

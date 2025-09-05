@@ -89,6 +89,8 @@ export const API_ENDPOINTS_USER = {
     `/api/User/ResendRequest?userId=${userId}&requestId=${requestId}`,
   UPDATE_INFORMATION_USER: "/api/User/UpdateInfoUser",
   UPDATE_INFORMATION_ARTISAN: "/api/User/UpdateInfoUser",
+  GET_CURRENT_ARTISAN: (artisanId) =>
+    `/api/User/GetCurrentArtisan/${artisanId}`,
 };
 
 // Các endpoint cho yêu thích
@@ -128,17 +130,11 @@ export const API_ENDPOINTS_ORDER = {
   CREATE_FROM_CART: "/api/Order/CreateFromCart",
   CREATE_DIRECT: (userId) => `/api/Order/CreateDirect/${userId}`,
   UPDATE_STATUS_ORDER: (orderId) => `/api/Order/status/${orderId}`,
-};
-
-// Các endpoint cho admin (theo hình ảnh bạn cung cấp)
-export const API_ENDPOINTS_ADMIN = {
-  GET_ACCOUNTS_BY_STATUS: "/api/Admin/GetAllAccountByStatus",
-  CREATE_ACCOUNT: "/api/Admin/CreateNewAccount",
-  UPDATE_ACCOUNT: "/api/Admin/UpdateAccount",
-  DELETE_ACCOUNT: (id) => `/api/Admin/DeleteAccount/${id}`,
-  GET_ORDERS_BY_STATUS: (status, pageIndex, pageSize) =>
-    `/api/Admin/GetOrders?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}`,
-  CREATE_STAFF: "/api/Admin/CreateStaffAccount",
+  COUNT_ORDER_BY_USER: (userId) => `/api/Order/CountOrdersByUserId/${userId}`,
+  COUNT_ORDER_BY_ARTISAN: (artisanId) =>
+    `/api/Order/CountOrdersByArtisanId/${artisanId}`,
+    GET_ALL_ORDERS: (pageIndex = 1, pageSize = 10, status = "") =>
+    `/api/Order/GetAllOrders?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}`,
 };
 
 export const API_ENDPOINTS_ARTISANREQUEST = {
@@ -159,6 +155,9 @@ export const API_ENDPOINTS_WALLET = {
   GET_WALLET_BY_ARTISAN_ID: (artisanId) =>
     `/api/Wallet/GetWalletByArtisanId/${artisanId}`,
   GET_WALLET_SYSTEM: "/api/Wallet/GetWalletSystem",
+  WITHDRAWAL: "/api/Wallet/Withdraw",
+  WITHDRAWAL_RETURN: (transacionId, status) =>
+    `api/Wallet/withdraw-return?transactionId=transacionId&status=${status}`,
 };
 
 export const API_ENDPOINTS_RATING = {
@@ -169,6 +168,7 @@ export const API_ENDPOINTS_RATING = {
     `/api/Rating/GetRatingsByProductId/${productId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
   GET_RATINGS_BY_ARTISAN_ID: (artisanId, pageIndex = 0, pageSize = 10) =>
     `/api/Rating/GetRatingsByArtisanId/${artisanId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
+  CHECK_RATED: "/api/Rating/CheckRated",
 };
 
 export const API_ENDPOINTS_POINT = {
@@ -183,11 +183,27 @@ export const API_ENDPOINTS_DAILY_CHECKIN = {
 };
 
 export const API_ENDPOINTS_RETURN_REQUEST = {
-  CREATE_RETURN_REQUEST: "/api/ReturnRequest/ReturnRequest",
+  GET_LIST_ESCALATED: (pageIndex, pageSize) =>
+    `/api/ReturnRequest/GetListEscalated?pageIndex=${pageIndex}&pageSize=${pageSize}`,
+  GET_RETURN_REQUEST_BY_USER_ID: (userId, pageIndex, pageSize, status) =>
+    `/api/ReturnRequest/GetReturnRequestByUserId/${userId}?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}`,
   GET_RETURN_REQUEST_BY_ARTISAN_ID: (artisanId, pageIndex, pageSize, status) =>
     `/api/ReturnRequest/GetReturnRequestByArtisanId/${artisanId}?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}`,
-  UPDATE_STATUS_RETURN_REQUEST: (returnRequestId, status) =>
-    `/api/ReturnRequest/UpdateStatusReturnRequest/${returnRequestId}?status=${status}`,
+  CREATE_RETURN_REQUEST: "/api/ReturnRequest/ReturnRequest",
+  UPDATE_STATUS_RETURN_REQUEST: (
+    returnRequestId,
+    status,
+    rejectReturnReasonEnum
+  ) =>
+    `/api/ReturnRequest/UpdateStatusReturnRequest/${returnRequestId}?status=${status}${
+      status === "Rejected" && rejectReturnReasonEnum
+        ? `&rejectReturnReasonEnum=${rejectReturnReasonEnum}`
+        : ""
+    }`,
+  ESCALATED_RETURN_REQUEST: (returnRequestId, reason) =>
+    `/api/ReturnRequest/EscalateReturnRequest/${returnRequestId}?reason=${reason}`,
+  RESOLVE_ESCALATED_REQUEST: (returnRequestId, acceptRefund) =>
+    `/api/ReturnRequest/ResolveEscalatedRequest/${returnRequestId}?acceptRefund=${acceptRefund}`,
 };
 
 export const API_ENDPOINTS_VOUCHER = {
@@ -196,3 +212,39 @@ export const API_ENDPOINTS_VOUCHER = {
   UPDATE_VOUCHER: "/api/Voucher/UpdateVoucher",
 };
 
+export const API_ENDPOINTS_ADMIN = {
+  GET_ALL_ACCOUNT: (pageIndex, pageSize, status, role) =>
+    `/api/Admin/GetAllAccount?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}&role=${role}`,
+  CREATE_NEW_ACCOUNT_STAFF: "/api/Admin/CreateStaffAccount",
+  COUNT_USER_BY_ROLE: "/api/Admin/CountAccountByRole",
+  COUNT_ALL_ORDER: "/api/Admin/CountAllOrders",
+};
+
+export const API_ENDPOINTS_DASHBOARD = {
+  GET_DASHBOARD_FOR_ADMIN: (type, from, to) => {
+    let url = `/api/Dashboard/DashboardForAdmin?Type=${type}`;
+    if (type === "Custom" && from && to) {
+      url += `&From=${from}&To=${to}`;
+    }
+    return url;
+  },
+
+  GET_DASHBOARD_FOR_ARTISAN: (artisanId, type, from, to) => {
+    let url = `/api/Dashboard/DashboardForArtisan?ArtisanId=${artisanId}&Type=${type}`;
+    if (type === "Custom" && from && to) {
+      url += `&From=${from}&To=${to}`;
+    }
+    return url;
+  },
+
+  GET_PRODUCT_COUNT_BY_MONTHS: (year) =>
+    `/api/Dashboard/ProductCountsByMonth?year=${year}`,
+};
+
+export const API_ENDPOINTS_USER_VOUCHER = {
+  GET_ALL_VOUCHERS_BY_USER_ID: (userId, voucherType = "") =>
+    `/api/UserVoucher/GetAllVouchersByUserId?UserId=${userId}${
+      voucherType ? `&VoucherType=${voucherType}` : ""
+    }`,
+  SWAP_VOUCHER: "/api/UserVoucher/SwapVoucher",
+};

@@ -26,7 +26,7 @@ export default function ProfileUser() {
       <div className="py-8 bg-gray-50 min-h-screen">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-6 px-4">
           {/* Sidebar */}
-          <div className="w-full md:w-64 flex-shrink-0 bg-white rounded-lg shadow-lg h-fit sticky top-24">
+          <div className={`w-full md:w-64 flex-shrink-0 bg-white rounded-lg shadow-lg h-fit ${role === "Artisan" ? "sticky top-5" : "sticky top-24"}`}>
             {/* Profile Summary */}
             <div className="p-4 border-b">
               <div className="flex flex-col items-center text-center">

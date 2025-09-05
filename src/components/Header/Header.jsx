@@ -7,11 +7,12 @@ import {
   FaBoxOpen,
 } from "react-icons/fa";
 import { useContext, useState } from "react";
-import { AuthContext } from "../../contexts/AuthContext"; // Import AuthContext
-import { CartContext } from "../../contexts/CartContext"; // Import CartContext
+import { AuthContext } from "../../contexts/AuthContext";
+import { CartContext } from "../../contexts/CartContext";
 
 const Header = () => {
-  const { user, isAuthenticated, logout } = useContext(AuthContext);
+  const { user, isAuthenticated, logout, hasCheckedIn } =
+    useContext(AuthContext);
   const navigate = useNavigate();
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -23,7 +24,6 @@ const Header = () => {
     0
   );
 
-  // Hàm xử lý đăng xuất
   const handleLogout = () => {
     logout();
     navigate("/login");
@@ -31,7 +31,6 @@ const Header = () => {
 
   return (
     <>
-      {/* Banner day */}
       <div className="bg-[#5e3a1e] text-[#f2e8dc] text-xs py-4 overflow-hidden whitespace-nowrap relative border-y border-[#cbb892]">
         <div className="flex animate-marquee min-w-max font-semibold">
           <div className="flex space-x-8">
@@ -59,7 +58,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Main head */}
       <header className="bg-white text-[#5e3a1e] shadow-md sticky top-0 z-50 w-full relative">
         <div className="px-12 py-5 flex justify-between items-center">
           <div className="flex space-x-10 text-base font-medium items-center">
@@ -69,22 +67,25 @@ const Header = () => {
             >
               Sản Phẩm
             </Link>
-
-            <Link
-              to="/artisan"
-              className="hover:no-underline hover:text-gray-500 transition-colors duration-200 font-extrabold tracking-wider"
-            >
-              Nghệ Nhân
-            </Link>
             <Link
               to="/about"
               className="hover:no-underline hover:text-gray-500 transition-colors duration-200 font-extrabold tracking-wider"
             >
               Giới thiệu
             </Link>
+            <div className="relative">
+              <Link
+                to="/profile-user/daily-checkin"
+                className="hover:no-underline hover:text-gray-500 transition-colors duration-200 font-extrabold tracking-wider"
+              >
+                Điểm danh
+              </Link>
+              {!hasCheckedIn && isAuthenticated && (
+                <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full w-3 h-3 flex items-center justify-center"></span>
+              )}
+            </div>
           </div>
 
-          {/* Logo trung tâm */}
           <Link
             to="/"
             className="absolute left-1/2 transform -translate-x-1/2 text-3xl font-extrabold text-[#5e3a1e] font-nunito tracking-wider"
@@ -99,7 +100,6 @@ const Header = () => {
                 className="cursor-pointer hover:text-gray-500 tracking-wider"
                 title="Tìm kiếm"
               />
-
               {showSearchInput && (
                 <div className="absolute top-1/2 -translate-y-1/2 right-[20px] flex items-center z-50 bg-white border border-gray-300 rounded-full px-3 py-1 shadow w-64 transition-transform">
                   <input
@@ -154,7 +154,6 @@ const Header = () => {
                   )}
                   <span>Hi, {user?.userName || "User"}</span>
                 </button>
-
                 {showDropdown && (
                   <div className="absolute right-0 mt-2 w-40 bg-white bg-opacity-90 backdrop-blur-sm border border-gray-200 rounded-lg shadow-lg z-10">
                     <button

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
-import DailyCheckInService from "../../../../services/apis/dailyCheckInApi"; // Adjust path as needed
+import DailyCheckInService from "../../../../services/apis/dailyCheckInApi";
 import { AuthContext } from "../../../../contexts/AuthContext";
 import { useNotification } from "../../../../contexts/NotificationContext";
 
@@ -15,7 +15,7 @@ const DailyCheckInTab = () => {
     false,
   ]);
   const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
-  const rewards = [100, 100, 100, 200, 100, 100, 200];
+  const rewards = [20, 20, 20, 40, 20, 20, 40];
   const dayNames = [
     "Ngày 1",
     "Ngày 2",
@@ -25,23 +25,19 @@ const DailyCheckInTab = () => {
     "Ngày 6",
     "Ngày 7",
   ];
-  const { user } = useContext(AuthContext);
+  const { user, updateCheckInStatus } = useContext(AuthContext);
   const userId = user?.id;
   const { showNotification } = useNotification();
 
   useEffect(() => {
     const fetchInitialData = async () => {
+      if (!userId) return;
       try {
-        // Update streak when user enters the tab
         await DailyCheckInService.updateStreak(userId);
-
-        // Check if user has checked in today
         const hasCheckedResponse = await DailyCheckInService.hasCheckedIn(
           userId
         );
         setHasCheckedInToday(hasCheckedResponse.data.data);
-
-        // Get current streak
         const streakResponse = await DailyCheckInService.getCurrentStreak(
           userId
         );
@@ -53,25 +49,29 @@ const DailyCheckInTab = () => {
         setCheckInStatus(newStatus);
       } catch (error) {
         console.error("Error fetching initial data:", error);
-        // alert("Không thể tải dữ liệu điểm danh. Vui lòng thử lại!");
+        showNotification(
+          "Không thể tải dữ liệu điểm danh. Vui lòng thử lại!",
+          "error"
+        );
       }
     };
 
     fetchInitialData();
-  }, [userId]);
+  }, [userId, showNotification]);
 
   const handleCheckIn = async () => {
+    if (!userId) {
+      showNotification("Vui lòng đăng nhập để điểm danh!", "error");
+      return;
+    }
     if (hasCheckedInToday) {
       showNotification("Bạn đã điểm danh hôm nay!", "info");
       return;
     }
 
     try {
-      // Create FormData for checkIn API
       const formData = new FormData();
       formData.append("UserId", userId);
-      console.log([...formData.entries()]);
-
       const response = await DailyCheckInService.checkIn(formData);
       const todayIndex = checkInStatus.findIndex((status) => !status);
       if (todayIndex !== -1) {
@@ -83,6 +83,8 @@ const DailyCheckInTab = () => {
           response.data.message || `Bạn đã nhận ${rewards[todayIndex]} xu!`,
           "success"
         );
+        // Cập nhật trạng thái điểm danh để ẩn dấu chấm
+        await updateCheckInStatus();
       }
     } catch (error) {
       console.error("Check-in error:", error);
@@ -139,7 +141,7 @@ const DailyCheckInTab = () => {
         </div>
         <div className="w-full bg-gray-200 rounded-full h-2.5">
           <div
-            className="bg-orange-500 h-2.5 rounded-full"
+            className="bg-orange AscendingDescending -orange-500 h-2.5 rounded-full"
             style={{ width: `${(currentStreak / 7) * 100}%` }}
           ></div>
         </div>

@@ -1,25 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
 import DropdownSection from "./components/DropdownSection";
 import categoryService from "../../services/apis/cateApi";
-import productService from "../../services/apis/productApi"
+import productService from "../../services/apis/productApi";
 
 const Product = () => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
   const [isCategoryOpen, setIsCategoryOpen] = useState(true);
-  const [isArtistOpen, setIsArtistOpen] = useState(true);
   const [categories, setCategories] = useState([]);
   const [artisans, setArtisans] = useState([]);
   const [sortOrder, setSortOrder] = useState("");
   const location = useLocation();
-  const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [selectedSubCategories, setSelectedSubCategories] = useState([]);
   const [selectedArtisan, setSelectedArtisan] = useState("");
   const [searchParams] = useSearchParams();
   const searchTerm = searchParams.get("search") || "";
+  const categoryId = searchParams.get("categoryId") || "";
 
   useEffect(() => {
     if (location.state?.openCategory) {
@@ -31,7 +30,14 @@ const Product = () => {
     const fetchCategories = async () => {
       try {
         const res = await categoryService.getAllCategories();
-        setCategories(res?.data?.data || []);
+        const data = res?.data?.data || [];
+        const normalized = data.map((c) => ({
+          id: c.categoryId ?? c.id,
+          categoryName: c.categoryName,
+          image: c.image,
+          subCategories: c.subCategories || [],
+        }));
+        setCategories(normalized);
       } catch (err) {
         console.error("Lỗi khi fetch categories:", err);
       }
@@ -39,10 +45,26 @@ const Product = () => {
     fetchCategories();
   }, []);
 
+  useEffect(() => {
+    if (!categoryId || categories.length === 0) return;
+
+    const target = categories.find((c) => c.id === categoryId);
+    if (target) {
+      const subs = (target.subCategories || [])
+        .map((s) => s?.subName)
+        .filter(Boolean);
+      setSelectedSubCategories(subs);
+      setSelectedArtisan("");
+      setIsCategoryOpen(true);
+    } else {
+      setSelectedSubCategories([]);
+    }
+  }, [categoryId, categories]);
+
   // load products
   const fetchProducts = async () => {
     try {
-      const res = await productService.searchProducts({
+      const payload = {
         search: searchTerm,
         pageIndex: 1,
         pageSize: 20,
@@ -51,14 +73,18 @@ const Product = () => {
         sortOrder,
         subCategoryName: selectedSubCategories.join(","),
         artisanName: selectedArtisan,
-      });
+      };
+
+      if (categoryId) payload.categoryId = categoryId;
+
+      const res = await productService.searchProducts(payload);
       const fetchedProducts = res?.data?.data || [];
       setProducts(fetchedProducts);
 
       const uniqueArtisans = [
-        ...new Set(fetchedProducts.map((product) => product.artisanName)),
+        ...new Set(fetchedProducts.map((p) => p?.artisanName)),
       ]
-        .filter((name) => name) 
+        .filter(Boolean)
         .map((name) => ({ artisanName: name, value: name }));
       setArtisans(uniqueArtisans);
     } catch (error) {
@@ -76,16 +102,20 @@ const Product = () => {
     return number?.toLocaleString("vi-VN", { style: "currency", currency: "VND" }) || "";
   };
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSubCategory =
-      selectedSubCategories.length === 0 ||
-      selectedSubCategories.includes(product.subCategoryName);
+  const filteredProducts = useMemo(() => {
+    return products
+      .filter(product => product.status === "Active" && (product.quantity ?? 0) > 0)
+      .filter(product => {
+        const matchesSubCategory =
+          selectedSubCategories.length === 0 ||
+          selectedSubCategories.includes(product.subCategoryName);
 
-    const matchesArtisan =
-      !selectedArtisan || product.artisanName === selectedArtisan;
+        const matchesArtisan =
+          !selectedArtisan || product.artisanName === selectedArtisan;
 
-    return matchesSubCategory && matchesArtisan;
-  });
+        return matchesSubCategory && matchesArtisan;
+      });
+  }, [products, selectedSubCategories, selectedArtisan]);
 
   return (
     <MainLayout>
@@ -136,20 +166,6 @@ const Product = () => {
                 onParentSelect={(subNames) => {
                   setSelectedSubCategories(subNames);
                   setSelectedArtisan("");
-                }}
-              />
-
-              <DropdownSection
-                title="Nghệ nhân"
-                isOpen={isArtistOpen}
-                toggle={() => setIsArtistOpen(!isArtistOpen)}
-                items={artisans.map((artisan) => ({
-                  label: artisan.artisanName,
-                  value: artisan.artisanName,
-                }))}
-                onSelect={(name) => {
-                  setSelectedArtisan(name);
-                  setSelectedSubCategory("");
                 }}
               />
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import voucherService from "../../../services/apis/voucherApi";
 import { motion } from "framer-motion";
+import Notification from "../../../components/Notification/Notification";
 
 const ManageVoucher = () => {
     const [data, setData] = useState([]);
@@ -17,6 +18,7 @@ const ManageVoucher = () => {
         paymentMethod: "",
         minOrderValue: "",
         maxDiscountAmount: "",
+        pointChangeAmount: "",
         quantity: "",
         discount: "",
         startDate: "",
@@ -31,6 +33,14 @@ const ManageVoucher = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const pageSize = 10;
+
+    const [toasts, setToasts] = useState([]);
+    const pushToast = (type, message) => {
+        const id = Date.now() + Math.random();
+        setToasts((prev) => [...prev, { id, type, message }]);
+    };
+    const removeToast = (id) =>
+        setToasts((prev) => prev.filter((t) => t.id !== id));
 
     const filtered = data.filter((v) =>
         v.code?.toLowerCase().includes(search.toLowerCase()) ||
@@ -56,9 +66,11 @@ const ManageVoucher = () => {
                 setData(res.data.data);
             } else {
                 setData([]);
+                pushToast("warning", "Không có dữ liệu voucher.");
             }
         } catch (error) {
             console.error("Lỗi khi tải danh sách mã giảm giá:", error);
+            pushToast("error", "Không thể tải danh sách voucher.");
         } finally {
             setLoading(false);
         }
@@ -95,6 +107,7 @@ const ManageVoucher = () => {
             paymentMethod: "",
             minOrderValue: "",
             maxDiscountAmount: "",
+            pointChangeAmount: "",
             quantity: "",
             discount: "",
             startDate: "",
@@ -123,10 +136,11 @@ const ManageVoucher = () => {
                 type: voucher.type || "",
                 discountType: voucher.discountType || "",
                 paymentMethod: voucher.paymentMethod || "",
-                minOrderValue: voucher.minOrderValue || "",
-                maxDiscountAmount: voucher.maxDiscountAmount || "",
-                quantity: voucher.quantity || "",
-                discount: voucher.discount || "",
+                minOrderValue: voucher.minOrderValue ?? "",
+                maxDiscountAmount: voucher.maxDiscountAmount ?? "",
+                pointChangeAmount: voucher.pointChangeAmount ?? "",
+                quantity: voucher.quantity ?? "",
+                discount: voucher.discount ?? "",
                 startDate: voucher.startDate ? new Date(voucher.startDate).toISOString().slice(0, 16) : "",
                 endDate: voucher.endDate ? new Date(voucher.endDate).toISOString().slice(0, 16) : "",
                 isActive: voucher.isActive || false,
@@ -212,6 +226,7 @@ const ManageVoucher = () => {
                 paymentMethod: form.paymentMethod,
                 minOrderValue: form.minOrderValue || "",
                 maxDiscountAmount: form.maxDiscountAmount || "",
+                pointChangeAmount: form.pointChangeAmount || "",
                 quantity: form.quantity || "",
                 discount: form.discount,
                 startDate: form.startDate,
@@ -237,12 +252,14 @@ const ManageVoucher = () => {
                         paymentMethod: "",
                         minOrderValue: "",
                         maxDiscountAmount: "",
+                        pointChangeAmount: "",
                         quantity: "",
                         discount: "",
                         startDate: "",
                         endDate: "",
                         isActive: true,
                     });
+                    pushToast("success", "Thêm voucher thành công!");
                 } else {
                     let errorMessage = "Thêm mới thất bại!";
                     if (res.message) {
@@ -251,6 +268,7 @@ const ManageVoucher = () => {
                         errorMessage = typeof res.error === "string" ? res.error : Object.values(res.error).flat().join(", ");
                     }
                     setFormError(errorMessage);
+                    pushToast("error", res.message || "Thêm voucher thất bại.");
                 }
             } else {
                 if (!editVoucher || !editVoucher.id) {
@@ -272,6 +290,7 @@ const ManageVoucher = () => {
                         paymentMethod: "",
                         minOrderValue: "",
                         maxDiscountAmount: "",
+                        pointChangeAmount: "",
                         quantity: "",
                         discount: "",
                         startDate: "",
@@ -280,6 +299,7 @@ const ManageVoucher = () => {
                     });
                     setEditIdx(null);
                     setEditVoucher(null);
+                    pushToast("success", "Cập nhật voucher thành công!");
                 } else {
                     let errorMessage = "Cập nhật thất bại!";
                     if (res.message) {
@@ -288,6 +308,7 @@ const ManageVoucher = () => {
                         errorMessage = typeof res.error === "string" ? res.error : Object.values(res.error).flat().join(", ");
                     }
                     setFormError(errorMessage);
+                    pushToast("error", res.message || "Cập nhật voucher thất bại.");
                 }
             }
         } catch (err) {
@@ -330,12 +351,12 @@ const ManageVoucher = () => {
         }
     };
 
-    const openDelete = (voucherId) => {
-        if (!voucherId) {
+    const openDelete = (id) => {
+        if (!id) {
             alert("Không tìm thấy thông tin mã giảm giá!");
             return;
         }
-        setDeleteId(voucherId);
+        setDeleteId(id);
         setShowDeleteModal(true);
     };
 
@@ -359,6 +380,16 @@ const ManageVoucher = () => {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-2xl shadow-lg p-6 w-full"
         >
+            <div className="fixed top-4 right-4 z-[9999] space-y-2">
+                {toasts.map((t) => (
+                    <Notification
+                        key={t.id}
+                        type={t.type}
+                        message={t.message}
+                        onClose={() => removeToast(t.id)}
+                    />
+                ))}
+            </div>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <div className="flex-1">
                     <h1 className="text-2xl font-bold text-gray-800 mb-2">Quản lý mã giảm giá</h1>
@@ -405,7 +436,7 @@ const ManageVoucher = () => {
                     <tbody className="bg-white divide-y divide-gray-200">
                         {paged.map((row, idx) => (
                             <motion.tr
-                                key={row.voucherId ?? `row-${idx}`}
+                                key={row.id ?? `row-${idx}`}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.1 }}
@@ -458,7 +489,7 @@ const ManageVoucher = () => {
                                             whileHover={{ scale: 1.1 }}
                                             whileTap={{ scale: 0.9 }}
                                             className="text-red-600 hover:text-red-800"
-                                            onClick={() => openDelete(row.voucherId)}
+                                            onClick={() => openDelete(row.id)}
                                         >
                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -572,10 +603,10 @@ const ManageVoucher = () => {
                                         type="text"
                                         value={form.code}
                                         onChange={(e) => setForm({ ...form, code: e.target.value })}
-                                        disabled={editIdx !== null}  
+                                        disabled={editIdx !== null}
                                         className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:border-transparent transition-all ${editIdx !== null
-                                                ? "bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed"
-                                                : "border-gray-300 focus:ring-blue-400"
+                                            ? "bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed"
+                                            : "border-gray-300 focus:ring-blue-400"
                                             }`}
                                         placeholder="Nhập mã voucher..."
                                     />
@@ -613,6 +644,7 @@ const ManageVoucher = () => {
                                         onChange={(e) => setForm({ ...form, type: e.target.value })}
                                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
                                     >
+                                        <option value="" disabled>-- Chọn loại voucher --</option>
                                         <option value="Product">Sản phẩm</option>
                                         <option value="Delivery">Vận chuyển</option>
                                     </select>
@@ -626,6 +658,7 @@ const ManageVoucher = () => {
                                         onChange={(e) => setForm({ ...form, discountType: e.target.value })}
                                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
                                     >
+                                        <option value="" disabled>-- Chọn loại giảm giá --</option>
                                         <option value="Percentage">Phần trăm</option>
                                         <option value="FixedAmount">Số tiền cố định</option>
                                     </select>
@@ -639,7 +672,7 @@ const ManageVoucher = () => {
                                         onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}
                                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
                                     >
-                                        <option value="All">Tất cả</option>
+                                        <option value="" disabled>-- Chọn phương thức thanh toán --</option>
                                         <option value="Cash">Tiền mặt</option>
                                         <option value="Online">Thanh toán trực tuyến</option>
                                     </select>
@@ -666,6 +699,17 @@ const ManageVoucher = () => {
                                         onChange={(e) => setForm({ ...form, maxDiscountAmount: e.target.value })}
                                         className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
                                         placeholder="Nhập số tiền tối đa (VNĐ)..."
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Số xu quy đổi</label>
+                                    <input
+                                        type="number"
+                                        value={form.pointChangeAmount}
+                                        onChange={(e) => setForm({ ...form, pointChangeAmount: e.target.value })}
+                                        className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all"
+                                        placeholder="Nhập số xu cần để đổi..."
                                     />
                                 </div>
 
@@ -852,7 +896,7 @@ const ManageVoucher = () => {
 
                                     <div className="bg-gradient-to-r from-green-50 to-green-100 p-6 rounded-xl">
                                         <div className="text-sm text-green-600 font-medium mb-1">Mô tả</div>
-                                        <div className="text-gray-900">{filtered[viewIdx].description}</div>
+                                        <div className="text-gray-900 break-words whitespace-pre-wrap">{filtered[viewIdx].description}</div>
                                     </div>
 
                                     <div className="text-center">
@@ -896,13 +940,23 @@ const ManageVoucher = () => {
                                             <div>
                                                 <span className="text-gray-500">Giá trị đơn hàng tối thiểu:</span>
                                                 <span className="ml-2 font-medium">
-                                                    {filtered[viewIdx].minOrderValue ? `${filtered[viewIdx].minOrderValue.toLocaleString()} VNĐ` : "Không giới hạn"}
+                                                    {filtered[viewIdx].minOrderValue != null
+                                                        ? `${filtered[viewIdx].minOrderValue.toLocaleString()} VNĐ`
+                                                        : "Không giới hạn"}
                                                 </span>
                                             </div>
                                             <div>
                                                 <span className="text-gray-500">Số tiền giảm tối đa:</span>
                                                 <span className="ml-2 font-medium">
                                                     {filtered[viewIdx].maxDiscountAmount ? `${filtered[viewIdx].maxDiscountAmount.toLocaleString()} VNĐ` : "Không giới hạn"}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <span className="text-gray-500">Số xu quy đổi:</span>
+                                                <span className="ml-2 font-medium">
+                                                    {filtered[viewIdx].pointChangeAmount != null
+                                                        ? `${filtered[viewIdx].pointChangeAmount.toLocaleString()} xu`
+                                                        : "Không áp dụng"}
                                                 </span>
                                             </div>
                                             <div>
@@ -936,14 +990,14 @@ const ManageVoucher = () => {
                                             <div>
                                                 <span className="text-gray-500">Ngày tạo:</span>
                                                 <span className="ml-2 font-medium">
-                                                    {filtered[viewIdx].creationDate
-                                                        ? new Date(filtered[viewIdx].creationDate).toLocaleDateString("vi-VN")
+                                                    {filtered[viewIdx].startDate
+                                                        ? new Date(filtered[viewIdx].startDate).toLocaleDateString("vi-VN")
                                                         : "Chưa có"}
                                                 </span>
                                             </div>
                                             <div>
                                                 <span className="text-gray-500">Người tạo:</span>
-                                                <span className="ml-2 font-medium">{filtered[viewIdx].createdBy || "Không có thông tin"}</span>
+                                                <span className="ml-2 font-medium">{filtered[viewIdx].createdBy || "Nhân viên"}</span>
                                             </div>
                                         </div>
                                     </div>

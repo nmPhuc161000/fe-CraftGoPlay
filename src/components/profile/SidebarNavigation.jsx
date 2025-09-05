@@ -32,7 +32,7 @@ const SidebarNavigation = ({ role, isActive }) => {
 
   const getItemClass = (active) =>
     `flex items-center px-4 py-3 rounded-lg mb-1 transition-all duration-150 ${active
-      ? "bg-[#8f693b] text-white"
+      ? "bg-[#be9e7f] text-white"
       : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
     }`;
 
@@ -57,7 +57,7 @@ const SidebarNavigation = ({ role, isActive }) => {
       to: "/profile-user/returnRequests",
       icon: "↩️",
       label: "Yêu cầu trả hàng",
-      show: role === "Artisan",
+      show: true,
     },
     {
       id: role === "Artisan" ? "artisanReviews" : "userReviews",
@@ -97,8 +97,8 @@ const SidebarNavigation = ({ role, isActive }) => {
       id: "refundWallet",
       to: "/profile-user/refundWallet",
       icon: "💰",
-      label: "Ví hoàn tiền",
-      show: role === "User",
+      label: "Số dư tài khoản",
+      show: true,
     },
   ];
 

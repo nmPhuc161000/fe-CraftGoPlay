@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../../../contexts/AuthContext";
 import orderService from "../../../../services/apis/orderApi";
+import ratingService from "../../../../services/apis/ratingApi";
 import { useNotification } from "../../../../contexts/NotificationContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
@@ -35,6 +36,7 @@ const OrdersTab = () => {
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [expandedOrders, setExpandedOrders] = useState({});
   const { showNotification } = useNotification();
+  const [ratedOrders, setRatedOrders] = useState({});
 
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
@@ -43,34 +45,52 @@ const OrdersTab = () => {
 
   // Fetch orders based on status
   useEffect(() => {
-    const fetchOrders = async (status = "") => {
+    const fetchOrders = async (group = "") => {
       try {
         setLoading(true);
+        // Lấy tất cả đơn hàng
         const res = await orderService.getOrderByUserId(
           user.id,
           1,
           100,
-          status
+          "" // Luôn lấy tất cả, chúng ta sẽ lọc ở client
         );
 
         if (res.data.error === 0 && Array.isArray(res.data.data)) {
           const transformed = res.data.data.map(transformOrderData);
 
-          if (status === "") {
-            const counts = statusFilters.reduce((acc, filter) => {
-              if (filter.value === "all") {
-                acc[filter.value] = transformed.length;
-              } else {
-                acc[filter.value] = transformed.filter(
-                  (order) => order.status === filter.value
-                ).length;
-              }
-              return acc;
-            }, {});
-            setStatusCounts(counts);
-            setOrders(transformed);
+          // Tính counts cho từng group
+          const counts = statusFilters.reduce((acc, filter) => {
+            if (filter.value === "all") {
+              acc[filter.value] = transformed.length;
+            } else {
+              acc[filter.value] = transformed.filter((order) =>
+                filter.includes.includes(order.status)
+              ).length;
+            }
+            return acc;
+          }, {});
+
+          setStatusCounts(counts);
+          setOrders(transformed);
+
+          // Lọc đơn hàng theo group được chọn
+          if (group === "all" || group === "") {
+            setFilteredOrders(transformed);
+          } else {
+            const filter = statusFilters.find((f) => f.value === group);
+            if (filter && filter.includes) {
+              setFilteredOrders(
+                transformed.filter((order) =>
+                  filter.includes.includes(order.status)
+                )
+              );
+            } else {
+              setFilteredOrders([]);
+            }
           }
-          setFilteredOrders(transformed);
+
+          await checkRatedStatus(transformed);
         }
       } catch (err) {
         console.error("Lỗi khi lấy đơn hàng:", err);
@@ -81,7 +101,7 @@ const OrdersTab = () => {
     };
 
     if (user?.id) {
-      fetchOrders(selectedStatus === "all" ? "" : selectedStatus);
+      fetchOrders(selectedStatus);
     }
   }, [user, selectedStatus]);
 
@@ -112,39 +132,41 @@ const OrdersTab = () => {
         case "complete":
           newStatus = "Completed";
           break;
-        case "returnRequest":
-          if (
-          order.orderItems &&
-          Array.isArray(order.orderItems) &&
-          order.orderItems.length > 0
-        ) {
-          // Kiểm tra dữ liệu hợp lệ
-          const validItems = order.orderItems.every(
+        case "returnRequest": {
+          const items = order?.orderItems;
+          if (!Array.isArray(items) || items.length === 0) {
+            showNotification("Không tìm thấy sản phẩm trong đơn hàng", "error");
+            return;
+          }
+
+          const getImageUrl = (pi) => {
+            if (Array.isArray(pi)) return pi[0]?.imageUrl || "";
+            return pi?.imageUrl || "";
+          };
+
+          const validItems = items.every(
             (item) =>
               item &&
               item.id &&
               item.product &&
-              typeof item.product.name === "string" &&
-              item.product.productImages &&
-              typeof item.product.productImages.imageUrl === "string"
+              typeof item.product.name === "string"
           );
+
           if (!validItems) {
             showNotification("Dữ liệu sản phẩm không hợp lệ", "error");
             return;
           }
 
-          if (order.orderItems.length > 1) {
+          if (items.length > 1) {
+            const payload = items.map((item) => ({
+              orderItemId: item.id,
+              name: item.product.name,
+              imageUrl: getImageUrl(item.product.productImages),
+            }));
+
             const queryParams = new URLSearchParams({
               orderId: order.id,
-              orderItems: encodeURIComponent(
-                JSON.stringify(
-                  order.orderItems.map((item) => ({
-                    orderItemId: item.id,
-                    name: item.product.name,
-                    imageUrl: item.product.productImages?.imageUrl || "",
-                  }))
-                )
-              ),
+              orderItems: JSON.stringify(payload),
             }).toString();
             navigate(`/profile-user/returnRequest?${queryParams}`);
           } else {
@@ -153,10 +175,8 @@ const OrdersTab = () => {
               `/profile-user/returnRequest?orderItemId=${item.id}&orderId=${order.id}`
             );
           }
-        } else {
-          showNotification("Không tìm thấy sản phẩm trong đơn hàng", "error");
+          return;
         }
-        return;
         case "rating":
           console.log("Order found for rating:", order);
           if (order && order.orderItems && order.orderItems.length > 0) {
@@ -176,7 +196,10 @@ const OrdersTab = () => {
             }).toString();
             navigate(`/profile-user/productRating?${queryParams}`);
           } else {
-            showNotification("Không tìm thấy sản phẩm trong đơn hàng để đánh giá", "error");
+            showNotification(
+              "Không tìm thấy sản phẩm trong đơn hàng để đánh giá",
+              "error"
+            );
           }
           return;
         default:
@@ -187,10 +210,10 @@ const OrdersTab = () => {
         const updatedOrders = orders.map((order) =>
           order.id === orderId
             ? {
-              ...order,
-              status: newStatus,
-              statusKey: convertStatus(newStatus),
-            }
+                ...order,
+                status: newStatus,
+                statusKey: convertStatus(newStatus),
+              }
             : order
         );
         setOrders(updatedOrders);
@@ -241,10 +264,10 @@ const OrdersTab = () => {
     }
   };
 
-  const getAvailableUserActions = (currentStatus) => {
-    switch (currentStatus) {
-      case "Created":
-        return [
+  const getAvailableUserActions = (currentStatus, orderId) => {
+    const actions =
+      {
+        Created: [
           {
             action: "cancel",
             label: "Hủy đơn hàng",
@@ -252,12 +275,8 @@ const OrdersTab = () => {
               "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-200",
             icon: <FiX className="w-4 h-4" />,
           },
-        ];
-      case "Confirmed":
-      case "Preparing":
-      case "AwaitingPayment":
-      case "ReadyForShipment":
-        return [
+        ],
+        Confirmed: [
           {
             action: "cancel",
             label: "Hủy đơn hàng",
@@ -272,9 +291,15 @@ const OrdersTab = () => {
               "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
             icon: <FiUser className="w-4 h-4" />,
           },
-        ];
-      case "Shipped":
-        return [
+        ],
+        Preparing: [
+          {
+            action: "cancel",
+            label: "Hủy đơn hàng",
+            color:
+              "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-200",
+            icon: <FiX className="w-4 h-4" />,
+          },
           {
             action: "contact",
             label: "Liên hệ nghệ nhân",
@@ -282,9 +307,49 @@ const OrdersTab = () => {
               "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
             icon: <FiUser className="w-4 h-4" />,
           },
-        ];
-      case "Delivered":
-        return [
+        ],
+        AwaitingPayment: [
+          {
+            action: "cancel",
+            label: "Hủy đơn hàng",
+            color:
+              "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-200",
+            icon: <FiX className="w-4 h-4" />,
+          },
+          {
+            action: "contact",
+            label: "Liên hệ nghệ nhân",
+            color:
+              "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
+            icon: <FiUser className="w-4 h-4" />,
+          },
+        ],
+        ReadyForShipment: [
+          {
+            action: "cancel",
+            label: "Hủy đơn hàng",
+            color:
+              "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-200",
+            icon: <FiX className="w-4 h-4" />,
+          },
+          {
+            action: "contact",
+            label: "Liên hệ nghệ nhân",
+            color:
+              "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
+            icon: <FiUser className="w-4 h-4" />,
+          },
+        ],
+        Shipped: [
+          {
+            action: "contact",
+            label: "Liên hệ nghệ nhân",
+            color:
+              "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
+            icon: <FiUser className="w-4 h-4" />,
+          },
+        ],
+        Delivered: [
           {
             action: "returnRequest",
             label: "Yêu cầu trả hàng",
@@ -299,9 +364,8 @@ const OrdersTab = () => {
               "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-green-200",
             icon: <FiCheck className="w-4 h-4" />,
           },
-        ];
-      case "Completed":
-        return [
+        ],
+        PartialReturn: [
           {
             action: "returnRequest",
             label: "Yêu cầu trả hàng",
@@ -309,17 +373,20 @@ const OrdersTab = () => {
               "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-orange-200",
             icon: <FiPackage className="w-4 h-4" />,
           },
-          {
+        ],
+        Completed: [
+          !ratedOrders[orderId] && {
             action: "rating",
             label: "Đánh giá sản phẩm",
             color:
               "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 shadow-yellow-200",
             icon: <FiStar className="w-4 h-4" />,
           },
-        ];
-      default:
-        return [];
-    }
+        ],
+      }[currentStatus] || [];
+
+    // Lọc bỏ các phần tử falsy (false, null, undefined)
+    return actions.filter(Boolean);
   };
 
   const toggleOrderExpansion = (orderId) => {
@@ -327,6 +394,30 @@ const OrdersTab = () => {
       ...prev,
       [orderId]: !prev[orderId],
     }));
+  };
+
+  const checkRatedStatus = async (orders) => {
+    const results = {};
+    for (const order of orders) {
+      if (order.status === "Completed" && order.orderItems.length > 0) {
+        try {
+          const firstOrderItemId = order.orderItems[0].id;
+          const checkRating = {
+            userId: user.id,
+            orderItemId: firstOrderItemId,
+          };
+          const res = await ratingService.checkRated(checkRating);
+          results[order.id] = res?.data?.data === true; // true nếu đã đánh giá
+          console.log("data: ", res.data);
+        } catch (err) {
+          console.error("Lỗi checkRated:", err);
+          results[order.id] = false; // fallback
+        }
+      }
+    }
+    console.log("data: ", results);
+
+    setRatedOrders(results);
   };
 
   return (
@@ -354,20 +445,22 @@ const OrdersTab = () => {
                 <button
                   key={filter.value}
                   onClick={() => setSelectedStatus(filter.value)}
-                  className={`group relative flex items-center px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 transform hover:scale-105 ${selectedStatus === filter.value
+                  className={`group relative flex items-center px-6 py-3 rounded-xl text-sm font-medium transition-all duration-300 transform hover:scale-105 ${
+                    selectedStatus === filter.value
                       ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200"
                       : "bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 hover:border-blue-300"
-                    }`}
+                  }`}
                 >
                   <div className="flex items-center">
                     {filter.icon}
                     <span className="ml-2">{filter.label}</span>
                     {statusCounts[filter.value] > 0 && (
                       <span
-                        className={`ml-3 px-2 py-1 rounded-full text-xs font-bold ${selectedStatus === filter.value
+                        className={`ml-3 px-2 py-1 rounded-full text-xs font-bold ${
+                          selectedStatus === filter.value
                             ? "bg-white text-blue-600"
                             : "bg-blue-100 text-blue-700"
-                          }`}
+                        }`}
                       >
                         {statusCounts[filter.value]}
                       </span>
@@ -445,8 +538,9 @@ const OrdersTab = () => {
                           </div>
                         </div>
                         <div
-                          className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${statusConfig[order.statusKey].color
-                            }`}
+                          className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
+                            statusConfig[order.statusKey].color
+                          }`}
                         >
                           {statusConfig[order.statusKey].icon}
                           <span className="ml-2">
@@ -476,98 +570,217 @@ const OrdersTab = () => {
                           Sản phẩm đã đặt
                         </h4>
                         <div className="space-y-4">
-                          {order.orderItems.map((item) => (
-                            <div
-                              key={item.id}
-                              className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200"
-                            >
-                              <div className="flex items-center space-x-4">
-                                <div className="relative">
-                                  <img
-                                    src={item.product.productImages.imageUrl}
-                                    alt={item.product.name}
-                                    className="w-20 h-20 object-cover rounded-xl shadow-sm"
-                                  />
-                                  <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                                    {item.quantity}
+                          {order.orderItems.map((item) => {
+                            console.log("item.status:", item.status); // Debug
+                            console.log(
+                              "item.statusKey:",
+                              convertStatus(item.status)
+                            ); // Debug
+                            return (
+                              <div
+                                key={item.id}
+                                className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200"
+                              >
+                                <div className="flex items-center space-x-4">
+                                  <div className="relative">
+                                    <img
+                                      src={item.product.productImages.imageUrl}
+                                      alt={item.product.name}
+                                      className="w-20 h-20 object-cover rounded-xl shadow-sm"
+                                    />
+                                    <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                                      {item.quantity}
+                                    </div>
                                   </div>
-                                </div>
-                                <div className="flex-1">
-                                  <h5 className="font-semibold text-gray-900 mb-2">
-                                    {item.product.name}
-                                  </h5>
-                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
-                                    <div className="flex items-center">
-                                      <FiUser className="mr-1 text-gray-400" />
-                                      <span className="font-medium">
-                                        Nghệ nhân:
-                                      </span>
-                                      <span className="ml-1">
-                                        {item.artisanName}
-                                      </span>
+                                  <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center space-x-3">
+                                        <h5 className="font-semibold text-gray-900">
+                                          {item.product.name}
+                                        </h5>
+                                        {/* Display item status next to product name */}
+                                        <div
+                                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                                            statusConfig[
+                                              convertStatus(item.status)
+                                            ]
+                                              ? statusConfig[
+                                                  convertStatus(item.status)
+                                                ].color
+                                              : "bg-gray-100 text-gray-700"
+                                          }`}
+                                        >
+                                          {statusConfig[
+                                            convertStatus(item.status)
+                                          ] ? (
+                                            <>
+                                              {
+                                                statusConfig[
+                                                  convertStatus(item.status)
+                                                ].icon
+                                              }
+                                              <span className="ml-1">
+                                                {
+                                                  statusConfig[
+                                                    convertStatus(item.status)
+                                                  ].text
+                                                }
+                                              </span>
+                                            </>
+                                          ) : (
+                                            <span>Unknown Status</span> // Fallback for undefined status
+                                          )}
+                                        </div>
+                                      </div>
                                     </div>
-                                    <div className="flex items-center">
-                                      <FiPackage className="mr-1 text-gray-400" />
-                                      <span className="font-medium">
-                                        Số lượng:
-                                      </span>
-                                      <span className="ml-1">
-                                        {item.quantity}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center">
-                                      <FiDollarSign className="mr-1 text-gray-400" />
-                                      <span className="font-medium">Giá:</span>
-                                      <span className="ml-1 font-semibold text-blue-600">
-                                        {formatPrice(item.unitPrice)}
-                                      </span>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
+                                      <div className="flex items-center">
+                                        <FiUser className="mr-1 text-gray-400" />
+                                        <span className="font-medium">
+                                          Nghệ nhân:
+                                        </span>
+                                        <span className="ml-1">
+                                          {item.artisanName}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center">
+                                        <FiPackage className="mr-1 text-gray-400" />
+                                        <span className="font-medium">
+                                          Số lượng:
+                                        </span>
+                                        <span className="ml-1">
+                                          {item.quantity}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center">
+                                        <FiDollarSign className="mr-1 text-gray-400" />
+                                        <span className="font-medium">
+                                          Giá:
+                                        </span>
+                                        <span className="ml-1 font-semibold text-blue-600">
+                                          {formatPrice(item.unitPrice)}
+                                        </span>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
 
                       {/* Order Information */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                          <h5 className="font-semibold text-gray-900 mb-3 flex items-center">
-                            <FiCreditCard className="mr-2 text-green-600" />
-                            Thông tin thanh toán
-                          </h5>
-                          <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">
-                                Phương thức:
-                              </span>
-                              <span className="font-medium">
-                                {order.paymentMethod}
-                              </span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Trạng thái:</span>
-                              <span className="font-medium">
-                                {order.paymentStatus}
-                              </span>
+                      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                          <FiDollarSign className="mr-2 text-green-600" />
+                          Chi tiết thanh toán & vận chuyển
+                        </h4>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Left Column - Payment Method Only */}
+                          <div className="space-y-4">
+                            <h5 className="font-semibold text-gray-800 flex items-center">
+                              <FiCreditCard className="mr-2 text-green-500" />
+                              Chi tiết thanh toán
+                            </h5>
+
+                            <div className="space-y-2 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">
+                                  Phương thức:
+                                </span>
+                                <span className="font-medium">
+                                  {order.paymentMethod}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">
+                                  Trạng thái:
+                                </span>
+                                <span className="font-medium">
+                                  {order.paymentStatus}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
 
-                        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
-                          <h5 className="font-semibold text-gray-900 mb-3 flex items-center">
-                            <FiTruck className="mr-2 text-orange-600" />
-                            Thông tin vận chuyển
-                          </h5>
-                          <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">
-                                Phí vận chuyển:
-                              </span>
-                              <span className="font-medium text-orange-600">
-                                {order.delivery_Amount}
-                              </span>
+                          {/* Right Column - Price Details and Shipping */}
+                          <div className="space-y-4">
+                            <h5 className="font-semibold text-gray-800 flex items-center">
+                              <FiDollarSign className="mr-2 text-orange-500" />
+                              Chi tiết đơn hàng
+                            </h5>
+
+                            <div className="space-y-2 text-sm">
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">
+                                  Tổng tiền hàng:
+                                </span>
+                                <span className="font-medium">
+                                  {formatPrice(order.product_Amount)}
+                                </span>
+                              </div>
+
+                              {/* Discounts Section */}
+                              {(order.productDiscount > 0 ||
+                                order.deliveryDiscount > 0 ||
+                                order.pointDiscount > 0) && (
+                                <div className="pt-2 border-t border-gray-100">
+                                  <div className="text-gray-600 font-medium mb-1">
+                                    Giảm giá:
+                                  </div>
+                                  {order.productDiscount > 0 && (
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-gray-500 pl-2">
+                                        - Giảm giá sản phẩm:
+                                      </span>
+                                      <span className="text-green-600">
+                                        -{formatPrice(order.productDiscount)}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {order.deliveryDiscount > 0 && (
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-gray-500 pl-2">
+                                        - Giảm giá vận chuyển:
+                                      </span>
+                                      <span className="text-green-600">
+                                        -{formatPrice(order.deliveryDiscount)}
+                                      </span>
+                                    </div>
+                                  )}
+                                  {order.pointDiscount > 0 && (
+                                    <div className="flex justify-between text-sm">
+                                      <span className="text-gray-500 pl-2">
+                                        - Giảm giá từ xu:
+                                      </span>
+                                      <span className="text-green-600">
+                                        -{formatPrice(order.pointDiscount)}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              <div className="flex justify-between pt-2 border-t border-gray-100">
+                                <span className="text-gray-600">
+                                  Phí vận chuyển:
+                                </span>
+                                <span className="font-medium text-orange-600">
+                                  {order.delivery_Amount}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Total Summary */}
+                            <div className="pt-3 border-t border-gray-200 mt-4">
+                              <div className="flex justify-between font-semibold text-lg">
+                                <span>Tổng cộng:</span>
+                                <span className="text-blue-600">
+                                  {formatPrice(order.totalPrice)}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -575,26 +788,28 @@ const OrdersTab = () => {
 
                       {/* Action Buttons */}
                       <div className="flex flex-wrap gap-3">
-                        {getAvailableUserActions(order.status).map((action) => (
-                          <button
-                            key={action.action}
-                            onClick={() => {
-                              if (action.action === "cancel") {
-                                setSelectedOrderId(order.id);
-                                setShowCancelModal(true);
-                              } else if (action.action === "rating") {
-                                setSelectedOrderId(order.id);
-                                handleUserAction(order.id, action.action);
-                              } else {
-                                handleUserAction(order.id, action.action);
-                              }
-                            }}
-                            className={`flex items-center px-6 py-3 rounded-xl text-white text-sm font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg ${action.color}`}
-                          >
-                            {action.icon}
-                            <span className="ml-2">{action.label}</span>
-                          </button>
-                        ))}
+                        {getAvailableUserActions(order.status, order.id).map(
+                          (action) => (
+                            <button
+                              key={action.action}
+                              onClick={() => {
+                                if (action.action === "cancel") {
+                                  setSelectedOrderId(order.id);
+                                  setShowCancelModal(true);
+                                } else if (action.action === "rating") {
+                                  setSelectedOrderId(order.id);
+                                  handleUserAction(order.id, action.action);
+                                } else {
+                                  handleUserAction(order.id, action.action);
+                                }
+                              }}
+                              className={`flex items-center px-6 py-3 rounded-xl text-white text-sm font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg ${action.color}`}
+                            >
+                              {action.icon}
+                              <span className="ml-2">{action.label}</span>
+                            </button>
+                          )
+                        )}
 
                         {/* Modal xác nhận hủy đơn */}
                         {showCancelModal && (

@@ -319,8 +319,8 @@ export default function ProductDetailTab() {
 
   const handleDelete = async () => {
     const confirmed = await confirm({
-      title: "Xóa sản phẩm",
-      message: "Bạn có chắc chắn muốn xóa sản phẩm này?",
+      title: "Ẩn sản phẩm",
+      message: "Bạn có chắc chắn muốn ẩn sản phẩm này? Sau khi ẩn sẽ không được mở bán lại.",
       confirmText: "Xóa",
       cancelText: "Hủy",
       type: "danger",
@@ -330,7 +330,7 @@ export default function ProductDetailTab() {
       try {
         const response = await productService.deleteProduct(productId);
         if (response.success) {
-          showNotification("Xóa sản phẩm thành công", "success");
+          showNotification("Ẩn sản phẩm thành công", "success");
           navigate("/profile-user/products");
         } else {
           throw new Error(response.error || "Failed to delete product");
@@ -393,7 +393,7 @@ export default function ProductDetailTab() {
                     className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg hover:shadow-xl font-medium"
                   >
                     <FiTrash2 className="w-4 h-4" />
-                    <span>Xóa sản phẩm</span>
+                    <span>Ẩn sản phẩm</span>
                   </button>
                 </>
               )}
@@ -572,7 +572,7 @@ export default function ProductDetailTab() {
                 <div className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
                   <span className="text-gray-600 font-medium">Đã bán:</span>
                   <span className="font-bold text-blue-600">
-                    {product.soldQuantity || 0}
+                    {product.quantitySold || 0}
                   </span>
                 </div>
 

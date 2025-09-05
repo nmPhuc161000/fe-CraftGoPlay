@@ -78,6 +78,14 @@ export const validateProductData = (productData) => {
       status: 400,
     };
   }
+
+  if (productData.Images.length > 5) {
+    return {
+      success: false,
+      error: "Tối đa chỉ được 5 tấm ảnh",
+      status: 400,
+    };
+  }
   return {
     success: true,
   };

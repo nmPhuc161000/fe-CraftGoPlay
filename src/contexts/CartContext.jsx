@@ -14,9 +14,7 @@ export const CartContext = createContext();
 
 const getStock = (product) => {
     if (!product) return 0;
-    const qty = Number(product.quantity) || 0;
-    const sold = Number(product.quantitySold) || 0;
-    return Math.max(0, qty - sold);
+    return Number(product.quantity) || 0;
 };
 
 export const CartProvider = ({ children }) => {
@@ -65,16 +63,18 @@ export const CartProvider = ({ children }) => {
     useEffect(() => {
         if (isAuthenticated && user?.id && user?.roleId === 4) {
             fetchCart();
+        } else {
+            setCartItems([]);
         }
     }, [isAuthenticated, user?.id, user?.roleId]);
 
 
     // 2. Thêm sản phẩm vào giỏ hàng
     const addToCart = async (product) => {
-        if (!isAuthenticated || !user?.id || !product?.id || product.quantity <= 0) return;
+        const qty = Number(product?.quantity ?? 0);
+        if (!isAuthenticated || !user?.id || !product?.id || qty <= 0) return;
 
         try {
-
             const productRes = await getProductById(product.id);
             const latestProduct = productRes?.data?.data;
 
@@ -83,9 +83,18 @@ export const CartProvider = ({ children }) => {
                 return;
             }
 
-            const stock = getStock(latestProduct); // số lượng còn trong kho mới nhất
-            const existingQuantity = cartItems.find(item => item.product?.id === product.id)?.quantity || 0;
-            const totalAfterAdd = existingQuantity + product.quantity;
+            const stock = Number(latestProduct.quantity ?? 0);
+
+            // da co trong gio hang
+            const existingQuantity =
+                cartItems.find((item) => item.product?.id === product.id)?.quantity || 0;
+
+            const totalAfterAdd = existingQuantity + qty;
+
+            if (stock <= 0) {
+                showNotification("Sản phẩm đã hết hàng", "error");
+                return;
+            }
 
             if (totalAfterAdd > stock) {
                 const remaining = Math.max(0, stock - existingQuantity);
@@ -96,7 +105,7 @@ export const CartProvider = ({ children }) => {
                 return;
             }
 
-            const res = await addToCartApi(user.id, product.id, product.quantity);
+            const res = await addToCartApi(user.id, product.id, qty);
             if (res?.success) {
                 await fetchCart();
                 showNotification("Đã thêm sản phẩm vào giỏ hàng", "success");
@@ -104,7 +113,6 @@ export const CartProvider = ({ children }) => {
                 console.error("Lỗi khi thêm vào giỏ hàng:", res?.error);
                 showNotification("Lỗi khi thêm sản phẩm vào giỏ hàng", "error");
             }
-
         } catch (err) {
             console.error("Lỗi kết nối khi thêm vào giỏ hàng:", err);
             showNotification("Không thể kết nối tới máy chủ", "error");
@@ -121,15 +129,6 @@ export const CartProvider = ({ children }) => {
         } else {
             console.error("Lỗi khi xoá sản phẩm:", res.error);
         }
-    };
-
-    //xoa sau khi thanh toan
-    const removeMultipleItems = async (cartItemIds = []) => {
-        if (!isAuthenticated || !cartItemIds.length) return;
-
-        // Dùng Promise.all để xoá song song các item
-        await Promise.all(cartItemIds.map((id) => removeFromCartApi(id)));
-        await fetchCart();
     };
 
     // 4. Cập nhật số lượng
@@ -179,8 +178,8 @@ export const CartProvider = ({ children }) => {
         await fetchCart();
     };
 
-    const cartCount = Array.isArray(cartItems)
-        ? cartItems.reduce((sum, item) => sum + item.quantity, 0)
+    const cartCount = isAuthenticated
+        ? (Array.isArray(cartItems) ? cartItems.reduce((sum, item) => sum + item.quantity, 0) : 0)
         : 0;
 
     return (
@@ -189,11 +188,11 @@ export const CartProvider = ({ children }) => {
                 cartItems,
                 addToCart,
                 removeFromCart,
-                removeMultipleItems,
                 updateQuantity,
                 cartCount,
                 clearCart,
                 getStock,
+                fetchCart,
             }}
         >
             {children}

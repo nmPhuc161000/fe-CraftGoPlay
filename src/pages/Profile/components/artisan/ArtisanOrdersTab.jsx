@@ -30,40 +30,75 @@ const ArtisanOrdersTab = () => {
   const [statusCounts, setStatusCounts] = useState({});
   const [loading, setLoading] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState("all");
-  const { showNotification } = useNotification();
-  const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch orders based on status
+  // state phân trang
+  const [pageIndex, setPageIndex] = useState(1); // Trang hiện tại (tiếng Việt: trang)
+  const [pageSize] = useState(10); // Số đơn hàng mỗi trang
+  const [totalOrders, setTotalOrders] = useState(0);
+
+  const { showNotification } = useNotification();
+
+  // Lấy số lượng đơn hàng
   useEffect(() => {
-    const fetchOrders = async (status = "") => {
+    const fetchTotalOrders = async () => {
+      try {
+        const res = await orderService.countOrderByArtisanId(user.id);
+        if (res.data.error === 0) {
+          console.log("abc: ", res.data.data.totalOrders);
+
+          setTotalOrders(res.data.data.totalOrders);
+        }
+      } catch (err) {
+        console.error("Lỗi khi lấy tổng số đơn hàng:", err);
+      }
+    };
+
+    if (user?.id) fetchTotalOrders();
+  }, [user]);
+
+  // Lấy danh sách đơn hàng theo trang và trạng thái
+  useEffect(() => {
+    const fetchOrders = async (group = "") => {
       try {
         setLoading(true);
         const res = await orderService.getOrderByArtisanId(
           user.id,
-          1,
-          100,
-          status
+          pageIndex,
+          pageSize,
+          "" // bạn có thể truyền status filter vào đây nếu API hỗ trợ
         );
 
         if (res.data.error === 0 && Array.isArray(res.data.data)) {
           const transformed = res.data.data.map(transformOrderData);
-          console.log("Transformed Orders:", transformed);
 
-          if (status === "") {
-            const counts = statusFilters.reduce((acc, filter) => {
-              if (filter.value === "all") {
-                acc[filter.value] = transformed.length;
-              } else {
-                acc[filter.value] = transformed.filter(
-                  (order) => order.status === filter.value
-                ).length;
-              }
-              return acc;
-            }, {});
-            setStatusCounts(counts);
-            setOrders(transformed);
+          // Tính counts cho từng group
+          const counts = statusFilters.reduce((acc, filter) => {
+            if (filter.value === "all") {
+              acc[filter.value] = transformed.length;
+            } else {
+              acc[filter.value] = transformed.filter((order) =>
+                filter.includes.includes(order.status)
+              ).length;
+            }
+            return acc;
+          }, {});
+
+          setStatusCounts(counts);
+          setOrders(transformed);
+
+          // Lọc theo group đã chọn
+          if (group === "all" || group === "") {
+            setFilteredOrders(transformed);
+          } else {
+            const filter = statusFilters.find((f) => f.value === group);
+            setFilteredOrders(
+              filter
+                ? transformed.filter((order) =>
+                    filter.includes.includes(order.status)
+                  )
+                : []
+            );
           }
-          setFilteredOrders(transformed);
         }
       } catch (err) {
         console.error("Lỗi khi lấy đơn hàng:", err);
@@ -73,9 +108,19 @@ const ArtisanOrdersTab = () => {
     };
 
     if (user?.id) {
-      fetchOrders(selectedStatus === "all" ? "" : selectedStatus);
+      fetchOrders(selectedStatus);
     }
-  }, [user, selectedStatus]);
+  }, [user, selectedStatus, pageIndex, pageSize]);
+
+  // Tính số trang
+  const totalPages = Math.ceil(totalOrders / pageSize);
+
+  // Hàm đổi trang
+  const handleChangePage = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setPageIndex(newPage);
+    }
+  };
 
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
@@ -180,23 +225,16 @@ const ArtisanOrdersTab = () => {
           color: "bg-green-600 hover:bg-green-700",
         },
         {
-          status: "DeliveryFailed",
-          label: "Giao hàng thất bại",
+          status: "DeliveryAttemptFailed",
+          label: "Giao hàng không thành công",
           color: "bg-red-600 hover:bg-red-700",
         },
       ],
-      Delivered: [
+      DeliveryAttemptFailed: [
         {
-          status: "DeliveryFailed",
-          label: "Giao hàng thất bại",
-          color: "bg-red-600 hover:bg-red-700",
-        },
-      ],
-      ReturnRequested: [
-        {
-          status: "Returned",
-          label: "Xác nhận đã trả hàng",
-          color: "bg-pink-600 hover:bg-pink-700",
+          status: "Shipped",
+          label: "Giao Hàng lại",
+          color: "bg-purple-600 hover:bg-purple-700",
         },
       ],
     };
@@ -249,20 +287,6 @@ const ArtisanOrdersTab = () => {
                 <p className="mt-2 text-gray-600">
                   Theo dõi và xử lý các đơn hàng của bạn
                 </p>
-              </div>
-
-              {/* Search Bar */}
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiSearch className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm đơn hàng..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
               </div>
             </div>
           </div>
@@ -376,7 +400,7 @@ const ArtisanOrdersTab = () => {
                           <div>
                             <p className="text-sm text-gray-500">Khách hàng</p>
                             <p className="font-semibold text-gray-900">
-                              {order.user?.userName || "Khách hàng"}
+                              {order.userAddress?.fullName || "Khách hàng"}
                             </p>
                           </div>
                         </div>
@@ -387,23 +411,13 @@ const ArtisanOrdersTab = () => {
                           <div>
                             <p className="text-sm text-gray-500">Điện thoại</p>
                             <p className="font-medium text-gray-700">
-                              {order.user?.phone || "Chưa cập nhật"}
+                              {order.userAddress?.phoneNumber ||
+                                "Chưa cập nhật"}
                             </p>
                           </div>
                         </div>
                       </div>
                       <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-purple-100 rounded-lg">
-                            <FiMail size={16} className="text-purple-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-500">Email</p>
-                            <p className="font-medium text-gray-700 truncate">
-                              {order.user?.email || "Chưa cập nhật"}
-                            </p>
-                          </div>
-                        </div>
                         <div className="flex items-center gap-3">
                           <div className="p-2 bg-orange-100 rounded-lg">
                             <FiMapPin size={16} className="text-orange-600" />
@@ -413,8 +427,21 @@ const ArtisanOrdersTab = () => {
                               Địa chỉ giao hàng
                             </p>
                             <p className="font-medium text-gray-700 text-sm">
-                              {order.userAddresses?.[0]?.address ||
+                              {order.userAddress?.fullAddress ||
                                 "Chưa có địa chỉ"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <FiTruck size={16} className="text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm text-gray-500">
+                              Phí vận chuyển
+                            </p>
+                            <p className="font-semibold text-gray-900">
+                              {order.delivery_Amount || 0}
                             </p>
                           </div>
                         </div>
@@ -448,6 +475,13 @@ const ArtisanOrdersTab = () => {
                             <h5 className="font-semibold text-gray-900 truncate">
                               {item.product?.name || "Sản phẩm"}
                             </h5>
+                            <p className="text-sm text-gray-600 mt-1">
+                              Trạng thái:{" "}
+                              <span className="font-medium">
+                                {statusConfig[convertStatus(item.status)]
+                                  ?.text || item.status}
+                              </span>
+                            </p>
                             <p className="text-sm text-gray-600 mt-1">
                               Số lượng:{" "}
                               <span className="font-medium">
@@ -507,7 +541,7 @@ const ArtisanOrdersTab = () => {
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-3">
+                          {/* <div className="flex items-center gap-3">
                             <div className="p-2 bg-blue-100 rounded-lg">
                               <FiTruck size={16} className="text-blue-600" />
                             </div>
@@ -519,7 +553,7 @@ const ArtisanOrdersTab = () => {
                                 {order.delivery_Amount || 0}
                               </p>
                             </div>
-                          </div>
+                          </div> */}
                         </div>
 
                         {/* Total Price */}
@@ -560,6 +594,27 @@ const ArtisanOrdersTab = () => {
             })}
           </div>
         )}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-center items-center gap-2 mt-6">
+        <button
+          onClick={() => handleChangePage(pageIndex - 1)}
+          disabled={pageIndex === 1}
+          className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+        >
+          Trang trước
+        </button>
+        <span>
+          Trang {pageIndex} / {totalPages}
+        </span>
+        <button
+          onClick={() => handleChangePage(pageIndex + 1)}
+          disabled={pageIndex === totalPages}
+          className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50"
+        >
+          Trang sau
+        </button>
       </div>
     </div>
   );
