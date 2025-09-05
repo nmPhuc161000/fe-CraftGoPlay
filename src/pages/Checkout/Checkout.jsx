@@ -143,7 +143,7 @@ const Checkout = () => {
 
   function allowsPayment(voucher, method /* 'vnpay' | 'cod' */) {
     if (!voucher) return true;
-    const pm = (voucher.paymentMethod || "All").toString().toLowerCase(); 
+    const pm = (voucher.paymentMethod || "All").toString().toLowerCase();
     if (pm === "all") return true;
     if (pm === "online") return method === "vnpay";
     if (pm === "cash") return method !== "vnpay";
@@ -172,9 +172,9 @@ const Checkout = () => {
   };
 
   const recomputeVoucherDiscount = React.useCallback(() => {
-    const orderSubtotal = getTotal();              
-    const baseProduct = orderSubtotal;              
-    const baseDelivery = totalShippingFee || 0;     
+    const orderSubtotal = getTotal();
+    const baseProduct = orderSubtotal;
+    const baseDelivery = totalShippingFee || 0;
 
     const d1 = calcDiscount(
       appliedProductVoucher,
@@ -194,9 +194,9 @@ const Checkout = () => {
     appliedProductVoucher,
     appliedDeliveryVoucher,
     totalShippingFee,
-    paymentMethod,          
-    selectedCartItems,      
-    buyNow                   
+    paymentMethod,
+    selectedCartItems,
+    buyNow,
   ]);
 
   useEffect(() => {
@@ -211,10 +211,14 @@ const Checkout = () => {
     setIsPlacingOrder(true);
 
     // Nếu đang có Product voucher mà không cho phép theo phương thức hiện tại -> báo lỗi
-    if (appliedProductVoucher && !allowsPayment(appliedProductVoucher, paymentMethod)) {
+    if (
+      appliedProductVoucher &&
+      !allowsPayment(appliedProductVoucher, paymentMethod)
+    ) {
       showNotification(
         `Mã giảm giá ${appliedProductVoucher.code} chỉ áp dụng cho ` +
-          ((appliedProductVoucher.paymentMethod || "Cash").toLowerCase() === "cash"
+          ((appliedProductVoucher.paymentMethod || "Cash").toLowerCase() ===
+          "cash"
             ? "thanh toán khi nhận hàng."
             : "thanh toán VNPay."),
         "error"
@@ -224,7 +228,10 @@ const Checkout = () => {
     }
 
     // Delivery voucher thường cho cả 2, nhưng vẫn kiểm cho chắc:
-    if (appliedDeliveryVoucher && !allowsPayment(appliedDeliveryVoucher, paymentMethod)) {
+    if (
+      appliedDeliveryVoucher &&
+      !allowsPayment(appliedDeliveryVoucher, paymentMethod)
+    ) {
       showNotification(
         `Mã vận chuyển ${appliedDeliveryVoucher.code} không áp dụng cho phương thức này.`,
         "error"
@@ -247,12 +254,16 @@ const Checkout = () => {
       formData.append("DeliveryAmount", totalShippingFee);
       formData.append(
         "VoucherProductCode",
-        allowsPayment(appliedProductVoucher, paymentMethod) ? (appliedProductVoucher?.code || "") : ""
+        allowsPayment(appliedProductVoucher, paymentMethod)
+          ? appliedProductVoucher?.code || ""
+          : ""
       );
       formData.append("Point", userCoinsToUse);
       formData.append(
         "VoucherDeliveryCode",
-        allowsPayment(appliedDeliveryVoucher, paymentMethod) ? (appliedDeliveryVoucher?.code || "") : ""
+        allowsPayment(appliedDeliveryVoucher, paymentMethod)
+          ? appliedDeliveryVoucher?.code || ""
+          : ""
       );
 
       const result = await createOrderDirect(realUser?.id, formData);
@@ -297,11 +308,15 @@ const Checkout = () => {
       formData.append("DeliveryAmounts", JSON.stringify(deliveryAmounts));
       formData.append(
         "VoucherProductCode",
-        allowsPayment(appliedProductVoucher, paymentMethod) ? (appliedProductVoucher?.code || "") : ""
+        allowsPayment(appliedProductVoucher, paymentMethod)
+          ? appliedProductVoucher?.code || ""
+          : ""
       );
       formData.append(
         "VoucherDeliveryCode",
-        allowsPayment(appliedDeliveryVoucher, paymentMethod) ? (appliedDeliveryVoucher?.code || "") : ""
+        allowsPayment(appliedDeliveryVoucher, paymentMethod)
+          ? appliedDeliveryVoucher?.code || ""
+          : ""
       );
       formData.append("Point", userCoinsToUse);
 
@@ -347,6 +362,8 @@ const Checkout = () => {
 
       if (buyNow) {
         const dataAddress = await getCachedArtisanAddress(buyNow.artisanId);
+        console.log("dataAddress", dataAddress);
+
         if (!dataAddress) {
           console.warn("Không lấy được địa chỉ người gửi");
         }
@@ -392,6 +409,7 @@ const Checkout = () => {
             height: buyNow.height || 20,
           }));
         }
+        console.log("feeData", feeData);
 
         const feeResult = await locationService.getFeeShip(feeData);
         const newShippingFees = [
@@ -599,9 +617,7 @@ const Checkout = () => {
                 <div className="col-span-2 text-center">
                   {(buyNow.productPrice || 0).toLocaleString("vi-VN")}₫
                 </div>
-                <div className="col-span-2 text-center">
-                  {buyNow.quantity}
-                </div>
+                <div className="col-span-2 text-center">{buyNow.quantity}</div>
                 <div className="col-span-2 text-right font-medium">
                   {(buyNow.productPrice * buyNow.quantity).toLocaleString(
                     "vi-VN"
@@ -620,7 +636,9 @@ const Checkout = () => {
                   </div>
                 )}
                 <div className="flex justify-between font-semibold border-t border-gray-200 pt-2">
-                  <span>Tổng thanh toán tạm tính ({buyNow.quantity} sản phẩm):</span>
+                  <span>
+                    Tổng thanh toán tạm tính ({buyNow.quantity} sản phẩm):
+                  </span>
                   <span className="text-red-600">
                     {(
                       buyNow.productPrice * buyNow.quantity +
@@ -663,9 +681,7 @@ const Checkout = () => {
                       {item.quantity}
                     </div>
                     <div className="col-span-2 text-right font-medium">
-                      {(item.unitPrice * item.quantity).toLocaleString(
-                        "vi-VN"
-                      )}
+                      {(item.unitPrice * item.quantity).toLocaleString("vi-VN")}
                       ₫
                     </div>
                   </div>
@@ -699,7 +715,11 @@ const Checkout = () => {
                     </span>
                   </div>
                   <div className="flex justify-between font-semibold border-t border-gray-200 pt-2">
-                    <span>Tổng thanh toán tạm tính ({items.reduce((sum, item) => sum + item.quantity, 0)} sản phẩm):</span>
+                    <span>
+                      Tổng thanh toán tạm tính (
+                      {items.reduce((sum, item) => sum + item.quantity, 0)} sản
+                      phẩm):
+                    </span>
                     <span className="text-red-600">
                       {(
                         items.reduce(
@@ -768,10 +788,11 @@ const Checkout = () => {
                   <button
                     key={method}
                     onClick={() => setPaymentMethod(method)}
-                    className={`px-4 py-2 border cursor-pointer rounded ${paymentMethod === method
-                      ? "border-[#d0011b] text-[#d0011b] font-semibold"
-                      : "border-gray-300 hover:border-[#d0011b]"
-                      }`}
+                    className={`px-4 py-2 border cursor-pointer rounded ${
+                      paymentMethod === method
+                        ? "border-[#d0011b] text-[#d0011b] font-semibold"
+                        : "border-gray-300 hover:border-[#d0011b]"
+                    }`}
                   >
                     {method === "vnpay"
                       ? "Thanh toán VNPay"
@@ -821,7 +842,10 @@ const Checkout = () => {
                 <span>
                   {Math.max(
                     0,
-                    getTotal() + totalShippingFee - voucherDiscount - coinDiscount
+                    getTotal() +
+                      totalShippingFee -
+                      voucherDiscount -
+                      coinDiscount
                   ).toLocaleString("vi-VN")}
                   ₫
                 </span>
@@ -839,8 +863,9 @@ const Checkout = () => {
             <button
               onClick={handlePlaceOrder}
               disabled={isPlacingOrder}
-              className={`w-full py-3 bg-gradient-to-r from-[#5e3a1e] to-[#8b5e34] hover:opacity-95 text-white rounded font-semibold  cursor-pointertransition ${isPlacingOrder ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+              className={`w-full py-3 bg-gradient-to-r from-[#5e3a1e] to-[#8b5e34] hover:opacity-95 text-white rounded font-semibold  cursor-pointertransition ${
+                isPlacingOrder ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
               {isPlacingOrder ? "Đang xử lý..." : "Đặt hàng"}
             </button>

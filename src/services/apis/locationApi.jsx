@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const ghnApi = axios.create({
-  baseURL: "https://dev-online-gateway.ghn.vn/shiip/public-api",
+  baseURL: "https://online-gateway.ghn.vn/shiip/public-api",
   headers: {
     "Content-Type": "application/json",
     Token: import.meta.env.VITE_TOKEN_GHN, // Nhớ thay token thực
