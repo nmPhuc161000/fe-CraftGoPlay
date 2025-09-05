@@ -63,7 +63,7 @@ export default function AddressTab({ userId }) {
         districts={districts}
         wards={wards}
         onProvinceChange={fetchDistricts}
-        onDistrictChange={fetchWards}
+        onDistrictChange={(districtId) => fetchWards(districtId)}
         loadingLocations={loadingLocations}
       />
       <ConfirmComponent />

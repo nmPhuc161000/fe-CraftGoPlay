@@ -1,11 +1,12 @@
 import React, { memo } from 'react';
-import { FiEdit, FiTrash2, FiCheck, FiPlus, FiHome, FiBriefcase, FiMapPin } from 'react-icons/fi';
+import { FiEdit, FiTrash2, FiCheck, FiPlus, FiHome, FiMapPin } from 'react-icons/fi';
+import { FaBuilding } from "react-icons/fa";
 import PropTypes from 'prop-types';
 
 const AddressTypeIcon = ({ type }) => {
   const iconMap = {
     home: <FiHome className="w-4 h-4" />,
-    office: <FiBriefcase className="w-4 h-4" />,
+    office: <FaBuilding className="w-4 h-4" />,
     other: <FiMapPin className="w-4 h-4" />,
   };
   return iconMap[type.toLowerCase()] || iconMap.other;
@@ -30,7 +31,7 @@ const AddressCard = ({ address, onDelete, onSetDefault, onEdit, onSelect, select
       )}
       <div className="flex items-start mb-3">
         <div className="p-2 bg-[#eee5dd] rounded-lg text-[#5e3a1e] mr-3">
-          <AddressTypeIcon type={address.type || 'home'} />
+          <AddressTypeIcon type={address.addressType || 'home'} />
         </div>
         <div>
           <h4 className="font-semibold text-gray-900">{address.fullName}</h4>
@@ -41,12 +42,7 @@ const AddressCard = ({ address, onDelete, onSetDefault, onEdit, onSelect, select
         <div className="flex items-start text-gray-700">
           <FiMapPin className="flex-shrink-0 mt-0.5 mr-2 text-gray-500" />
           <p className="break-words">
-            {address.fullAddress.split(', ').map((part, i, arr) => (
-              <span key={i}>
-                {part}
-                {i < arr.length - 1 && <br />}
-              </span>
-            ))}
+            {address.fullAddress}
           </p>
         </div>
         {address.note && (

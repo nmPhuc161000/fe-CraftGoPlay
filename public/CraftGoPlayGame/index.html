@@ -3,9 +3,11 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity Web Player | Craft Farm</title>
+    <title>🌾 Craft Farm - RPG Adventure</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <style>
+      @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap');
+      
       * {
         margin: 0;
         padding: 0;
@@ -13,17 +15,17 @@
       }
 
       body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #6B8E23 0%, #228B22 50%, #32CD32 100%);
+        font-family: 'Fredoka', sans-serif;
+        background: linear-gradient(135deg, #87CEEB 0%, #98FB98 50%, #F0E68C 100%);
+        background-attachment: fixed;
         min-height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
-        overflow: hidden;
+        position: relative;
+        overflow-x: hidden;
       }
 
-      /* Animated background particles */
       body::before {
         content: '';
         position: fixed;
@@ -31,42 +33,123 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-image: 
-          radial-gradient(circle at 20% 80%, rgba(139, 195, 74, 0.3) 0%, transparent 50%),
-          radial-gradient(circle at 80% 20%, rgba(76, 175, 80, 0.3) 0%, transparent 50%),
-          radial-gradient(circle at 40% 40%, rgba(156, 204, 101, 0.3) 0%, transparent 50%);
-        animation: float 20s ease-in-out infinite;
-        z-index: -1;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-opacity='0.1'%3E%3Cpolygon fill='%23000' points='50 0 60 40 100 50 60 60 50 100 40 60 0 50 40 40'/%3E%3C/g%3E%3C/svg%3E") center/80px 80px;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      .floating-elements {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 2;
+      }
+
+      .cloud {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50px;
+        animation: float 20s infinite linear;
+      }
+
+      .cloud::before,
+      .cloud::after {
+        content: '';
+        position: absolute;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50px;
+      }
+
+      .cloud1 {
+        width: 80px;
+        height: 40px;
+        top: 10%;
+        left: -100px;
+        animation-delay: 0s;
+      }
+
+      .cloud1::before {
+        width: 50px;
+        height: 50px;
+        top: -25px;
+        left: 10px;
+      }
+
+      .cloud1::after {
+        width: 60px;
+        height: 40px;
+        top: -15px;
+        right: 10px;
+      }
+
+      .cloud2 {
+        width: 60px;
+        height: 30px;
+        top: 20%;
+        left: -80px;
+        animation-delay: -10s;
+      }
+
+      .cloud2::before {
+        width: 40px;
+        height: 40px;
+        top: -20px;
+        left: 8px;
+      }
+
+      .cloud2::after {
+        width: 50px;
+        height: 35px;
+        top: -12px;
+        right: 8px;
       }
 
       @keyframes float {
-        0%, 100% { transform: translateY(0px) rotate(0deg); }
-        33% { transform: translateY(-30px) rotate(2deg); }
-        66% { transform: translateY(-20px) rotate(-2deg); }
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(calc(100vw + 100px));
+        }
       }
 
       #unity-container {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 25px;
-        box-shadow: 
-          0 25px 45px rgba(0, 0, 0, 0.1),
-          inset 0 1px 0 rgba(255, 255, 255, 0.2);
         position: relative;
-        max-width: 100%;
-        max-height: 100vh;
+        z-index: 10;
+        background: linear-gradient(145deg, #8B4513, #A0522D);
+        border-radius: 25px;
+        padding: 20px;
+        box-shadow: 
+          0 20px 40px rgba(0,0,0,0.3),
+          inset 0 2px 4px rgba(255,255,255,0.1),
+          inset 0 -2px 4px rgba(0,0,0,0.2);
+        border: 4px solid #654321;
+        animation: glow 3s ease-in-out infinite alternate;
+      }
+
+      @keyframes glow {
+        from {
+          box-shadow: 
+            0 20px 40px rgba(0,0,0,0.3),
+            0 0 20px rgba(255,215,0,0.3),
+            inset 0 2px 4px rgba(255,255,255,0.1);
+        }
+        to {
+          box-shadow: 
+            0 25px 50px rgba(0,0,0,0.4),
+            0 0 30px rgba(255,215,0,0.5),
+            inset 0 2px 4px rgba(255,255,255,0.2);
+        }
       }
 
       #unity-canvas {
         border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        background: #000;
-        display: block;
-        margin: 0 auto;
-        max-width: 100%;
-        max-height: calc(100vh - 150px);
+        border: 3px solid #8FBC8F;
+        box-shadow: inset 0 4px 8px rgba(0,0,0,0.2);
+        background: #2F4F2F;
       }
 
       #unity-loading-bar {
@@ -75,42 +158,55 @@
         top: 50%;
         transform: translate(-50%, -50%);
         display: none;
-        flex-direction: column;
-        align-items: center;
-        z-index: 10;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        border: 3px solid #8FBC8F;
       }
 
       #unity-logo {
-        width: 154px;
-        height: 130px;
-        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 154 130"><defs><linearGradient id="a" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%236B8E23"/><stop offset="50%" style="stop-color:%23228B22"/><stop offset="100%" style="stop-color:%2332CD32"/></linearGradient></defs><rect width="154" height="130" rx="20" fill="url(%23a)"/><text x="77" y="75" text-anchor="middle" fill="white" font-size="50" font-family="Arial">🚜</text></svg>') no-repeat center;
-        background-size: contain;
-        margin-bottom: 20px;
-        animation: pulse 2s ease-in-out infinite;
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(45deg, #32CD32, #228B22);
+        border-radius: 50%;
+        margin: 0 auto 15px;
+        position: relative;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        animation: spin 2s linear infinite;
       }
 
-      @keyframes pulse {
-        0%, 100% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.05); opacity: 0.8; }
+      #unity-logo::before {
+        content: '🌾';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 40px;
+      }
+
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
       }
 
       #unity-progress-bar-empty {
-        width: 200px;
-        height: 8px;
-        background: rgba(255, 255, 255, 0.2);
+        width: 300px;
+        height: 20px;
+        background: #654321;
         border-radius: 10px;
+        border: 2px solid #8FBC8F;
         overflow: hidden;
         position: relative;
       }
 
       #unity-progress-bar-full {
-        width: 0%;
         height: 100%;
-        background: linear-gradient(90deg, #6B8E23, #228B22, #32CD32);
-        border-radius: 10px;
+        background: linear-gradient(90deg, #32CD32, #7CFC00, #ADFF2F);
+        border-radius: 8px;
+        width: 0%;
         transition: width 0.3s ease;
         position: relative;
-        overflow: hidden;
       }
 
       #unity-progress-bar-full::after {
@@ -120,7 +216,7 @@
         left: -100%;
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
         animation: shimmer 2s infinite;
       }
 
@@ -130,159 +226,182 @@
       }
 
       #unity-warning {
-        position: absolute;
-        top: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 20;
-        max-width: 90%;
-      }
-
-      #unity-warning div {
-        border-radius: 8px;
-        margin-bottom: 10px;
-        font-size: 14px;
-        text-align: center;
-        animation: slideDown 0.5s ease;
-      }
-
-      @keyframes slideDown {
-        from { transform: translateY(-20px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
+        margin-top: 15px;
+        border-radius: 10px;
+        font-weight: 500;
       }
 
       #unity-footer {
         margin-top: 15px;
+        height: 60px;
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        padding: 10px 0;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        justify-content: space-between;
+        background: linear-gradient(45deg, #228B22, #32CD32);
+        border-radius: 15px;
+        padding: 0 20px;
+        border: 2px solid #8FBC8F;
+        box-shadow: inset 0 2px 4px rgba(255,255,255,0.2);
       }
 
       #unity-logo-title-footer {
         flex: 1;
-        color: rgba(255, 255, 255, 0.8);
-        font-size: 12px;
+        color: white;
+        font-weight: 600;
+        font-size: 18px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      }
+
+      #unity-logo-title-footer::before {
+        content: '🚜 ';
+        font-size: 24px;
+        margin-right: 8px;
       }
 
       #unity-build-title {
+        flex: 2;
+        text-align: center;
         color: white;
-        font-size: 16px;
-        font-weight: 600;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        letter-spacing: 1px;
+        font-size: 24px;
+        font-weight: 700;
+        text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+        position: relative;
+      }
+
+      #unity-build-title::before {
+        content: '✨';
+        position: absolute;
+        left: -30px;
+        animation: sparkle 2s ease-in-out infinite;
+      }
+
+      #unity-build-title::after {
+        content: '✨';
+        position: absolute;
+        right: -30px;
+        animation: sparkle 2s ease-in-out infinite 0.5s;
+      }
+
+      @keyframes sparkle {
+        0%, 100% { 
+          opacity: 0.3; 
+          transform: scale(0.8);
+        }
+        50% { 
+          opacity: 1; 
+          transform: scale(1.2);
+        }
       }
 
       #unity-fullscreen-button {
-        width: 38px;
-        height: 38px;
-        background: linear-gradient(135deg, #6B8E23, #228B22);
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(45deg, #FFD700, #FFA500);
         border-radius: 8px;
         cursor: pointer;
-        position: relative;
-        transition: all 0.3s ease;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-left: 15px;
-      }
-
-      #unity-fullscreen-button:hover {
-        background: linear-gradient(135deg, #228B22, #32CD32);
-        transform: scale(1.1);
-        box-shadow: 0 5px 15px rgba(107, 142, 35, 0.4);
+        transition: all 0.3s ease;
+        border: 2px solid #B8860B;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
       }
 
       #unity-fullscreen-button::before {
         content: '⛶';
-        color: white;
-        font-size: 18px;
+        font-size: 20px;
+        color: #8B4513;
         font-weight: bold;
       }
 
+      #unity-fullscreen-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        background: linear-gradient(45deg, #FFA500, #FFD700);
+      }
+
       .unity-mobile #unity-container {
-        padding: 15px;
-        margin: 10px;
-        border-radius: 15px;
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        border-radius: 0;
+        padding: 10px;
       }
 
       .unity-mobile #unity-canvas {
-        width: 100% !important;
-        height: auto !important;
-        border-radius: 10px;
+        width: 100%;
+        height: calc(100% - 80px);
       }
 
-      .unity-mobile #unity-footer {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
+      .unity-desktop {
+        width: 1320px;
+        height: 680px;
       }
 
-      .unity-mobile #unity-fullscreen-button {
-        margin: 0;
-      }
-
-      /* Loading text animation */
-      .loading-text {
+      button {
+        background: linear-gradient(45deg, #DC143C, #B22222);
         color: white;
-        margin-top: 15px;
-        font-size: 14px;
-        text-align: center;
-        opacity: 0.8;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-family: 'Fredoka', sans-serif;
+        font-weight: 600;
+        margin-left: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        border: 2px solid #8B0000;
       }
 
-      .loading-text::after {
-        content: '';
-        animation: dots 2s infinite;
+      button::before {
+        content: '🔄 ';
       }
 
-      @keyframes dots {
-        0%, 20% { content: ''; }
-        40% { content: '.'; }
-        60% { content: '..'; }
-        80%, 100% { content: '...'; }
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+        background: linear-gradient(45deg, #B22222, #DC143C);
       }
 
-      /* Responsive design */
+      /* Responsive cho mobile */
       @media (max-width: 768px) {
-        body {
-          padding: 10px;
-        }
-        
         #unity-container {
+          margin: 10px;
           padding: 15px;
-          border-radius: 15px;
-        }
-        
-        #unity-canvas {
-          border-radius: 10px;
         }
         
         #unity-build-title {
-          font-size: 14px;
+          font-size: 20px;
+        }
+        
+        #unity-progress-bar-empty {
+          width: 250px;
         }
       }
     </style>
   </head>
   <body>
+    <div class="floating-elements">
+      <div class="cloud cloud1"></div>
+      <div class="cloud cloud2"></div>
+    </div>
+    
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
+      <canvas id="unity-canvas" width=1280 height=600 tabindex="-1"></canvas>
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
           <div id="unity-progress-bar-full"></div>
         </div>
-        <div class="loading-text">Đang tải trò chơi</div>
       </div>
-      <div id="unity-warning"></div>
+      <div id="unity-warning"> </div>
       <div id="unity-footer">
-        <div id="unity-logo-title-footer">🌾 Farm Craft Game 🐄</div>
-        <div id="unity-build-title">Craft Farm</div>
+        <div id="unity-logo-title-footer">Farm RPG</div>
         <div id="unity-fullscreen-button"></div>
+        <div id="unity-build-title">Craft Farm</div>
       </div>
     </div>
-
+    
     <script>
       var canvas = document.querySelector("#unity-canvas");
 
@@ -294,12 +413,9 @@
         var div = document.createElement('div');
         div.innerHTML = msg;
         warningBanner.appendChild(div);
-        if (type == 'error') {
-          div.style = 'background: linear-gradient(135deg, #ff4757, #ff3838); color: white; padding: 12px; border-radius: 8px; box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);';
-        } else {
-          if (type == 'warning') {
-            div.style = 'background: linear-gradient(135deg, #ffa502, #ff6348); color: white; padding: 12px; border-radius: 8px; box-shadow: 0 4px 15px rgba(255, 165, 2, 0.3);';
-          }
+        if (type == 'error') div.style = 'background: linear-gradient(45deg, #DC143C, #B22222); color: white; padding: 15px; border-radius: 10px; border: 2px solid #8B0000;';
+        else {
+          if (type == 'warning') div.style = 'background: linear-gradient(45deg, #FFD700, #FFA500); color: #8B4513; padding: 15px; border-radius: 10px; border: 2px solid #B8860B;';
           setTimeout(function() {
             warningBanner.removeChild(div);
             updateBannerVisibility();
@@ -330,11 +446,11 @@
         document.querySelector("#unity-container").className = "unity-mobile";
         canvas.className = "unity-mobile";
       } else {
-        canvas.style.width = "960px";
+        canvas.style.width = "1280px";
         canvas.style.height = "600px";
       }
 
-      document.querySelector("#unity-loading-bar").style.display = "flex";
+      document.querySelector("#unity-loading-bar").style.display = "block";
 
       var script = document.createElement("script");
       script.src = loaderUrl;
@@ -345,6 +461,18 @@
           document.querySelector("#unity-loading-bar").style.display = "none";
           document.querySelector("#unity-fullscreen-button").onclick = () => {
             unityInstance.SetFullscreen(1);
+          };
+
+          var quit = document.createElement("button");
+          quit.innerHTML = "Unload Game";
+          document.querySelector("#unity-build-title").appendChild(quit);
+          quit.onclick = () => {
+            unityInstance.Quit().then(() => {
+              document.querySelector("#unity-container").remove();
+              canvas = null;
+              script.remove();
+              script = null;
+            });
           };
         }).catch((message) => {
           alert(message);

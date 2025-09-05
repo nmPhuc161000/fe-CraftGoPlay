@@ -9,16 +9,31 @@ const addressService = {
     });
   },
 
-    async getDefaultAddress(userId) {
-    return performApiRequest(API_ENDPOINTS_ADDRESS.GET_DEFAULT_ADDRESS(userId), {
-      method: "get",
-    });
+  async getDefaultAddress(userId) {
+    return performApiRequest(
+      API_ENDPOINTS_ADDRESS.GET_DEFAULT_ADDRESS(userId),
+      {
+        method: "get",
+      }
+    );
   },
 
   async getAddressOfArtisan(artisanId) {
-    return performApiRequest(API_ENDPOINTS_ADDRESS.GET_ADDRESS_BY_ARTISANID(artisanId), {
-      method: "get",
-    })
+    return performApiRequest(
+      API_ENDPOINTS_ADDRESS.GET_ADDRESS_BY_ARTISANID(artisanId),
+      {
+        method: "get",
+      }
+    );
+  },
+
+  async getAddressById(addressId) {
+    return performApiRequest(
+      API_ENDPOINTS_ADDRESS.GET_ADDRESS_BY_ID(addressId),
+      {
+        method: "get",
+      }
+    );
   },
 
   async addNewAddress(addressData) {

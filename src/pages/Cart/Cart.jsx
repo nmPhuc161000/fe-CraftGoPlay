@@ -3,15 +3,11 @@ import { CartContext } from "../../contexts/CartContext";
 import MainLayout from "../../components/layout/MainLayout";
 import { Link, useNavigate } from "react-router-dom";
 import { FaLock } from "react-icons/fa";
-import { FaTrashAlt } from "react-icons/fa";
+import { FaTrashAlt, FaShoppingCart } from "react-icons/fa";
 import { useNotification } from "../../contexts/NotificationContext";
 
 const Cart = () => {
     const { cartItems, removeFromCart, updateQuantity, getStock } = useContext(CartContext);
-    // voucher
-    const [voucherCode, setVoucherCode] = useState("");
-    const [discount, setDiscount] = useState(0);
-    const [voucherError, setVoucherError] = useState("");
     const [selectedItems, setSelectedItems] = useState([]);
     const { showNotification } = useNotification();
 
@@ -19,19 +15,6 @@ const Cart = () => {
         cartItems
             .filter((item) => selectedItems.includes(item.id))
             .reduce((total, item) => total + (item?.totalPrice ?? 0), 0);
-    const getTotal = () =>
-        cartItems.reduce((total, item) => total + (item?.totalPrice ?? 0), 0);
-
-    const handleApplyVoucher = () => {
-        if (voucherCode === "GIAM10") {
-            const discountValue = getTotal() * 0.1;
-            setDiscount(discountValue);
-            showNotification("Áp dụng mã giảm giá thành công!", "success");
-        } else {
-            setDiscount(0);
-            setVoucherError("Mã không hợp lệ hoặc đã hết hạn");
-        }
-    };
 
     const navigate = useNavigate();
     const groupByArtisan = (items) => {
@@ -225,29 +208,28 @@ const Cart = () => {
 
                         {/* chi tiet */}
                         <div className="sticky top-24 self-start">
-                            <div className="p-6 border border-gray-200 rounded shadow-sm bg-white">
-                                <div className="mb-4 space-y-2">
-                                    <div className="flex justify-between">
-                                        <span>Tạm tính</span>
-                                        <span className="text-red-600 font-semibold">
+                            <div className="p-6 border border-gray-200 rounded-2xl shadow-lg bg-gradient-to-br from-white to-gray-50">
+                                {/* Tiêu đề */}
+                                <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                    <FaShoppingCart className="text-[#8b5e34]" /> Tóm tắt đơn hàng
+                                </h2>
+
+                                {/* Nội dung */}
+                                <div className="space-y-4">
+                                    <div className="flex justify-between text-gray-700">
+                                        <span>Tạm tính ({cartItems
+                                            .filter((item) => selectedItems.includes(item.id))
+                                            .reduce((total, item) => total + (item.quantity || 1), 0)} sản phẩm)</span>
+                                        <span className="text-red-600 font-medium">
                                             {getSelectedTotal().toLocaleString("vi-VN")} ₫
                                         </span>
                                     </div>
 
-                                    <div className="flex justify-between">
-                                        <span>Giảm giá</span>
-                                        <span className="text-green-600">
-                                            − {discount?.toLocaleString("vi-VN") || "0"} ₫
-                                        </span>
-                                    </div>
-
-                                    <div className="flex justify-between font-bold text-2xl border-t border-gray-500 pt-3">
+                                    <div className="flex justify-between font-bold text-xl border-t border-gray-300 pt-3">
                                         <span>Thành tiền</span>
-                                        <div className="text-right text-red-600 font-semibold">
-                                            <p>
-                                                {(getSelectedTotal() - (discount || 0)).toLocaleString("vi-VN")} ₫
-                                            </p>
-                                        </div>
+                                        <span className="text-red-600 font-extrabold">
+                                            {getSelectedTotal().toLocaleString("vi-VN")} ₫
+                                        </span>
                                     </div>
 
                                     <p className="text-sm text-gray-500 mt-2">
@@ -255,34 +237,13 @@ const Cart = () => {
                                     </p>
                                 </div>
 
-                                {/* giam gia */}
-                                <div className="mb-4">
-                                    <div className="flex gap-2">
-                                        <input
-                                            type="text"
-                                            value={voucherCode}
-                                            onChange={(e) => setVoucherCode(e.target.value)}
-                                            placeholder="Nhập mã giảm giá"
-                                            className="flex-1 border border-gray-300 rounded px-3 py-2 focus:outline-none"
-                                        />
-                                        <button
-                                            onClick={handleApplyVoucher}
-                                            className="px-4 py-2 bg-[#5e3a1e] hover:bg-[#4a2f15] text-white rounded transition"
-                                        >
-                                            Áp dụng
-                                        </button>
-                                    </div>
-                                    {voucherError && (
-                                        <p className="text-sm text-red-500 mt-1">{voucherError}</p>
-                                    )}
-                                </div>
-
+                                {/* Button */}
                                 <button
                                     onClick={() => {
-                                        if (selectedItems.length === 0) return; // Không chọn => không làm gì cả
+                                        if (selectedItems.length === 0) return;
                                         navigate("/checkout", { state: { selectedItems } });
                                     }}
-                                    className="w-full py-3 bg-[#5e3a1e] hover:bg-[#4a2f15] text-white rounded flex justify-center items-center gap-2 transition text-[15px]"
+                                    className="w-full mt-5 py-3 bg-gradient-to-r from-[#5e3a1e] to-[#8b5e34] hover:scale-[1.02] transition-transform duration-200 text-white rounded-xl flex justify-center items-center gap-2 text-[15px] font-semibold shadow-md"
                                 >
                                     <FaLock /> Thanh toán
                                 </button>
@@ -290,7 +251,7 @@ const Cart = () => {
 
                             <Link
                                 to="/products"
-                                className="block text-center mt-4 text-[#5e3a1e] text-[15px] font-medium transition"
+                                className="block text-center mt-4 text-[#5e3a1e] hover:underline text-[15px] font-medium"
                             >
                                 ← Tiếp tục mua sắm
                             </Link>

@@ -160,29 +160,21 @@ const OrdersTab = () => {
         case "rating":
           console.log("Order found for rating:", order);
           if (order && order.orderItems && order.orderItems.length > 0) {
-            if (order.orderItems.length > 1) {
-              const queryParams = new URLSearchParams({
-                orderId,
-                orderItems: encodeURIComponent(
-                  JSON.stringify(
-                    order.orderItems.map((item) => ({
-                      id: item.product.id,
-                      name: item.product.name,
-                      imageUrl: item.product.productImages?.imageUrl || "",
-                      orderItemId: item.id,
-                    }))
-                  )
-                ),
-              }).toString();
-              navigate(`/profile-user/productRating?${queryParams}`);
-            } else {
-              const item = order.orderItems[0];
-              const url = `/profile-user/productRating?orderId=${orderId}&productId=${item.product.id}&productName=${encodeURIComponent(
-                item.product.name
-              )}&productImage=${encodeURIComponent(item.product.productImages?.imageUrl || "")}&orderItemId=${item.id}`;
-              navigate(url);
-              console.log("Navigating to single-product:", url);
-            }
+            const queryParams = new URLSearchParams({
+              orderId,
+              orderItems: encodeURIComponent(
+                JSON.stringify(
+                  order.orderItems.map((item) => ({
+                    id: item.product.id,
+                    name: item.product.name,
+                    imageUrl: item.product.productImages?.imageUrl || "",
+                    orderItemId: item.id,
+                    price: item.product.price || 0,
+                  }))
+                )
+              ),
+            }).toString();
+            navigate(`/profile-user/productRating?${queryParams}`);
           } else {
             showNotification("Không tìm thấy sản phẩm trong đơn hàng để đánh giá", "error");
           }
