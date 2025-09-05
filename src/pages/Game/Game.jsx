@@ -8,9 +8,9 @@ export default function Game() {
     setIsGameLoaded(true); // Kích hoạt hiển thị game
   };
 
-  const handleBackToMenu = () => {
-    setIsGameLoaded(false); // Quay lại menu chính
-  };
+  // const handleBackToMenu = () => {
+  //   setIsGameLoaded(false); // Quay lại menu chính
+  // };
 
   return (
     <MainLayout>
@@ -117,13 +117,13 @@ export default function Game() {
                 // Game container với nút quay lại
                 <div className="relative w-full h-screen">
                   {/* Nút quay lại menu */}
-                  <button
+                  {/* <button
                     onClick={handleBackToMenu}
                     className="absolute top-4 left-4 z-50 bg-black/70 hover:bg-black/90 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 backdrop-blur-sm border border-white/20"
                   >
                     <span>←</span>
                     <span>Quay lại</span>
-                  </button>
+                  </button> */}
 
                   {/* Game iframe */}
                   <iframe
