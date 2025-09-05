@@ -195,6 +195,7 @@ const BackgroundImage = () => (
     src={backgroundImg}
     alt="background"
     className="absolute inset-0 w-full h-full object-cover blur-md brightness-75 z-[-1]"
+    crossorigin="anonymous"
   />
 );
 
@@ -205,6 +206,7 @@ const LoginBanner = () => (
         src={loginImg}
         alt="CraftGoPlay Logo"
         className="w-40 h-40 object-contain rounded-full shadow-md"
+        crossorigin="anonymous"
       />
     </Link>
     <h2 className="text-2xl font-bold text-center">

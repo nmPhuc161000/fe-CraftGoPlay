@@ -328,6 +328,7 @@ const ArtisanReturnRequestsTab = () => {
                           src={productImg || "https://via.placeholder.com/80"}
                           alt={req?.orderItem?.product?.name || "Sản phẩm"}
                           className="w-full h-full object-cover"
+                          crossorigin="anonymous"
                         />
                       </div>
                       <div className="min-w-0">
@@ -379,6 +380,7 @@ const ArtisanReturnRequestsTab = () => {
                           src={req.imageUrl}
                           alt="Ảnh yêu cầu trả hàng"
                           className="w-full h-full object-cover"
+                          crossorigin="anonymous"
                         />
                       </div>
                     </div>

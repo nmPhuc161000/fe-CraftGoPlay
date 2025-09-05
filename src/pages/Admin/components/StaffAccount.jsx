@@ -151,6 +151,7 @@ const CreateStaffModal = ({
                       src={thumbnailPreview}
                       alt="Xem trước ảnh đại diện"
                       className="w-24 h-24 object-cover rounded-full border-2 border-orange-400 shadow group-hover:scale-105 transition"
+                      crossorigin="anonymous"
                     />
                   ) : (
                     <span className="flex flex-col items-center text-orange-400">

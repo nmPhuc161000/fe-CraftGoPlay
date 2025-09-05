@@ -148,6 +148,7 @@ const Header = () => {
                       src={user.thumbnail}
                       alt="User avatar"
                       className="w-10 h-10 rounded-full object-cover"
+                      crossorigin="anonymous"
                     />
                   ) : (
                     <FaUser />

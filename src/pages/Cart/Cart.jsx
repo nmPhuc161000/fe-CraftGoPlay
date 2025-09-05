@@ -105,6 +105,7 @@ const Cart = () => {
                                                 src={group.artisanAvatar}
                                                 alt={group.artisanName}
                                                 className="w-8 h-8 rounded-full object-cover"
+                                                crossorigin="anonymous"
                                             />
                                         ) : (
                                             <div className="w-8 h-8 rounded-full bg-gray-400 text-white flex items-center justify-center">
@@ -132,6 +133,7 @@ const Cart = () => {
                                                     src={item.productImages?.[0]?.imageUrl}
                                                     alt={item.productName}
                                                     className="w-16 h-16 object-cover rounded-md border flex-shrink-0"
+                                                    crossorigin="anonymous"
                                                 />
                                                 <div className="font-semibold leading-snug text-[#5e3a1e] break-words min-w-0">
                                                     {item.productName}

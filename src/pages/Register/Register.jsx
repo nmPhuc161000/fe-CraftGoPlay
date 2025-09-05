@@ -279,6 +279,7 @@ const Register = () => {
         src={backgroundImg}
         alt="background"
         className="absolute inset-0 w-full h-full object-cover blur-md brightness-75 z-[-1]"
+        crossorigin="anonymous"
       />
 
       <div className="bg-[#fffdf8] shadow-2xl rounded-2xl max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 overflow-hidden">
@@ -288,6 +289,7 @@ const Register = () => {
               src={registerImg}
               alt="CraftGoPlay Logo"
               className="w-40 h-40 object-contain rounded-full shadow-md"
+              crossorigin="anonymous"
             />
           </Link>
           <h2 className="text-2xl font-bold text-center">

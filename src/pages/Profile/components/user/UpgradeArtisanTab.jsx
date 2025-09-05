@@ -489,6 +489,7 @@ export default function UpgradeArtisanTab({ userId }) {
                   src={previewImage}
                   alt="Preview"
                   className="w-full h-32 object-cover rounded-md"
+                  crossorigin="anonymous"
                 />
                 <button
                   type="button"

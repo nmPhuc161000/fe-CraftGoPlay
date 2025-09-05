@@ -37,6 +37,7 @@ export default function ProfileUser() {
                     "https://th.bing.com/th/id/OIP.PwEh4SGekpMaWT2d5GWw0wHaHt?rs=1&pid=ImgDetMain"
                   }
                   alt="User avatar"
+                  crossorigin="anonymous"
                 />
                 <h3 className="font-bold text-lg">
                   {user?.userName || "Khách"}
