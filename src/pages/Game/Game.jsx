@@ -2,78 +2,99 @@ import React, { useEffect, useRef, useState } from "react";
 import MainLayout from "../../components/layout/MainLayout";
 
 export default function Game() {
-  const [isGameLoaded, setIsGameLoaded] = useState(false);   // toggle màn intro
-  const [loading, setLoading] = useState(false);              // loading Unity
+  const [isGameLoaded, setIsGameLoaded] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
   const canvasRef = useRef(null);
   const unityInstanceRef = useRef(null);
-  const loaderScriptRef = useRef(null);
+  const loaderScriptEl = useRef(null);
 
-  const buildRoot = "/CraftGoPlayGame/Build"; // <-- ĐƯỜNG DẪN TUYỆT ĐỐI từ gốc site
+  // ĐƯỜNG DẪN TUYỆT ĐỐI tới folder build trong public/
+  const buildRoot = "/CraftGoPlayGame/Build";
 
   const startUnity = () => {
     setLoading(true);
     setError("");
 
-    // tạo <script> nạp loader
+    // Nếu loader đã có sẵn (đã load trước đó) → gọi luôn
+    if (typeof window.createUnityInstance === "function") {
+      initUnity();
+      return;
+    }
+
+    // Nạp loader
     const script = document.createElement("script");
     script.src = `${buildRoot}/CraftGoPlay.loader.js`;
     script.async = true;
+
+    // Log để tự test URL trên production
+    console.log("[Unity] loader URL =", script.src);
+
     script.onload = () => {
-      // window.createUnityInstance do loader cung cấp
-      if (typeof createUnityInstance !== "function") {
-        setError("Không tìm thấy createUnityInstance từ loader.");
+      if (typeof window.createUnityInstance !== "function") {
+        setError("Không tìm thấy window.createUnityInstance từ loader (có thể URL trả về HTML/404).");
         setLoading(false);
         return;
       }
-
-      // CẤU HÌNH: dùng đúng tên file KHÔNG .br
-      const config = {
-        dataUrl: `${buildRoot}/CraftGoPlay.data`,
-        frameworkUrl: `${buildRoot}/CraftGoPlay.framework.js`,
-        codeUrl: `${buildRoot}/CraftGoPlay.wasm`,
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "CGP",
-        productName: "CraftGoPlay",
-        productVersion: "1.0",
-      };
-
-      createUnityInstance(canvasRef.current, config, (progress) => {
-        // bạn có thể dùng progress (0..1) nếu muốn thanh progress
-      })
-        .then((instance) => {
-          unityInstanceRef.current = instance;
-          setLoading(false);
-        })
-        .catch((e) => {
-          console.error(e);
-          setError("Không khởi tạo được Unity instance.");
-          setLoading(false);
-        });
+      initUnity();
     };
+
     script.onerror = () => {
-      setError("Không tải được CraftGoPlay.loader.js (sai đường dẫn?).");
+      setError("Không tải được CraftGoPlay.loader.js (sai đường dẫn hoặc bị rewrite).");
       setLoading(false);
     };
+
     document.body.appendChild(script);
-    loaderScriptRef.current = script;
+    loaderScriptEl.current = script;
+  };
+
+  const initUnity = () => {
+    const cfg = {
+      dataUrl: `${buildRoot}/CraftGoPlay.data`,
+      frameworkUrl: `${buildRoot}/CraftGoPlay.framework.js`,
+      codeUrl: `${buildRoot}/CraftGoPlay.wasm`,
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "CGP",
+      productName: "CraftGoPlay",
+      productVersion: "1.0",
+    };
+
+    // Log để tự test URL trên production
+    console.log("[Unity] dataUrl =", cfg.dataUrl);
+    console.log("[Unity] frameworkUrl =", cfg.frameworkUrl);
+    console.log("[Unity] codeUrl =", cfg.codeUrl);
+
+    window
+      .createUnityInstance(canvasRef.current, cfg, (p) => {
+        // p: 0..1 nếu muốn hiển thị progress
+      })
+      .then((inst) => {
+        unityInstanceRef.current = inst;
+        setLoading(false);
+      })
+      .catch((e) => {
+        console.error("[Unity] init error:", e);
+        setError("Không khởi tạo được Unity instance (kiểm tra .data/.wasm/.js có bị 404 hoặc sai MIME).");
+        setLoading(false);
+      });
   };
 
   const handlePlayClick = (e) => {
     e.preventDefault();
-    setIsGameLoaded(true); // ẩn intro
-    startUnity();          // bắt đầu nạp Unity
+    setIsGameLoaded(true);
+    startUnity();
   };
 
-  // cleanup khi rời trang
+  // Cleanup khi unmount
   useEffect(() => {
     return () => {
-      if (unityInstanceRef.current) {
-        try { unityInstanceRef.current.Quit(); } catch {}
-      }
-      if (loaderScriptRef.current) {
-        try { document.body.removeChild(loaderScriptRef.current); } catch {}
-      }
+      try {
+        if (unityInstanceRef.current) unityInstanceRef.current.Quit();
+      } catch {}
+      try {
+        if (loaderScriptEl.current) document.body.removeChild(loaderScriptEl.current);
+      } catch {}
     };
   }, []);
 
@@ -84,26 +105,25 @@ export default function Game() {
           isGameLoaded ? "bg-black" : "bg-cover bg-center"
         }`}
         style={{
+          // Đổi sang HTTPS để tránh Mixed Content
           backgroundImage: !isGameLoaded
-            ? "url('http://res.cloudinary.com/dqnq00784/image/upload/v1753625525/kpnnembzq1bgwncat0hq.png')"
+            ? "url('https://res.cloudinary.com/dqnq00784/image/upload/v1753625525/kpnnembzq1bgwncat0hq.png')"
             : undefined,
           backgroundAttachment: !isGameLoaded ? "fixed" : undefined,
         }}
       >
         {!isGameLoaded && (
           <div className="absolute inset-0 opacity-30">
-            <div className="absolute top-20 left-10 w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></div>
-            <div className="absolute top-40 right-20 w-1 h-1 bg-green-300 rounded-full animate-bounce"></div>
-            <div className="absolute bottom-32 left-32 w-1.5 h-1.5 bg-blue-300 rounded-full animate-pulse"></div>
-            <div className="absolute top-60 left-1/4 w-1 h-1 bg-pink-300 rounded-full animate-bounce"></div>
+            <div className="absolute top-20 left-10 w-2 h-2 bg-yellow-300 rounded-full animate-pulse" />
+            <div className="absolute top-40 right-20 w-1 h-1 bg-green-300 rounded-full animate-bounce" />
+            <div className="absolute bottom-32 left-32 w-1.5 h-1.5 bg-blue-300 rounded-full animate-pulse" />
+            <div className="absolute top-60 left-1/4 w-1 h-1 bg-pink-300 rounded-full animate-bounce" />
           </div>
         )}
 
         <div
           className={`min-h-screen flex items-center justify-center px-4 transition-all duration-500 ${
-            isGameLoaded
-              ? "bg-transparent p-0"
-              : "bg-gradient-to-b from-black/40 via-black/50 to-black/60"
+            isGameLoaded ? "bg-transparent p-0" : "bg-gradient-to-b from-black/40 via-black/50 to-black/60"
           }`}
         >
           <div
@@ -113,8 +133,8 @@ export default function Game() {
           >
             {!isGameLoaded && (
               <>
-                <div className="absolute -top-6 -left-6 w-12 h-12 border-4 border-green-400/30 rounded-full animate-spin"></div>
-                <div className="absolute -bottom-6 -right-6 w-8 h-8 border-4 border-yellow-400/30 rounded-full animate-pulse"></div>
+                <div className="absolute -top-6 -left-6 w-12 h-12 border-4 border-green-400/30 rounded-full animate-spin" />
+                <div className="absolute -bottom-6 -right-6 w-8 h-8 border-4 border-yellow-400/30 rounded-full animate-pulse" />
               </>
             )}
 
@@ -132,11 +152,9 @@ export default function Game() {
                       🌱 Nông Trại 🌾
                     </h1>
                     <div className="flex items-center justify-center gap-2 mb-6">
-                      <div className="h-px bg-gradient-to-r from-transparent via-white/50 to-transparent flex-1"></div>
-                      <span className="text-white/80 text-sm font-medium px-4">
-                        Cuộc sống nông thôn yên bình
-                      </span>
-                      <div className="h-px bg-gradient-to-r from-transparent via-white/50 to-transparent flex-1"></div>
+                      <div className="h-px bg-gradient-to-r from-transparent via-white/50 to-transparent flex-1" />
+                      <span className="text-white/80 text-sm font-medium px-4">Cuộc sống nông thôn yên bình</span>
+                      <div className="h-px bg-gradient-to-r from-transparent via-white/50 to-transparent flex-1" />
                     </div>
                   </div>
 
@@ -162,18 +180,15 @@ export default function Game() {
                     >
                       <span className="text-xl">🎮</span>
                       <span>Chơi ngay</span>
-                      <div className="absolute inset-0 bg-white/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 bg-white/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     </a>
                   </div>
 
                   <div className="text-center mt-8 pt-6 border-t border-white/20">
-                    <p className="text-white/60 text-sm font-light">
-                      ✨ Khám phá thế giới nông nghiệp đầy màu sắc ✨
-                    </p>
+                    <p className="text-white/60 text-sm font-light">✨ Khám phá thế giới nông nghiệp đầy màu sắc ✨</p>
                   </div>
                 </>
               ) : (
-                // Vùng game: canvas + overlay loading/error
                 <div className="relative w-full h-screen">
                   <canvas ref={canvasRef} className="w-full h-full" />
                   {loading && (
@@ -183,9 +198,7 @@ export default function Game() {
                   )}
                   {error && (
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="bg-red-600 text-white px-4 py-3 rounded">
-                        {error}
-                      </div>
+                      <div className="bg-red-600 text-white px-4 py-3 rounded">{error}</div>
                     </div>
                   )}
                 </div>
@@ -196,22 +209,12 @@ export default function Game() {
 
         {!isGameLoaded && (
           <>
-            <div className="absolute top-10 left-10 text-4xl animate-bounce opacity-70">
-              🌻
-            </div>
-            <div className="absolute top-20 right-10 text-3xl animate-pulse opacity-70">
-              🦋
-            </div>
-            <div
-              className="absolute bottom-20 left-20 text-3xl animate-bounce opacity-70"
-              style={{ animationDelay: "1s" }}
-            >
+            <div className="absolute top-10 left-10 text-4xl animate-bounce opacity-70">🌻</div>
+            <div className="absolute top-20 right-10 text-3xl animate-pulse opacity-70">🦋</div>
+            <div className="absolute bottom-20 left-20 text-3xl animate-bounce opacity-70" style={{ animationDelay: "1s" }}>
               🐝
             </div>
-            <div
-              className="absolute bottom-10 right-20 text-4xl animate-pulse opacity-70"
-              style={{ animationDelay: "0.5s" }}
-            >
+            <div className="absolute bottom-10 right-20 text-4xl animate-pulse opacity-70" style={{ animationDelay: "0.5s" }}>
               🌸
             </div>
           </>
