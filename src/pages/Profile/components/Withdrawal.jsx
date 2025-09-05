@@ -1,4 +1,5 @@
 import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom"; // Thêm import useNavigate
 import walletService from "../../../services/apis/walletApi";
 import { useNotification } from "../../../contexts/NotificationContext";
 import { AuthContext } from "../../../contexts/AuthContext";
@@ -7,6 +8,7 @@ import { performApiRequest } from "../../../utils/apiUtils";
 export default function Withdrawal() {
   const { user } = useContext(AuthContext);
   const { showNotification } = useNotification();
+  const navigate = useNavigate(); // Sử dụng hook useNavigate
   const [formData, setFormData] = useState({
     amount: "",
     bankCode: "",
@@ -15,6 +17,11 @@ export default function Withdrawal() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // 'success' or 'error'
+
+  // Hàm xử lý quay lại trang trước đó
+  const handleGoBack = () => {
+    navigate(-1); // -1 có nghĩa là quay lại trang trước đó trong lịch sử
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -96,10 +103,12 @@ export default function Withdrawal() {
           bankAccount: "",
         });
       } else {
-        throw new Error(
-          result.withdrawUrl?.message ||
-            "Có lỗi xảy ra khi tạo yêu cầu rút tiền"
+        showNotification(
+          result?.data?.withdrawUrl?.message ||
+            "Có lỗi xảy ra, vui lòng thử lại",
+          "error"
         );
+        setMessageType("error");
       }
     } catch (error) {
       console.error("Lỗi khi rút tiền:", error);
@@ -126,6 +135,26 @@ export default function Withdrawal() {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
       <div className="w-full max-w-lg bg-white rounded-xl shadow-lg p-8">
+        {/* Nút quay lại */}
+        <button
+          onClick={handleGoBack}
+          className="mb-4 flex items-center text-blue-600 hover:text-blue-800 transition duration-200"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-1"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+              clipRule="evenodd"
+            />
+          </svg>
+          Quay lại
+        </button>
+
         <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
           Rút Tiền
         </h2>
