@@ -118,6 +118,7 @@ const Home = () => {
               src="https://img.icons8.com/?size=100&id=36872&format=png&color=5e3a1e"
               alt="Craftgoplay"
               className="w-20 h-20 object-contain"
+              crossorigin="anonymous"
             />
           </div>
 
