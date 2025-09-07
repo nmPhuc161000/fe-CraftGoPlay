@@ -293,6 +293,7 @@ const ManageProduct = () => {
                       e.target.src =
                         "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg";
                     }}
+                    crossorigin="anonymous"
                   />
                 </td>
                 <td
@@ -508,6 +509,7 @@ const ManageProduct = () => {
                           e.target.src =
                             "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg";
                         }}
+                        crossorigin="anonymous"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     </div>
