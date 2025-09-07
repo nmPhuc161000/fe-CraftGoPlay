@@ -210,6 +210,7 @@ mediaprop
                                                     className="max-h-48 mx-auto rounded-lg object-cover"
                                                     initial={{ opacity: 0 }}
                                                     animate={{ opacity: 1 }}
+                                                    crossorigin="anonymous"
                                                 />
                                                 <motion.button
                                                     whileHover={{ scale: 1.1 }}
