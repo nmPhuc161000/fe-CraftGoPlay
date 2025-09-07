@@ -226,7 +226,8 @@ const OrderHistory = () => {
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-xl px-4 py-2">
               <span className="text-sm">
-                Tổng đơn: <span className="font-semibold">{filtered.length}</span>
+                Tổng đơn:{" "}
+                <span className="font-semibold">{filtered.length}</span>
               </span>
             </div>
             <div className="relative">
@@ -270,7 +271,10 @@ const OrderHistory = () => {
 
           <tbody className="divide-y divide-gray-100">
             {paged.map((row, idx) => (
-              <tr key={row.id || idx} className="hover:bg-gray-50/60 transition-colors">
+              <tr
+                key={row.id || idx}
+                className="hover:bg-gray-50/60 transition-colors"
+              >
                 {/* STT */}
                 <td className="px-3 py-3 text-center text-sm text-gray-700">
                   {(page - 1) * PAGE_SIZE + idx + 1}
@@ -282,28 +286,40 @@ const OrderHistory = () => {
                     {maskCode(row.code)}
                   </div>
                   {/* có thể bỏ dòng ghi full mã nếu không muốn */}
-                  <div className="text-[11px] text-gray-500 font-mono truncate" title={row.code}>
+                  <div
+                    className="text-[11px] text-gray-500 font-mono truncate"
+                    title={row.code}
+                  >
                     {row.code}
                   </div>
                 </td>
 
                 {/* Tên người nhận */}
                 <td className="px-3 py-3">
-                  <div className="font-medium text-gray-800 truncate" title={row.receiver}>
+                  <div
+                    className="font-medium text-gray-800 truncate"
+                    title={row.receiver}
+                  >
                     {row.receiver || "—"}
                   </div>
                 </td>
 
                 {/* Trạng thái */}
                 <td className="px-3 py-3 text-center">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusChip(row.status)}`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${statusChip(
+                      row.status
+                    )}`}
+                  >
                     {row.status}
                   </span>
                 </td>
 
                 {/* Ngày tạo */}
                 <td className="px-3 py-3 text-center text-sm text-gray-700">
-                  {row.createdAt ? new Date(row.createdAt).toLocaleDateString("vi-VN") : "—"}
+                  {row.createdAt
+                    ? new Date(row.createdAt).toLocaleDateString("vi-VN")
+                    : "—"}
                 </td>
 
                 {/* Xem */}
@@ -345,8 +361,18 @@ const OrderHistory = () => {
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             className="h-9 w-9 flex items-center justify-center rounded-xl border bg-white hover:bg-gray-50 disabled:opacity-50"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
 
@@ -359,8 +385,18 @@ const OrderHistory = () => {
             onClick={() => setPage((p) => Math.min(totalPage, p + 1))}
             className="h-9 w-9 flex items-center justify-center rounded-xl border bg-white hover:bg-gray-50 disabled:opacity-50"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
         </div>
@@ -381,10 +417,16 @@ const OrderHistory = () => {
             {/* header */}
             <div className="sticky top-0 bg-white border-b border-gray-100 px-8 py-6 flex items-start justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">Chi tiết đơn hàng</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Chi tiết đơn hàng
+                </h2>
                 <div className="mt-1 text-sm text-gray-500">
-                  Mã đơn: <span className="font-semibold">{viewOrder.code}</span> • Ngày tạo:{" "}
-                  {viewOrder.createdAt ? new Date(viewOrder.createdAt).toLocaleString("vi-VN") : "—"}
+                  Mã đơn:{" "}
+                  <span className="font-semibold">{viewOrder.code}</span> • Ngày
+                  tạo:{" "}
+                  {viewOrder.createdAt
+                    ? new Date(viewOrder.createdAt).toLocaleString("vi-VN")
+                    : "—"}
                 </div>
               </div>
               <button
@@ -394,8 +436,18 @@ const OrderHistory = () => {
                   setViewOrder(null);
                 }}
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -419,22 +471,33 @@ const OrderHistory = () => {
                         <div className="text-lg font-bold text-gray-800">
                           {fmtMoney(viewOrder.deliveryAmount)}
                         </div>
-                        <div className="text-xs text-gray-500">Phí vận chuyển</div>
+                        <div className="text-xs text-gray-500">
+                          Phí vận chuyển
+                        </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="bg-white border border-gray-200 rounded-2xl p-6">
                     <div className="text-sm text-gray-500 mb-1">Người nhận</div>
-                    <div className="font-semibold text-gray-900">{viewOrder.receiver || "—"}</div>
+                    <div className="font-semibold text-gray-900">
+                      {viewOrder.receiver || "—"}
+                    </div>
                     {viewOrder.phone && (
-                      <div className="text-sm text-gray-600 mt-1">SĐT: {viewOrder.phone}</div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        SĐT: {viewOrder.phone}
+                      </div>
                     )}
                     <div className="text-sm text-gray-600 mt-1">
                       Địa chỉ: {viewOrder.address || "—"}
                     </div>
                     <div className="mt-3">
-                      <span className={cx("px-3 py-1 rounded-full text-xs font-semibold", statusChip(viewOrder.status))}>
+                      <span
+                        className={cx(
+                          "px-3 py-1 rounded-full text-xs font-semibold",
+                          statusChip(viewOrder.status)
+                        )}
+                      >
                         {viewOrder.status}
                       </span>
                     </div>
@@ -465,7 +528,9 @@ const OrderHistory = () => {
                             <div className="font-semibold text-gray-700">
                               {it.name}
                             </div>
-                            <div className="text-xs text-gray-500">SL: {it.quantity}</div>
+                            <div className="text-xs text-gray-500">
+                              SL: {it.quantity}
+                            </div>
                             <div className="text-xs text-gray-500">
                               Đơn giá:{" "}
                               <span className="font-semibold text-blue-700">
@@ -484,10 +549,16 @@ const OrderHistory = () => {
                   <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="text-sm text-gray-600">Tiền hàng</div>
-                      <div className="text-right font-semibold">{fmtMoney(viewOrder.productAmount)}</div>
+                      <div className="text-right font-semibold">
+                        {fmtMoney(viewOrder.productAmount)}
+                      </div>
 
-                      <div className="text-sm text-gray-600">Phí vận chuyển</div>
-                      <div className="text-right font-semibold">{fmtMoney(viewOrder.deliveryAmount)}</div>
+                      <div className="text-sm text-gray-600">
+                        Phí vận chuyển
+                      </div>
+                      <div className="text-right font-semibold">
+                        {fmtMoney(viewOrder.deliveryAmount)}
+                      </div>
 
                       {(viewOrder.productDiscount ||
                         viewOrder.deliveryDiscount ||
@@ -496,7 +567,8 @@ const OrderHistory = () => {
                         <>
                           <div className="text-sm text-gray-600">Giảm giá</div>
                           <div className="text-right font-semibold text-green-600">
-                            -{fmtMoney(
+                            -
+                            {fmtMoney(
                               (viewOrder.productDiscount || 0) +
                                 (viewOrder.deliveryDiscount || 0) +
                                 (viewOrder.pointDiscount || 0) +
@@ -516,7 +588,9 @@ const OrderHistory = () => {
                               : "bg-amber-100 text-amber-800"
                           )}
                         >
-                          {viewOrder.isPaid ? "ĐÃ THANH TOÁN" : "CHƯA THANH TOÁN"}
+                          {viewOrder.isPaid
+                            ? "ĐÃ THANH TOÁN"
+                            : "CHƯA THANH TOÁN"}
                         </span>
                         {viewOrder.paymentMethod && (
                           <span className="ml-2 text-xs text-gray-600">

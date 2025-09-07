@@ -10,7 +10,11 @@ import {
   formatCurrency,
 } from "../../../../utils/returnRequestUtils";
 
-const RETURN_BLOCKED = new Set(["returnrequested", "returnapproved", "returned"]);
+const RETURN_BLOCKED = new Set([
+  "returnrequested",
+  "returnapproved",
+  "returned",
+]);
 
 const parseQS = (search, key) => new URLSearchParams(search).get(key) || "";
 
@@ -50,7 +54,10 @@ const ReturnRequestTab = () => {
   const orderId = parseQS(location.search, "orderId");
   const orderItemIdQS = parseQS(location.search, "orderItemId");
 
-  const productsFromQS = useMemo(() => parseOrderItemsFromQS(location.search), [location.search]);
+  const productsFromQS = useMemo(
+    () => parseOrderItemsFromQS(location.search),
+    [location.search]
+  );
 
   const REASON_OPTIONS = useMemo(
     () =>
@@ -75,7 +82,9 @@ const ReturnRequestTab = () => {
         const res = await orderService.getOrderByOrderId(orderId);
         const items = res?.data?.data?.orderItems || [];
         const filtered = items
-          .filter((it) => !RETURN_BLOCKED.has(String(it?.status || "").toLowerCase()))
+          .filter(
+            (it) => !RETURN_BLOCKED.has(String(it?.status || "").toLowerCase())
+          )
           .map((it) => {
             const img = Array.isArray(it.product?.productImages)
               ? it.product?.productImages?.[0]?.imageUrl
@@ -89,7 +98,9 @@ const ReturnRequestTab = () => {
           });
 
         setEligibleItems(filtered);
-        setSelectedIds((prev) => prev.filter((id) => filtered.some((e) => e.id === id)));
+        setSelectedIds((prev) =>
+          prev.filter((id) => filtered.some((e) => e.id === id))
+        );
       } catch {
         setEligibleItems(productsFromQS);
       } finally {
@@ -100,7 +111,9 @@ const ReturnRequestTab = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId]);
 
-  const [selectedIds, setSelectedIds] = useState(orderItemIdQS ? [orderItemIdQS] : []);
+  const [selectedIds, setSelectedIds] = useState(
+    orderItemIdQS ? [orderItemIdQS] : []
+  );
   const [selectAll, setSelectAll] = useState(false);
   const [selectedForms, setSelectedForms] = useState({});
   const [errors, setErrors] = useState({});
@@ -144,7 +157,13 @@ const ReturnRequestTab = () => {
       setSelectedForms((prev) => {
         const next = { ...prev };
         for (const id of allIds) {
-          if (!next[id]) next[id] = { reason: "", otherReason: "", description: "", image: null };
+          if (!next[id])
+            next[id] = {
+              reason: "",
+              otherReason: "",
+              description: "",
+              image: null,
+            };
         }
         return next;
       });
@@ -172,7 +191,8 @@ const ReturnRequestTab = () => {
   const completedSelected = selectedIds.filter((id) => {
     const f = selectedForms[id] || {};
     if (!f.reason) return false;
-    if (f.reason === "Other" && !String(f.otherReason || "").trim()) return false;
+    if (f.reason === "Other" && !String(f.otherReason || "").trim())
+      return false;
     return true;
   }).length;
   const isReady = selectedCount > 0 && completedSelected === selectedCount;
@@ -207,7 +227,11 @@ const ReturnRequestTab = () => {
       if (Object.keys(err).length) newErr[id] = err;
     }
     setErrors(newErr);
-    if (!ok) showNotification("Vui lòng hoàn thành thông tin cho sản phẩm đã chọn!", "warning");
+    if (!ok)
+      showNotification(
+        "Vui lòng hoàn thành thông tin cho sản phẩm đã chọn!",
+        "warning"
+      );
     return ok;
   };
 
@@ -223,7 +247,8 @@ const ReturnRequestTab = () => {
         data.append("OrderItemId", oid);
         data.append("UserId", user.id);
         data.append("Reason", f.reason);
-        if (f.reason === "Other") data.append("OtherReason", f.otherReason || "");
+        if (f.reason === "Other")
+          data.append("OtherReason", f.otherReason || "");
         data.append("Description", f.description || "");
         if (f.image) data.append("ImageUrl", f.image);
         return returnRequestService.createReturnRequest(data);
@@ -237,7 +262,10 @@ const ReturnRequestTab = () => {
       if (okCount === selectedIds.length) {
         showNotification("Gửi yêu cầu trả hàng thành công!", "success");
       } else if (okCount > 0) {
-        showNotification(`Gửi thành công ${okCount}/${selectedIds.length} sản phẩm`, "warning");
+        showNotification(
+          `Gửi thành công ${okCount}/${selectedIds.length} sản phẩm`,
+          "warning"
+        );
       } else {
         showNotification("Không thể gửi yêu cầu trả hàng", "error");
       }
@@ -256,7 +284,15 @@ const ReturnRequestTab = () => {
       setSelectedForms((prev) =>
         prev[orderItemIdQS]
           ? prev
-          : { ...prev, [orderItemIdQS]: { reason: "", otherReason: "", description: "", image: null } }
+          : {
+              ...prev,
+              [orderItemIdQS]: {
+                reason: "",
+                otherReason: "",
+                description: "",
+                image: null,
+              },
+            }
       );
     }
   }, [orderItemIdQS]);
@@ -268,10 +304,16 @@ const ReturnRequestTab = () => {
         <div className="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
           <div className="flex items-center gap-3">
             <FiPackage className="text-2xl text-orange-600" />
-            <h2 className="text-3xl font-bold text-gray-800 font-sans">Yêu cầu trả hàng</h2>
+            <h2 className="text-3xl font-bold text-gray-800 font-sans">
+              Yêu cầu trả hàng
+            </h2>
           </div>
           <button
-            onClick={() => navigate("/profile-user/orders", { state: { expandedOrderId: orderId } })}
+            onClick={() =>
+              navigate("/profile-user/orders", {
+                state: { expandedOrderId: orderId },
+              })
+            }
             className="flex items-center text-gray-600 hover:text-orange-600 transition-colors duration-300 text-sm font-medium"
           >
             <FiArrowLeft className="mr-2 text-lg" />
@@ -284,16 +326,29 @@ const ReturnRequestTab = () => {
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
               <p className="text-sm font-medium text-gray-600">
-                Đã hoàn tất: {completedSelected}/{selectedCount || 0} sản phẩm đã chọn
+                Đã hoàn tất: {completedSelected}/{selectedCount || 0} sản phẩm
+                đã chọn
               </p>
-              <p className={`text-sm font-semibold ${isReady ? "text-green-600" : "text-gray-600"}`}>
-                {isReady ? "Sẵn sàng gửi!" : "Cần điền form cho sản phẩm đã chọn"}
+              <p
+                className={`text-sm font-semibold ${
+                  isReady ? "text-green-600" : "text-gray-600"
+                }`}
+              >
+                {isReady
+                  ? "Sẵn sàng gửi!"
+                  : "Cần điền form cho sản phẩm đã chọn"}
               </p>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
               <div
                 className="bg-gradient-to-r from-orange-500 to-orange-600 h-full rounded-full transition-all duration-300"
-                style={{ width: `${selectedCount ? (completedSelected / selectedCount) * 100 : 0}%` }}
+                style={{
+                  width: `${
+                    selectedCount
+                      ? (completedSelected / selectedCount) * 100
+                      : 0
+                  }%`,
+                }}
               />
             </div>
           </div>
@@ -301,7 +356,9 @@ const ReturnRequestTab = () => {
 
         {/* Loading */}
         {loadingOrder && (
-          <div className="text-center py-6 text-sm text-gray-500">Đang tải sản phẩm đủ điều kiện…</div>
+          <div className="text-center py-6 text-sm text-gray-500">
+            Đang tải sản phẩm đủ điều kiện…
+          </div>
         )}
 
         {/* danh sach sp*/}
@@ -327,7 +384,9 @@ const ReturnRequestTab = () => {
                 <div
                   key={p.id}
                   className={`bg-gray-50 rounded-2xl border p-5 transition-all duration-300 hover:shadow-md ${
-                    checked ? "border-orange-200 ring-1 ring-orange-100" : "border-gray-100"
+                    checked
+                      ? "border-orange-200 ring-1 ring-orange-100"
+                      : "border-gray-100"
                   }`}
                 >
                   <div className="flex items-start gap-4">
@@ -344,19 +403,29 @@ const ReturnRequestTab = () => {
                           src={p.imageUrl}
                           alt={p.name}
                           className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
-                          onError={(e) => (e.currentTarget.src = "/placeholder.svg")}
+                          onError={(e) =>
+                            (e.currentTarget.src = "/placeholder.svg")
+                          }
                           crossorigin="anonymous"
                         />
                       ) : (
                         <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                          <span className="text-gray-400 text-xs">No Image</span>
+                          <span className="text-gray-400 text-xs">
+                            No Image
+                          </span>
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-lg font-semibold text-gray-800">{p.name}</h4>
-                      <p className="text-sm text-gray-500 mt-1">Mã sản phẩm: {formatProductCode(p.id)}</p>
-                      <p className="text-sm text-gray-700 mt-1">Giá: {formatCurrency(p.price)}</p>
+                      <h4 className="text-lg font-semibold text-gray-800">
+                        {p.name}
+                      </h4>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Mã sản phẩm: {formatProductCode(p.id)}
+                      </p>
+                      <p className="text-sm text-gray-700 mt-1">
+                        Giá: {formatCurrency(p.price)}
+                      </p>
                     </div>
                   </div>
 
@@ -365,11 +434,14 @@ const ReturnRequestTab = () => {
                     <div className="mt-4 space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Lý do trả hàng <span className="text-orange-500">*</span>
+                          Lý do trả hàng{" "}
+                          <span className="text-orange-500">*</span>
                         </label>
                         <select
                           value={f.reason || ""}
-                          onChange={(e) => handleItemFormChange(p.id, "reason", e.target.value)}
+                          onChange={(e) =>
+                            handleItemFormChange(p.id, "reason", e.target.value)
+                          }
                           className={`w-full px-4 py-3 rounded-xl border ${
                             err.reason ? "border-red-300" : "border-gray-200"
                           } focus:border-orange-500 focus:ring-2 focus:ring-orange-200 text-gray-700 bg-white shadow-sm transition hover:border-orange-300`}
@@ -382,30 +454,56 @@ const ReturnRequestTab = () => {
                             </option>
                           ))}
                         </select>
-                        {err.reason && <p className="text-sm text-red-500 mt-1">{err.reason}</p>}
+                        {err.reason && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {err.reason}
+                          </p>
+                        )}
                       </div>
 
                       {f.reason === "Other" && (
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Lý do khác</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Lý do khác
+                          </label>
                           <input
                             type="text"
                             value={f.otherReason || ""}
-                            onChange={(e) => handleItemFormChange(p.id, "otherReason", e.target.value)}
+                            onChange={(e) =>
+                              handleItemFormChange(
+                                p.id,
+                                "otherReason",
+                                e.target.value
+                              )
+                            }
                             className={`w-full px-4 py-3 rounded-xl border ${
-                              err.otherReason ? "border-red-300" : "border-gray-200"
+                              err.otherReason
+                                ? "border-red-300"
+                                : "border-gray-200"
                             } focus:border-orange-500 focus:ring-2 focus:ring-orange-200 text-gray-700 bg-white shadow-sm transition hover:border-orange-300`}
                             placeholder="Vui lòng nêu rõ lý do"
                           />
-                          {err.otherReason && <p className="text-sm text-red-500 mt-1">{err.otherReason}</p>}
+                          {err.otherReason && (
+                            <p className="text-sm text-red-500 mt-1">
+                              {err.otherReason}
+                            </p>
+                          )}
                         </div>
                       )}
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Mô tả chi tiết</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Mô tả chi tiết
+                        </label>
                         <textarea
                           value={f.description || ""}
-                          onChange={(e) => handleItemFormChange(p.id, "description", e.target.value)}
+                          onChange={(e) =>
+                            handleItemFormChange(
+                              p.id,
+                              "description",
+                              e.target.value
+                            )
+                          }
                           className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 text-gray-700 bg-white shadow-sm transition hover:border-orange-300"
                           rows="3"
                           placeholder="Mô tả thêm về lý do trả hàng (tùy chọn)"
@@ -424,7 +522,11 @@ const ReturnRequestTab = () => {
                           type="file"
                           accept="image/*"
                           onChange={(e) =>
-                            handleItemFormChange(p.id, "image", e.target.files?.[0] || null)
+                            handleItemFormChange(
+                              p.id,
+                              "image",
+                              e.target.files?.[0] || null
+                            )
                           }
                           className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 text-gray-700 bg-white shadow-sm transition file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
                         />
@@ -438,7 +540,10 @@ const ReturnRequestTab = () => {
         )}
 
         {/* Action bar */}
-        <form onSubmit={handleSubmit} className="flex justify-between items-center space-x-4 pt-6">
+        <form
+          onSubmit={handleSubmit}
+          className="flex justify-between items-center space-x-4 pt-6"
+        >
           <p className="text-sm text-orange-600 font-medium">
             {selectedCount > 0
               ? `Đã chọn ${selectedCount} sản phẩm • Hoàn tất ${completedSelected}/${selectedCount}`
@@ -447,7 +552,11 @@ const ReturnRequestTab = () => {
           <div className="flex space-x-3">
             <button
               type="button"
-              onClick={() => navigate("/profile-user/orders", { state: { expandedOrderId: orderId } })}
+              onClick={() =>
+                navigate("/profile-user/orders", {
+                  state: { expandedOrderId: orderId },
+                })
+              }
               className="px-6 py-2.5 bg-gray-200 text-gray-700 rounded-lg font-medium transition-all duration-300 hover:bg-gray-300"
             >
               Hủy
@@ -470,10 +579,15 @@ const ReturnRequestTab = () => {
         {!loadingOrder && eligibleItems.length === 0 && (
           <div className="text-center py-10 mt-6 bg-gray-50 rounded-2xl border border-gray-100">
             <p className="text-gray-600 mb-4">
-              Tất cả sản phẩm trong đơn đã có yêu cầu trả hoặc không đủ điều kiện.
+              Tất cả sản phẩm trong đơn đã có yêu cầu trả hoặc không đủ điều
+              kiện.
             </p>
             <button
-              onClick={() => navigate("/profile-user/orders", { state: { expandedOrderId: orderId } })}
+              onClick={() =>
+                navigate("/profile-user/orders", {
+                  state: { expandedOrderId: orderId },
+                })
+              }
               className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-medium hover:from-orange-600 hover:to-orange-700 transition"
             >
               Quay lại đơn hàng

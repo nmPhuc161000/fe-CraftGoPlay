@@ -66,48 +66,54 @@ export default function UpgradeArtisanTab({ userId }) {
     }
   }, [showNotification]);
 
-  const fetchDistricts = useCallback(async (provinceName) => {
-    try {
-      setLoadingLocations(true);
-      const province = provinces.find((p) => p.ProvinceName === provinceName);
-      if (!province) return;
-      const response = await locationService.getDistrict(province.ProvinceID);
-      setDistricts(response.data || []);
-      setWards([]);
-      setFormData((prev) => ({
-        ...prev,
-        district: "",
-        districtId: "",
-        ward: "",
-        wardCode: "",
-      }));
-    } catch (error) {
-      showNotification("Không tải được danh sách quận/huyện", "error");
-      console.error("Error fetching districts:", error);
-    } finally {
-      setLoadingLocations(false);
-    }
-  }, [provinces, showNotification]);
+  const fetchDistricts = useCallback(
+    async (provinceName) => {
+      try {
+        setLoadingLocations(true);
+        const province = provinces.find((p) => p.ProvinceName === provinceName);
+        if (!province) return;
+        const response = await locationService.getDistrict(province.ProvinceID);
+        setDistricts(response.data || []);
+        setWards([]);
+        setFormData((prev) => ({
+          ...prev,
+          district: "",
+          districtId: "",
+          ward: "",
+          wardCode: "",
+        }));
+      } catch (error) {
+        showNotification("Không tải được danh sách quận/huyện", "error");
+        console.error("Error fetching districts:", error);
+      } finally {
+        setLoadingLocations(false);
+      }
+    },
+    [provinces, showNotification]
+  );
 
-  const fetchWards = useCallback(async (districtName) => {
-    try {
-      setLoadingLocations(true);
-      const district = districts.find((d) => d.DistrictName === districtName);
-      if (!district) return;
-      const response = await locationService.getWard(district.DistrictID);
-      setWards(response.data || []);
-      setFormData((prev) => ({
-        ...prev,
-        ward: "",
-        wardCode: "",
-      }));
-    } catch (error) {
-      showNotification("Không tải được danh sách phường/xã", "error");
-      console.error("Error fetching wards:", error);
-    } finally {
-      setLoadingLocations(false);
-    }
-  }, [districts, showNotification]);
+  const fetchWards = useCallback(
+    async (districtName) => {
+      try {
+        setLoadingLocations(true);
+        const district = districts.find((d) => d.DistrictName === districtName);
+        if (!district) return;
+        const response = await locationService.getWard(district.DistrictID);
+        setWards(response.data || []);
+        setFormData((prev) => ({
+          ...prev,
+          ward: "",
+          wardCode: "",
+        }));
+      } catch (error) {
+        showNotification("Không tải được danh sách phường/xã", "error");
+        console.error("Error fetching wards:", error);
+      } finally {
+        setLoadingLocations(false);
+      }
+    },
+    [districts, showNotification]
+  );
 
   const handleProvinceChange = useCallback(
     (e) => {
@@ -164,7 +170,9 @@ export default function UpgradeArtisanTab({ userId }) {
         setCraftVillages(villagesResponse.data.data);
 
         try {
-          const requestResponse = await userService.getSentRequestByUserId(userId);
+          const requestResponse = await userService.getSentRequestByUserId(
+            userId
+          );
           if (requestResponse.data && requestResponse.data.data) {
             const requestData = requestResponse.data.data;
             setCheckRequest({
@@ -532,10 +540,7 @@ export default function UpgradeArtisanTab({ userId }) {
             >
               <option value="">Chọn tỉnh/thành</option>
               {provinces.map((province) => (
-                <option
-                  key={province.ProvinceID}
-                  value={province.ProvinceName}
-                >
+                <option key={province.ProvinceID} value={province.ProvinceName}>
                   {province.ProvinceName}
                 </option>
               ))}
@@ -553,14 +558,16 @@ export default function UpgradeArtisanTab({ userId }) {
               onChange={handleDistrictChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
-              disabled={isLoading || checkRequest.isSent || !formData.province || loadingLocations}
+              disabled={
+                isLoading ||
+                checkRequest.isSent ||
+                !formData.province ||
+                loadingLocations
+              }
             >
               <option value="">Chọn quận/huyện</option>
               {districts.map((district) => (
-                <option
-                  key={district.DistrictID}
-                  value={district.DistrictName}
-                >
+                <option key={district.DistrictID} value={district.DistrictName}>
                   {district.DistrictName}
                 </option>
               ))}
@@ -578,7 +585,12 @@ export default function UpgradeArtisanTab({ userId }) {
               onChange={handleWardChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
-              disabled={isLoading || checkRequest.isSent || !formData.district || loadingLocations}
+              disabled={
+                isLoading ||
+                checkRequest.isSent ||
+                !formData.district ||
+                loadingLocations
+              }
             >
               <option value="">Chọn phường/xã</option>
               {wards.map((ward) => (
@@ -725,7 +737,9 @@ export default function UpgradeArtisanTab({ userId }) {
             {isLoading ? "Đang gửi..." : "Gửi yêu cầu"}
           </button>
 
-          {loadingLocations && <LoadingSpinner message="Đang tải dữ liệu địa chỉ..." />}
+          {loadingLocations && (
+            <LoadingSpinner message="Đang tải dữ liệu địa chỉ..." />
+          )}
         </form>
       )}
     </div>
