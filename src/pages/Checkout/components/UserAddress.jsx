@@ -1,4 +1,4 @@
-// /src/pages/Checkout/component/UserAddress.jsx
+// /src/pages/Checkout/components/UserAddress.jsx
 import React, { useState, useCallback } from "react";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { useNotification } from "../../../contexts/NotificationContext";
@@ -61,6 +61,15 @@ const UserAddress = ({
     onDefaultAddressChanged?.(); // Gọi callback khi đặt mặc định thành công
   };
 
+  // Hàm xử lý khi đóng popup
+  const handleClosePopup = () => {
+    setShowAddressPopup(false);
+    // Gọi callback khi đóng popup (bao gồm cả khi thêm địa chỉ mới)
+    if (onDefaultAddressChanged) {
+      onDefaultAddressChanged();
+    }
+  };
+
   const selectedAddress = addresses.find(
     (addr) => addr.id === selectedAddressId
   );
@@ -107,7 +116,7 @@ const UserAddress = ({
                   Chọn địa chỉ nhận hàng
                 </h3>
                 <button
-                  onClick={() => setShowAddressPopup(false)}
+                  onClick={handleClosePopup} // Sử dụng hàm mới
                   className="text-gray-500 hover:text-gray-700"
                 >
                   ✕

@@ -19,6 +19,8 @@ import {
   formatCurrency,
   isActionRequired,
 } from "../../../utils/returnRequestUtils";
+import { useNotification } from "../../../contexts/NotificationContext";
+import { useConfirm } from "../../../components/ConfirmForm/ConfirmForm";
 
 export default function ComplaintManagement() {
   const [complaints, setComplaints] = useState([]);
@@ -27,6 +29,8 @@ export default function ComplaintManagement() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 10;
+  const { showNotification } = useNotification();
+  const { confirm, ConfirmComponent } = useConfirm();
 
   useEffect(() => {
     fetchComplaints();
@@ -45,6 +49,10 @@ export default function ComplaintManagement() {
       }
     } catch (error) {
       console.error("Lỗi khi lấy danh sách khiếu nại:", error);
+      showNotification({
+        message: "Đã có lỗi xảy ra khi lấy danh sách khiếu nại.",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -60,9 +68,16 @@ export default function ComplaintManagement() {
       ? "Bạn có chắc chắn muốn chấp nhận hoàn tiền cho khiếu nại này?"
       : "Bạn có chắc chắn muốn từ chối hoàn tiền cho khiếu nại này?";
 
-    if (!window.confirm(confirmMessage)) return;
-
     try {
+      const confirmed = await confirm({
+        title: acceptRefund ? "Chấp nhận hoàn tiền" : "Từ chối hoàn tiền",
+        message: confirmMessage,
+        confirmText: acceptRefund ? "Chấp nhận" : "Từ chối",
+        type: acceptRefund ? "default" : "danger",
+      });
+
+      if (!confirmed) return;
+
       await returnRequestService.resolveEscalatedRequest(
         returnRequestId,
         acceptRefund
@@ -75,14 +90,18 @@ export default function ComplaintManagement() {
             : complaint
         )
       );
-      alert(
-        `Yêu cầu đã được xử lý: ${
+      showNotification({
+        message: `Yêu cầu đã được xử lý: ${
           acceptRefund ? "Hoàn tiền" : "Từ chối hoàn tiền"
-        }`
-      );
+        }`,
+        type: "success",
+      });
     } catch (error) {
       console.error("Lỗi khi xử lý yêu cầu:", error);
-      alert("Đã có lỗi xảy ra khi xử lý yêu cầu.");
+      showNotification({
+        message: "Đã có lỗi xảy ra khi xử lý yêu cầu.",
+        type: "error",
+      });
     }
   };
 
@@ -102,6 +121,7 @@ export default function ComplaintManagement() {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
+      <ConfirmComponent />
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">

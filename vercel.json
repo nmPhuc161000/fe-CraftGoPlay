@@ -4,17 +4,21 @@
   "outputDirectory": "dist",
 
   "rewrites": [
-    { "source": "/CraftGoPlayGame/Build/:path*", "destination": "/CraftGoPlayGame/Build/:path*" },
-    { "source": "/CraftGoPlayGame/:path*", "destination": "/CraftGoPlayGame/:path*" },
+    {
+      "source": "/CraftGoPlayGame/Build/:path*",
+      "destination": "/CraftGoPlayGame/Build/:path*"
+    },
+    {
+      "source": "/CraftGoPlayGame/:path*",
+      "destination": "/CraftGoPlayGame/:path*"
+    },
     { "source": "/:path((?!CraftGoPlayGame/).*)", "destination": "/index.html" }
   ],
 
   "headers": [
     {
       "source": "/CraftGoPlayGame/Build/(.*)\\.wasm",
-      "headers": [
-        { "key": "Content-Type", "value": "application/wasm" }
-      ]
+      "headers": [{ "key": "Content-Type", "value": "application/wasm" }]
     },
     {
       "source": "/CraftGoPlayGame/Build/(.*)\\.data",
@@ -24,9 +28,7 @@
     },
     {
       "source": "/CraftGoPlayGame/Build/(.*)\\.js",
-      "headers": [
-        { "key": "Content-Type", "value": "application/javascript" }
-      ]
+      "headers": [{ "key": "Content-Type", "value": "application/javascript" }]
     }
   ],
 
