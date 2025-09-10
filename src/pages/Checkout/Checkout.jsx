@@ -568,10 +568,11 @@ const Checkout = () => {
     fetchDefaultAddress();
   }, [fetchDefaultAddress]);
 
-  const handleDefaultAddressChanged = () => {
+  // Hàm xử lý khi địa chỉ mặc định thay đổi
+  const handleDefaultAddressChanged = useCallback(() => {
     fetchDefaultAddress(); // Gọi lại API lấy địa chỉ mặc định
     calculateShippingFee(); // Tính lại phí vận chuyển nếu cần
-  };
+  }, [fetchDefaultAddress]);
 
   return (
     <MainLayout>
