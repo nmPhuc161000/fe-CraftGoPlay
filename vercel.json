@@ -2,20 +2,7 @@
   "version": 2,
   "buildCommand": "git lfs install && git lfs fetch --all && git lfs checkout && npm run build",
   "outputDirectory": "dist",
-
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ],
-
   "headers": [
-    {
-      "source": "/CraftGoPlayGame/(.*)",
-      "headers": [
-        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
-        { "key": "Cross-Origin-Embedder-Policy", "value": "require-corp" }
-      ]
-    },
     {
       "source": "/CraftGoPlayGame/Build/(.*)\\.wasm",
       "headers": [
