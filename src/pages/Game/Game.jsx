@@ -7,8 +7,8 @@ const HERO_BG =
   "https://res.cloudinary.com/dqnq00784/image/upload/v1753625525/kpnnembzq1bgwncat0hq.png";
 
 export default function Game() {
-  const [isGameRequested, setIsGameRequested] = useState(false); // user bấm "Chơi ngay"
-  const [iframeLoaded, setIframeLoaded] = useState(false);       // iframe onLoad -> true
+  const [isGameRequested, setIsGameRequested] = useState(false); 
+  const [iframeLoaded, setIframeLoaded] = useState(false);       
 
   const startGame = () => setIsGameRequested(true);
 
@@ -23,7 +23,6 @@ export default function Game() {
           backgroundAttachment: !isGameRequested ? "fixed" : undefined,
         }}
       >
-        {/* Animated particles overlay - chỉ hiện khi chưa load game */}
         {!isGameRequested && (
           <div className="absolute inset-0 opacity-30 pointer-events-none">
             <div className="absolute top-20 left-10 w-2 h-2 bg-yellow-300 rounded-full animate-pulse" />
