@@ -347,7 +347,7 @@ const Checkout = () => {
     }
   };
 
-  const calculateShippingFee = async () => {
+  const calculateShippingFee = useCallback(async () => {
     try {
       if (!selectedAddressId || (!buyNow && selectedCartItems.length === 0)) {
         return;
@@ -556,7 +556,14 @@ const Checkout = () => {
         "warning"
       );
     }
-  };
+  }, [
+    selectedAddressId,
+    buyNow,
+    selectedCartItems,
+    addresses,
+    showNotification,
+    artisanAddressCache,
+  ]);
 
   useEffect(() => {
     if (selectedAddressId && (buyNow || selectedCartItems.length > 0)) {
@@ -572,7 +579,7 @@ const Checkout = () => {
   const handleDefaultAddressChanged = useCallback(() => {
     fetchDefaultAddress(); // Gọi lại API lấy địa chỉ mặc định
     calculateShippingFee(); // Tính lại phí vận chuyển nếu cần
-  }, [fetchDefaultAddress]);
+  }, [fetchDefaultAddress, calculateShippingFee]);
 
   return (
     <MainLayout>

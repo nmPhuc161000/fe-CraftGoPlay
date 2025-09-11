@@ -53,6 +53,7 @@ const UserAddress = ({
     onError,
     onSuccess,
     confirmDelete: confirm,
+    onAddressChanged: onDefaultAddressChanged, // Thêm callback này
   });
 
   // Thêm hàm xử lý khi set default
@@ -153,6 +154,7 @@ const UserAddress = ({
         onProvinceChange={fetchDistricts}
         onDistrictChange={fetchWards}
         loadingLocations={loadingLocations}
+        onAddressChanged={onDefaultAddressChanged} // Thêm prop này
       />
 
       <ConfirmComponent />
