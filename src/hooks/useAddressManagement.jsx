@@ -8,6 +8,7 @@ export const useAddressManagement = (userId, options = {}) => {
     onError = (error) => console.error("Address Management Error:", error),
     onSuccess,
     confirmDelete,
+    onAddressChanged, // Thêm callback mới
   } = options;
 
   const [state, setState] = useState({
@@ -243,7 +244,7 @@ export const useAddressManagement = (userId, options = {}) => {
           AddressType: formData.addressType,
           IsDefault: formData.isDefault,
         };
-        
+
         const isUpdate = !!state.currentAddress;
         const response = isUpdate
           ? await addressService.updateAddress(state.currentAddress.id, apiData)
@@ -256,6 +257,12 @@ export const useAddressManagement = (userId, options = {}) => {
             ? "Cập nhật địa chỉ thành công"
             : "Thêm địa chỉ mới thành công"
         );
+
+        // Gọi callback khi địa chỉ thay đổi
+        if (onAddressChanged) {
+          onAddressChanged();
+        }
+
         return response.data;
       } catch (error) {
         onError(error);
@@ -271,6 +278,7 @@ export const useAddressManagement = (userId, options = {}) => {
       fetchAllData,
       onSuccess,
       onError,
+      onAddressChanged, // Thêm dependency
     ]
   );
 

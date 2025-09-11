@@ -136,6 +136,7 @@ const AddressFormPopup = ({
   wards = [],
   onProvinceChange,
   onDistrictChange,
+  onAddressChanged,
 }) => {
   const [formData, setFormData] = useState(defaultFormData);
   const [errors, setErrors] = useState({});
@@ -239,10 +240,21 @@ const AddressFormPopup = ({
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Submitting address form with data:", formData);
-    
+
     const { isValid, errors } = validateAddressForm(formData);
     setErrors(errors);
-    if (isValid) onSubmit(formData);
+    if (isValid) {
+      onSubmit(formData)
+        .then(() => {
+          // Gọi callback sau khi submit thành công
+          if (onAddressChanged && formData.isDefault) {
+            onAddressChanged();
+          }
+        })
+        .catch((error) => {
+          console.error("Submit error:", error);
+        });
+    }
   };
 
   if (!isOpen) return null;
