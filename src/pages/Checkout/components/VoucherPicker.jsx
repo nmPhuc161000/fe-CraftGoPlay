@@ -19,8 +19,9 @@ const VoucherPicker = ({
   const [vouchers, setVouchers] = useState([]);
   const [voucherSuccess, setVoucherSuccess] = useState("");
 
-  const mapVoucherFromBE = (v) => {
-    const src = v?.voucher ?? v;
+  // ---- Map 1 item từ BE về dạng FE
+  const mapVoucherFromBE = (entry) => {
+    const src = entry?.voucher ?? entry ?? {};
     return {
       id: src?.id,
       code: src?.code,
@@ -45,9 +46,39 @@ const VoucherPicker = ({
       endDate: src?.endDate,
       isActive: src?.isActive,
       quantity: src?.quantity,
-      isUsed: v?.isUsed ?? false,
+      usedCount: src?.usedCount ?? 0,
+      isUsed: entry?.isUsed ?? src?.isUsed ?? false,
       paymentMethod: src?.paymentMethod,
     };
+  };
+
+  // ---- Chuẩn hoá list + gắn _key duy nhất cho từng bản sao (kể cả trùng id)
+  const normalizeVoucherList = (rawData) => {
+    if (!Array.isArray(rawData)) return [];
+    const out = [];
+    const counter = new Map(); 
+
+    const pushWithKey = (obj) => {
+      const idOrCode = obj?.id ?? obj?.code ?? "unknown";
+      const next = (counter.get(idOrCode) || 0) + 1;
+      counter.set(idOrCode, next);
+      out.push({ ...obj, _key: `${idOrCode}#${next}` });
+    };
+
+    for (const item of rawData) {
+      if (item?.voucher) {
+        pushWithKey(mapVoucherFromBE(item));
+        continue;
+      }
+      if (Array.isArray(item?.vouchers)) {
+        for (const v of item.vouchers) pushWithKey(mapVoucherFromBE(v));
+        continue;
+      }
+      if (item && (item.code || item.name || item.id)) {
+        pushWithKey(mapVoucherFromBE(item));
+      }
+    }
+    return out;
   };
 
   useEffect(() => {
@@ -62,15 +93,11 @@ const VoucherPicker = ({
         setLoading(true);
         setVoucherError("");
 
-        // Lấy tất cả voucher theo user (để FE tự chia 2 cột)
         const res = await userVoucherService.getAllVouchersByUserId(user.id, "");
         const wrapper = res?.data?.data ?? [];
-        const raw = Array.isArray(wrapper)
-          ? wrapper.flatMap((item) => item?.vouchers ?? [])
-          : [];
+        const normalized = normalizeVoucherList(wrapper);
 
-        const mapped = raw.map(mapVoucherFromBE);
-        if (mounted) setVouchers(mapped);
+        if (mounted) setVouchers(normalized);
       } catch (e) {
         console.error("getAllVouchersByUserId error:", e);
         if (mounted) setVoucherError("Không tải được danh sách voucher.");
@@ -83,22 +110,14 @@ const VoucherPicker = ({
     };
   }, [user?.id]);
 
-  const productVouchers = useMemo(
-    () => vouchers.filter((v) => (v.type || "") === "Product"),
-    [vouchers]
-  );
-  const deliveryVouchers = useMemo(
-    () => vouchers.filter((v) => (v.type || "") === "Delivery"),
-    [vouchers]
-  );
-
+  // ---- Điều kiện khả dụng
   const canUseNow = (v) => {
     const now = new Date();
     const startOk = v.startDate ? new Date(v.startDate) <= now : true;
     const endOk = v.endDate ? new Date(v.endDate) >= now : true;
     const isActive = v.isActive !== false;
-    const notUsed = v.isUsed ? false : true;
-    const qtyOk = v.quantity == null ? true : v.quantity > 0;
+    const notUsed = !v.isUsed;
+    const qtyOk = v.quantity == null ? true : (v.usedCount ?? 0) < v.quantity;
     const subtotalOk = subtotal >= (v.minOrder || 0);
     return startOk && endOk && isActive && notUsed && qtyOk && subtotalOk;
   };
@@ -109,12 +128,12 @@ const VoucherPicker = ({
     if (v.endDate && new Date(v.endDate) < now) return "Hết hạn";
     if (v.isActive === false) return "Ngừng";
     if (v.isUsed) return "Đã dùng";
-    if (v.quantity === 0) return "Hết";
+    if (v.quantity != null && (v.usedCount ?? 0) >= v.quantity) return "Hết lượt";
     if (subtotal < (v.minOrder || 0)) return "Chưa đạt tối thiểu";
     return "Không khả dụng";
   };
 
-  const combinedLabel = React.useMemo(() => {
+  const combinedLabel = useMemo(() => {
     const parts = [];
     if (productCode) parts.push(`SP: ${productCode}`);
     if (deliveryCode) parts.push(`VC: ${deliveryCode}`);
@@ -142,6 +161,21 @@ const VoucherPicker = ({
       setVoucherSuccess("");
       return;
     }
+    if (voucher.isActive === false) {
+      setVoucherError(`Mã ${voucher.code} đã ngừng hoạt động.`);
+      setVoucherSuccess("");
+      return;
+    }
+    if (voucher.isUsed) {
+      setVoucherError(`Mã ${voucher.code} bạn đã sử dụng.`);
+      setVoucherSuccess("");
+      return;
+    }
+    if (voucher.quantity != null && (voucher.usedCount ?? 0) >= voucher.quantity) {
+      setVoucherError(`Mã ${voucher.code} đã hết lượt.`);
+      setVoucherSuccess("");
+      return;
+    }
     if (subtotal < (voucher.minOrder || 0)) {
       setVoucherError(
         `Đơn tối thiểu ${Number(voucher.minOrder || 0).toLocaleString("vi-VN")}₫ để dùng mã này.`
@@ -163,6 +197,31 @@ const VoucherPicker = ({
     setVoucherError("");
   };
 
+  // ---- Tách cột & sắp xếp (khả dụng trước, gần hết hạn trước)
+  const productSorted = useMemo(() => {
+    const list = vouchers.filter((v) => (v.type || "") === "Product");
+    return [...list].sort((a, b) => {
+      const ua = canUseNow(a) ? 0 : 1;
+      const ub = canUseNow(b) ? 0 : 1;
+      if (ua !== ub) return ua - ub;
+      const ea = a.endDate ? new Date(a.endDate).getTime() : Number.POSITIVE_INFINITY;
+      const eb = b.endDate ? new Date(b.endDate).getTime() : Number.POSITIVE_INFINITY;
+      return ea - eb;
+    });
+  }, [vouchers, subtotal]);
+
+  const deliverySorted = useMemo(() => {
+    const list = vouchers.filter((v) => (v.type || "") === "Delivery");
+    return [...list].sort((a, b) => {
+      const ua = canUseNow(a) ? 0 : 1;
+      const ub = canUseNow(b) ? 0 : 1;
+      if (ua !== ub) return ua - ub;
+      const ea = a.endDate ? new Date(a.endDate).getTime() : Number.POSITIVE_INFINITY;
+      const eb = b.endDate ? new Date(b.endDate).getTime() : Number.POSITIVE_INFINITY;
+      return ea - eb;
+    });
+  }, [vouchers, subtotal]);
+
   const handleClearProduct = () => {
     setProductCode("");
     onApplyProduct && onApplyProduct(null);
@@ -182,9 +241,8 @@ const VoucherPicker = ({
 
     return (
       <div
-        key={v.id}
         className={`flex items-center justify-between p-4 border rounded-xl shadow-sm hover:shadow-md transition bg-white ${selected ? "ring-2 ring-[#b28940]" : ""
-          }`}
+          } ${!usable && !selected ? "opacity-70" : ""}`}
       >
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 flex items-center justify-center bg-gradient-to-r from-[#b28940] to-[#e6c37f] text-white rounded-lg shadow">
@@ -281,7 +339,7 @@ const VoucherPicker = ({
         <p className="text-sm text-red-500 text-right">{voucherError}</p>
       )}
 
-      {/* Modal: 2 layout (SP | VC) */}
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -304,29 +362,29 @@ const VoucherPicker = ({
                 <div className="text-center text-sm text-gray-500">Đang tải voucher…</div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Cột Sản phẩm */}
+                  {/* Sản phẩm */}
                   <div>
                     <h4 className="font-semibold text-[#5e3a1e] mb-3">Voucher SẢN PHẨM</h4>
                     <div className="space-y-4">
-                      {productVouchers.length === 0 ? (
+                      {productSorted.length === 0 ? (
                         <div className="text-sm text-gray-500">Không có voucher sản phẩm.</div>
                       ) : (
-                        productVouchers.map((v) => (
-                          <VoucherCard key={v.id} v={v} type="Product" />
+                        productSorted.map((v) => (
+                          <VoucherCard key={v._key} v={v} type="Product" />
                         ))
                       )}
                     </div>
                   </div>
 
-                  {/* Cột Vận chuyển */}
+                  {/* Vận chuyển */}
                   <div>
                     <h4 className="font-semibold text-[#5e3a1e] mb-3">Voucher VẬN CHUYỂN</h4>
                     <div className="space-y-4">
-                      {deliveryVouchers.length === 0 ? (
+                      {deliverySorted.length === 0 ? (
                         <div className="text-sm text-gray-500">Không có voucher vận chuyển.</div>
                       ) : (
-                        deliveryVouchers.map((v) => (
-                          <VoucherCard key={v.id} v={v} type="Delivery" />
+                        deliverySorted.map((v) => (
+                          <VoucherCard key={v._key} v={v} type="Delivery" />
                         ))
                       )}
                     </div>

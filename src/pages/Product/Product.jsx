@@ -69,7 +69,7 @@ const Product = () => {
         pageIndex: 1,
         pageSize: 20,
         from: 0,
-        to: 1000000,
+        to: 100000000,
         sortOrder,
         subCategoryName: selectedSubCategories.join(","),
         artisanName: selectedArtisan,
