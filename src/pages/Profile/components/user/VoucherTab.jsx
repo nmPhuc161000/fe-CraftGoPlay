@@ -10,50 +10,62 @@ import pointService from "../../../../services/apis/pointApi";
 dayjs.locale("vi");
 
 // ===== Utils =====
-const formatVND = (v) =>
-  (typeof v === "number" ? v : Number(v || 0)).toLocaleString("vi-VN");
+const n2 = (v) => (typeof v === "number" ? v : Number(v || 0));
+const formatVND = (v) => n2(v).toLocaleString("vi-VN");
+// luôn lấy object voucher bên trong wrapper (BE trả { voucher: {...}, isUsed })
+const pickSrc = (wrapper) => (wrapper && wrapper.voucher ? wrapper.voucher : wrapper);
 
-function computeVoucherStatus(v) {
+// ---- safe time
+const parseTime = (t) => (t ? dayjs(t) : null);
+
+function computeVoucherStatus(wrapper) {
+  const v = pickSrc(wrapper);
   const now = dayjs();
-  const start = dayjs(v.startDate);
-  const end = dayjs(v.endDate);
+  const start = parseTime(v?.startDate);
+  const end = parseTime(v?.endDate);
 
-  if (v.isActive === false)
+  if (v?.isActive === false)
     return { label: "Ngừng hoạt động", color: "bg-gray-100 text-gray-600" };
+  if (wrapper?.isUsed === true)
+    return { label: "Đã dùng", color: "bg-gray-100 text-gray-600" };
   if (
-    v.quantity !== undefined &&
-    v.usedCount !== undefined &&
-    v.usedCount >= v.quantity
+    v?.quantity !== undefined &&
+    v?.usedCount !== undefined &&
+    n2(v.usedCount) >= n2(v.quantity)
   )
     return { label: "Hết số lượng", color: "bg-rose-50 text-rose-700" };
-  if (start.isAfter(now))
+  if (start && start.isAfter(now))
     return { label: "Chưa hiệu lực", color: "bg-amber-50 text-amber-700" };
-  if (end.isBefore(now))
+  if (end && end.isBefore(now))
     return { label: "Hết hạn", color: "bg-rose-50 text-rose-700" };
   return { label: "Còn hạn", color: "bg-emerald-50 text-emerald-700" };
 }
 
-function buildShortDesc(v) {
-  if (v.description && v.description.trim().length > 0) return v.description;
+function buildShortDesc(wrapper) {
+  const v = pickSrc(wrapper);
+  if (v?.description && v.description.trim().length > 0) return v.description;
+
+  const discountValue =
+    typeof v?.discountValue === "number" ? v.discountValue : n2(v?.discount || 0);
 
   const typeText =
-    v.discountType === "FixedAmount"
-      ? `Giảm trực tiếp ${formatVND(v.discount || v.discountValue)}đ`
-      : v.discountType === "Percentage"
-        ? `Giảm ${v.discount || v.discountValue}%`
+    v?.discountType === "FixedAmount"
+      ? `Giảm trực tiếp ${formatVND(discountValue)}đ`
+      : v?.discountType === "Percentage"
+        ? `Giảm ${n2(discountValue)}%`
         : "Giảm giá";
 
   const cond =
-    v.minOrderValue && Number(v.minOrderValue) > 0
+    v?.minOrderValue && n2(v.minOrderValue) > 0
       ? ` cho đơn từ ${formatVND(v.minOrderValue)}đ`
       : "";
 
   const cap =
-    v.maxDiscountAmount && Number(v.maxDiscountAmount) > 0
+    v?.maxDiscountAmount && n2(v.maxDiscountAmount) > 0
       ? ` (tối đa ${formatVND(v.maxDiscountAmount)}đ)`
       : "";
 
-  const scope = v.type === "Delivery" ? " phí vận chuyển" : "";
+  const scope = v?.type === "Delivery" ? " phí vận chuyển" : "";
 
   return `${typeText}${cap}${scope}${cond}.`;
 }
@@ -65,7 +77,7 @@ const mapVoucherType = (type) => {
     case "Delivery":
       return "Vận chuyển";
     default:
-      return type;
+      return type || "—";
   }
 };
 
@@ -82,7 +94,7 @@ const mapPaymentMethod = (pm) => {
     case "Card":
       return "Thẻ";
     default:
-      return pm;
+      return pm || "—";
   }
 };
 
@@ -99,21 +111,31 @@ const Chip = ({ icon, children }) => (
   </span>
 );
 
-
-const VoucherCard = ({ v }) => {
-  const status = computeVoucherStatus(v);
-  const expiry = v.endDate ? dayjs(v.endDate).format("DD/MM/YYYY HH:mm") : "—";
-  const start = v.startDate ? dayjs(v.startDate).format("DD/MM/YYYY HH:mm") : "—";
-  const desc = buildShortDesc(v);
+const VoucherCard = ({ v: wrapper }) => {
+  const v = pickSrc(wrapper);
+  const status = computeVoucherStatus(wrapper);
+  const expiry = v?.endDate ? dayjs(v.endDate).format("DD/MM/YYYY HH:mm") : "—";
+  const start = v?.startDate ? dayjs(v.startDate).format("DD/MM/YYYY HH:mm") : "—";
+  const desc = buildShortDesc(wrapper);
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:shadow-lg">
+    <div
+      className={`group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:shadow-lg ${wrapper?.isUsed ? "opacity-70" : ""
+        }`}
+    >
       {/* Header */}
       <div className="relative bg-gradient-to-r from-amber-50 to-amber-100 px-4 py-3">
         <div className="flex items-center justify-between">
-          <p className="text-lg font-bold tracking-wide text-[#5e3a1e]">🎟 {v.code}</p>
+          <p className="text-lg font-bold tracking-wide text-[#5e3a1e]">🎟 {v?.code || "—"}</p>
           <Badge className={status.color}>{status.label}</Badge>
         </div>
+
+        {wrapper?.isUsed && (
+          <div className="absolute right-3 top-3 rounded-md bg-gray-800/90 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-white">
+            Đã dùng
+          </div>
+        )}
+
         <div className="absolute -bottom-3 left-0 right-0 flex justify-between px-3 text-amber-200">
           <span className="h-6 w-6 rounded-full bg-white"></span>
           <span className="h-6 w-6 rounded-full bg-white"></span>
@@ -123,7 +145,7 @@ const VoucherCard = ({ v }) => {
       {/* Body */}
       <div className="px-4 pb-4 pt-5">
         <div className="text-sm text-gray-700">
-          <div className="font-semibold">{v.name}</div>
+          <div className="font-semibold">{v?.name || "—"}</div>
           <div className="mt-1 text-gray-600">{desc}</div>
         </div>
 
@@ -135,10 +157,10 @@ const VoucherCard = ({ v }) => {
               </svg>
             }
           >
-            Loại: {mapVoucherType(v.type)}
+            Loại: {mapVoucherType(v?.type)}
           </Chip>
 
-          {v.paymentMethod && (
+          {v?.paymentMethod && (
             <Chip
               icon={
                 <svg width="14" height="14" viewBox="0 0 24 24">
@@ -150,7 +172,7 @@ const VoucherCard = ({ v }) => {
             </Chip>
           )}
 
-          {v.minOrderValue > 0 && (
+          {n2(v?.minOrderValue) > 0 && (
             <Chip
               icon={
                 <svg width="14" height="14" viewBox="0 0 24 24">
@@ -162,7 +184,7 @@ const VoucherCard = ({ v }) => {
             </Chip>
           )}
 
-          {v.maxDiscountAmount > 0 && (
+          {n2(v?.maxDiscountAmount) > 0 && (
             <Chip
               icon={
                 <svg width="14" height="14" viewBox="0 0 24 24">
@@ -188,7 +210,7 @@ const VoucherCard = ({ v }) => {
   );
 };
 
-// main
+// ===== Main =====
 const VoucherTab = () => {
   const { user } = useContext(AuthContext);
   const userId = user?.id;
@@ -220,16 +242,15 @@ const VoucherTab = () => {
 
         // voucher
         if (!voucherRes?.success) throw new Error(voucherRes?.error || "API voucher lỗi");
-        const voucherPayload = voucherRes.data;
-        if (voucherPayload?.error && voucherPayload.error !== 0) {
-          throw new Error(voucherPayload.message || "API voucher trả lỗi");
+        const payload = voucherRes.data;
+        if (payload?.error && payload.error !== 0) {
+          throw new Error(payload.message || "API voucher trả lỗi");
         }
-        const raw = Array.isArray(voucherPayload?.data)
-          ? voucherPayload.data.flatMap(x =>
-            Array.isArray(x?.vouchers) ? x.vouchers : x
-          )
-          : [];
-        console.log("Voucher list:", raw);
+
+        // GIỮ NGUYÊN CẤU TRÚC TỪ BE (wrapper)
+        const raw = Array.isArray(payload?.data) ? payload.data : [];
+        console.log("Voucher list (wrapper):", raw);
+
         // xu
         if (!pointRes?.success) throw new Error(pointRes?.error || "API điểm lỗi");
         const p =
@@ -241,7 +262,7 @@ const VoucherTab = () => {
 
         if (!mounted) return;
         setVouchers(raw);
-        setPoints(Number(p) || 0);
+        setPoints(n2(p) || 0);
       } catch (e) {
         console.error(e);
         if (!mounted) return;
@@ -257,29 +278,41 @@ const VoucherTab = () => {
     };
   }, [userId]);
 
-  // ✅ Chỉ SẮP XẾP (không lọc)
+  const rank = (s) =>
+    s === "Còn hạn" ? 0 :
+      s === "Chưa hiệu lực" ? 1 :
+        s === "Hết số lượng" ? 2 :
+          s === "Đã dùng" ? 3 :
+            s === "Ngừng hoạt động" ? 4 :
+              5; // Hết hạn
+
+  const vTime = (d) => (d ? new Date(d).getTime() : Number.POSITIVE_INFINITY);
+
+  // sap xep voucher
   const sortedVouchers = useMemo(() => {
     return [...vouchers].sort((a, b) => {
       const sa = computeVoucherStatus(a).label;
       const sb = computeVoucherStatus(b).label;
-      const rank = (s) =>
-        s === "Còn hạn"
-          ? 0
-          : s === "Chưa hiệu lực"
-            ? 1
-            : s === "Hết số lượng"
-              ? 2
-              : s === "Ngừng hoạt động"
-                ? 3
-                : 4; // Hết hạn
       const ra = rank(sa);
       const rb = rank(sb);
       if (ra !== rb) return ra - rb;
-      const ea = dayjs(a.endDate).valueOf();
-      const eb = dayjs(b.endDate).valueOf();
-      return (isNaN(ea) ? Infinity : ea) - (isNaN(eb) ? Infinity : eb);
+      const va = pickSrc(a);
+      const vb = pickSrc(b);
+      return vTime(va?.endDate) - vTime(vb?.endDate);
     });
   }, [vouchers]);
+
+  // ❗️Tạo key duy nhất cho từng bản ghi (kể cả trùng id/code)
+  const keyedSorted = useMemo(() => {
+    const seen = new Map();
+    return sortedVouchers.map((wrap) => {
+      const src = pickSrc(wrap);
+      const idOrCode = src?.id ?? src?.code ?? "unknown";
+      const count = (seen.get(idOrCode) || 0) + 1;
+      seen.set(idOrCode, count);
+      return { wrap, _key: `${idOrCode}#${count}` };
+    });
+  }, [sortedVouchers]);
 
   return (
     <div className="p-4 md:p-6">
@@ -330,14 +363,14 @@ const VoucherTab = () => {
         <div className="rounded-xl border border-rose-200 bg-rose-50 p-8 text-center text-rose-700">
           {err}
         </div>
-      ) : sortedVouchers.length === 0 ? (
+      ) : keyedSorted.length === 0 ? (
         <div className="rounded-xl border border-dashed bg-white p-12 text-center text-gray-500">
           Hiện chưa có voucher nào.
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {sortedVouchers.map((v) => (
-            <VoucherCard key={v.id} v={v} />
+          {keyedSorted.map(({ wrap, _key }) => (
+            <VoucherCard key={_key} v={wrap} />
           ))}
         </div>
       )}
