@@ -133,8 +133,9 @@ export const API_ENDPOINTS_ORDER = {
   COUNT_ORDER_BY_USER: (userId) => `/api/Order/CountOrdersByUserId/${userId}`,
   COUNT_ORDER_BY_ARTISAN: (artisanId) =>
     `/api/Order/CountOrdersByArtisanId/${artisanId}`,
-    GET_ALL_ORDERS: (pageIndex = 1, pageSize = 10, status = "") =>
+  GET_ALL_ORDERS: (pageIndex = 1, pageSize = 10, status = "") =>
     `/api/Order/GetAllOrders?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}`,
+  RETRY_PAYMENT: (orderId) => `/api/Order/RetryPayment/${orderId}`,
 };
 
 export const API_ENDPOINTS_ARTISANREQUEST = {

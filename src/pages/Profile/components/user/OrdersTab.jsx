@@ -37,7 +37,6 @@ const OrdersTab = () => {
   const [expandedOrders, setExpandedOrders] = useState({});
   const { showNotification } = useNotification();
   const [ratedOrders, setRatedOrders] = useState({});
-
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const navigate = useNavigate();
@@ -48,18 +47,15 @@ const OrdersTab = () => {
     const fetchOrders = async (group = "") => {
       try {
         setLoading(true);
-        // Lấy tất cả đơn hàng
         const res = await orderService.getOrderByUserId(
           user.id,
           1,
           100,
-          "" // Luôn lấy tất cả, chúng ta sẽ lọc ở client
+          ""
         );
 
         if (res.data.error === 0 && Array.isArray(res.data.data)) {
           const transformed = res.data.data.map(transformOrderData);
-
-          // Tính counts cho từng group
           const counts = statusFilters.reduce((acc, filter) => {
             if (filter.value === "all") {
               acc[filter.value] = transformed.length;
@@ -74,7 +70,6 @@ const OrdersTab = () => {
           setStatusCounts(counts);
           setOrders(transformed);
 
-          // Lọc đơn hàng theo group được chọn
           if (group === "all" || group === "") {
             setFilteredOrders(transformed);
           } else {
@@ -132,6 +127,36 @@ const OrdersTab = () => {
         case "complete":
           newStatus = "Completed";
           break;
+        case "retryPayment": {
+          const retryRes = await orderService.retryPayment(orderId);
+          if (retryRes.data.error === 0 && retryRes.data.data) {
+            showNotification("Đang chuyển hướng đến trang thanh toán VNPay", "success");
+            window.open(retryRes.data.data, "_blank");
+            // Cập nhật lại danh sách đơn hàng sau khi thanh toán
+            const updatedOrdersRes = await orderService.getOrderByUserId(
+              user.id,
+              1,
+              100,
+              ""
+            );
+            if (updatedOrdersRes.data.error === 0 && Array.isArray(updatedOrdersRes.data.data)) {
+              const transformed = updatedOrdersRes.data.data.map(transformOrderData);
+              setOrders(transformed);
+              setFilteredOrders(
+                selectedStatus === "all"
+                  ? transformed
+                  : transformed.filter((order) =>
+                      statusFilters
+                        .find((f) => f.value === selectedStatus)
+                        ?.includes.includes(order.status)
+                    )
+              );
+            }
+          } else {
+            showNotification("Không lấy được URL thanh toán", "error");
+          }
+          return;
+        }
         case "returnRequest": {
           const items = order?.orderItems;
           if (!Array.isArray(items) || items.length === 0) {
@@ -178,7 +203,6 @@ const OrdersTab = () => {
           return;
         }
         case "rating":
-          console.log("Order found for rating:", order);
           if (order && order.orderItems && order.orderItems.length > 0) {
             const queryParams = new URLSearchParams({
               orderId,
@@ -310,18 +334,20 @@ const OrdersTab = () => {
         ],
         AwaitingPayment: [
           {
-            action: "cancel",
-            label: "Hủy đơn hàng",
+            action: "retryPayment",
+            label: "Thanh toán lại",
             color:
-              "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-red-200",
-            icon: <FiX className="w-4 h-4" />,
+              "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-blue-200",
+            icon: <FiCreditCard className="w-4 h-4" />,
           },
+        ],
+        PaymentFailed: [
           {
-            action: "contact",
-            label: "Liên hệ nghệ nhân",
+            action: "retryPayment",
+            label: "Thanh toán lại",
             color:
-              "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
-            icon: <FiUser className="w-4 h-4" />,
+              "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-blue-200",
+            icon: <FiCreditCard className="w-4 h-4" />,
           },
         ],
         ReadyForShipment: [
@@ -385,7 +411,6 @@ const OrdersTab = () => {
         ],
       }[currentStatus] || [];
 
-    // Lọc bỏ các phần tử falsy (false, null, undefined)
     return actions.filter(Boolean);
   };
 
@@ -407,23 +432,19 @@ const OrdersTab = () => {
             orderItemId: firstOrderItemId,
           };
           const res = await ratingService.checkRated(checkRating);
-          results[order.id] = res?.data?.data === true; // true nếu đã đánh giá
-          console.log("data: ", res.data);
+          results[order.id] = res?.data?.data === true;
         } catch (err) {
           console.error("Lỗi checkRated:", err);
-          results[order.id] = false; // fallback
+          results[order.id] = false;
         }
       }
     }
-    console.log("data: ", results);
-
     setRatedOrders(results);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <div className="container mx-auto p-6 max-w-7xl">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Đơn hàng của tôi
@@ -433,7 +454,6 @@ const OrdersTab = () => {
           </p>
         </div>
 
-        {/* Status Filter Bar */}
         <div className="mb-8">
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
@@ -472,7 +492,6 @@ const OrdersTab = () => {
           </div>
         </div>
 
-        {/* Orders List */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">
             <div className="relative">
@@ -559,119 +578,108 @@ const OrdersTab = () => {
                   </div>
                 </div>
 
-                {/* Expanded Order Details */}
                 {expandedOrders[order.id] && (
                   <div className="border-t border-gray-100 bg-gray-50">
                     <div className="p-6">
-                      {/* Order Items */}
                       <div className="mb-6">
                         <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                           <FiShoppingBag className="mr-2 text-blue-600" />
                           Sản phẩm đã đặt
                         </h4>
                         <div className="space-y-4">
-                          {order.orderItems.map((item) => {
-                            console.log("item.status:", item.status); // Debug
-                            console.log(
-                              "item.statusKey:",
-                              convertStatus(item.status)
-                            ); // Debug
-                            return (
-                              <div
-                                key={item.id}
-                                className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200"
-                              >
-                                <div className="flex items-center space-x-4">
-                                  <div className="relative">
-                                    <img
-                                      src={item.product.productImages.imageUrl}
-                                      alt={item.product.name}
-                                      className="w-20 h-20 object-cover rounded-xl shadow-sm"
-                                      crossorigin="anonymous"
-                                    />
-                                    <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                                      {item.quantity}
-                                    </div>
+                          {order.orderItems.map((item) => (
+                            <div
+                              key={item.id}
+                              className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200"
+                            >
+                              <div className="flex items-center space-x-4">
+                                <div className="relative">
+                                  <img
+                                    src={item.product.productImages.imageUrl}
+                                    alt={item.product.name}
+                                    className="w-20 h-20 object-cover rounded-xl shadow-sm"
+                                    crossorigin="anonymous"
+                                  />
+                                  <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                                    {item.quantity}
                                   </div>
-                                  <div className="flex-1">
-                                    <div className="flex items-center justify-between mb-2">
-                                      <div className="flex items-center space-x-3">
-                                        <h5 className="font-semibold text-gray-900">
-                                          {item.product.name}
-                                        </h5>
-                                        {/* Display item status next to product name */}
-                                        <div
-                                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                                            statusConfig[
-                                              convertStatus(item.status)
-                                            ]
-                                              ? statusConfig[
-                                                  convertStatus(item.status)
-                                                ].color
-                                              : "bg-gray-100 text-gray-700"
-                                          }`}
-                                        >
-                                          {statusConfig[
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center space-x-3">
+                                      <h5 className="font-semibold text-gray-900">
+                                        {item.product.name}
+                                      </h5>
+                                      <div
+                                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                                          statusConfig[
                                             convertStatus(item.status)
-                                          ] ? (
-                                            <>
+                                          ]
+                                            ? statusConfig[
+                                                convertStatus(item.status)
+                                              ].color
+                                            : "bg-gray-100 text-gray-700"
+                                        }`}
+                                      >
+                                        {statusConfig[
+                                          convertStatus(item.status)
+                                        ] ? (
+                                          <>
+                                            {
+                                              statusConfig[
+                                                convertStatus(item.status)
+                                              ].icon
+                                            }
+                                            <span className="ml-1">
                                               {
                                                 statusConfig[
                                                   convertStatus(item.status)
-                                                ].icon
+                                                ].text
                                               }
-                                              <span className="ml-1">
-                                                {
-                                                  statusConfig[
-                                                    convertStatus(item.status)
-                                                  ].text
-                                                }
-                                              </span>
-                                            </>
-                                          ) : (
-                                            <span>Unknown Status</span> // Fallback for undefined status
-                                          )}
-                                        </div>
+                                            </span>
+                                          </>
+                                        ) : (
+                                          <span>Unknown Status</span>
+                                        )}
                                       </div>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
-                                      <div className="flex items-center">
-                                        <FiUser className="mr-1 text-gray-400" />
-                                        <span className="font-medium">
-                                          Nghệ nhân:
-                                        </span>
-                                        <span className="ml-1">
-                                          {item.artisanName}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center">
-                                        <FiPackage className="mr-1 text-gray-400" />
-                                        <span className="font-medium">
-                                          Số lượng:
-                                        </span>
-                                        <span className="ml-1">
-                                          {item.quantity}
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center">
-                                        <FiDollarSign className="mr-1 text-gray-400" />
-                                        <span className="font-medium">
-                                          Giá:
-                                        </span>
-                                        <span className="ml-1 font-semibold text-blue-600">
-                                          {formatPrice(item.unitPrice)}
-                                        </span>
-                                      </div>
+                                  </div>
+                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
+                                    <div className="flex items-center">
+                                      <FiUser className="mr-1 text-gray-400" />
+                                      <span className="font-medium">
+                                        Nghệ nhân:
+                                      </span>
+                                      <span className="ml-1">
+                                        {item.artisanName}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center">
+                                      <FiPackage className="mr-1 text-gray-400" />
+                                      <span className="font-medium">
+                                        Số lượng:
+                                      </span>
+                                      <span className="ml-1">
+                                        {item.quantity}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center">
+                                      <FiDollarSign className="mr-1 text-gray-400" />
+                                      <span className="font-medium">
+                                        Giá:
+                                      </span>
+                                      <span className="ml-1 font-semibold text-blue-600">
+                                        {formatPrice(item.unitPrice)}
+                                      </span>
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                            );
-                          })}
+                            </div>
+                          ))}
                         </div>
                       </div>
 
-                      {/* Order Information */}
                       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
                         <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                           <FiDollarSign className="mr-2 text-green-600" />
@@ -679,7 +687,6 @@ const OrdersTab = () => {
                         </h4>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {/* Left Column - Payment Method Only */}
                           <div className="space-y-4">
                             <h5 className="font-semibold text-gray-800 flex items-center">
                               <FiCreditCard className="mr-2 text-green-500" />
@@ -706,7 +713,6 @@ const OrdersTab = () => {
                             </div>
                           </div>
 
-                          {/* Right Column - Price Details and Shipping */}
                           <div className="space-y-4">
                             <h5 className="font-semibold text-gray-800 flex items-center">
                               <FiDollarSign className="mr-2 text-orange-500" />
@@ -723,7 +729,6 @@ const OrdersTab = () => {
                                 </span>
                               </div>
 
-                              {/* Discounts Section */}
                               {(order.productDiscount > 0 ||
                                 order.deliveryDiscount > 0 ||
                                 order.pointDiscount > 0) && (
@@ -774,7 +779,6 @@ const OrdersTab = () => {
                               </div>
                             </div>
 
-                            {/* Total Summary */}
                             <div className="pt-3 border-t border-gray-200 mt-4">
                               <div className="flex justify-between font-semibold text-lg">
                                 <span>Tổng cộng:</span>
@@ -787,19 +791,15 @@ const OrdersTab = () => {
                         </div>
                       </div>
 
-                      {/* Action Buttons */}
                       <div className="flex flex-wrap gap-3">
                         {getAvailableUserActions(order.status, order.id).map(
                           (action) => (
                             <button
-                              key={action.action}
+                              key={action.action || action.label}
                               onClick={() => {
                                 if (action.action === "cancel") {
                                   setSelectedOrderId(order.id);
                                   setShowCancelModal(true);
-                                } else if (action.action === "rating") {
-                                  setSelectedOrderId(order.id);
-                                  handleUserAction(order.id, action.action);
                                 } else {
                                   handleUserAction(order.id, action.action);
                                 }
@@ -812,7 +812,6 @@ const OrdersTab = () => {
                           )
                         )}
 
-                        {/* Modal xác nhận hủy đơn */}
                         {showCancelModal && (
                           <div className="fixed inset-0 bg-opacity-30 backdrop-blur-sm z-50 flex items-center justify-center">
                             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center">

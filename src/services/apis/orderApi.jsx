@@ -96,5 +96,11 @@ const orderService = {
       }
     );
   },
+
+  async retryPayment(orderId) {
+    return performApiRequest(API_ENDPOINTS_ORDER.RETRY_PAYMENT(orderId), {
+      method: "get",
+    });
+  }
 };
 export default orderService;
