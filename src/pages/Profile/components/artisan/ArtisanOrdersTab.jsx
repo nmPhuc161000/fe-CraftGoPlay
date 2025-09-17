@@ -213,7 +213,7 @@ const ArtisanOrdersTab = () => {
           color: "bg-green-600 hover:bg-green-700",
         },
         {
-          status: "Cancelled",
+          status: "Rejected",
           label: "Từ chối đơn hàng",
           color: "bg-red-600 hover:bg-red-700",
         },
