@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { FaShoppingCart, FaCoins, FaChartLine, FaBox, FaTruck } from "react-icons/fa";
+import {
+  FaShoppingCart,
+  FaCoins,
+  FaChartLine,
+  FaBox,
+  FaTruck,
+  FaHandHoldingUsd,
+  FaMoneyBillWave,
+  FaTags,
+} from "react-icons/fa";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -38,7 +47,10 @@ const PieLegend = ({ data }) => (
         <span className="font-medium" style={{ color: entry.color }}>
           {entry.name}
         </span>
-        : <span className="font-semibold">{entry.value.toLocaleString()} VNĐ</span>
+        :{" "}
+        <span className="font-semibold">
+          {entry.value.toLocaleString()} VNĐ
+        </span>
       </div>
     ))}
   </div>
@@ -54,28 +66,25 @@ const Dashboard = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [lineChartData, setLineChartData] = useState([]);
 
-  // Mapping trạng thái đơn hàng
-  const ORDER_STATUS_LABELS = {
-    Completed: "Hoàn thành",
-    ReturnRequested: "Yêu cầu trả hàng",
-    Cancel: "Bị hủy",
-    Reject: "Đã từ chối",
-    Refunded: "Đã hoàn tiền",
+  // Màu sắc cho biểu đồ thu chi
+  const REVENUE_EXPENSE_COLORS = {
+    totalProductFeeForArtisan: "#10B981", // Emerald - Tiền trả cho artisan
+    totalDeliveryFeeShiper: "#3B82F6", // Blue - Tiền giao hàng
+    totalDiscount: "#EF4444", // Red - Tiền giảm giá
   };
 
-  // Cập nhật màu sắc cho biểu đồ tròn
-  const ORDER_STATUS_COLORS = {
-    Completed: "#8B4513", // SaddleBrown
-    ReturnRequested: "#F4A261", // SandyBrown
-    Cancel: "#A0522D", // Sienna
-    Reject: "#D4A017", // Gold
-    Refunded: "#C4A484", // Light Brown
+  // Icon cho biểu đồ thu chi
+  const REVENUE_EXPENSE_ICONS = {
+    totalProductFeeForArtisan: <FaHandHoldingUsd className="text-lg" />,
+    totalDeliveryFeeShiper: <FaTruck className="text-lg" />,
+    totalDiscount: <FaTags className="text-lg" />,
   };
 
-  // Màu sắc cho biểu đồ doanh thu
-  const REVENUE_COLORS = {
-    Product: "#10B981", // Emerald
-    Delivery: "#3B82F6", // Blue
+  // Labels cho biểu đồ thu chi
+  const REVENUE_EXPENSE_LABELS = {
+    totalProductFeeForArtisan: "Tiền nghệ nhân",
+    totalDeliveryFeeShiper: "Tiền giao hàng",
+    totalDiscount: "Tiền giảm từ voucher và xu",
   };
 
   // Generate years for select
@@ -153,7 +162,7 @@ const Dashboard = () => {
             labels: months,
             datasets: [
               {
-                label: "Sản phẩm còn lại",
+                label: "Sản phẩm có sẵn",
                 data: response.data.data.availableProducts.map(
                   (value) => value || 0
                 ),
@@ -202,36 +211,28 @@ const Dashboard = () => {
     fetchLineChartData();
   }, [selectedYear]);
 
-  // Tính toán dữ liệu cho biểu đồ tròn với field "Khác"
-  const calculatePieData = () => {
-    const statusKeys = Object.keys(ORDER_STATUS_LABELS);
-    let totalFromStatus = 0;
-    
-    // Tính tổng từ các trạng thái đơn hàng
-    statusKeys.forEach(key => {
-      totalFromStatus += dashboardData?.orderStatusCounts?.[key] || 0;
-    });
-    
-    // Tính giá trị cho field "Khác"
-    const otherValue = (dashboardData?.totalOrders || 0) - totalFromStatus;
-    
-    // Tạo dữ liệu cho biểu đồ, bao gồm field "Khác"
-    const pieDataWithOther = statusKeys.map(key => ({
-      name: ORDER_STATUS_LABELS[key],
-      value: dashboardData?.orderStatusCounts?.[key] || 0,
-      color: ORDER_STATUS_COLORS[key],
-    }));
-    
-    // Thêm field "Khác" nếu có giá trị
-    if (otherValue > 0) {
-      pieDataWithOther.push({
-        name: "Khác",
-        value: otherValue,
-        color: "#808080", // Màu xám cho field "Khác"
-      });
-    }
-    
-    return pieDataWithOther;
+  // Tính toán dữ liệu cho biểu đồ thu chi
+  const calculateRevenueExpenseData = () => {
+    return [
+      {
+        name: REVENUE_EXPENSE_LABELS.totalProductFeeForArtisan,
+        value: dashboardData?.totalProductFeeForArtisan || 0,
+        color: REVENUE_EXPENSE_COLORS.totalProductFeeForArtisan,
+        icon: REVENUE_EXPENSE_ICONS.totalProductFeeForArtisan,
+      },
+      {
+        name: REVENUE_EXPENSE_LABELS.totalDeliveryFeeShiper,
+        value: dashboardData?.totalDeliveryFeeShiper || 0,
+        color: REVENUE_EXPENSE_COLORS.totalDeliveryFeeShiper,
+        icon: REVENUE_EXPENSE_ICONS.totalDeliveryFeeShiper,
+      },
+      {
+        name: REVENUE_EXPENSE_LABELS.totalDiscount,
+        value: dashboardData?.totalDiscount || 0,
+        color: REVENUE_EXPENSE_COLORS.totalDiscount,
+        icon: REVENUE_EXPENSE_ICONS.totalDiscount,
+      },
+    ];
   };
 
   // Tính toán dữ liệu cho biểu đồ doanh thu
@@ -240,22 +241,30 @@ const Dashboard = () => {
       {
         name: "Từ sản phẩm",
         value: dashboardData?.totalRevenueProductFee || 0,
-        color: REVENUE_COLORS.Product,
-        icon: <FaBox className="text-lg" />
+        color: "#10B981", // Emerald
+        icon: <FaBox className="text-lg" />,
       },
       {
         name: "Từ vận chuyển",
         value: dashboardData?.totalRevenueDeliveryFee || 0,
-        color: REVENUE_COLORS.Delivery,
-        icon: <FaTruck className="text-lg" />
-      }
+        color: "#3B82F6", // Blue
+        icon: <FaTruck className="text-lg" />,
+      },
     ];
   };
 
-  const pieData = calculatePieData();
+  const revenueExpenseData = calculateRevenueExpenseData();
   const revenueData = calculateRevenueData();
-  const hasOrderData = pieData.some((item) => item.value > 0);
+  const hasRevenueExpenseData = revenueExpenseData.some(
+    (item) => item.value > 0
+  );
   const hasRevenueData = revenueData.some((item) => item.value > 0);
+
+  // Tính tổng thu chi
+  const totalRevenueExpense = revenueExpenseData.reduce(
+    (sum, item) => sum + item.value,
+    0
+  );
 
   // Cấu hình Chart.js
   const chartOptions = {
@@ -396,7 +405,9 @@ const Dashboard = () => {
               <FaShoppingCart className="text-amber-600 text-2xl" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-600">Tổng đơn hàng</h3>
+              <h3 className="text-lg font-semibold text-gray-600">
+                Tổng đơn hàng
+              </h3>
               <p className="text-2xl font-bold text-gray-900">
                 {dashboardData?.totalOrders || 0}
               </p>
@@ -409,9 +420,12 @@ const Dashboard = () => {
               <FaCoins className="text-amber-600 text-2xl" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-600">Tổng doanh thu trước phí</h3>
+              <h3 className="text-lg font-semibold text-gray-600">
+                Tổng doanh thu trước phí
+              </h3>
               <p className="text-2xl font-bold text-gray-900">
-                {dashboardData?.totalRevenueBeforeFee?.toLocaleString() || '0'} VNĐ
+                {dashboardData?.totalRevenueBeforeFee?.toLocaleString() || "0"}{" "}
+                VNĐ
               </p>
             </div>
           </div>
@@ -422,9 +436,12 @@ const Dashboard = () => {
               <FaChartLine className="text-amber-600 text-2xl" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-600">Tổng doanh thu sau phí</h3>
+              <h3 className="text-lg font-semibold text-gray-600">
+                Tổng doanh thu sau phí
+              </h3>
               <p className="text-2xl font-bold text-gray-900">
-                {dashboardData?.totalRevenueAfterFee?.toLocaleString() || '0'} VNĐ
+                {dashboardData?.totalRevenueAfterFee?.toLocaleString() || "0"}{" "}
+                VNĐ
               </p>
             </div>
           </div>
@@ -432,62 +449,64 @@ const Dashboard = () => {
 
         {/* Pie Chart Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Biểu đồ trạng thái đơn hàng */}
+          {/* Biểu đồ chi */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h3 className="text-xl font-semibold mb-4 text-gray-800 text-center">
-              Thống kê trạng thái đơn hàng
+              Thống kê các phần chi
             </h3>
-            
-            {hasOrderData ? (
+
+            {hasRevenueExpenseData ? (
               <>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={pieData}
+                        data={revenueExpenseData}
                         cx="50%"
                         cy="50%"
                         innerRadius={60}
                         outerRadius={80}
                         paddingAngle={5}
                         dataKey="value"
-                        label={({ name, percent, value }) => 
-                          // Chỉ hiển thị nhãn nếu phần trăm lớn hơn 0
-                          percent > 0 ? `${name}: ${(percent * 100).toFixed(0)}%` : null
+                        label={({ name, percent }) =>
+                          `${name}: ${(percent * 100).toFixed(0)}%`
                         }
                         labelLine={false}
                       >
-                        {pieData.map((entry, index) => (
+                        {revenueExpenseData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip 
+                      <Tooltip
                         formatter={(value, name) => [
-                          `${value} đơn (${((value / (dashboardData?.totalOrders || 1)) * 100).toFixed(1)}%)`, 
-                          name
+                          `${value.toLocaleString()} VNĐ (${(
+                            (value / (totalRevenueExpense || 1)) *
+                            100
+                          ).toFixed(1)}%)`,
+                          name,
                         ]}
                       />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
-                <PieLegend data={pieData} />
+                <PieLegend data={revenueExpenseData} />
                 <div className="text-center mt-2 text-sm text-gray-500">
-                  Tổng đơn hàng: {dashboardData?.totalOrders || 0}
+                  Tổng chi: {totalRevenueExpense.toLocaleString()} VNĐ
                 </div>
               </>
             ) : (
               <div className="text-center text-gray-500 py-8">
-                Không có dữ liệu đơn hàng để hiển thị
+                Không có dữ liệu thu chi để hiển thị
               </div>
             )}
           </div>
-          
+
           {/* Biểu đồ doanh thu sau phí */}
           <div className="bg-white rounded-2xl shadow-lg p-6">
             <h3 className="text-xl font-semibold mb-4 text-gray-800 text-center">
               Phân bổ doanh thu sau phí
             </h3>
-            
+
             {hasRevenueData ? (
               <>
                 <div className="h-80">
@@ -501,7 +520,7 @@ const Dashboard = () => {
                         outerRadius={80}
                         paddingAngle={5}
                         dataKey="value"
-                        label={({ name, percent }) => 
+                        label={({ name, percent }) =>
                           `${name}: ${(percent * 100).toFixed(0)}%`
                         }
                         labelLine={false}
@@ -510,10 +529,14 @@ const Dashboard = () => {
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip 
+                      <Tooltip
                         formatter={(value, name) => [
-                          `${value.toLocaleString()} VNĐ (${((value / (dashboardData?.totalRevenueAfterFee || 1)) * 100).toFixed(1)}%)`, 
-                          name
+                          `${value.toLocaleString()} VNĐ (${(
+                            (value /
+                              (dashboardData?.totalRevenueAfterFee || 1)) *
+                            100
+                          ).toFixed(1)}%)`,
+                          name,
                         ]}
                       />
                     </PieChart>
@@ -521,7 +544,9 @@ const Dashboard = () => {
                 </div>
                 <PieLegend data={revenueData} />
                 <div className="text-center mt-2 text-sm text-gray-500">
-                  Tổng doanh thu sau phí: {dashboardData?.totalRevenueAfterFee?.toLocaleString() || '0'} VNĐ
+                  Tổng doanh thu sau phí:{" "}
+                  {dashboardData?.totalRevenueAfterFee?.toLocaleString() || "0"}{" "}
+                  VNĐ
                 </div>
               </>
             ) : (

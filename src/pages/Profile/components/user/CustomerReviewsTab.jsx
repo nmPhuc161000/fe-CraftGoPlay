@@ -47,7 +47,7 @@ const CustomerReviewsTab = () => {
                       src={product.productImages?.[0]?.imageUrl}
                       alt={product.name}
                       className="w-full h-full object-cover"
-                      crossorigin="anonymous"
+                      crossOrigin="anonymous"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">

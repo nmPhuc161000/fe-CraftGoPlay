@@ -338,7 +338,7 @@ const ManageCategory = () => {
                     onError={(e) => {
                       e.target.src = "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg";
                     }}
-                    crossorigin="anonymous"
+                    crossOrigin="anonymous"
                   />
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">{row.categoryName}</td>
@@ -537,7 +537,7 @@ const ManageCategory = () => {
                           className="max-h-48 mx-auto rounded-lg object-cover"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          crossorigin="anonymous"
+                          crossOrigin="anonymous"
                         />
                         <motion.button
                           whileHover={{ scale: 1.1 }}
@@ -667,7 +667,7 @@ const ManageCategory = () => {
                       onError={(e) => {
                         e.target.src = "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg";
                       }}
-                      crossorigin="anonymous"
+                      crossOrigin="anonymous"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   </div>

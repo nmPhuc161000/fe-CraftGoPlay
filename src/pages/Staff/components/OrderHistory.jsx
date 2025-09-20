@@ -522,7 +522,7 @@ const OrderHistory = () => {
                             src={it.imageUrl}
                             alt={it.name}
                             className="w-16 h-16 object-cover rounded border"
-                            crossorigin="anonymous"
+                            crossOrigin="anonymous"
                           />
                           <div className="flex-1">
                             <div className="font-semibold text-gray-700">

@@ -31,9 +31,10 @@ const SidebarNavigation = ({ role, isActive }) => {
   }, [location.pathname]);
 
   const getItemClass = (active) =>
-    `flex items-center px-4 py-3 rounded-lg mb-1 transition-all duration-150 ${active
-      ? "bg-[#be9e7f] text-white"
-      : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
+    `flex items-center px-4 py-3 rounded-lg mb-1 transition-all duration-150 ${
+      active
+        ? "bg-[#be9e7f] text-white"
+        : "text-gray-700 hover:bg-gray-100 active:bg-gray-200"
     }`;
 
   const navItems = [
@@ -70,14 +71,11 @@ const SidebarNavigation = ({ role, isActive }) => {
       show: true,
     },
     {
-      id: role === "Artisan" ? "customers" : "favorites",
-      to:
-        role === "Artisan"
-          ? "/profile-user/customers"
-          : "/profile-user/favorites",
-      icon: role === "Artisan" ? "👥" : "❤️",
-      label: role === "Artisan" ? "Khách hàng" : "Yêu thích",
-      show: true,
+      id: "favorites",
+      to: "/profile-user/favorites",
+      icon: "❤️",
+      label: "Yêu thích",
+      show: role === "User",
     },
     {
       id: role === "Artisan" ? "revenue" : "points",
@@ -144,8 +142,9 @@ const SidebarNavigation = ({ role, isActive }) => {
               <span className="ml-3">Tài khoản của tôi</span>
             </div>
             <span
-              className={`ml-2 text-sm transition-transform duration-200 ${isAccountOpen ? "rotate-180" : ""
-                }`}
+              className={`ml-2 text-sm transition-transform duration-200 ${
+                isAccountOpen ? "rotate-180" : ""
+              }`}
             >
               ▼
             </span>

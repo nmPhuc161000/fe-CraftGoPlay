@@ -91,7 +91,7 @@ const VerifyOtp = () => {
           style={{
             filter: "blur(8px) brightness(0.75)",
           }}
-          crossorigin="anonymous"
+          crossOrigin="anonymous"
         />
       </div>
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md backdrop-blur-sm">

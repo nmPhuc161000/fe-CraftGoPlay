@@ -617,7 +617,7 @@ const Checkout = () => {
                     src={buyNow.productImage}
                     alt={buyNow.productName}
                     className="w-14 h-14 object-cover rounded border"
-                    crossorigin="anonymous"
+                    crossOrigin="anonymous"
                   />
                   <p className="font-medium max-w-[200px] truncate">
                     {buyNow.productName}
@@ -678,7 +678,7 @@ const Checkout = () => {
                         src={item.productImages?.[0]?.imageUrl}
                         alt={item.productName}
                         className="w-14 h-14 object-cover rounded border"
-                        crossorigin="anonymous"
+                        crossOrigin="anonymous"
                       />
                       <p className="font-medium max-w-[200px] truncate">
                         {item.productName}

@@ -200,13 +200,13 @@ const Product = () => {
                       src={product.productImages?.[0]?.imageUrl}
                       alt={product.name}
                       className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-100 group-hover:opacity-0"
-                      crossorigin="anonymous"
+                      crossOrigin="anonymous"
                     />
                     <img
                       src={product.productImages?.[1]?.imageUrl || product.productImages?.[0]?.imageUrl}
                       alt={product.name}
                       className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
-                      crossorigin="anonymous"
+                      crossOrigin="anonymous"
                     />
                   </div>
                   <div className="p-4">

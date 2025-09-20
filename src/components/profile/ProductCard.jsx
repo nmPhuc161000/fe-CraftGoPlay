@@ -31,7 +31,7 @@ export default function ProductCard({ product }) {
             onError={(e) => {
               e.target.src = "/default-product-image.jpg";
             }}
-            crossorigin="anonymous"
+            crossOrigin="anonymous"
           />
           {!imageLoaded && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-200">

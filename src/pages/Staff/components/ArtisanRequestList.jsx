@@ -222,7 +222,7 @@ const ArtisanRequestList = () => {
                       e.target.src =
                         "https://via.placeholder.com/300x200?text=Không+có+hình+ảnh";
                     }}
-                    crossorigin="anonymous"
+                    crossOrigin="anonymous"
                   />
                 </div>
               </div>

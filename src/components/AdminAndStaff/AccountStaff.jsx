@@ -250,7 +250,7 @@ export default function AccountStaff() {
                   src={avatarPreview || formData.thumbnail}
                   alt={formData.userName}
                   className="h-full w-full object-cover"
-                  crossorigin="anonymous"
+                  crossOrigin="anonymous"
                 />
               ) : (
                 <span className="text-4xl text-gray-400 font-bold">
