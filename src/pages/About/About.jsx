@@ -11,7 +11,7 @@ const About = () => {
           src={loginImg}
           alt="CraftGoPlay Banner Giới thiệu"
           className="w-full h-full object-cover object-center"
-          crossorigin="anonymous"
+          crossOrigin="anonymous"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-center justify-center">
           <div className="text-center text-white">
@@ -60,7 +60,7 @@ const About = () => {
                     src={loginImg}
                     alt="About CraftGoPlay"
                     className="absolute inset-0 w-[80%] h-[80%] object-cover opacity-50 rounded-lg mx-auto my-auto transition-transform duration-300 hover:scale-105"
-                    crossorigin="anonymous"
+                    crossOrigin="anonymous"
                   />
                   {/* Văn bản trên hình ảnh */}
                   <p className="text-[#5e3a1e] text-center text-xl md:text-2xl font-semibold relative z-10 px-4 py-2 bg-white/80 rounded-md shadow-lg">

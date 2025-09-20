@@ -211,7 +211,7 @@ const Sidebar = ({
                 isDesktopCollapsed ? "h-10 w-10" : "h-12 w-12"
               }`}
               style={{ border: "2px solid #3e2612" }}
-              crossorigin="anonymous"
+              crossOrigin="anonymous"
             />
             <div className="absolute -top-1 -right-1 w-4 h-4 bg-indigo-400 rounded-full border-2 border-white shadow-sm animate-pulse"></div>
           </div>
