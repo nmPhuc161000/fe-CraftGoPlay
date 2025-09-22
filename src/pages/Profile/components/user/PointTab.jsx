@@ -12,15 +12,21 @@ const PointTab = () => {
   // Helper function to map status to display text and icon
   const getTransactionDetails = (status) => {
     const transactionTypes = {
-      Earned: { type: "Nhận xu", icon: "💰", isPositive: true },
+      Earned: { type: "Nhận xu", icon: "🎁", isPositive: true },
       Swap: { type: "Đổi xu", icon: "🔄", isPositive: false },
-      Redeemed: { type: "Dùng xu", icon: "🎁", isPositive: false },
+      Redeemed: { type: "Dùng xu", icon: "💰", isPositive: false },
       Expired: { type: "Xu hết hạn", icon: "⌛", isPositive: false },
       Refunded: { type: "Hoàn xu", icon: "↩️", isPositive: true },
-      Bonus: { type: "Xu thưởng", icon: "🎉", isPositive: true }
+      Bonus: { type: "Xu thưởng", icon: "🎉", isPositive: true },
     };
 
-    return transactionTypes[status] || { type: "Giao dịch", icon: "💳", isPositive: true };
+    return (
+      transactionTypes[status] || {
+        type: "Giao dịch",
+        icon: "💳",
+        isPositive: true,
+      }
+    );
   };
 
   useEffect(() => {
@@ -37,10 +43,14 @@ const PointTab = () => {
               return {
                 id: transaction.id,
                 type: details.type,
-                amount: details.isPositive ? transaction.amount : -transaction.amount,
+                amount: details.isPositive
+                  ? transaction.amount
+                  : -transaction.amount,
                 reason: transaction.description,
-                date: new Date(transaction.createdAt).toISOString().split("T")[0],
-                icon: details.icon
+                date: new Date(transaction.createdAt)
+                  .toISOString()
+                  .split("T")[0],
+                icon: details.icon,
               };
             }),
           });
@@ -185,8 +195,8 @@ const PointTab = () => {
                           item.amount >= 0 ? "text-green-600" : "text-red-500"
                         }`}
                       >
-                        {item.amount >= 0 ? "+" : ""}
-                        {item.amount.toLocaleString()} xu
+                        {item.amount > 0 ? "+" : item.amount < 0 ? "-" : ""}
+                        {Math.abs(item.amount).toLocaleString()} xu
                       </p>
                     </div>
                     <p className="text-sm text-gray-500 mt-1">{item.reason}</p>
