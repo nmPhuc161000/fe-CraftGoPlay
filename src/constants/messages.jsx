@@ -11,6 +11,7 @@ export const MESSAGES = {
     VERIFY_EMAIL_SUCCESS: "Xác thực email thành công",
     LOGOUT_SUCCESS: "Đăng xuất thành công",
     FORGET_FAILED: "Vui lòng nhập email trước khi gửi mã.",
+    OTP_RESENT: "Mã OTP đã được gửi lại",
     // Thêm các thông báo khác
   },
   COMMON: {
