@@ -11,6 +11,7 @@ export const API_ENDPOINTS_AUTH = {
   CHANGE_PASSWORD: "/auth/change-password",
   FORGOT_PASSWORD: "/api/Auth/user/password/forgot",
   RESET_PASSWORD: "/api/Auth/user/password/reset",
+  RESEND_OTP: (email) => `/api/Auth/user/otp/resend?email=${email}`,
   // Thêm các endpoint khác
 };
 

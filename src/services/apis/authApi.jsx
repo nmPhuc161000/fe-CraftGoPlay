@@ -99,6 +99,19 @@ const authService = {
     });
   },
 
+  async resendOtp(data) {
+    if (!data || !data.email) {
+      return {
+        success: false,
+        error: "Email là bắt buộc",
+        status: 400,
+      };
+    }
+    return performApiRequest(API_ENDPOINTS_AUTH.RESEND_OTP(data.email), {
+      method: "post",
+    });
+  },
+
   /**
    * Thay đổi mật khẩu
    * @param {Object} data - { oldPassword, newPassword }
