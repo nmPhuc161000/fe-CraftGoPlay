@@ -29,7 +29,7 @@ const VoucherPicker = ({
       name: src?.name,
       description: src?.description,
       type: (src?.type || "").trim(), // "Product" | "Delivery"
-      discountType: normalizeDiscountType(src?.discountType),
+      discountType: src?.discountType ?? src?.discount_type ?? "",
       discountValue:
         typeof src?.discountValue === "number"
           ? src.discountValue
@@ -48,12 +48,6 @@ const VoucherPicker = ({
     };
   };
 
-  const normalizeDiscountType = (t) => {
-    const s = (t || "").trim().toLowerCase();
-    if (s === "percentage") return "Percentage";
-    if (s === "fixedamount") return "FixedAmount";
-    return t;
-  };
   // Chuẩn hoá list + _key duy nhất cho từng bản sao (kể cả trùng id/code)
   const normalizeVoucherList = (rawData) => {
     if (!Array.isArray(rawData)) return [];
@@ -101,13 +95,21 @@ const VoucherPicker = ({
         if (mounted) setLoading(false);
       }
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [user?.id]);
+
+  // helper: có phải là voucher % không? (hỗ trợ cả "Percentage", "Percent", "percentage", "percent")
+  const isPercentType = (v) => {
+    const t = (v?.discountType || "").toString().trim().toLowerCase();
+    return t === "percentage" || t === "percent";
+  };
 
   // Cho/không cho theo PTTT
   const allowsPayment = (voucher) => {
     if (!voucher) return true;
-    const pm = (voucher.paymentMethod || "All").toLowerCase();
+    const pm = (voucher.paymentMethod || "All").toString().toLowerCase();
     if (!paymentMethod) return false; // bắt buộc chọn PTTT trước
     if (pm === "all") return true;
     if (pm === "online") return paymentMethod === "vnpay";
@@ -250,6 +252,11 @@ const VoucherPicker = ({
     const usable = canUseNow(v);
     const label = selected ? "Đang dùng" : usable ? "Dùng" : disableReason(v);
 
+    // Hiển thị discount: nếu % thì show %, else show VNĐ
+    const discountLabel = isPercentType(v)
+      ? `Giảm ${v.discountValue}%`
+      : `Giảm ${Number(v.discountValue).toLocaleString("vi-VN")}₫`;
+
     return (
       <div
         className={`flex items-center justify-between p-4 border rounded-xl shadow-sm hover:shadow-md transition bg-white ${
@@ -265,12 +272,10 @@ const VoucherPicker = ({
               {v.code} — {v.name}
             </p>
             <p className="text-xs text-gray-500 mt-0.5 truncate">
-              {v.discountType === "Percent"
-                ? `Giảm ${v.discountValue}%`
-                : `Giảm ${Number(v.discountValue).toLocaleString("vi-VN")}₫`}
+              {discountLabel}
               {v.maxDiscountAmount > 0 ? ` • Tối đa ${Number(v.maxDiscountAmount).toLocaleString("vi-VN")}₫` : ""}
               {v.minOrder > 0 ? ` • Đơn tối thiểu ${Number(v.minOrder).toLocaleString("vi-VN")}₫` : ""}
-              {v.paymentMethod && ` • PTTT: ${v.paymentMethod}`}
+              {v.paymentMethod ? ` • PTTT: ${v.paymentMethod}` : ""}
             </p>
             {v.endDate && (
               <p className="text-[11px] text-gray-400">
