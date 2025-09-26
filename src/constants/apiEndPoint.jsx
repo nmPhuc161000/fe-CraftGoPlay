@@ -11,6 +11,7 @@ export const API_ENDPOINTS_AUTH = {
   CHANGE_PASSWORD: "/auth/change-password",
   FORGOT_PASSWORD: "/api/Auth/user/password/forgot",
   RESET_PASSWORD: "/api/Auth/user/password/reset",
+  RESEND_OTP: (email) => `/api/Auth/user/otp/resend?email=${email}`,
   // Thêm các endpoint khác
 };
 
@@ -133,8 +134,9 @@ export const API_ENDPOINTS_ORDER = {
   COUNT_ORDER_BY_USER: (userId) => `/api/Order/CountOrdersByUserId/${userId}`,
   COUNT_ORDER_BY_ARTISAN: (artisanId) =>
     `/api/Order/CountOrdersByArtisanId/${artisanId}`,
-    GET_ALL_ORDERS: (pageIndex = 1, pageSize = 10, status = "") =>
+  GET_ALL_ORDERS: (pageIndex = 1, pageSize = 10, status = "") =>
     `/api/Order/GetAllOrders?pageIndex=${pageIndex}&pageSize=${pageSize}&status=${status}`,
+  RETRY_PAYMENT: (orderId) => `/api/Order/RetryPayment/${orderId}`,
 };
 
 export const API_ENDPOINTS_ARTISANREQUEST = {

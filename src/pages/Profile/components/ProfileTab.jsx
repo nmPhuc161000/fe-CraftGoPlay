@@ -230,7 +230,7 @@ const ProfileTab = () => {
                 role === "Artisan" ? "border-amber-200" : "border-blue-200"
               } ${isEditing ? "cursor-pointer" : ""}`}
               onClick={triggerFileInput}
-              crossorigin="anonymous"
+              crossOrigin="anonymous"
             />
             {isEditing && (
               <div

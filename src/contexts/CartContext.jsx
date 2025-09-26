@@ -85,7 +85,6 @@ export const CartProvider = ({ children }) => {
 
             const stock = Number(latestProduct.quantity ?? 0);
 
-            // da co trong gio hang
             const existingQuantity =
                 cartItems.find((item) => item.product?.id === product.id)?.quantity || 0;
 

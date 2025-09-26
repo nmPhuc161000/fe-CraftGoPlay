@@ -69,7 +69,7 @@ const VerifyOtp = () => {
       const response = await authService.resendOtp({ email });
       if (response.success) {
         setCountdown(60);
-        showNotification(MESSAGES.AUTH.OTP_RESENT);
+        showNotification(MESSAGES.AUTH.OTP_RESENT, "success");
       } else {
         setError(response.error || MESSAGES.AUTH.OTP_RESEND_FAILED);
       }
@@ -91,7 +91,7 @@ const VerifyOtp = () => {
           style={{
             filter: "blur(8px) brightness(0.75)",
           }}
-          crossorigin="anonymous"
+          crossOrigin="anonymous"
         />
       </div>
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md backdrop-blur-sm">
@@ -148,7 +148,7 @@ const VerifyOtp = () => {
                 type="button"
                 onClick={handleResendOtp}
                 disabled={loading}
-                className="text-[#b28940] hover:underline"
+                className="text-[#b28940] hover:underline cursor-pointer"
               >
                 Gửi lại mã OTP
               </button>

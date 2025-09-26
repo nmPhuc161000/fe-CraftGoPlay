@@ -47,7 +47,7 @@ const SubCategoryTable = ({
                     onError={(e) => {
                       e.target.src = "https://doanhnghiepkinhtexanh.vn/uploads/images/2022/08/05/074602-1-1659697249.jpg";
                     }}
-                    crossorigin="anonymous"
+                    crossOrigin="anonymous"
                   />
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap font-medium text-gray-900">{row.subName}</td>

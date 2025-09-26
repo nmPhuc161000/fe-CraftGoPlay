@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import Sidebar from "../../components/AdminAndStaff/Sidebar";
 import Dashboard from "./components/Dashboard";
 import ArtisanAccount from "./components/ArtisanAccount";
@@ -7,14 +8,25 @@ import StaffAccount from "./components/StaffAccount";
 import WalletSystem from "./components/WalletSystem";
 
 const Admin = () => {
-  const [selected, setSelected] = useState("dashboard");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // For mobile
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabFromUrl = searchParams.get("tab");
+
+  const [selected, setSelected] = useState(tabFromUrl || "dashboard");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] =
-    useState(false); // For desktop
+    useState(false);
+
+  // Cập nhật URL khi selected thay đổi
+  useEffect(() => {
+    if (selected !== "dashboard") {
+      setSearchParams({ tab: selected });
+    } else {
+      setSearchParams({});
+    }
+  }, [selected, setSearchParams]);
 
   return (
     <div className="flex h-screen bg-white overflow-hidden">
-      {/* Sidebar takes full viewport height */}
       <Sidebar
         selected={selected}
         setSelected={setSelected}
@@ -24,7 +36,6 @@ const Admin = () => {
         onToggleDesktop={() => setIsDesktopSidebarCollapsed((v) => !v)}
         userRole="admin"
       />
-      {/* Main content takes remaining width and full height */}
       <div className="flex-1 flex flex-col min-w-0">
         <main className="flex-1 overflow-auto bg-white">
           {selected === "dashboard" && <Dashboard />}

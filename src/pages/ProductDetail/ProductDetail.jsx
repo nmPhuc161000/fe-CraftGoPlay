@@ -198,7 +198,7 @@ const ProductDetail = () => {
               src={selectedImg}
               alt="product"
               className="w-full h-[420px] object-cover rounded-md"
-              crossorigin="anonymous"
+              crossOrigin="anonymous"
             />
           )}
           <div className="flex mt-4 gap-2 overflow-x-auto">
@@ -212,7 +212,7 @@ const ProductDetail = () => {
                   ? "border-black"
                   : "border-gray-300"
                   }`}
-                  crossorigin="anonymous"
+                  crossOrigin="anonymous"
               />
             ))}
           </div>

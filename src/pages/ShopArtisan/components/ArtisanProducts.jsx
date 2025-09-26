@@ -130,7 +130,7 @@ const ArtisanProducts = ({ artisanId }) => {
                                             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                                             whileHover={{ scale: 1.08 }}
                                             draggable={false}
-                                            crossorigin="anonymous"
+                                            crossOrigin="anonymous"
                                         />
                                         <motion.div
                                             className="absolute top-3 right-3 bg-[#fff7e6] text-[#c7903f] px-3 py-1 rounded-full text-xs font-semibold shadow-sm"

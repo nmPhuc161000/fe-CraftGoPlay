@@ -265,7 +265,7 @@ const Checkout = () => {
           navigate("/order-success");
         }
       } else {
-        alert("Đặt hàng thất bại: " + result.error);
+        showNotification("Đặt hàng thất bại: " + result.error, "error");
         setIsPlacingOrder(false);
       }
     } else {
@@ -323,7 +323,7 @@ const Checkout = () => {
           navigate("/order-success");
         }
       } else {
-        alert("Đặt hàng thất bại: " + result.error);
+        showNotification("Đặt hàng thất bại: " + result.error, "error");
         setIsPlacingOrder(false);
       }
     }
