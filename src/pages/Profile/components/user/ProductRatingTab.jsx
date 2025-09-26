@@ -125,9 +125,9 @@ const ProductRatingTab = () => {
         }
       });
 
-      const totalCoins = successCount * 100; //1 danh gia +100 xu
+      const totalCoins = successCount * 20; //1 danh gia +20 xu
       if (successCount === ratings.length) {
-        showNotification(`Đánh giá đã được gửi thành công! Bạn nhận được ${totalCoins} xu cho mỗi sản phẩm`, "success");
+        showNotification(`Đánh giá đã được gửi thành công! Bạn nhận được ${totalCoins} xu`, "success");
         setTimeout(() => {
           navigate("/profile-user/orders", {
             state: { expandedOrderId: searchParams.get("orderId") },
@@ -271,7 +271,7 @@ const ProductRatingTab = () => {
 
             {/* Buttons */}
             <div className="flex justify-between items-center space-x-4 mt-6">
-              <p className="text-sm text-yellow-600 font-bold">Mỗi 1 sản phẩm được đánh giá sẽ cộng 100 xu vào ví</p>
+              <p className="text-sm text-yellow-600 font-bold">Mỗi 1 sản phẩm được đánh giá sẽ cộng 20 xu vào ví</p>
               <div className="flex space-x-4">
                 <button
                   onClick={() => navigate("/profile-user/orders", { state: { expandedOrderId: searchParams.get("orderId") } })}

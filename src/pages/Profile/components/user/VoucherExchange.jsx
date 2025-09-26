@@ -35,6 +35,8 @@ async function getExchangeCatalog() {
         endDate: v.endDate ?? v.EndDate,
         isActive: v.isActive ?? v.IsActive,
         pointChangeAmount: v.pointChangeAmount ?? v.PointChangeAmount,
+        changeAmout: v.changeAmout ?? v.ChangeAmout,
+        quantity: v.quantity ?? v.Quantity,
     }));
 }
 
@@ -164,7 +166,7 @@ export default function VoucherExchange() {
                 0;
             setPoints(Number(p) || 0);
 
-            navigate("/profile-user/vouchers");
+            // navigate("/profile-user/vouchers");
         } catch (e) {
             console.error("Lỗi khi đổi voucher:", e);
             pushToast("error", e.message || "Có lỗi khi đổi voucher.");
@@ -204,6 +206,15 @@ export default function VoucherExchange() {
             </div>
 
             <div className="mx-auto max-w-6xl px-4 py-8">
+                <div className="mb-3">
+                    <button
+                        onClick={() => navigate("/profile-user/vouchers")}
+                        className="text-sm text-amber-700 hover:underline"
+                    >
+                        ← Quay lại
+                    </button>
+                </div>
+
                 {/* Header */}
                 <div className="mb-6 flex flex-col items-start justify-between gap-4 rounded-2xl border border-amber-100 bg-white p-6 shadow sm:flex-row sm:items-center">
                     <div>
@@ -388,6 +399,17 @@ export default function VoucherExchange() {
                                                     }
                                                 >
                                                     PTTT: {t(v.paymentMethod)}
+                                                </Chip>
+                                            ) : null}
+                                            {v.quantity !== undefined ? (
+                                                <Chip
+                                                    icon={
+                                                        <svg width="14" height="14" viewBox="0 0 24 24">
+                                                            <path fill="currentColor" d="M3 3h18v18H3z" />
+                                                        </svg>
+                                                    }
+                                                >
+                                                    Còn lại: {Math.max(0, (Number(v.quantity) || 0) - (Number(v.changeAmout) || 0))}
                                                 </Chip>
                                             ) : null}
                                         </div>
