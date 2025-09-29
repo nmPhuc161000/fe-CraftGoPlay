@@ -7,6 +7,8 @@ import {
   FiMapPin,
   FiHome,
   FiCheck,
+  FiSearch,
+  FiChevronDown,
 } from "react-icons/fi";
 import { FaBuilding } from "react-icons/fa";
 import { validateAddressForm } from "../../utils/validationAddressUtils";
@@ -79,7 +81,8 @@ const FormInput = ({
   </div>
 );
 
-const FormSelect = ({
+// Component mới cho dropdown có tìm kiếm
+const SearchableDropdown = ({
   name,
   value,
   onChange,
@@ -87,44 +90,121 @@ const FormSelect = ({
   placeholder,
   error,
   disabled,
-}) => (
-  <div className="relative group">
-    <select
-      name={name}
-      value={value}
-      onChange={onChange}
-      disabled={disabled}
-      className={`w-full px-3 py-2 pr-8 border rounded-xl focus:outline-none focus:ring-1 focus:ring-[#8f693b]/20 focus:border-[#8f693b] appearance-none cursor-pointer text-sm ${
-        error
-          ? "border-red-500 bg-red-50"
-          : "border-gray-200 hover:border-gray-300 bg-gray-50 focus:bg-white"
-      } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-    >
-      <option value="">{placeholder}</option>
-      {options.map(({ value, label }) => (
-        <option key={value} value={value}>
-          {label}
-        </option>
-      ))}
-    </select>
-    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-      <svg
-        className="w-4 h-4 text-gray-400"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
+  searchPlaceholder = "Tìm kiếm...",
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Lọc options dựa trên search term
+  const filteredOptions = options.filter((option) =>
+    option.label.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Đóng dropdown khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest(`[data-dropdown="${name}"]`)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [name]);
+
+  const handleSelect = (option) => {
+    onChange({
+      target: {
+        name,
+        value: option.value,
+      },
+    });
+    setIsOpen(false);
+    setSearchTerm("");
+  };
+
+  const handleToggle = () => {
+    if (!disabled) {
+      setIsOpen(!isOpen);
+      setSearchTerm("");
+    }
+  };
+
+  const displayValue = options.find((opt) => opt.value === value)?.label || "";
+
+  return (
+    <div className="relative group" data-dropdown={name}>
+      {/* Input hiển thị */}
+      <button
+        type="button"
+        onClick={handleToggle}
+        disabled={disabled}
+        className={`w-full px-3 py-2 pr-8 border rounded-xl focus:outline-none focus:ring-1 focus:ring-[#8f693b]/20 focus:border-[#8f693b] text-left text-sm ${
+          error
+            ? "border-red-500 bg-red-50"
+            : "border-gray-200 hover:border-gray-300 bg-gray-50 focus:bg-white"
+        } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
       >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M19 9l-7 7-7-7"
+        <span className={!displayValue ? "text-gray-400" : ""}>
+          {displayValue || placeholder}
+        </span>
+      </button>
+
+      {/* Icon mũi tên */}
+      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+        <FiChevronDown
+          className={`w-4 h-4 text-gray-400 transition-transform ${
+            isOpen ? "transform rotate-180" : ""
+          }`}
         />
-      </svg>
+      </div>
+
+      {/* Dropdown menu */}
+      {isOpen && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg max-h-60 overflow-hidden">
+          {/* Thanh tìm kiếm */}
+          <div className="p-2 border-b border-gray-100">
+            <div className="relative">
+              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder={searchPlaceholder}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#8f693b]/20 focus:border-[#8f693b]"
+                autoFocus
+              />
+            </div>
+          </div>
+
+          {/* Danh sách options */}
+          <div className="max-h-48 overflow-y-auto">
+            {filteredOptions.length === 0 ? (
+              <div className="px-3 py-2 text-sm text-gray-500 text-center">
+                Không tìm thấy kết quả
+              </div>
+            ) : (
+              filteredOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => handleSelect(option)}
+                  className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
+                    value === option.value ? "bg-amber-50 text-[#8f693b]" : ""
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
     </div>
-    {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
-  </div>
-);
+  );
+};
 
 const AddressFormPopup = ({
   isOpen,
@@ -320,7 +400,7 @@ const AddressFormPopup = ({
               </h3>
             </div>
             <div className="grid grid-cols-3 gap-4">
-              <FormSelect
+              <SearchableDropdown
                 name="province"
                 value={formData.province}
                 onChange={handleProvinceChange}
@@ -330,8 +410,9 @@ const AddressFormPopup = ({
                 }))}
                 placeholder="Tỉnh/Thành"
                 error={errors.province}
+                searchPlaceholder="Tìm tỉnh/thành..."
               />
-              <FormSelect
+              <SearchableDropdown
                 name="district"
                 value={formData.district}
                 onChange={handleDistrictChange}
@@ -342,8 +423,9 @@ const AddressFormPopup = ({
                 placeholder="Quận/Huyện"
                 error={errors.district}
                 disabled={!formData.province}
+                searchPlaceholder="Tìm quận/huyện..."
               />
-              <FormSelect
+              <SearchableDropdown
                 name="ward"
                 value={formData.ward}
                 onChange={handleWardChange}
@@ -354,6 +436,7 @@ const AddressFormPopup = ({
                 placeholder="Phường/Xã"
                 error={errors.ward}
                 disabled={!formData.district}
+                searchPlaceholder="Tìm phường/xã..."
               />
             </div>
             <FormInput

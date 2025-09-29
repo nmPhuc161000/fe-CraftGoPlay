@@ -2,10 +2,136 @@
 import { useCallback, useEffect, useState } from "react";
 import userService from "../../../../services/apis/userApi";
 import { useNotification } from "../../../../contexts/NotificationContext";
-import { FiUpload, FiX } from "react-icons/fi";
+import { FiUpload, FiX, FiSearch, FiChevronDown } from "react-icons/fi";
 import CraftVillageService from "../../../../services/apis/craftvillageApi";
 import locationService from "../../../../services/apis/locationApi";
 import LoadingSpinner from "../../../../components/common/LoadingSpinner";
+
+// Component SearchableDropdown cho các select box
+const SearchableDropdown = ({
+  name,
+  value,
+  onChange,
+  options,
+  placeholder,
+  error,
+  disabled,
+  searchPlaceholder = "Tìm kiếm...",
+  className = "",
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Lọc options dựa trên search term
+  const filteredOptions = options.filter((option) =>
+    option.label.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Đóng dropdown khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest(`[data-dropdown="${name}"]`)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [name]);
+
+  const handleSelect = (option) => {
+    onChange({
+      target: {
+        name,
+        value: option.value,
+      },
+    });
+    setIsOpen(false);
+    setSearchTerm("");
+  };
+
+  const handleToggle = () => {
+    if (!disabled) {
+      setIsOpen(!isOpen);
+      setSearchTerm("");
+    }
+  };
+
+  const displayValue = options.find((opt) => opt.value === value)?.label || "";
+
+  return (
+    <div className={`relative group ${className}`} data-dropdown={name}>
+      {/* Input hiển thị */}
+      <button
+        type="button"
+        onClick={handleToggle}
+        disabled={disabled}
+        className={`w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-left text-sm ${
+          disabled
+            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+            : "bg-white cursor-pointer"
+        } ${error ? "border-red-500" : ""}`}
+      >
+        <span className={!displayValue ? "text-gray-400" : ""}>
+          {displayValue || placeholder}
+        </span>
+      </button>
+
+      {/* Icon mũi tên */}
+      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+        <FiChevronDown
+          className={`w-4 h-4 text-gray-400 transition-transform ${
+            isOpen ? "transform rotate-180" : ""
+          }`}
+        />
+      </div>
+
+      {/* Dropdown menu */}
+      {isOpen && (
+        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-hidden">
+          {/* Thanh tìm kiếm */}
+          <div className="p-2 border-b border-gray-200">
+            <div className="relative">
+              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder={searchPlaceholder}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                autoFocus
+              />
+            </div>
+          </div>
+
+          {/* Danh sách options */}
+          <div className="max-h-48 overflow-y-auto">
+            {filteredOptions.length === 0 ? (
+              <div className="px-3 py-2 text-sm text-gray-500 text-center">
+                Không tìm thấy kết quả
+              </div>
+            ) : (
+              filteredOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => handleSelect(option)}
+                  className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-50 ${
+                    value === option.value ? "bg-blue-50 text-blue-600" : ""
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+    </div>
+  );
+};
 
 export default function UpgradeArtisanTab({ userId }) {
   const [formData, setFormData] = useState({
@@ -524,81 +650,77 @@ export default function UpgradeArtisanTab({ userId }) {
             )}
           </div>
 
-          {/* Phần chọn địa chỉ */}
-          <div>
-            <label className="block text-gray-700 mb-2" htmlFor="province">
-              Tỉnh/Thành
-            </label>
-            <select
-              id="province"
-              name="province"
-              value={formData.province}
-              onChange={handleProvinceChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-              disabled={isLoading || checkRequest.isSent || loadingLocations}
-            >
-              <option value="">Chọn tỉnh/thành</option>
-              {provinces.map((province) => (
-                <option key={province.ProvinceID} value={province.ProvinceName}>
-                  {province.ProvinceName}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* Phần chọn địa chỉ với dropdown có tìm kiếm */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-gray-700 mb-2" htmlFor="province">
+                Tỉnh/Thành
+              </label>
+              <SearchableDropdown
+                id="province"
+                name="province"
+                value={formData.province}
+                onChange={handleProvinceChange}
+                options={provinces.map((province) => ({
+                  value: province.ProvinceName,
+                  label: province.ProvinceName,
+                }))}
+                placeholder="Chọn tỉnh/thành"
+                searchPlaceholder="Tìm tỉnh/thành..."
+                disabled={isLoading || checkRequest.isSent || loadingLocations}
+                required
+              />
+            </div>
 
-          <div>
-            <label className="block text-gray-700 mb-2" htmlFor="district">
-              Quận/Huyện
-            </label>
-            <select
-              id="district"
-              name="district"
-              value={formData.district}
-              onChange={handleDistrictChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-              disabled={
-                isLoading ||
-                checkRequest.isSent ||
-                !formData.province ||
-                loadingLocations
-              }
-            >
-              <option value="">Chọn quận/huyện</option>
-              {districts.map((district) => (
-                <option key={district.DistrictID} value={district.DistrictName}>
-                  {district.DistrictName}
-                </option>
-              ))}
-            </select>
-          </div>
+            <div>
+              <label className="block text-gray-700 mb-2" htmlFor="district">
+                Quận/Huyện
+              </label>
+              <SearchableDropdown
+                id="district"
+                name="district"
+                value={formData.district}
+                onChange={handleDistrictChange}
+                options={districts.map((district) => ({
+                  value: district.DistrictName,
+                  label: district.DistrictName,
+                }))}
+                placeholder="Chọn quận/huyện"
+                searchPlaceholder="Tìm quận/huyện..."
+                disabled={
+                  isLoading ||
+                  checkRequest.isSent ||
+                  !formData.province ||
+                  loadingLocations
+                }
+                required
+              />
+            </div>
 
-          <div>
-            <label className="block text-gray-700 mb-2" htmlFor="ward">
-              Phường/Xã
-            </label>
-            <select
-              id="ward"
-              name="ward"
-              value={formData.ward}
-              onChange={handleWardChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-              disabled={
-                isLoading ||
-                checkRequest.isSent ||
-                !formData.district ||
-                loadingLocations
-              }
-            >
-              <option value="">Chọn phường/xã</option>
-              {wards.map((ward) => (
-                <option key={ward.WardCode} value={ward.WardName}>
-                  {ward.WardName}
-                </option>
-              ))}
-            </select>
+            <div>
+              <label className="block text-gray-700 mb-2" htmlFor="ward">
+                Phường/Xã
+              </label>
+              <SearchableDropdown
+                id="ward"
+                name="ward"
+                value={formData.ward}
+                onChange={handleWardChange}
+                options={wards.map((ward) => ({
+                  value: ward.WardName,
+                  label: ward.WardName,
+                }))}
+                placeholder="Chọn phường/xã"
+                searchPlaceholder="Tìm phường/xã..."
+                disabled={
+                  isLoading ||
+                  checkRequest.isSent ||
+                  !formData.district ||
+                  loadingLocations
+                }
+                required
+              />
+            </div>
           </div>
 
           <div>
@@ -635,7 +757,7 @@ export default function UpgradeArtisanTab({ userId }) {
             />
           </div>
 
-          {/* Phần chọn làng nghề */}
+          {/* Phần chọn làng nghề với dropdown có tìm kiếm */}
           <div>
             <label
               className="block text-gray-700 mb-2"
@@ -643,24 +765,22 @@ export default function UpgradeArtisanTab({ userId }) {
             >
               Làng nghề thủ công
             </label>
-            <select
+            <SearchableDropdown
               id="CraftVillageId"
               name="CraftVillageId"
               value={formData.CraftVillageId}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
+              options={craftVillages.map((village) => ({
+                value: village.id,
+                label: village.village_Name,
+              }))}
+              placeholder="Chọn làng nghề thủ công"
+              searchPlaceholder="Tìm làng nghề..."
               disabled={
                 isLoading || craftVillages.length === 0 || checkRequest.isSent
               }
-            >
-              <option value="">Chọn làng nghề thủ công</option>
-              {craftVillages.map((village) => (
-                <option key={village.id} value={village.id}>
-                  {village.village_Name}
-                </option>
-              ))}
-            </select>
+              required
+            />
           </div>
 
           {/* Hiển thị thông tin chi tiết làng nghề khi được chọn */}

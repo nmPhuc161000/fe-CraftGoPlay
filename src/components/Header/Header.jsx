@@ -242,9 +242,12 @@ const Header = () => {
                       crossOrigin="anonymous"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-[#5e3a1e] flex items-center justify-center">
-                      <FaUser className="text-white text-sm" />
-                    </div>
+                    <img
+                      src="https://th.bing.com/th/id/OIP.PwEh4SGekpMaWT2d5GWw0wHaHt?rs=1&pid=ImgDetMain"
+                      alt="User avatar"
+                      className="w-8 h-8 rounded-full object-cover border-2 border-[#5e3a1e]"
+                      crossOrigin="anonymous"
+                    />
                   )}
                   <div className="flex flex-col items-start">
                     <span className="font-semibold text-[#5e3a1e]">
@@ -259,7 +262,7 @@ const Header = () => {
                 {showDropdown && (
                   <div
                     ref={dropdownRef}
-                    className="absolute right-0 mt-3 w-80 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 overflow-hidden backdrop-blur-sm bg-opacity-95"
+                    className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-xl z-50 overflow-hidden backdrop-blur-sm bg-opacity-95"
                   >
                     {/* Header dropdown */}
                     <div className="bg-gradient-to-r from-[#5e3a1e] to-[#7a4f2e] text-white p-6">
@@ -272,9 +275,12 @@ const Header = () => {
                             crossOrigin="anonymous"
                           />
                         ) : (
-                          <div className="w-14 h-14 rounded-full bg-white bg-opacity-20 flex items-center justify-center">
-                            <FaUser className="text-white text-xl" />
-                          </div>
+                          <img
+                            src="https://th.bing.com/th/id/OIP.PwEh4SGekpMaWT2d5GWw0wHaHt?rs=1&pid=ImgDetMain"
+                            alt="User avatar"
+                            className="w-14 h-14 rounded-full object-cover border-2 border-white"
+                            crossOrigin="anonymous"
+                          />
                         )}
                         <div className="flex-1">
                           <h3 className="font-bold text-lg">
