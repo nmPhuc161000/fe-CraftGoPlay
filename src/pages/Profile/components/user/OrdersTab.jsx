@@ -791,7 +791,7 @@ const OrdersTab = () => {
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-3">
+                      <div className="flex flex-wrap gap-3 justify-end">
                         {getAvailableUserActions(order.status, order.id).map(
                           (action) => (
                             <button

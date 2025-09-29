@@ -131,7 +131,11 @@ const ArtisanOrdersTab = () => {
   const handleUpdateStatus = async (orderId, newStatus, reason = "") => {
     try {
       setLoading(true);
-      const res = await orderService.updateStatusOrder(orderId, newStatus, reason);
+      const res = await orderService.updateStatusOrder(
+        orderId,
+        newStatus,
+        reason
+      );
       if (res.data.error === 0) {
         setOrders((prev) =>
           prev.map((order) =>
@@ -190,7 +194,11 @@ const ArtisanOrdersTab = () => {
   // Handle confirming the reason selection
   const handleConfirmReason = () => {
     if (selectedOrderId && selectedReason) {
-      handleUpdateStatus(selectedOrderId, "DeliveryAttemptFailed", selectedReason);
+      handleUpdateStatus(
+        selectedOrderId,
+        "DeliveryAttemptFailed",
+        selectedReason
+      );
       setIsModalOpen(false);
       setSelectedOrderId(null);
       setSelectedReason("Empty");
@@ -208,14 +216,14 @@ const ArtisanOrdersTab = () => {
     const actions = {
       Created: [
         {
-          status: "Confirmed",
-          label: "Xác nhận đơn hàng",
-          color: "bg-green-600 hover:bg-green-700",
-        },
-        {
           status: "Rejected",
           label: "Từ chối đơn hàng",
           color: "bg-red-600 hover:bg-red-700",
+        },
+        {
+          status: "Confirmed",
+          label: "Xác nhận đơn hàng",
+          color: "bg-green-600 hover:bg-green-700",
         },
       ],
       Confirmed: [
@@ -223,14 +231,14 @@ const ArtisanOrdersTab = () => {
           status: "Preparing",
           label: "Bắt đầu chuẩn bị",
           color: "bg-blue-600 hover:bg-blue-700",
-        }
+        },
       ],
       Preparing: [
         {
           status: "ReadyForShipment",
           label: "Sẵn sàng giao hàng",
           color: "bg-purple-600 hover:bg-purple-700",
-        }
+        },
       ],
       ReadyForShipment: [
         {
@@ -241,15 +249,15 @@ const ArtisanOrdersTab = () => {
       ],
       Shipped: [
         {
-          status: "Delivered",
-          label: "Xác nhận đã giao",
-          color: "bg-green-600 hover:bg-green-700",
-        },
-        {
           status: "DeliveryAttemptFailed",
           label: "Giao hàng không thành công",
           color: "bg-red-600 hover:bg-red-700",
           action: handleOpenReasonModal, // Custom action to open modal
+        },
+        {
+          status: "Delivered",
+          label: "Xác nhận đã giao",
+          color: "bg-green-600 hover:bg-green-700",
         },
       ],
       DeliveryAttemptFailed: [
@@ -607,7 +615,10 @@ const ArtisanOrdersTab = () => {
 
       {/* Reason Selection Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50" style={{ background: "rgba(0, 0, 0, 0.5)" }}>
+        <div
+          className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50"
+          style={{ background: "rgba(0, 0, 0, 0.5)" }}
+        >
           <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-xl">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Chọn lý do giao hàng không thành công

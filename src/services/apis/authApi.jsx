@@ -117,19 +117,15 @@ const authService = {
    * @param {Object} data - { oldPassword, newPassword }
    * @returns {Promise<{success: boolean, data?: any, error?: string, status?: number}>}
    */
-  // async changePassword(data) {
-  //   if (!data || !data.oldPassword || !data.newPassword) {
-  //     return {
-  //       success: false,
-  //       error: "Mật khẩu cũ và mới là bắt buộc",
-  //       status: 400,
-  //     };
-  //   }
-  //   return performApiRequest(API_ENDPOINTS_AUTH.CHANGE_PASSWORD, {
-  //     method: "post",
-  //     data,
-  //   });
-  // },
+  async changePassword(data) {
+    return performApiRequest(API_ENDPOINTS_AUTH.CHANGE_PASSWORD, {
+      method: "post",
+      data: data,
+      headers: {
+        "Content-Type": "multipart/form-data", // Đảm bảo gửi dữ liệu dưới dạng FormData
+      },
+    });
+  },
   /**
    * Quên mật khẩu
    * @param {string} email - Email người dùng
