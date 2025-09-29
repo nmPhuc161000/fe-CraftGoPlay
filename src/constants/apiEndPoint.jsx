@@ -8,7 +8,7 @@ export const API_ENDPOINTS_AUTH = {
   REGISTER_GOOGLE: "/api/Auth/register-google",
   VERIFY_EMAIL: "/api/Auth/user/otp/verify",
   LOGOUT: "/auth/logout",
-  CHANGE_PASSWORD: "/auth/change-password",
+  CHANGE_PASSWORD: "/api/Auth/user/password/change",
   FORGOT_PASSWORD: "/api/Auth/user/password/forgot",
   RESET_PASSWORD: "/api/Auth/user/password/reset",
   RESEND_OTP: (email) => `/api/Auth/user/otp/resend?email=${email}`,

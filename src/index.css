@@ -27,3 +27,7 @@ html,
     --accent: #FBBF24;
   }
 }
+
+button {
+  cursor: pointer;
+}
