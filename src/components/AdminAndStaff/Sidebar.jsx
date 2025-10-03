@@ -6,7 +6,6 @@ import {
   MdInventory2,
   MdHistory,
   MdOutlineHolidayVillage,
-  MdBolt,
   MdAssignment,
   MdLogout,
   MdLocalOffer,
@@ -17,11 +16,25 @@ import { AuthContext } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 // Color constants (using staff theme)
-const MAIN_COLOR = "#c7903f";
-const MAIN_COLOR_DARK = "#8b3f1d";
 const MAIN_BG_GRADIENT = "bg-gradient-to-b from-[#5e3a1e] to-[#704524]";
 const MAIN_BORDER = "border-[#3e2612]/50";
 const MAIN_SHADOW = "shadow-[0_4px_24px_0_rgba(62,38,18,0.2)]";
+const COLORS = {
+  // Warm terracotta and clay tones
+  primary: "#8B4513", // Saddle brown (clay)
+  secondary: "#D2691E", // Chocolate (terracotta)
+  accent: "#CD853F", // Peru (warm sand)
+  light: "#F4A460", // Sandy brown
+
+  // Natural earth backgrounds
+  bgDark: "#3E2723", // Dark wood
+  bgMedium: "#5D4037", // Medium wood
+  bgLight: "#6D4C41", // Light wood
+
+  // Accent colors
+  craftGold: "#DAA520", // Goldenrod (artisan gold)
+  naturalCream: "#FFF8DC", // Cornsilk
+};
 
 // Menu configurations
 const adminMenu = [
@@ -84,11 +97,7 @@ const staffMenu = [
     value: "account",
     icon: <MdAccountCircle size={22} />,
   },
-  {
-    label: "Xử lý khiếu nại",
-    value: "complain",
-    icon: <MdAssignmentLate size={22} />,
-  },
+
   {
     label: "Quản lý sản phẩm",
     value: "product",
@@ -124,6 +133,11 @@ const staffMenu = [
     value: "voucher",
     icon: <MdLocalOffer size={22} />,
   },
+  {
+    label: "Xử lý khiếu nại",
+    value: "complain",
+    icon: <MdAssignmentLate size={22} />,
+  },
 ];
 
 const managerAccountSubMenu = [
@@ -150,7 +164,6 @@ const Sidebar = ({
   isMobileOpen,
   onCloseMobile,
   isDesktopCollapsed,
-  onToggleDesktop,
   userRole = "admin", // Default to admin, can be 'staff'
 }) => {
   const [openManager, setOpenManager] = useState(true);
@@ -203,17 +216,26 @@ const Sidebar = ({
             isDesktopCollapsed ? "justify-center" : ""
           }`}
         >
-          <div className="relative group">
-            <img
-              src={logo}
-              alt="CraftGoPlay Logo"
-              className={`transition-all duration-300 rounded-full object-cover ring-2 ring-indigo-400/30 group-hover:ring-indigo-400/60 shadow-lg ${
-                isDesktopCollapsed ? "h-10 w-10" : "h-12 w-12"
-              }`}
-              style={{ border: "2px solid #3e2612" }}
-              crossOrigin="anonymous"
+          <div className="relative">
+            <div
+              className="rounded-full object-cover transition-all duration-300 flex items-center justify-center text-2xl font-bold"
+              style={{
+                width: isDesktopCollapsed ? "40px" : "48px",
+                height: isDesktopCollapsed ? "40px" : "48px",
+                background: `linear-gradient(135deg, ${COLORS.craftGold} 0%, ${COLORS.accent} 100%)`,
+                color: COLORS.bgDark,
+                boxShadow: `0 4px 12px rgba(218, 165, 32, 0.3)`,
+              }}
+            >
+              {user?.userName?.charAt(0) || "C"}
+            </div>
+            <div
+              className="absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 animate-pulse"
+              style={{
+                backgroundColor: COLORS.craftGold,
+                borderColor: COLORS.bgDark,
+              }}
             />
-            <div className="absolute -top-1 -right-1 w-4 h-4 bg-indigo-400 rounded-full border-2 border-white shadow-sm animate-pulse"></div>
           </div>
           {!isDesktopCollapsed && (
             <div className="flex flex-col">
@@ -221,7 +243,7 @@ const Sidebar = ({
                 className="text-xl font-bold tracking-wide"
                 style={{
                   backgroundImage:
-                    "linear-gradient(90deg, #f8e4c3 0%, #ffe9b3 100%)",
+                    "linear-gradient(90deg, #d89b52 0%, #f0c572 100%)",
                   WebkitBackgroundClip: "text",
                   backgroundClip: "text",
                   color: "transparent",
