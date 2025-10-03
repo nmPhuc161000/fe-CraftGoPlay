@@ -67,7 +67,7 @@ const Product = () => {
       const payload = {
         search: searchTerm,
         pageIndex: 1,
-        pageSize: 20,
+        pageSize: 1000,
         from: 0,
         to: 100000000,
         sortOrder,
