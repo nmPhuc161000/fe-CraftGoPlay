@@ -211,9 +211,14 @@ const Dashboard = () => {
     fetchLineChartData();
   }, [selectedYear]);
 
-  // Tính toán dữ liệu cho biểu đồ thu chi
+  // Hàm lọc dữ liệu - ẩn các field có giá trị 0
+  const filterZeroData = (data) => {
+    return data.filter((item) => item.value > 0);
+  };
+
+  // Tính toán dữ liệu cho biểu đồ thu chi (đã lọc giá trị 0)
   const calculateRevenueExpenseData = () => {
-    return [
+    const rawData = [
       {
         name: REVENUE_EXPENSE_LABELS.totalProductFeeForArtisan,
         value: dashboardData?.totalProductFeeForArtisan || 0,
@@ -233,11 +238,13 @@ const Dashboard = () => {
         icon: REVENUE_EXPENSE_ICONS.totalDiscount,
       },
     ];
+
+    return filterZeroData(rawData);
   };
 
-  // Tính toán dữ liệu cho biểu đồ doanh thu
+  // Tính toán dữ liệu cho biểu đồ doanh thu (đã lọc giá trị 0)
   const calculateRevenueData = () => {
-    return [
+    const rawData = [
       {
         name: "Từ sản phẩm",
         value: dashboardData?.totalRevenueProductFee || 0,
@@ -251,16 +258,16 @@ const Dashboard = () => {
         icon: <FaTruck className="text-lg" />,
       },
     ];
+
+    return filterZeroData(rawData);
   };
 
   const revenueExpenseData = calculateRevenueExpenseData();
   const revenueData = calculateRevenueData();
-  const hasRevenueExpenseData = revenueExpenseData.some(
-    (item) => item.value > 0
-  );
-  const hasRevenueData = revenueData.some((item) => item.value > 0);
+  const hasRevenueExpenseData = revenueExpenseData.length > 0;
+  const hasRevenueData = revenueData.length > 0;
 
-  // Tính tổng thu chi
+  // Tính tổng thu chi (chỉ tính các giá trị không bị lọc)
   const totalRevenueExpense = revenueExpenseData.reduce(
     (sum, item) => sum + item.value,
     0
@@ -345,7 +352,7 @@ const Dashboard = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Bảng Điều Khiển Admin
+            Bảng Thống Kê
           </h1>
           <p className="text-gray-600">Tổng quan về hoạt động kinh doanh</p>
         </div>

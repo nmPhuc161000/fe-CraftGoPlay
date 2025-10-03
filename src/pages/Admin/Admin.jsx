@@ -37,7 +37,7 @@ const Admin = () => {
         userRole="admin"
       />
       <div className="flex-1 flex flex-col min-w-0">
-        <main className="flex-1 overflow-auto bg-white">
+        <main className="flex-1 overflow-auto bg-gradient-to-br from-amber-50 to-brown-100">
           {selected === "dashboard" && <Dashboard />}
           {selected === "artisan" && <ArtisanAccount />}
           {selected === "customer" && <UserAccount />}

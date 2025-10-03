@@ -25,6 +25,7 @@ import {
   FiTruck,
   FiStar,
   FiCheck,
+  FiAlertTriangle,
 } from "react-icons/fi";
 
 const OrdersTab = () => {
@@ -42,17 +43,28 @@ const OrdersTab = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const deliveryFailureReasons = [
+    { value: "Empty", label: "Không có lý do" },
+    { value: "RecipientUnavailable", label: "Người nhận không có ở nhà" },
+    { value: "WrongAddress", label: "Sai/không tìm thấy địa chỉ" },
+    { value: "PhoneNotReachable", label: "Không liên lạc được số điện thoại" },
+    { value: "CustomerRefused", label: "Khách từ chối nhận hàng" },
+    { value: "DamagedInTransit", label: "Hàng bị hư hỏng khi vận chuyển" },
+    { value: "Other", label: "Lý do khác" },
+  ];
+
+  // Hàm lấy label của lý do giao hàng thất bại
+  const getDeliveryFailureReasonLabel = (reasonValue) => {
+    const reason = deliveryFailureReasons.find((r) => r.value === reasonValue);
+    return reason ? reason.label : "Không xác định";
+  };
+
   // Fetch orders based on status
   useEffect(() => {
     const fetchOrders = async (group = "") => {
       try {
         setLoading(true);
-        const res = await orderService.getOrderByUserId(
-          user.id,
-          1,
-          100,
-          ""
-        );
+        const res = await orderService.getOrderByUserId(user.id, 1, 100, "");
 
         if (res.data.error === 0 && Array.isArray(res.data.data)) {
           const transformed = res.data.data.map(transformOrderData);
@@ -130,8 +142,11 @@ const OrdersTab = () => {
         case "retryPayment": {
           const retryRes = await orderService.retryPayment(orderId);
           if (retryRes.data.error === 0 && retryRes.data.data) {
-            showNotification("Đang chuyển hướng đến trang thanh toán VNPay", "success");
-            window.open(retryRes.data.data, "_blank");
+            showNotification(
+              "Đang chuyển hướng đến trang thanh toán VNPay",
+              "success"
+            );
+            window.open(retryRes.data.data, "_self");
             // Cập nhật lại danh sách đơn hàng sau khi thanh toán
             const updatedOrdersRes = await orderService.getOrderByUserId(
               user.id,
@@ -139,8 +154,12 @@ const OrdersTab = () => {
               100,
               ""
             );
-            if (updatedOrdersRes.data.error === 0 && Array.isArray(updatedOrdersRes.data.data)) {
-              const transformed = updatedOrdersRes.data.data.map(transformOrderData);
+            if (
+              updatedOrdersRes.data.error === 0 &&
+              Array.isArray(updatedOrdersRes.data.data)
+            ) {
+              const transformed =
+                updatedOrdersRes.data.data.map(transformOrderData);
               setOrders(transformed);
               setFilteredOrders(
                 selectedStatus === "all"
@@ -391,6 +410,15 @@ const OrdersTab = () => {
             icon: <FiCheck className="w-4 h-4" />,
           },
         ],
+        DeliveryAttemptFailed: [
+          {
+            action: "contact",
+            label: "Liên hệ hỗ trợ",
+            color:
+              "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 shadow-amber-200",
+            icon: <FiUser className="w-4 h-4" />,
+          },
+        ],
         PartialReturn: [
           {
             action: "returnRequest",
@@ -581,6 +609,30 @@ const OrdersTab = () => {
                 {expandedOrders[order.id] && (
                   <div className="border-t border-gray-100 bg-gray-50">
                     <div className="p-6">
+                      {/* Hiển thị lý do giao hàng thất bại chỉ khi status là DeliveryAttemptFailed */}
+                      {order.status === "DeliveryAttemptFailed" &&
+                        order.reasonDeliveryFailed && (
+                          <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
+                            <div className="flex items-start">
+                              <FiAlertTriangle className="text-red-500 text-xl mr-3 mt-0.5 flex-shrink-0" />
+                              <div>
+                                <h4 className="text-lg font-semibold text-red-800 mb-2">
+                                  Giao hàng thất bại
+                                </h4>
+                                <p className="text-red-700 mb-1">
+                                  <span className="font-medium">Lý do: </span>
+                                  {getDeliveryFailureReasonLabel(
+                                    order.reasonDeliveryFailed
+                                  )}
+                                </p>
+                                <p className="text-red-600 text-sm">
+                                  Đơn hàng sẽ được giao trong vòng 24 giờ tới.
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
                       <div className="mb-6">
                         <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                           <FiShoppingBag className="mr-2 text-blue-600" />
@@ -665,9 +717,7 @@ const OrdersTab = () => {
                                     </div>
                                     <div className="flex items-center">
                                       <FiDollarSign className="mr-1 text-gray-400" />
-                                      <span className="font-medium">
-                                        Giá:
-                                      </span>
+                                      <span className="font-medium">Giá:</span>
                                       <span className="ml-1 font-semibold text-blue-600">
                                         {formatPrice(item.unitPrice)}
                                       </span>

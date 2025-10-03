@@ -21,6 +21,11 @@ import {
   FiPhone,
   FiMail,
   FiTruck,
+  FiChevronDown,
+  FiChevronUp,
+  FiAlertTriangle,
+  FiShoppingBag,
+  FiCreditCard,
 } from "react-icons/fi";
 
 const ArtisanOrdersTab = () => {
@@ -34,6 +39,7 @@ const ArtisanOrdersTab = () => {
   const [pageSize] = useState(10);
   const [totalOrders, setTotalOrders] = useState(0);
   const { showNotification } = useNotification();
+  const [expandedOrders, setExpandedOrders] = useState({});
 
   // State for modal and reason selection
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,6 +56,12 @@ const ArtisanOrdersTab = () => {
     { value: "DamagedInTransit", label: "Hàng bị hư hỏng khi vận chuyển" },
     { value: "Other", label: "Lý do khác" },
   ];
+
+  // Hàm lấy label của lý do giao hàng thất bại
+  const getDeliveryFailureReasonLabel = (reasonValue) => {
+    const reason = deliveryFailureReasons.find((r) => r.value === reasonValue);
+    return reason ? reason.label : "Không xác định";
+  };
 
   // Fetch total orders
   useEffect(() => {
@@ -126,6 +138,13 @@ const ArtisanOrdersTab = () => {
     if (newPage >= 1 && newPage <= totalPages) {
       setPageIndex(newPage);
     }
+  };
+
+  const toggleOrderExpansion = (orderId) => {
+    setExpandedOrders((prev) => ({
+      ...prev,
+      [orderId]: !prev[orderId],
+    }));
   };
 
   const handleUpdateStatus = async (orderId, newStatus, reason = "") => {
@@ -391,221 +410,394 @@ const ArtisanOrdersTab = () => {
               return (
                 <div
                   key={order.id}
-                  className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl hover:border-blue-200 transition-all duration-300 group"
+                  className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300"
                 >
-                  {/* Order Header */}
-                  <div className="bg-gradient-to-r from-gray-50 to-blue-50 px-6 py-4 border-b border-gray-100">
-                    <div className="flex justify-between items-center">
-                      <div className="flex items-center gap-4">
-                        <div className="font-bold text-lg text-gray-900">
-                          #{order.id.split("-")[0].toUpperCase()}
-                        </div>
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <FiCalendar size={16} />
-                          <span className="text-sm">{order.formattedDate}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {statusConfig[order.statusKey]?.icon}
-                        <span
-                          className={`px-4 py-2 rounded-full text-sm font-medium ${
-                            statusConfig[order.statusKey]?.color ||
-                            "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          {statusConfig[order.statusKey]?.text || order.status}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Customer Information */}
-                  <div className="px-6 py-4 border-b border-gray-100">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <FiUser size={16} className="text-blue-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-500">Khách hàng</p>
-                            <p className="font-semibold text-gray-900">
-                              {order.userAddress?.fullName || "Khách hàng"}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-green-100 rounded-lg">
-                            <FiPhone size={16} className="text-green-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-500">Điện thoại</p>
-                            <p className="font-medium text-gray-700">
-                              {order.userAddress?.phoneNumber ||
-                                "Chưa cập nhật"}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-orange-100 rounded-lg">
-                            <FiMapPin size={16} className="text-orange-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-500">
-                              Địa chỉ giao hàng
-                            </p>
-                            <p className="font-medium text-gray-700 text-sm">
-                              {order.userAddress?.fullAddress ||
-                                "Chưa có địa chỉ"}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 bg-blue-100 rounded-lg">
-                            <FiTruck size={16} className="text-blue-600" />
-                          </div>
-                          <div>
-                            <p className="text-sm text-gray-500">
-                              Phí vận chuyển
-                            </p>
-                            <p className="font-semibold text-gray-900">
-                              {order.delivery_Amount || 0}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Order Items */}
-                  <div className="px-6 py-4 border-b border-gray-100">
-                    <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                      <FiPackage size={18} />
-                      Sản phẩm đặt hàng
-                    </h4>
-                    <div className="space-y-4">
-                      {order.orderItems?.map((item, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl"
-                        >
-                          <div className="w-20 h-20 rounded-xl overflow-hidden bg-white shadow-sm">
-                            <img
-                              src={
-                                item.product?.productImages?.imageUrl ||
-                                "https://via.placeholder.com/100"
-                              }
-                              alt={item.product?.name}
-                              className="w-full h-full object-cover"
-                              crossOrigin="anonymous"
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h5 className="font-semibold text-gray-900 truncate">
-                              {item.product?.name || "Sản phẩm"}
-                            </h5>
-                            <p className="text-sm text-gray-600 mt-1">
-                              Trạng thái:{" "}
-                              <span className="font-medium">
-                                {statusConfig[convertStatus(item.status)]
-                                  ?.text || item.status}
-                              </span>
-                            </p>
-                            <p className="text-sm text-gray-600 mt-1">
-                              Số lượng:{" "}
-                              <span className="font-medium">
-                                {item.quantity}
-                              </span>
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-bold text-lg text-gray-900">
-                              {formatPrice(item.unitPrice)}
-                            </p>
-                            <p className="text-sm text-gray-500">/ sản phẩm</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Order Summary & Actions */}
-                  <div className="px-6 py-6">
-                    <div className="flex flex-col gap-6">
-                      {/* Payment Info + Total Price */}
-                      <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6">
-                        <div className="flex flex-col gap-4">
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`p-2 rounded-lg ${
-                                order.isPaid ? "bg-green-100" : "bg-red-100"
-                              }`}
-                            >
-                              <FiDollarSign
-                                size={16}
-                                className={
-                                  order.isPaid
-                                    ? "text-green-600"
-                                    : "text-red-600"
-                                }
-                              />
+                  {/* Order Header - Clickable để mở rộng/thu gọn - Giống OrdersTab */}
+                  <div
+                    className="p-6 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
+                    onClick={() => toggleOrderExpansion(order.id)}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center space-x-4">
+                            <div className="bg-blue-100 rounded-lg p-3">
+                              <FiPackage className="text-blue-600 text-xl" />
                             </div>
                             <div>
-                              <p className="text-sm text-gray-500">
-                                Thanh toán
-                              </p>
-                              <p
-                                className={`font-semibold ${
-                                  order.isPaid
-                                    ? "text-green-600"
-                                    : "text-red-600"
-                                }`}
-                              >
-                                {order.paymentStatus}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {order.paymentMethod}
-                              </p>
+                              <h3 className="text-lg font-bold text-gray-900">
+                                Đơn hàng #{order.id.split("-")[0].toUpperCase()}
+                              </h3>
+                              <div className="flex items-center space-x-4 mt-2 text-sm text-gray-600">
+                                <div className="flex items-center">
+                                  <FiCalendar className="mr-1" />
+                                  {order.formattedDate}
+                                </div>
+                                <div className="flex items-center">
+                                  <FiDollarSign className="mr-1" />
+                                  {formatPrice(order.totalPrice)}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div
+                            className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
+                              statusConfig[order.statusKey].color
+                            }`}
+                          >
+                            {statusConfig[order.statusKey].icon}
+                            <span className="ml-2">
+                              {statusConfig[order.statusKey].text}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="ml-4 text-gray-400 group-hover:text-gray-600 transition-colors">
+                        {expandedOrders[order.id] ? (
+                          <FiChevronUp className="text-2xl" />
+                        ) : (
+                          <FiChevronDown className="text-2xl" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Order Details - Chỉ hiển thị khi mở rộng */}
+                  {expandedOrders[order.id] && (
+                    <div className="border-t border-gray-100 bg-gray-50">
+                      <div className="p-6">
+                        {/* Hiển thị lý do giao hàng thất bại chỉ khi status là DeliveryAttemptFailed */}
+                        {order.status === "DeliveryAttemptFailed" &&
+                          order.reasonDeliveryFailed && (
+                            <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
+                              <div className="flex items-start">
+                                <FiAlertTriangle className="text-red-500 text-xl mr-3 mt-0.5 flex-shrink-0" />
+                                <div>
+                                  <h4 className="text-lg font-semibold text-red-800 mb-2">
+                                    Giao hàng thất bại
+                                  </h4>
+                                  <p className="text-red-700 mb-1">
+                                    <span className="font-medium">Lý do: </span>
+                                    {getDeliveryFailureReasonLabel(
+                                      order.reasonDeliveryFailed
+                                    )}
+                                  </p>
+                                  <p className="text-red-600 text-sm">
+                                    Vui lòng thử giao hàng lại hoặc liên hệ hỗ
+                                    trợ.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                        {/* Customer Information */}
+                        <div className="mb-6">
+                          <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                            <FiUser className="mr-2 text-blue-600" />
+                            Thông tin khách hàng
+                          </h4>
+                          <div className="grid md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-blue-100 rounded-lg">
+                                  <FiUser size={16} className="text-blue-600" />
+                                </div>
+                                <div>
+                                  <p className="text-sm text-gray-500">
+                                    Khách hàng
+                                  </p>
+                                  <p className="font-semibold text-gray-900">
+                                    {order.userAddress?.fullName ||
+                                      "Khách hàng"}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-green-100 rounded-lg">
+                                  <FiPhone
+                                    size={16}
+                                    className="text-green-600"
+                                  />
+                                </div>
+                                <div>
+                                  <p className="text-sm text-gray-500">
+                                    Điện thoại
+                                  </p>
+                                  <p className="font-medium text-gray-700">
+                                    {order.userAddress?.phoneNumber ||
+                                      "Chưa cập nhật"}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="space-y-4">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-orange-100 rounded-lg">
+                                  <FiMapPin
+                                    size={16}
+                                    className="text-orange-600"
+                                  />
+                                </div>
+                                <div>
+                                  <p className="text-sm text-gray-500">
+                                    Địa chỉ giao hàng
+                                  </p>
+                                  <p className="font-medium text-gray-700 text-sm">
+                                    {order.userAddress?.fullAddress ||
+                                      "Chưa có địa chỉ"}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-blue-100 rounded-lg">
+                                  <FiTruck
+                                    size={16}
+                                    className="text-blue-600"
+                                  />
+                                </div>
+                                <div>
+                                  <p className="text-sm text-gray-500">
+                                    Phí vận chuyển
+                                  </p>
+                                  <p className="font-semibold text-gray-900">
+                                    {order.delivery_Amount || 0}
+                                  </p>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
 
-                        <div className="text-right">
-                          <p className="text-sm text-gray-500">
-                            Tổng thanh toán
-                          </p>
-                          <p className="font-bold text-2xl text-blue-600">
-                            {formatPrice(order.totalPrice)}
-                          </p>
+                        {/* Order Items */}
+                        <div className="mb-6">
+                          <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                            <FiShoppingBag className="mr-2 text-blue-600" />
+                            Sản phẩm đặt hàng
+                          </h4>
+                          <div className="space-y-4">
+                            {order.orderItems?.map((item, index) => (
+                              <div
+                                key={index}
+                                className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200"
+                              >
+                                <div className="flex items-center space-x-4">
+                                  <div className="relative">
+                                    <img
+                                      src={
+                                        item.product?.productImages?.imageUrl ||
+                                        "https://via.placeholder.com/100"
+                                      }
+                                      alt={item.product?.name}
+                                      className="w-20 h-20 object-cover rounded-xl shadow-sm"
+                                      crossOrigin="anonymous"
+                                    />
+                                    <div className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                                      {item.quantity}
+                                    </div>
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center space-x-3">
+                                        <h5 className="font-semibold text-gray-900">
+                                          {item.product?.name || "Sản phẩm"}
+                                        </h5>
+                                        <div
+                                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                                            statusConfig[
+                                              convertStatus(item.status)
+                                            ]
+                                              ? statusConfig[
+                                                  convertStatus(item.status)
+                                                ].color
+                                              : "bg-gray-100 text-gray-700"
+                                          }`}
+                                        >
+                                          {statusConfig[
+                                            convertStatus(item.status)
+                                          ] ? (
+                                            <>
+                                              {
+                                                statusConfig[
+                                                  convertStatus(item.status)
+                                                ].icon
+                                              }
+                                              <span className="ml-1">
+                                                {
+                                                  statusConfig[
+                                                    convertStatus(item.status)
+                                                  ].text
+                                                }
+                                              </span>
+                                            </>
+                                          ) : (
+                                            <span>Unknown Status</span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
+                                      <div className="flex items-center">
+                                        <span className="font-medium">
+                                          Số lượng:
+                                        </span>
+                                        <span className="ml-1">
+                                          {item.quantity}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center">
+                                        <span className="font-medium">
+                                          Giá:
+                                        </span>
+                                        <span className="ml-1 font-semibold text-blue-600">
+                                          {formatPrice(item.unitPrice)}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Order Summary & Actions */}
+                        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-6">
+                          <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                            <FiDollarSign className="mr-2 text-green-600" />
+                            Chi tiết thanh toán & vận chuyển
+                          </h4>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                              <h5 className="font-semibold text-gray-800 flex items-center">
+                                <FiCreditCard className="mr-2 text-green-500" />
+                                Chi tiết thanh toán
+                              </h5>
+
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-gray-600">
+                                    Phương thức:
+                                  </span>
+                                  <span className="font-medium">
+                                    {order.paymentMethod}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-gray-600">
+                                    Trạng thái:
+                                  </span>
+                                  <span className="font-medium">
+                                    {order.paymentStatus}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="space-y-4">
+                              <h5 className="font-semibold text-gray-800 flex items-center">
+                                <FiDollarSign className="mr-2 text-orange-500" />
+                                Chi tiết đơn hàng
+                              </h5>
+
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-gray-600">
+                                    Tổng tiền hàng:
+                                  </span>
+                                  <span className="font-medium">
+                                    {formatPrice(order.product_Amount)}
+                                  </span>
+                                </div>
+
+                                {(order.productDiscount > 0 ||
+                                  order.deliveryDiscount > 0 ||
+                                  order.pointDiscount > 0) && (
+                                  <div className="pt-2 border-t border-gray-100">
+                                    <div className="text-gray-600 font-medium mb-1">
+                                      Giảm giá:
+                                    </div>
+                                    {order.productDiscount > 0 && (
+                                      <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500 pl-2">
+                                          - Giảm giá sản phẩm:
+                                        </span>
+                                        <span className="text-green-600">
+                                          -{formatPrice(order.productDiscount)}
+                                        </span>
+                                      </div>
+                                    )}
+                                    {order.deliveryDiscount > 0 && (
+                                      <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500 pl-2">
+                                          - Giảm giá vận chuyển:
+                                        </span>
+                                        <span className="text-green-600">
+                                          -{formatPrice(order.deliveryDiscount)}
+                                        </span>
+                                      </div>
+                                    )}
+                                    {order.pointDiscount > 0 && (
+                                      <div className="flex justify-between text-sm">
+                                        <span className="text-gray-500 pl-2">
+                                          - Giảm giá từ xu:
+                                        </span>
+                                        <span className="text-green-600">
+                                          -{formatPrice(order.pointDiscount)}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                <div className="flex justify-between pt-2 border-t border-gray-100">
+                                  <span className="text-gray-600">
+                                    Phí vận chuyển:
+                                  </span>
+                                  <span className="font-medium text-orange-600">
+                                    {order.delivery_Amount}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="pt-3 border-t border-gray-200 mt-4">
+                                <div className="flex justify-between font-semibold text-lg">
+                                  <span>Tổng cộng:</span>
+                                  <span className="text-blue-600">
+                                    {formatPrice(order.totalPrice)}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex flex-wrap gap-3 justify-end">
+                          {availableActions.map((action, index) => (
+                            <button
+                              key={index}
+                              onClick={() =>
+                                action.action
+                                  ? action.action(order.id)
+                                  : handleUpdateStatus(order.id, action.status)
+                              }
+                              disabled={loading}
+                              className={`flex items-center gap-2 px-6 py-3 text-white rounded-xl font-medium transition-all duration-200 hover:scale-105 ${
+                                action.color
+                              } ${
+                                loading ? "opacity-50 cursor-not-allowed" : ""
+                              }`}
+                            >
+                              {action.label}
+                              <FiChevronRight size={16} />
+                            </button>
+                          ))}
                         </div>
                       </div>
-
-                      {/* Action Buttons */}
-                      <div className="w-full flex flex-wrap justify-end gap-3">
-                        {availableActions.map((action, index) => (
-                          <button
-                            key={index}
-                            onClick={() =>
-                              action.action
-                                ? action.action(order.id)
-                                : handleUpdateStatus(order.id, action.status)
-                            }
-                            disabled={loading}
-                            className={`flex items-center gap-2 px-6 py-2 text-white rounded-lg font-medium transition-all duration-200 hover:scale-105 ${
-                              action.color
-                            } ${
-                              loading ? "opacity-50 cursor-not-allowed" : ""
-                            }`}
-                          >
-                            {action.label}
-                            <FiChevronRight size={16} />
-                          </button>
-                        ))}
-                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               );
             })}
