@@ -184,14 +184,14 @@ const Header = () => {
           </Link>
 
           <div className="flex space-x-10 items-center text-base font-medium">
-            <div className="relative">
+            <div className="relative flex items-center">
               <FaSearch
                 onClick={() => setShowSearchInput((prev) => !prev)}
                 className="cursor-pointer hover:text-gray-500 tracking-wider text-xl"
                 title="Tìm kiếm"
               />
               {showSearchInput && (
-                <div className="absolute top-full right-0 mt-2 flex items-center z-50 bg-white border border-gray-300 rounded-full px-4 py-2 shadow-lg w-80 transition-all duration-300">
+                <div className="absolute right-full mr-2 flex items-center z-50 bg-white border border-gray-300 rounded-full px-3 py-1 shadow-md w-60 transition-all duration-300">
                   <input
                     type="text"
                     value={searchTerm}
@@ -201,9 +201,7 @@ const Header = () => {
                     className="w-full text-sm text-black outline-none bg-transparent"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
-                        navigate(
-                          `/products?search=${encodeURIComponent(searchTerm)}`
-                        );
+                        navigate(`/products?search=${encodeURIComponent(searchTerm)}`);
                         setShowSearchInput(false);
                       }
                     }}
