@@ -47,7 +47,7 @@ export const statusFilters = [
   },
   {
     value: "cancelled",
-    label: "Đã hủy",
+    label: "Đã hủy/Từ chối",
     icon: <FiXCircle />,
     includes: ["Rejected", "Cancelled"],
   },
