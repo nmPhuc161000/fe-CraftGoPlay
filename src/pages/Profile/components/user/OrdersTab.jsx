@@ -223,19 +223,18 @@ const OrdersTab = () => {
         }
         case "rating":
           if (order && order.orderItems && order.orderItems.length > 0) {
+            const orderItemsPayload = order.orderItems.map((item) => ({
+              id: item.product.id,
+              name: item.product.name,
+              imageUrl: item.product.productImages?.imageUrl || "",
+              orderItemId: item.id,
+              price: item.product.price || 0,
+              status: item.status, 
+            }));
+
             const queryParams = new URLSearchParams({
               orderId,
-              orderItems: encodeURIComponent(
-                JSON.stringify(
-                  order.orderItems.map((item) => ({
-                    id: item.product.id,
-                    name: item.product.name,
-                    imageUrl: item.product.productImages?.imageUrl || "",
-                    orderItemId: item.id,
-                    price: item.product.price || 0,
-                  }))
-                )
-              ),
+              orderItems: JSON.stringify(orderItemsPayload),
             }).toString();
             navigate(`/profile-user/productRating?${queryParams}`);
           } else {

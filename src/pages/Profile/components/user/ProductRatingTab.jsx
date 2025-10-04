@@ -19,35 +19,43 @@ const ProductRatingTab = () => {
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
-    const orderItems = searchParams.get("orderItems");
-    if (orderItems) {
-      try {
-        const items = JSON.parse(decodeURIComponent(orderItems));
-        const products = items.map((item) => ({
-          id: item.id,
-          name: item.name,
-          imageUrl:
-            item.product?.productImages?.imageUrl || item.imageUrl || "",
-          orderItemId: item.orderItemId,
-          price: item.price || 0,
-        }));
-        setAvailableProducts(products);
-        setRatings(
-          products.map((product) => ({
-            productId: product.id,
-            orderItemId: product.orderItemId,
-            star: 0,
-            comment: "",
-            hoverStar: 0,
-          }))
-        );
-      } catch (e) {
-        console.error("Lỗi khi parse orderItems:", e);
-        showNotification("Lỗi khi tải sản phẩm để đánh giá!", "error");
-      }
-    } else {
-      console.warn("Không có orderItems trong searchParams.");
+    const raw = searchParams.get("orderItems");
+    if (!raw) {
       showNotification("Không có sản phẩm để đánh giá!", "warning");
+      return;
+    }
+
+    try {
+      const items = JSON.parse(decodeURIComponent(raw));
+      console.log("Parsed orderItems:", items);
+
+      const completed = (Array.isArray(items) ? items : [])
+        .filter(it => typeof it.status === "string" && it.status.toLowerCase() === "completed");
+
+      const products = completed.map(it => ({
+        id: it.id, 
+        name: it.name,
+        imageUrl: it.imageUrl || "",
+        orderItemId: it.orderItemId,
+        price: it.price || 0,
+        status: it.status,
+      }));
+
+      setAvailableProducts(products);
+      setRatings(products.map(p => ({
+        productId: p.id,
+        orderItemId: p.orderItemId,
+        star: 0,
+        comment: "",
+        hoverStar: 0,
+      })));
+
+      if (products.length === 0) {
+        showNotification("Không có sản phẩm ở trạng thái 'Hoàn Thành' để đánh giá.", "warning");
+      }
+    } catch (e) {
+      console.error(e);
+      showNotification("Lỗi khi tải sản phẩm để đánh giá!", "error");
     }
   }, [searchParams]);
 
