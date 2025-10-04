@@ -206,6 +206,22 @@ export default function AddProductTab() {
     return <div>Vui lòng đăng nhập để thêm sản phẩm!</div>;
   }
 
+  const handleInputValidation = (e) => {
+    const input = e.target;
+    const max = parseInt(input.getAttribute("max"));
+    const value = parseInt(input.value);
+
+    if (value > max) {
+      input.setCustomValidity(
+        `Giá trị không được vượt quá ${max.toLocaleString()}`
+      );
+    } else if (value < 0) {
+      input.setCustomValidity("Giá trị không được âm");
+    } else {
+      input.setCustomValidity("");
+    }
+  };
+
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
       <div className="flex items-center gap-4 mb-6">
@@ -309,6 +325,7 @@ export default function AddProductTab() {
               name="Price"
               value={formData.Price}
               onChange={handleChange}
+              onInput={handleInputValidation}
               min="0"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
               required
@@ -347,6 +364,7 @@ export default function AddProductTab() {
               name="Weight"
               value={formData.Weight}
               onChange={handleChange}
+              onInput={handleInputValidation}
               min="0"
               max="1600000"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
@@ -368,6 +386,7 @@ export default function AddProductTab() {
               name="Length"
               value={formData.Length}
               onChange={handleChange}
+              onInput={handleInputValidation}
               min="0"
               max="200"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
@@ -389,6 +408,7 @@ export default function AddProductTab() {
               name="Width"
               value={formData.Width}
               onChange={handleChange}
+              onInput={handleInputValidation}
               min="0"
               max="200"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
@@ -410,6 +430,7 @@ export default function AddProductTab() {
               name="Height"
               value={formData.Height}
               onChange={handleChange}
+              onInput={handleInputValidation}
               min="0"
               max="200"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
@@ -512,7 +533,6 @@ export default function AddProductTab() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#5e3a1e] focus:border-[#5e3a1e]"
             >
               <option value="Active">Đang bán</option>
-              <option value="Inactive">Ngừng bán</option>
             </select>
           </div>
         </div>
