@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, useCallback } from "react";
 import { Link, useParams, useLocation } from "react-router-dom";
 import MainLayout from "../../components/layout/MainLayout";
 import ProductReviews from "./components/ProductReviews";
+import RecommendProducts from "./components/RecommendProducts";
 import { CartContext } from "../../contexts/CartContext";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
@@ -194,12 +195,20 @@ const ProductDetail = () => {
         {/* img san pham */}
         <div className="flex flex-col md:w-1/2">
           {selectedImg && (
-            <img
-              src={selectedImg}
-              alt="product"
-              className="w-full h-[420px] object-cover rounded-md"
-              crossOrigin="anonymous"
-            />
+            <div className="relative w-full h-[420px] rounded-md overflow-hidden">
+              <img
+                src={selectedImg}
+                alt="bg"
+                className="absolute inset-0 w-full h-full object-cover blur-lg scale-110"
+                crossOrigin="anonymous"
+              />
+              <img
+                src={selectedImg}
+                alt="product"
+                className="relative z-10 max-h-full max-w-full mx-auto object-contain"
+                crossOrigin="anonymous"
+              />
+            </div>
           )}
           <div className="flex mt-4 gap-2 overflow-x-auto">
             {product.productImages?.map((imgObj, index) => (
@@ -343,6 +352,11 @@ const ProductDetail = () => {
       <div className="h-[1px] bg-gradient-to-r from-transparent via-gray-300 to-transparent my-12"></div>
       <div className="container mx-auto px-6 pb-12 text-[#5e3a1e]">
         <ProductReviews productId={id} />
+        <RecommendProducts
+          subCategoryId={product.subCategoryId}
+          currentProductId={product.id}
+          limit={8}
+        />
       </div>
     </MainLayout>
   );

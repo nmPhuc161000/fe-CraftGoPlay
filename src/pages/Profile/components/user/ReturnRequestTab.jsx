@@ -109,7 +109,6 @@ const ReturnRequestTab = () => {
       }
     };
     fetchOrder();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId]);
 
   const [selectedIds, setSelectedIds] = useState(
@@ -192,8 +191,8 @@ const ReturnRequestTab = () => {
   const completedSelected = selectedIds.filter((id) => {
     const f = selectedForms[id] || {};
     if (!f.reason) return false;
-    if (f.reason === "Other" && !String(f.otherReason || "").trim())
-      return false;
+    if (!f.image) return false;
+    if (!String(f.description || "").trim()) return false;
     return true;
   }).length;
   const isReady = selectedCount > 0 && completedSelected === selectedCount;
@@ -221,8 +220,12 @@ const ReturnRequestTab = () => {
         err.reason = "Vui lòng chọn lý do";
         ok = false;
       }
-      if (f.reason === "Other" && !String(f.otherReason || "").trim()) {
-        err.otherReason = "Vui lòng nêu rõ lý do khác";
+      if (!f.image) {
+        err.image = "Vui lòng tải lên hình ảnh minh họa";
+        ok = false;
+      }
+      if (!String(f.description || "").trim()) {
+        err.description = "Vui lòng nhập mô tả chi tiết";
         ok = false;
       }
       if (Object.keys(err).length) newErr[id] = err;
@@ -230,7 +233,7 @@ const ReturnRequestTab = () => {
     setErrors(newErr);
     if (!ok)
       showNotification(
-        "Vui lòng hoàn thành thông tin cho sản phẩm đã chọn!",
+        "Vui lòng hoàn thành thông tin cho sản phẩm đã chọn (lý do, mô tả và ảnh)!",
         "warning"
       );
     return ok;
@@ -248,8 +251,6 @@ const ReturnRequestTab = () => {
         data.append("OrderItemId", oid);
         data.append("UserId", user.id);
         data.append("Reason", f.reason);
-        if (f.reason === "Other")
-          data.append("OtherReason", f.otherReason || "");
         data.append("Description", f.description || "");
         if (f.image) data.append("ImageUrl", f.image);
         return returnRequestService.createReturnRequest(data);
@@ -337,7 +338,7 @@ const ReturnRequestTab = () => {
               >
                 {isReady
                   ? "Sẵn sàng gửi!"
-                  : "Cần điền form cho sản phẩm đã chọn"}
+                  : "Cần điền lý do, mô tả và tải ảnh cho sản phẩm đã chọn"}
               </p>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
@@ -411,9 +412,7 @@ const ReturnRequestTab = () => {
                         />
                       ) : (
                         <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                          <span className="text-gray-400 text-xs">
-                            No Image
-                          </span>
+                          <span className="text-gray-400 text-xs">No Image</span>
                         </div>
                       )}
                     </div>
@@ -435,8 +434,7 @@ const ReturnRequestTab = () => {
                     <div className="mt-4 space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Lý do trả hàng{" "}
-                          <span className="text-orange-500">*</span>
+                          Lý do trả hàng <span className="text-orange-500">*</span>
                         </label>
                         <select
                           value={f.reason || ""}
@@ -456,45 +454,13 @@ const ReturnRequestTab = () => {
                           ))}
                         </select>
                         {err.reason && (
-                          <p className="text-sm text-red-500 mt-1">
-                            {err.reason}
-                          </p>
+                          <p className="text-sm text-red-500 mt-1">{err.reason}</p>
                         )}
                       </div>
 
-                      {f.reason === "Other" && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Lý do khác
-                          </label>
-                          <input
-                            type="text"
-                            value={f.otherReason || ""}
-                            onChange={(e) =>
-                              handleItemFormChange(
-                                p.id,
-                                "otherReason",
-                                e.target.value
-                              )
-                            }
-                            className={`w-full px-4 py-3 rounded-xl border ${
-                              err.otherReason
-                                ? "border-red-300"
-                                : "border-gray-200"
-                            } focus:border-orange-500 focus:ring-2 focus:ring-orange-200 text-gray-700 bg-white shadow-sm transition hover:border-orange-300`}
-                            placeholder="Vui lòng nêu rõ lý do"
-                          />
-                          {err.otherReason && (
-                            <p className="text-sm text-red-500 mt-1">
-                              {err.otherReason}
-                            </p>
-                          )}
-                        </div>
-                      )}
-
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Mô tả chi tiết
+                          Mô tả chi tiết <span className="text-orange-500">*</span>
                         </label>
                         <textarea
                           value={f.description || ""}
@@ -505,11 +471,16 @@ const ReturnRequestTab = () => {
                               e.target.value
                             )
                           }
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 text-gray-700 bg-white shadow-sm transition hover:border-orange-300"
+                          className={`w-full px-4 py-3 rounded-xl border ${
+                            err.description ? "border-red-300" : "border-gray-200"
+                          } focus:border-orange-500 focus:ring-2 focus:ring-orange-200 text-gray-700 bg-white shadow-sm transition hover:border-orange-300`}
                           rows="3"
-                          placeholder="Mô tả thêm về lý do trả hàng (tùy chọn)"
+                          placeholder="Mô tả chi tiết lý do trả hàng"
                           maxLength={1000}
                         />
+                        {err.description && (
+                          <p className="text-sm text-red-500 mt-1">{err.description}</p>
+                        )}
                         <p className="text-right text-xs text-gray-500 mt-1">
                           {String(f.description || "").length}/1000
                         </p>
@@ -517,7 +488,7 @@ const ReturnRequestTab = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Hình ảnh minh họa (tùy chọn)
+                          Hình ảnh minh họa <span className="text-orange-500">*</span>
                         </label>
                         <input
                           type="file"
@@ -531,6 +502,9 @@ const ReturnRequestTab = () => {
                           }
                           className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 text-gray-700 bg-white shadow-sm transition file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100"
                         />
+                        {err.image && (
+                          <p className="text-sm text-red-500 mt-1">{err.image}</p>
+                        )}
                       </div>
                     </div>
                   )}

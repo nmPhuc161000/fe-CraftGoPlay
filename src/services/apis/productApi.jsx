@@ -108,6 +108,16 @@ const productService = {
         method: "get",
       }
     );
+  },
+
+  async getProductsBySubCategoryId(subCategoryId, pageIndex = 1, pageSize = 10, productStatus = "Active") {
+    if (!subCategoryId) {
+      return Promise.resolve({ data: { data: [] } });
+    }
+    return performApiRequest(
+      API_ENDPOINTS_PRODUCT.GET_PRODUCTS_BY_SUBCATEGORYID(subCategoryId, pageIndex, pageSize, productStatus),
+      { method: "get" }
+    );
   }
 };
 
