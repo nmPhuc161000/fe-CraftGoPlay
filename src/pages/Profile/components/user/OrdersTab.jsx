@@ -223,18 +223,19 @@ const OrdersTab = () => {
         }
         case "rating":
           if (order && order.orderItems && order.orderItems.length > 0) {
-            const orderItemsPayload = order.orderItems.map((item) => ({
-              id: item.product.id,
-              name: item.product.name,
-              imageUrl: item.product.productImages?.imageUrl || "",
-              orderItemId: item.id,
-              price: item.product.price || 0,
-              status: item.status, 
-            }));
-
             const queryParams = new URLSearchParams({
               orderId,
-              orderItems: JSON.stringify(orderItemsPayload),
+              orderItems: encodeURIComponent(
+                JSON.stringify(
+                  order.orderItems.map((item) => ({
+                    id: item.product.id,
+                    name: item.product.name,
+                    imageUrl: item.product.productImages?.imageUrl || "",
+                    orderItemId: item.id,
+                    price: item.product.price || 0,
+                  }))
+                )
+              ),
             }).toString();
             navigate(`/profile-user/productRating?${queryParams}`);
           } else {
@@ -306,7 +307,18 @@ const OrdersTab = () => {
     }
   };
 
+  // Kiểm tra xem order có orderItem nào Completed không
+  const hasCompletedOrderItems = (order) => {
+    console.log("Checking completed items for order:", order);
+    
+    if (!order || !Array.isArray(order.orderItems)) {
+      return false;
+    }
+    return order.orderItems.some((item) => item.status === "Completed");
+  };
+
   const getAvailableUserActions = (currentStatus, orderId) => {
+    const order = orders.find((o) => o.id === orderId);
     const actions =
       {
         Created: [
@@ -428,13 +440,15 @@ const OrdersTab = () => {
           },
         ],
         Completed: [
-          !ratedOrders[orderId] && {
-            action: "rating",
-            label: "Đánh giá sản phẩm",
-            color:
-              "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 shadow-yellow-200",
-            icon: <FiStar className="w-4 h-4" />,
-          },
+          !ratedOrders[orderId] &&
+            order &&
+            hasCompletedOrderItems(order) && {
+              action: "rating",
+              label: "Đánh giá sản phẩm",
+              color:
+                "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 shadow-yellow-200",
+              icon: <FiStar className="w-4 h-4" />,
+            },
         ],
       }[currentStatus] || [];
 

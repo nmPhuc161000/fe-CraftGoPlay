@@ -355,7 +355,7 @@ const RefundWalletTab = () => {
                         {amountPrefix}
                         {formatCurrency(Math.abs(tx.amount))}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">{label}</p>
+                      <p className="text-xs text-gray-500 mt-1 truncate">{label}</p>
                     </div>
                   </div>
                 );
