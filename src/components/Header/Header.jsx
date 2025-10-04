@@ -84,25 +84,25 @@ const Header = () => {
     {
       icon: FaHistory,
       label: "Yêu cầu trả hàng",
-      path: "/profile-user/returns",
+      path: "/profile-user/returnRequests",
       color: "text-red-600",
     },
     {
       icon: FaStar,
       label: "Đánh giá của bạn",
-      path: "/profile-user/reviews",
+      path: "/profile-user/userReviews",
       color: "text-yellow-600",
     },
     {
       icon: FaHeart,
       label: "Yêu thích",
-      path: "/profile-user/wishlist",
+      path: "/profile-user/favorites",
       color: "text-pink-600",
     },
     {
       icon: FaWarehouse,
       label: "Kho xu",
-      path: "/profile-user/coin-wallet",
+      path: "/profile-user/points",
       color: "text-amber-600",
     },
     {
@@ -114,7 +114,7 @@ const Header = () => {
     {
       icon: FaWallet,
       label: "Số dư tài khoản",
-      path: "/profile-user/balance",
+      path: "/profile-user/refundWallet",
       color: "text-emerald-600",
     },
   ];
