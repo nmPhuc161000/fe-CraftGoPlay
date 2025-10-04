@@ -60,53 +60,53 @@ const OrdersTab = () => {
   };
 
   // Fetch orders based on status
-  useEffect(() => {
-    const fetchOrders = async (group = "") => {
-      try {
-        setLoading(true);
-        const res = await orderService.getOrderByUserId(user.id, 1, 100, "");
 
-        if (res.data.error === 0 && Array.isArray(res.data.data)) {
-          const transformed = res.data.data.map(transformOrderData);
-          const counts = statusFilters.reduce((acc, filter) => {
-            if (filter.value === "all") {
-              acc[filter.value] = transformed.length;
-            } else {
-              acc[filter.value] = transformed.filter((order) =>
-                filter.includes.includes(order.status)
-              ).length;
-            }
-            return acc;
-          }, {});
+  const fetchOrders = async (group = "") => {
+    try {
+      setLoading(true);
+      const res = await orderService.getOrderByUserId(user.id, 1, 100, "");
 
-          setStatusCounts(counts);
-          setOrders(transformed);
-
-          if (group === "all" || group === "") {
-            setFilteredOrders(transformed);
+      if (res.data.error === 0 && Array.isArray(res.data.data)) {
+        const transformed = res.data.data.map(transformOrderData);
+        const counts = statusFilters.reduce((acc, filter) => {
+          if (filter.value === "all") {
+            acc[filter.value] = transformed.length;
           } else {
-            const filter = statusFilters.find((f) => f.value === group);
-            if (filter && filter.includes) {
-              setFilteredOrders(
-                transformed.filter((order) =>
-                  filter.includes.includes(order.status)
-                )
-              );
-            } else {
-              setFilteredOrders([]);
-            }
+            acc[filter.value] = transformed.filter((order) =>
+              filter.includes.includes(order.status)
+            ).length;
           }
+          return acc;
+        }, {});
 
-          await checkRatedStatus(transformed);
+        setStatusCounts(counts);
+        setOrders(transformed);
+
+        if (group === "all" || group === "") {
+          setFilteredOrders(transformed);
+        } else {
+          const filter = statusFilters.find((f) => f.value === group);
+          if (filter && filter.includes) {
+            setFilteredOrders(
+              transformed.filter((order) =>
+                filter.includes.includes(order.status)
+              )
+            );
+          } else {
+            setFilteredOrders([]);
+          }
         }
-      } catch (err) {
-        console.error("Lỗi khi lấy đơn hàng:", err);
-        showNotification("Lỗi khi lấy danh sách đơn hàng", "error");
-      } finally {
-        setLoading(false);
-      }
-    };
 
+        await checkRatedStatus(transformed);
+      }
+    } catch (err) {
+      console.error("Lỗi khi lấy đơn hàng:", err);
+      showNotification("Lỗi khi lấy danh sách đơn hàng", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     if (user?.id) {
       fetchOrders(selectedStatus);
     }
@@ -223,19 +223,18 @@ const OrdersTab = () => {
         }
         case "rating":
           if (order && order.orderItems && order.orderItems.length > 0) {
+            const orderItemsPayload = order.orderItems.map((item) => ({
+              id: item.product.id,
+              name: item.product.name,
+              imageUrl: item.product.productImages?.imageUrl || "",
+              orderItemId: item.id,
+              price: item.product.price || 0,
+              status: item.status,
+            }));
+
             const queryParams = new URLSearchParams({
               orderId,
-              orderItems: encodeURIComponent(
-                JSON.stringify(
-                  order.orderItems.map((item) => ({
-                    id: item.product.id,
-                    name: item.product.name,
-                    imageUrl: item.product.productImages?.imageUrl || "",
-                    orderItemId: item.id,
-                    price: item.product.price || 0,
-                  }))
-                )
-              ),
+              orderItems: JSON.stringify(orderItemsPayload),
             }).toString();
             navigate(`/profile-user/productRating?${queryParams}`);
           } else {
@@ -281,6 +280,7 @@ const OrdersTab = () => {
         const res = await orderService.updateStatusOrder(orderId, newStatus);
         if (res.data.error === 0) {
           showNotification("Cập nhật đơn hàng thành công", "success");
+          await fetchOrders();
         }
       } else if (action === "contact") {
         showNotification("Đã mở cửa sổ liên hệ với nghệ nhân", "info");
@@ -310,7 +310,7 @@ const OrdersTab = () => {
   // Kiểm tra xem order có orderItem nào Completed không
   const hasCompletedOrderItems = (order) => {
     console.log("Checking completed items for order:", order);
-    
+
     if (!order || !Array.isArray(order.orderItems)) {
       return false;
     }

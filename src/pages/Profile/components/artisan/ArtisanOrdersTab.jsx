@@ -80,53 +80,53 @@ const ArtisanOrdersTab = () => {
   }, [user]);
 
   // Fetch orders
-  useEffect(() => {
-    const fetchOrders = async (group = "") => {
-      try {
-        setLoading(true);
-        const res = await orderService.getOrderByArtisanId(
-          user.id,
-          pageIndex,
-          pageSize,
-          ""
-        );
 
-        if (res.data.error === 0 && Array.isArray(res.data.data)) {
-          const transformed = res.data.data.map(transformOrderData);
-          const counts = statusFilters.reduce((acc, filter) => {
-            if (filter.value === "all") {
-              acc[filter.value] = transformed.length;
-            } else {
-              acc[filter.value] = transformed.filter((order) =>
-                filter.includes.includes(order.status)
-              ).length;
-            }
-            return acc;
-          }, {});
+  const fetchOrders = async (group = "") => {
+    try {
+      setLoading(true);
+      const res = await orderService.getOrderByArtisanId(
+        user.id,
+        pageIndex,
+        pageSize,
+        ""
+      );
 
-          setStatusCounts(counts);
-          setOrders(transformed);
-
-          if (group === "all" || group === "") {
-            setFilteredOrders(transformed);
+      if (res.data.error === 0 && Array.isArray(res.data.data)) {
+        const transformed = res.data.data.map(transformOrderData);
+        const counts = statusFilters.reduce((acc, filter) => {
+          if (filter.value === "all") {
+            acc[filter.value] = transformed.length;
           } else {
-            const filter = statusFilters.find((f) => f.value === group);
-            setFilteredOrders(
-              filter
-                ? transformed.filter((order) =>
-                    filter.includes.includes(order.status)
-                  )
-                : []
-            );
+            acc[filter.value] = transformed.filter((order) =>
+              filter.includes.includes(order.status)
+            ).length;
           }
-        }
-      } catch (err) {
-        console.error("Lỗi khi lấy đơn hàng:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+          return acc;
+        }, {});
 
+        setStatusCounts(counts);
+        setOrders(transformed);
+
+        if (group === "all" || group === "") {
+          setFilteredOrders(transformed);
+        } else {
+          const filter = statusFilters.find((f) => f.value === group);
+          setFilteredOrders(
+            filter
+              ? transformed.filter((order) =>
+                  filter.includes.includes(order.status)
+                )
+              : []
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Lỗi khi lấy đơn hàng:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     if (user?.id) {
       fetchOrders(selectedStatus);
     }
@@ -194,6 +194,7 @@ const ArtisanOrdersTab = () => {
           return newCounts;
         });
         showNotification("Cập nhật đơn hàng thành công", "success");
+        await fetchOrders();
       }
     } catch (err) {
       console.error("Lỗi khi cập nhật trạng thái:", err);
