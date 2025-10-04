@@ -32,6 +32,8 @@ export const API_ENDPOINTS_PRODUCT = {
   DELETE_PRODUCT: (id) => `/api/Product/DeleteProduct/${id}`,
   GET_PRODUCTS_BY_STATUS: (status, pageIndex, pageSize) =>
     `/api/Product/GetProductsByStatus?pageIndex=${pageIndex}&pageSize=${pageSize}&productStatus=${status}`,
+  GET_PRODUCTS_BY_SUBCATEGORYID: (subCategoryId, pageIndex = 1, pageSize = 10, productStatus = "Active") =>
+  `/api/Product/GetProductsBySubCategoryId/${subCategoryId}?pageIndex=${pageIndex}&pageSize=${pageSize}&productStatus=${productStatus}`,
 };
 
 // Các endpoint cho giỏ hàng
