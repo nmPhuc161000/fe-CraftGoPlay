@@ -169,18 +169,15 @@ export default function ComplaintManagement() {
         )
       );
 
-      showNotification({
-        message: `Yêu cầu đã được xử lý: ${
+      showNotification(
+        `Yêu cầu đã được xử lý: ${
           acceptRefund ? "Hoàn tiền" : "Từ chối hoàn tiền"
         }`,
-        type: "success",
-      });
+        "success"
+      );
     } catch (error) {
       console.error("Lỗi khi xử lý yêu cầu:", error);
-      showNotification({
-        message: "Đã có lỗi xảy ra khi xử lý yêu cầu.",
-        type: "error",
-      });
+      showNotification("Đã có lỗi xảy ra khi xử lý yêu cầu.", "error");
     }
   };
 

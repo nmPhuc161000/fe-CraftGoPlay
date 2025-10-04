@@ -278,7 +278,7 @@ const RefundWalletTab = () => {
         </p>
         {role === "Artisan" && (
           <div className="mt-4 pt-4 border-t border-white-400 border-opacity-50">
-            <p className="text-sm font-medium">Số tiền chờ hoàn</p>
+            <p className="text-sm font-medium">Số tiền chờ xử lý</p>
             <p className="text-xl font-semibold">
               {formatCurrency(pendingBalance)}
             </p>

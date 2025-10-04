@@ -14,6 +14,7 @@ const RETURN_BLOCKED = new Set([
   "returnrequested",
   "returnapproved",
   "returned",
+  "refunded"
 ]);
 
 const parseQS = (search, key) => new URLSearchParams(search).get(key) || "";
