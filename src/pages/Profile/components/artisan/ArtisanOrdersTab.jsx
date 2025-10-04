@@ -80,53 +80,53 @@ const ArtisanOrdersTab = () => {
   }, [user]);
 
   // Fetch orders
-  useEffect(() => {
-    const fetchOrders = async (group = "") => {
-      try {
-        setLoading(true);
-        const res = await orderService.getOrderByArtisanId(
-          user.id,
-          pageIndex,
-          pageSize,
-          ""
-        );
 
-        if (res.data.error === 0 && Array.isArray(res.data.data)) {
-          const transformed = res.data.data.map(transformOrderData);
-          const counts = statusFilters.reduce((acc, filter) => {
-            if (filter.value === "all") {
-              acc[filter.value] = transformed.length;
-            } else {
-              acc[filter.value] = transformed.filter((order) =>
-                filter.includes.includes(order.status)
-              ).length;
-            }
-            return acc;
-          }, {});
+  const fetchOrders = async (group = "") => {
+    try {
+      setLoading(true);
+      const res = await orderService.getOrderByArtisanId(
+        user.id,
+        pageIndex,
+        pageSize,
+        ""
+      );
 
-          setStatusCounts(counts);
-          setOrders(transformed);
-
-          if (group === "all" || group === "") {
-            setFilteredOrders(transformed);
+      if (res.data.error === 0 && Array.isArray(res.data.data)) {
+        const transformed = res.data.data.map(transformOrderData);
+        const counts = statusFilters.reduce((acc, filter) => {
+          if (filter.value === "all") {
+            acc[filter.value] = transformed.length;
           } else {
-            const filter = statusFilters.find((f) => f.value === group);
-            setFilteredOrders(
-              filter
-                ? transformed.filter((order) =>
-                    filter.includes.includes(order.status)
-                  )
-                : []
-            );
+            acc[filter.value] = transformed.filter((order) =>
+              filter.includes.includes(order.status)
+            ).length;
           }
-        }
-      } catch (err) {
-        console.error("Lỗi khi lấy đơn hàng:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+          return acc;
+        }, {});
 
+        setStatusCounts(counts);
+        setOrders(transformed);
+
+        if (group === "all" || group === "") {
+          setFilteredOrders(transformed);
+        } else {
+          const filter = statusFilters.find((f) => f.value === group);
+          setFilteredOrders(
+            filter
+              ? transformed.filter((order) =>
+                  filter.includes.includes(order.status)
+                )
+              : []
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Lỗi khi lấy đơn hàng:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     if (user?.id) {
       fetchOrders(selectedStatus);
     }
@@ -194,6 +194,7 @@ const ArtisanOrdersTab = () => {
           return newCounts;
         });
         showNotification("Cập nhật đơn hàng thành công", "success");
+        await fetchOrders();
       }
     } catch (err) {
       console.error("Lỗi khi cập nhật trạng thái:", err);
@@ -467,25 +468,42 @@ const ArtisanOrdersTab = () => {
                     <div className="border-t border-gray-100 bg-gray-50">
                       <div className="p-6">
                         {/* Hiển thị lý do giao hàng thất bại chỉ khi status là DeliveryAttemptFailed */}
-                        {order.status === "DeliveryAttemptFailed" &&
+                        {(order.status === "DeliveryAttemptFailed" ||
+                          order.status === "DeliveryFailed") &&
                           order.reasonDeliveryFailed && (
                             <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
                               <div className="flex items-start">
                                 <FiAlertTriangle className="text-red-500 text-xl mr-3 mt-0.5 flex-shrink-0" />
                                 <div>
-                                  <h4 className="text-lg font-semibold text-red-800 mb-2">
-                                    Giao hàng thất bại
-                                  </h4>
+                                  {order.status === "DeliveryAttemptFailed" && (
+                                    <h4 className="text-lg font-semibold text-red-800 mb-2">
+                                      Giao hàng không thành công
+                                    </h4>
+                                  )}
+
+                                  {order.status === "DeliveryFailed" && (
+                                    <h4 className="text-lg font-semibold text-red-800 mb-2">
+                                      Giao hàng thất bại
+                                    </h4>
+                                  )}
                                   <p className="text-red-700 mb-1">
                                     <span className="font-medium">Lý do: </span>
                                     {getDeliveryFailureReasonLabel(
                                       order.reasonDeliveryFailed
                                     )}
                                   </p>
-                                  <p className="text-red-600 text-sm">
-                                    Vui lòng thử giao hàng lại hoặc liên hệ hỗ
-                                    trợ.
-                                  </p>
+                                  {order.status === "DeliveryAttemptFailed" && (
+                                    <p className="text-red-600 text-sm">
+                                      Vui lòng thử giao hàng lại hoặc liên hệ hỗ
+                                      trợ.
+                                    </p>
+                                  )}
+
+                                  {order.status === "DeliveryFailed" && (
+                                    <p className="text-red-600 text-sm">
+                                      Đơn hàng đã giao thất bại và hoàn trả hàng lại cho nghệ nhân.
+                                    </p>
+                                  )}
                                 </div>
                               </div>
                             </div>

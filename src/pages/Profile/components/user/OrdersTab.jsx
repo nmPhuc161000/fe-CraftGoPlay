@@ -60,53 +60,53 @@ const OrdersTab = () => {
   };
 
   // Fetch orders based on status
-  useEffect(() => {
-    const fetchOrders = async (group = "") => {
-      try {
-        setLoading(true);
-        const res = await orderService.getOrderByUserId(user.id, 1, 100, "");
 
-        if (res.data.error === 0 && Array.isArray(res.data.data)) {
-          const transformed = res.data.data.map(transformOrderData);
-          const counts = statusFilters.reduce((acc, filter) => {
-            if (filter.value === "all") {
-              acc[filter.value] = transformed.length;
-            } else {
-              acc[filter.value] = transformed.filter((order) =>
-                filter.includes.includes(order.status)
-              ).length;
-            }
-            return acc;
-          }, {});
+  const fetchOrders = async (group = "") => {
+    try {
+      setLoading(true);
+      const res = await orderService.getOrderByUserId(user.id, 1, 100, "");
 
-          setStatusCounts(counts);
-          setOrders(transformed);
-
-          if (group === "all" || group === "") {
-            setFilteredOrders(transformed);
+      if (res.data.error === 0 && Array.isArray(res.data.data)) {
+        const transformed = res.data.data.map(transformOrderData);
+        const counts = statusFilters.reduce((acc, filter) => {
+          if (filter.value === "all") {
+            acc[filter.value] = transformed.length;
           } else {
-            const filter = statusFilters.find((f) => f.value === group);
-            if (filter && filter.includes) {
-              setFilteredOrders(
-                transformed.filter((order) =>
-                  filter.includes.includes(order.status)
-                )
-              );
-            } else {
-              setFilteredOrders([]);
-            }
+            acc[filter.value] = transformed.filter((order) =>
+              filter.includes.includes(order.status)
+            ).length;
           }
+          return acc;
+        }, {});
 
-          await checkRatedStatus(transformed);
+        setStatusCounts(counts);
+        setOrders(transformed);
+
+        if (group === "all" || group === "") {
+          setFilteredOrders(transformed);
+        } else {
+          const filter = statusFilters.find((f) => f.value === group);
+          if (filter && filter.includes) {
+            setFilteredOrders(
+              transformed.filter((order) =>
+                filter.includes.includes(order.status)
+              )
+            );
+          } else {
+            setFilteredOrders([]);
+          }
         }
-      } catch (err) {
-        console.error("Lỗi khi lấy đơn hàng:", err);
-        showNotification("Lỗi khi lấy danh sách đơn hàng", "error");
-      } finally {
-        setLoading(false);
-      }
-    };
 
+        await checkRatedStatus(transformed);
+      }
+    } catch (err) {
+      console.error("Lỗi khi lấy đơn hàng:", err);
+      showNotification("Lỗi khi lấy danh sách đơn hàng", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     if (user?.id) {
       fetchOrders(selectedStatus);
     }
@@ -229,7 +229,7 @@ const OrdersTab = () => {
               imageUrl: item.product.productImages?.imageUrl || "",
               orderItemId: item.id,
               price: item.product.price || 0,
-              status: item.status, 
+              status: item.status,
             }));
 
             const queryParams = new URLSearchParams({
@@ -280,6 +280,7 @@ const OrdersTab = () => {
         const res = await orderService.updateStatusOrder(orderId, newStatus);
         if (res.data.error === 0) {
           showNotification("Cập nhật đơn hàng thành công", "success");
+          await fetchOrders();
         }
       } else if (action === "contact") {
         showNotification("Đã mở cửa sổ liên hệ với nghệ nhân", "info");
@@ -306,7 +307,18 @@ const OrdersTab = () => {
     }
   };
 
+  // Kiểm tra xem order có orderItem nào Completed không
+  const hasCompletedOrderItems = (order) => {
+    console.log("Checking completed items for order:", order);
+
+    if (!order || !Array.isArray(order.orderItems)) {
+      return false;
+    }
+    return order.orderItems.some((item) => item.status === "Completed");
+  };
+
   const getAvailableUserActions = (currentStatus, orderId) => {
+    const order = orders.find((o) => o.id === orderId);
     const actions =
       {
         Created: [
@@ -428,13 +440,15 @@ const OrdersTab = () => {
           },
         ],
         Completed: [
-          !ratedOrders[orderId] && {
-            action: "rating",
-            label: "Đánh giá sản phẩm",
-            color:
-              "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 shadow-yellow-200",
-            icon: <FiStar className="w-4 h-4" />,
-          },
+          !ratedOrders[orderId] &&
+            order &&
+            hasCompletedOrderItems(order) && {
+              action: "rating",
+              label: "Đánh giá sản phẩm",
+              color:
+                "bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 shadow-yellow-200",
+              icon: <FiStar className="w-4 h-4" />,
+            },
         ],
       }[currentStatus] || [];
 
@@ -609,24 +623,42 @@ const OrdersTab = () => {
                   <div className="border-t border-gray-100 bg-gray-50">
                     <div className="p-6">
                       {/* Hiển thị lý do giao hàng thất bại chỉ khi status là DeliveryAttemptFailed */}
-                      {order.status === "DeliveryAttemptFailed" &&
+                      {(order.status === "DeliveryAttemptFailed" ||
+                        order.status === "DeliveryFailed") &&
                         order.reasonDeliveryFailed && (
                           <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
                             <div className="flex items-start">
                               <FiAlertTriangle className="text-red-500 text-xl mr-3 mt-0.5 flex-shrink-0" />
                               <div>
-                                <h4 className="text-lg font-semibold text-red-800 mb-2">
-                                  Giao hàng thất bại
-                                </h4>
+                                {order.status === "DeliveryAttemptFailed" && (
+                                  <h4 className="text-lg font-semibold text-red-800 mb-2">
+                                    Giao hàng không thành công
+                                  </h4>
+                                )}
+
+                                {order.status === "DeliveryFailed" && (
+                                  <h4 className="text-lg font-semibold text-red-800 mb-2">
+                                    Giao hàng thất bại
+                                  </h4>
+                                )}
                                 <p className="text-red-700 mb-1">
                                   <span className="font-medium">Lý do: </span>
                                   {getDeliveryFailureReasonLabel(
                                     order.reasonDeliveryFailed
                                   )}
                                 </p>
-                                <p className="text-red-600 text-sm">
-                                  Đơn hàng sẽ được giao trong vòng 24 giờ tới.
-                                </p>
+                                {order.status === "DeliveryAttemptFailed" && (
+                                  <p className="text-red-600 text-sm">
+                                    Đơn hàng sẽ được giao trong vòng 24 giờ tới.
+                                  </p>
+                                )}
+
+                                {order.status === "DeliveryFailed" && (
+                                  <p className="text-red-600 text-sm">
+                                    Đơn hàng đã giao thất bại và sẽ không được
+                                    giao lại.
+                                  </p>
+                                )}
                               </div>
                             </div>
                           </div>
