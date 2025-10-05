@@ -560,18 +560,12 @@ const OrderHistory = () => {
                         {fmtMoney(viewOrder.deliveryAmount)}
                       </div>
 
-                      {(viewOrder.productDiscount ||
-                        viewOrder.deliveryDiscount ||
-                        viewOrder.pointDiscount ||
-                        viewOrder.totalDiscount) > 0 && (
+                      {(viewOrder.totalDiscount) > 0 && (
                         <>
                           <div className="text-sm text-gray-600">Giảm giá</div>
                           <div className="text-right font-semibold text-green-600">
                             -
                             {fmtMoney(
-                              (viewOrder.productDiscount || 0) +
-                                (viewOrder.deliveryDiscount || 0) +
-                                (viewOrder.pointDiscount || 0) +
                                 (viewOrder.totalDiscount || 0)
                             )}
                           </div>

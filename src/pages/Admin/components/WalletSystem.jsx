@@ -53,7 +53,7 @@ export default function WalletSystem() {
       case "Pending":
         return "Đang chờ xử lý";
       case "Release":
-        return "Giải phóng tiền";
+        return "Đã xử lý";
       default:
         return type;
     }
@@ -66,12 +66,11 @@ export default function WalletSystem() {
       "Withdrawal",
       "ReceiveFromOrder",
       "ReceiveShippingFee",
-      "Release",
       "Refund",
     ];
 
     // Các loại giao dịch CỘNG TIỀN vào ví hệ thống
-    const creditTypes = ["Purchase", "SystemAdjustment"];
+    const creditTypes = ["Purchase", "SystemAdjustment", "Release"];
 
     if (debitTypes.includes(type)) {
       return "debit"; // Trừ tiền
